@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="com.example_recoleccion_jar_1.0PU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>ama.dao.newpackage.Estados</class>
+    <class>ama.dao.newpackage.Nivelusuarios</class>
+    <class>ama.dao.newpackage.Usuarios</class>
+    <class>ama.dao.newpackage.Comisiones</class>
+    <class>ama.dao.newpackage.Tiposdocumentos</class>
+    <class>ama.dao.newpackage.Ciudades</class>
+    <class>ama.dao.newpackage.Comprobantes</class>
+    <class>ama.dao.newpackage.Puntoexpedicion</class>
+    <class>ama.dao.newpackage.Usuariossistema</class>
+    <class>ama.dao.newpackage.Cobradores</class>
+    <class>ama.dao.newpackage.DetalleComprobante</class>
+    <class>ama.dao.newpackage.Metodospagos</class>
+    <class>ama.dao.newpackage.Tombrados</class>
+    <class>ama.dao.newpackage.Servicios</class>
+    <class>ama.dao.newpackage.Condicionventa</class>
+    <class>ama.dao.newpackage.Categorias</class>
+    <class>ama.dao.newpackage.Empresas</class>
+    <class>ama.dao.newpackage.Sucursales</class>
+    <class>ama.newpackage.Comprobantes</class>
+    <class>ama.newpackage.Tombrados</class>
+    <class>ama.newpackage.Metodospagos</class>
+    <class>ama.newpackage.Usuarios</class>
+    <class>ama.newpackage.Estados</class>
+    <class>ama.newpackage.Empresas</class>
+    <class>ama.newpackage.Comisiones</class>
+    <class>ama.newpackage.Usuariossistema</class>
+    <class>ama.newpackage.Servicios</class>
+    <class>ama.newpackage.Nivelusuarios</class>
+    <class>ama.newpackage.Cobradores</class>
+    <class>ama.newpackage.Sucursales</class>
+    <class>ama.newpackage.Puntoexpedicion</class>
+    <class>ama.newpackage.Ciudades</class>
+    <class>ama.newpackage.Categorias</class>
+    <class>ama.newpackage.Detallecomprobantes</class>
+    <class>ama.newpackage.Tiposdocumentos</class>
+    <class>ama.newpackage.Condicionventa</class>
+    <class>ama.newpackage.Zonas</class>
+    <class>ama.newpackage.Historiaservicio</class>
+    <class>ama.newpackage.Detallezonas</class>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3307/cliba_sa?zeroDateTimeBehavior=CONVERT_TO_NULL"/>
+      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="1234"/>
+    </properties>
+  </persistence-unit>
+</persistence>

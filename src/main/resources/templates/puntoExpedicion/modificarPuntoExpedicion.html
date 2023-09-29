@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container"> 
+            <h1>Datos de Punto de Expedicion</h1>
+            <a th:href="@{/puntoExpedicion/listar}" class="btn-primario ">Regresar</a>
+            <form th:action="@{/puntoExpedicion/guardar}" method="post" th:object="${puntosExpedicion}">
+                <div class="row ">
+                    <div class="form-group col-sm-4">
+                        <input type="hidden" name="codigoPuntoExpedicion"  th:value="*{codigoPuntoExpedicion}" />
+                        <label class="form-label" for="nombrePuntoExpedicion">Punto de expedicion </label>                                
+                        <input class="form-control" type="text" name="nombrePuntoExpedicion"  th:value="*{nombrePuntoExpedicion}" placeholder="Ingrese Punto Expedicion " required="campo ogligatorio"/>
+                    </div>
+                    <div class="form-group col-sm-4"> 
+                        <label class="form-label" for="sucursal">Sucursal</label>
+                        <select class="form-control" th:object="${sucursal}" name="sucursal" >
+                            <option th:each="sucursal : ${sucursales}" 
+                                    th:value="${sucursal.codigoSucursal}"
+                                    th:text="${sucursal.nombreSucursal}" />
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-4"> 
+                        <label  class="form-label" for="ciudad">Ciudad</label>
+                        <select class="form-control" th:object="${ciudad}" name="ciudad" >
+                            <option th:each="ciudad : ${ciudades}" 
+                                    th:value="${ciudad.codigoCiudad}"
+                                    th:text="${ciudad.nombreCiudad}"  />
+                        </select>
+                    </div>
+                    <div class="col-sm-4 form-group"> 
+                        <label class="form-label" for="estado">Estado</label>
+                        <select class="form-control" th:object="${estado}" name="estado" >
+                            <option th:each="estado : ${estados} " 
+                                    th:value="${estado.codigoEstado}"
+                                    th:text="${estado.estado}"  />
+                        </select>
+                    </div>
+                </div>
+                <input type="submit" name="guardar" value="Guardar" class="btn btn-success"/>
+            </form>
+            <br/>
+        </div>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+    </body>
+</html>

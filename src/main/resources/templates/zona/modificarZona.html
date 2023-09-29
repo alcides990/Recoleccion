@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container "> 
+            <div class="card-header">  <h3>Datos Zona</h3></div>
+            <a th:href="@{/zona/listar}" class="btn btn-primario">Regresar</a>
+            <form th:action="@{/zona/guardar}" method="post" th:object="${zona}">
+                <div class="row d-flex m-3">
+                    <div class="col-md-6 ">
+                        <input type="hidden" name="codigoZona"  th:value="*{codigoZona}" />
+                        <label class="form-label" for="nombreZona">Zona </label>
+                        <input class="form-control" type="text" name="nombreZona"  th:value="*{nombreZona}"  placeholder="Ingrese nombre zona" required="true"/>
+
+                    </div>
+                    <div class="col-sm-4"> 
+                        <label class="form-label" for="sucursal">Sucursal</label>
+                        <select th:field="*{sucursal}" class="form-control" name="sucursal" >
+                            <option th:each="sucursal : ${sucursal}" 
+                                    th:value="${sucursal.codigoSucursal}"
+                                    th:text="${sucursal.nombreSucursal}+' '+${sucursal.ciudad.nombreCiudad}"  />
+                        </select>
+                    </div>
+                </div>
+                <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3"/>
+            </form>
+        </div>
+        </div>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+    </body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside th:replace="~{layout/layout :: aside}">  </aside>
+        <div class="container-fluid"> 
+            <div class="card-header"> <h3>Comprobantes</h3></div>
+            <div class=" input-group my-3">
+                <input name="txtBuscar" id="txtBuscar" type="search" 
+                       class="col-lg-6 col-12"  autofocus="true" 
+                       placeholder="Ingrese numero de factura ej:001-001-1" 
+                       aria-label="Buscar" aria-describedby="search-addon" />
+            </div>
+
+            <div class="table-responsive-md">
+                <table id="tabla" class="table table-dark table-border table-striped  table-hover table-md" >
+                    <thead class="sticky-top ">
+                        <tr>
+                            <th>Tipo Factura</th> 
+                            <th>Nro. Factura</th>
+                            <th>Cuentacorriente</th>
+                            <th>Usuario</th>
+                            <th>FechaPago</th>
+                            <th>PeriodoPago</th>
+                            <th>Cant.Pago</th>
+                            <th>Tarifa</th>
+                            <th>Recargo</th>
+                            <th>Importe</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody  class="table-secondary"  >
+                        <tr  th:each="comprobante : ${comprobantes}" > 
+                            <td th:text="${comprobante.tipoFactura.tipoFactura}"> </td>
+                            <td th:text="${comprobante.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
+                            <td th:text="${comprobante.servicio.cuentaCorriente}"> </td>
+                            <td th:text="${comprobante.usuario.nombreCompleto}" >   </td>
+                            <td th:text="${comprobante.fechaPago}"></td>
+                            <td th:text="${comprobante.detalleComprobante[0].periodoPago}"></td>
+                            <td th:text="${comprobante.detalleComprobante[0].cantidadPago}"></td>
+                            <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"> 
+                                <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].recargo, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].importe, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td th:text="${comprobante.estado.estado}"></td>
+                                <td  title="Anular">
+                                    <a   id="anular" 
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#anularModal">
+                                        <i class="btn-close fa-regular fa-pen-to-square"></i>
+                                    </a>
+
+
+                                </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <nav  th:replace="~{layout/paginador :: paginador}"> </nav>
+            </div>
+        </div>
+
+        <!-- Ventana modal anular comprobante -->
+        <div class="modal fade" id="anularModal" tabindex="-1" aria-labelledby="titulo" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bg-color">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="titulo">Datos del Comprobante</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form name="frm-comprobante" id="frm-comprobante" th:action="@{/comprobante/guardar}" method="post" >
+                        <div class="row d-flex m-1">
+                            <div class="col-sm-3"> 
+                                <label  for="cuentaCorriente">Cuentacorriente </label>
+                                <input class="form-control" type="search"  name="cuentaCorriente" id="cuentaCorriente"   />
+                            </div>
+
+                            <input type="text" class="d-none" name="codigoUsuario" id="codigoUsuario"  >
+                                <div class="col-sm-3">
+                                    <label  for="numeroDocumento">RUC/CI </label>
+                                    <input class="form-control"  type="text" id="numeroDocumento" name="numeroDocumento" readonly="true"  />
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="buscarUsuario">Razon Social </label>
+                                    <input class="form-control"  type="text"  id="razonSocial" />
+                                </div>
+                                <div class="form-group col-sm-6"> 
+                                    <label for="categoria">Categoria</label>
+                                    <select  class="form-select" id="categoria" >
+                                        <option >Categoria</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2"> 
+                                    <label  for="sucursal">Sucursal</label>
+                                    <select class="form-select"  name="sucursal"  id="sucursal">
+                                        <option>Sucursal</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2"> 
+                                    <label for="puntoExpedicion">PuntoExpedicion</label>
+                                    <select  class="form-select" name="puntoExpedicion"  id="puntoExpedicion">
+                                        <option/>Punto Expedicion</select>
+                                    </select>
+                                </div>
+                        </div>
+                        <div class="row d-flex m-1">
+                            <div class="col-sm-3"> 
+                                <label for="N°Factura">N°Factura </label>
+                                <input class="form-control" type="text"  autofocus="true"  name="numeroComprobante" id="numeroComprobante" />
+                            </div>
+
+                            <div class="col-sm-3">
+                                <label  for="tipoFactura">TipoFactura</label>
+                                <select class="form-select" name="tipoFactura" id="tipoFactura"  >
+                                    <option> Tipo Fctura</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="condicionVenta">CondicionVenta</label>
+                                <select class="form-select" name="condicionVenta" >
+                                    <option>Condicion Venta</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6" >
+                                <label  for="cobrador">Cobrador</label>
+                                <select class="form-control" id="cobrador" name="cobrador">
+                                    <option>Cobrador</option>
+                                </select>
+
+                            </div>
+                        </div>
+                        <div class="row m-3">
+                            <div class="col-lg-6">
+                                <h5>Detalle Pago</h5>
+                                <input type="hidden" name="tarifa" id="tarifa"  />
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label  for="pagoHasta">Pago Hasta:</label>
+                                    </div>
+                                    <div class="col">
+                                        <input  type="text" readonly="true" name="pagoHasta" id="pagoHasta"  class="form-control"  />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label  for="cantidadDeuda">Cant.Deuda:</label>
+                                    </div>
+                                    <div class="col">
+                                        <input  type="text" readonly name="cantidadDeuda" id="cantidadDeuda"  class="form-control"  />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label  for="cantidadPago">Cant.Pago:</label>
+                                    </div>
+                                    <div class="col">
+                                        <input  type="text" name="cantidadPago" id="cantidadPago" class="form-control"  />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label for="subTotal">SubTotal:</label>
+                                    </div>
+                                    <div class="col">
+                                        <input  type="text" readonly="true" name="subTotal" id="subTotal"   class="form-control"  />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label  for="recargoPago">Recargo:</label>
+                                    </div>
+                                    <div class="col">
+                                        <input  type="text"  name="recargoPago" id="recargoPago"  class="form-control"  />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label  for="totalDeuda">Total:</label>
+                                    </div>
+                                    <div class="col">
+                                        <input  type="text" readonly="true" name="totalDeuda" id="totalDeuda" class="form-control"  />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-floating col-lg-6">
+                                <textarea class="form-control" placeholder="Ingrese motivo de anulacion" id="obs"></textarea>
+                                <label for="obs">Motivo de anulacion </label>
+                            </div>
+                        </div>
+
+                        <input type="submit" id="gaurdar" name="guardar" value="Guardar" class="btn-guardar m-3"/>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+        <script src="/js/comprobante.js"></script>
+
+    </body>
+
+</html>

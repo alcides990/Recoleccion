@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container"> 
+            <div class="card-header"> <h3>Datos de Cuenta</h3></div>
+            <a th:href="@{/servicio/listar}" class="btn btn-primario">Regresar</a>
+            <form name="frm-servicio" id="frm-servicio" th:action="@{/servicio/guardar}" method="post" th:object="${servicio}">
+                <input type="text" hidden="true" name="accion" th:value="${accion}">
+                <div class="row">
+                    <div class="form-label col-md-2"> 
+                        <label class="form-label"  for="cuentaCorriente">Cuentacorriente </label>
+                        <input type="text" name="cuentaCorriente" id="cuentaCorriente" class="form-control "  th:value="*{cuentaCorriente}" required="true" autofocus="true" />
+                    </div>
+
+                    <div class="col-md-4"> 
+                        <label for="categoria">Categoria</label>
+                        <select th:object="${categoria}" class="form-control" name="categoria" >
+                            <option th:each="categoria : ${categorias}" 
+                                    th:value="${categoria.codigoCategoria}"
+                                    th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} "
+                                    th:selected="${categoria}== ${servicio.categoria}"/>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label class="form-label" for="fechaInicio">Fecha Inicio </label>
+                        <input type="text"  name="fechaInicio"  id="fechaInicio" th:value="*{fechaInicio}" class="form-control" required="campo ogligatorio"  />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <input type="text" hidden="true" name="codigoUsuario" id="codigoUsuario" th:field="${usuario.codigoUsuario}"/>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        <label class="form-label" for="numeroDocumento">NumeroDocumento </label>
+                        <input type="text" id="numeroDocumento" name="numeroDocumento" disabled="true"class="form-control"  th:value="${usuario.numeroDocumento}"  required="campo ogligatorio"/>
+                    </div>
+                    <div class=" form-group col-md-5">
+                        <label class="form-label" for="buscarUsuario">Usuario </label>
+                        <input  class="form-control" type="text" name="buscarUsuario" id="buscarUsuario"   th:value="${usuario.nombreCompleto}" placeholder="Busca por: ruc/ci o nombres" required="true"/>
+                    </div>
+
+                    <div class="form-group col-md-2"> 
+                        <label class="form-label" for="sucursal">Sucursal</label>
+                        <select th:object="${sucursal}" class="form-control" name="sucursal" >
+                            <option th:each="sucursal : ${sucursal}" 
+                                    th:value="${sucursal.codigoSucursal}"
+                                    th:text="${sucursal.nombreSucursal} +' '+${sucursal.ciudad.nombreCiudad} "  />
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2"> 
+                        <label class="form-label" for="estado">Estado</label>
+                        <select th:object="${estado}" class="form-control" name="estado" >
+                            <option th:each="estado : ${estado} " 
+                                    th:value="${estado.codigoEstado}"
+                                    th:text="${estado.estado}"  />
+                        </select>
+                    </div>
+                </div>
+                <br/>
+                <input type="submit" name="guardar" value="Guardar" class="btn-guardar"/> 
+            </form>
+        </div>
+
+
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+    </body>
+    <script src="/js/buscarUsuario.js"></script>
+    <script src="/js/validarFormulario.js"></script>
+
+</html>

@@ -1,0 +1,28 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns="http://www.w3.org/1999/xhtmal">
+    <head>
+        <title>Datos de la Persona</title>
+        <meta http-equiv="Content-type" content="text/html charset=UTF-8">
+            <head  th:replace="~{layout/layout :: heat}"> </head>
+
+            <body>
+                <header  th:replace="~{layout/layout :: header}"> </header>
+                <aside  th:replace="~{layout/layout :: aside}"> </aside>
+                <div class="container">
+
+                    <h3>Datos de Ciudades</h3>
+                    <a th:href="@{/ciudad/listar}" class="btn-primario mb-5"> Regresar </a>
+                    <div class="contenedor">
+                        <form th:action="@{/ciudad/guardar}" id="formulario" method="post" th:object="${ciudad}" >
+                            <input type="hidden" name="codigoCiudad" id="codigoCiudad" th:value="*{codigoCiudad}" />
+
+                            <label class="form-label m-2" for="ciudad">Ciudad</label>
+                            <input class="form-control col-sm-6" type="text" name="nombreCiudad" id="ciudad"  th:value="*{nombreCiudad}"   placeholder="Igrese nombre de la de la ciudad" />
+
+                            <input type="submit" name="guardar" value="Guardar" class="btn-guardar mb-5"/>
+                        </form>
+                    </div>
+                </div>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+            </body>
+            </html>

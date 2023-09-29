@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container "> 
+            <h3>Cambiar cobrador</h3>
+            <a th:href="@{/detalleZona/listar}" class="btn btn-primario">
+                <i class="fa-solid fa-arrow-left"> </i> Regresar
+            </a>
+            <form th:action="@{/detalleZona/modificar}" method="post" th:object="${detalleZona}">
+                <div class="row m-3 p-3">
+                    <input type="number" hidden="" id="codigoCobradorActual" name="codigoCobradorActual" th:value="${codigoCobradorActual}"/>
+                    <div class="col-md-4"> 
+                        <label for="zona">Zona</label>
+                        <select th:field="*{zona}" class="form-control" name="zona" >
+                            <option th:each="zona : ${zona}" 
+                                    th:value="${zona.codigoZona}"
+                                    th:text="${zona.nombreZona}"  />
+                        </select>
+                    </div>
+                    <div class="col-md-4"> 
+                        <label for="cobrador">Cobrador</label>
+                        <select th:field="*{cobrador}" class="form-control" name="cobradorNuevo"  >
+                            <option th:each="cobrador : ${cobradores}" 
+                                    th:value="${cobrador.codigoCobrador}"
+                                    th:text="${cobrador.nombre}+' '+${cobrador.apellido}" 
+                                    />
+                        </select>
+                    </div>
+
+                    <div class="col-md-4"> 
+                        <label for="Sucursal">Sucursal:</label> 
+                        <select th:field="*{sucursal}" class="form-control" name="sucursal" >
+                            <option th:each="sucursal : ${sucursal}" 
+                                    th:value="${sucursal.codigoSucursal}"
+                                    th:text="${sucursal.nombreSucursal}+' '+ ${sucursal.ciudad.nombreCiudad}"  />
+                        </select>
+                    </div>
+
+                </div>
+                <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3"/>
+            </form>
+        </div>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+    </body>
+</html>

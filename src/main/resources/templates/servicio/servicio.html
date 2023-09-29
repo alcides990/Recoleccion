@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div th:replace="~{layout/layout :: modal}"> </div>
+        <div class="container-fluid">
+
+            <div class="card-header" ><h3>Cuentas</h3> </div>
+            <div class="d-md-flex py-2">
+                <div class="col-sm-2">
+                    <a 
+                        class="btn btn-primario btn-sm mb-2 " name="btnAgrerar" id="btnAgrerar"
+                        data-toggle="modal" data-target="#servicioModal">
+                        <i class="fa-solid fa-plus fa-lg"></i> Agregar
+                    </a> 
+                </div>
+                <div class="input-group my-1">
+                    <input name="txtBuscar" id="txtBuscarServicio" type="search" 
+                           class="col"  autofocus="true" 
+                           placeholder="Buscar por cta. corriente o nombre" 
+                           aria-label="Buscar" aria-describedby="search-addon" />
+                </div>
+            </div>
+            <div class="mensaje-alerta" id="contenedor-alertas"> </div>
+            <div class="table-responsive-sm">
+                <table id="tabla-servicio" class="table  table-dark table-border table-striped table-colapse table-hover table-sm " >
+                   
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="sticky-start ">Cuentacorriente</th>
+                            <th>Usuario</th>
+                            <th>Fecha Inicio</th>
+                            <th>cagtegoria</th>
+                            <th>Estado</th>
+                            <th>EstadoCuenta</th>
+                            <th>Faturar</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody" class="table-secondary  "  >
+                        <tr  th:each="servicio : ${servicios}" > 
+                            <td class="sticky-start" th:text="${servicio.cuentaCorriente}">  </td>
+                            <td th:text="${servicio.usuario.nombre} +' '+${servicio.usuario.apellido}" >   </td>
+                            <td th:text="${servicio.fechaInicio}"></td>
+                            <td th:text="${servicio.categoria.tarifa}+'-'+${servicio.categoria.nombreCategoria}"></td>
+                            <td th:text="${servicio.estado.estado}"></td>
+                            <td ><a th:href="@{/servicio/estadoCuenta/} + ${servicio.cuentaCorriente}" class="btn btn-primario btn-sm"th:text="EstadoCuenta"/> </td>
+                            <td ><a th:href="@{/comprobante/facturar/} + ${servicio.cuentaCorriente}" class="btn btn-primario btn-sm"th:text="Facturar"/> </td>
+                            <td>
+                                <a 
+                                    id="editar"  th:data-id="${servicio.cuentaCorriente}"
+                                    class="btn btn-info btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#servicioModal"> 
+                                    <i class="fa-regular fa-pen-to-square fa-lg"></i>
+                                </a>
+                                <a  id="eliminar" data-url="/servicio/eliminar/" 
+                                    th:data-id="${servicio.cuentaCorriente}"
+                                    class="btn btn-danger eliminar btn-sm" > 
+                                    <i class="fa-solid fa-trash-can"></i> 
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <nav  th:replace="~{layout/paginador :: paginador}"> </nav>
+            </div>
+
+            <!-- Ventana modal -->
+            <div class="modal fade" id="servicioModal" tabindex="-1" aria-labelledby="confirmacionModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content bg-color">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmacionModalLabel">Datos de Servicio</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form name="frm-servicio" id="frm-servicio"   action="/servicio/guardar" method="post" >
+                            <div class="container-md row d-md-flex align-content-center justify-content-start">
+                                <input type="text"  hidden="true" name="accion" id="accion"> 
+                                    <div class="form-label col-md-3"> 
+                                        <label class="form-label"  for="cuentaCorriente">Cuentacorriente </label>
+                                        <input type="text"  id="cuentaCorriente" name="cuentaCorriente" class="form-control " />
+                                    </div>
+
+                                    <input type="text" hidden="true" id="codigoUsuario" name="codigoUsuario" />
+                                    <div class="form-group col-md-3">
+                                        <label class="form-label" for="numeroDocumento">NumeroDocumento </label>
+                                        <input type="text" id="numeroDocumento" name="numeroDocumento" 
+                                               disabled="true"class="form-control"   required="campo ogligatorio"/>
+                                    </div>
+                                    <div class=" form-group col-md-6">
+                                        <div>
+                                            <label class="form-label" for="buscarUsuario">Usuario </label>
+                                            <input  class="form-control" type="text" name="buscarUsuario" id="buscarUsuario"    placeholder="Busca por: ruc/ci o nombres" required="true"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label class="form-label" for="fechaInicio">Fecha Inicio </label>
+                                        <input type="text"  name="fechaInicio"  id="fechaInicio" th:value="${fechaInicio}" autocomplete="off"
+                                               class="form-control" required="campo ogligatorio"  />
+                                    </div>
+                                    <div class="form-group col-md-6"> 
+                                        <label for="categoria">Categoria</label>
+                                        <select th:object="${categoria}" class="form-control" id="categoria" name="categoria" >
+                                            <option th:each="categoria : ${categorias}" 
+                                                    th:value="${categoria.codigoCategoria}"
+                                                    th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} "
+                                                    />
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-4"> 
+                                        <label class="form-label" for="sucursal">Sucursal</label>
+                                        <select th:object="${sucursal}" class="form-control" name="sucursal" id="sucursal" >
+                                            <option th:each="sucursal : ${sucursales}" 
+                                                    th:value="${sucursal.codigoSucursal}"
+                                                    th:text="${sucursal.nombreSucursal} +'-' +${sucursal.ciudad.nombreCiudad }"  />
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3" > 
+                                        <label class="form-label" for="estado">Estado</label>
+                                        <select th:object="${estado}" class="form-control" name="estado" id="estado">
+                                            <option th:each="estado : ${estado} " 
+                                                    th:value="${estado.codigoEstado}"
+                                                    th:text="${estado.estado}"  />
+                                        </select>
+                                    </div>
+                                    <br/>
+                            </div>
+                            <input type="submit" name="guardar" value="Guardar" class="btn-guardar offset-1 m-3"/> 
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+        <script src="/js/buscarServicios.js"></script>
+        <script src="/js/datepicker-es.js"></script>
+        <script src="/js/buscarUsuario.js"></script>
+        <script src="/js/validarFormulario.js" async="true"></script>
+        <script>
+            $(document).ready(function ()
+            {
+                eliminar();// Se carga la funcion eliminar  
+                //Cargar idioma español a la tabla paginado con Jquerry data
+                $('#tabla').DataTable({
+                    language: {
+                        url: '/i18n/es-ES.json'
+                    }
+                });
+                //Definir nombres de los campos
+                var cuentaCorriente = "#cuentaCorriente";
+                var fechaInicio = "#fechaInicio";
+                var buscarUsuario = "#buscarUsuario";
+                var numeroDocumento = "#numeroDocumento";
+                var buscarUsuario = "#buscarUsuario";
+                var accion = "";
+
+                var campos = [cuentaCorriente, fechaInicio, buscarUsuario, numeroDocumento];
+
+                $("#servicioModal").on('shown.bs.modal', function () {
+                    tabular(cuentaCorriente);
+                });
+                // Abrir ventana categoria al presionar agregar categoria
+                $("#btnAgrerar").click(function (event) {
+                    event.preventDefault();
+                    limpiar(campos);
+                    $("#accion").val("agregar");
+                    $("#servicioModal").modal('show');
+                });
+                // Tabular campos
+                tabulador(cuentaCorriente, buscarUsuario);
+                tabulador(buscarUsuario, fechaInicio);
+                //Cargar Datos al Abrir ventana modal para editar
+                $(document).on('click', '#editar', function (event)
+                {
+                    $(cuentaCorriente).prop("readonly", true);
+                    $(fechaInicio).prop("disabled", true);
+                    var url = '/servicio/editar';
+                    var servicio = {cuentaCorriente: $(this).data('id')};
+
+                    consultar(servicio, url)
+                            .then(function (respuesta) {
+                                $(cuentaCorriente).val(respuesta.cuentaCorriente);
+                                $(fechaInicio).val(respuesta.fechaInicio);
+                                $(numeroDocumento).val(respuesta.numeroDocumento);
+                                $("#codigoUsuario").val(respuesta.usuario.codigoUsuario);
+                                $(numeroDocumento).val(respuesta.usuario.numeroDocumento);
+                                $(buscarUsuario).val(respuesta.nombreUsuario);
+                                $("#categoria").val(respuesta.categoria.codigoCategoria);
+                                $("#estado").val(respuesta.estado.codigoEstado);
+                                $("#accion").val("editar");
+                            });
+                });
+                //Recuperar los datos al enviar formulario
+                $('#frm-servicio').submit(function (event) {
+                    event.preventDefault();
+                    var servicio = {
+                        cuentaCorriente: $("#cuentaCorriente").val(),
+                        fechaInicio: $("#fechaInicio").val(),
+                        usuario: {
+                            codigoUsuario: $("#codigoUsuario").val()
+                        },
+                        categoria: {
+                            codigoCategoria: $("#categoria").val()
+                        },
+                        sucursal: {
+                            codigoSucursal: $("#sucursal").val()
+                        },
+                        estado: {
+                            codigoEstado: $("#estado").val()
+                        }
+                    };
+                    accion = $("#accion").val();
+                    var contentType = 'application/json';
+                    var url = "/servicio/guardar/" + accion;
+                    guardar(servicio, url, contentType);
+                    $("#servicioModal").modal('hide');
+                    
+                });
+                     $("#fechaInicio").on('change', function (){
+                          var fecha = $("#fechaInicio").val();
+                    console.log(fecha);                        
+                    });
+            });
+        </script>
+    </body>
+
+</html>

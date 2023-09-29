@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div th:replace="~{layout/layout :: modal}"> </div>
+        <div class="container">
+            <h3 class="card-header">Detalle zona </h3> 
+            <a th:href="@{/detalleZona/agregar}"
+               class="btn btn-primario btn-sm mb-2 ">
+                <i class="fa-solid fa-plus fa-lg "> </i> Detalle zona
+            </a>
+            <div class="mensaje-alerta"id="contenedor-alertas" ></div>
+            <div class="table-responsive-lg">
+                <table id="tabla" class="table table-dark table-border table-striped table-colapse  " >
+                    <thead>
+                        <tr>
+                            <th>CodigoZona</th>
+                            <th>Zona</th>
+                            <th>Cobrador</th>
+                            <th>Sucursal</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-secondary table-hover">
+                        <tr th:each="detalleZona : ${detalleZona}">
+                            <td th:text="${detalleZona.detalleZonaPK.codigoZona}">  </td>
+                            <td th:text="${detalleZona.zona.nombreZona}">   </td>
+                            <td  th:text="${detalleZona.cobrador.nombre}+' '+${detalleZona.cobrador.apellido}">   </td>
+                            <td th:text="${detalleZona.zona.sucursal.nombreSucursal} +' '+${detalleZona.zona.sucursal.ciudad.nombreCiudad}"> </td>
+                            <td>
+                                <a title="Manzanas de la zona">
+                                    <i class="btn btn-primario fa-regular fa-eye"></i>
+                                </a>
+                                <a data-url="{/detalleZona/editar/{detalleZona.detalleZonaPK.codigoZona}/{detalleZona.detalleZonaPK.codigoCobrador}}" 
+                                   class="btn btn-info btn-sm"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modificarModal"
+                                   >
+                                    <i class="fa-regular fa-pen-to-square"></i> 
+                                </a>
+                                <a id="eliminar" data-url="/detalleZona/eliminar/"
+                                   th:data-id="${detalleZona.detalleZonaPK.manzana}" 
+                                   class="btn btn-danger eliminar btn-sm" > 
+                                    <i class="fa-solid fa-trash-can"></i> 
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+        <script>
+            $(document).ready(function () {
+//              Lamara al metodo eliminar al hacer click en el boton eliminar
+                eliminar();
+//                Cargar idioma español a la tabla paginado con Jquerry data
+                $('#tabla').DataTable({
+                    language: {
+                        url: '/i18n/es-ES.json'
+                    }
+                });
+            });
+        </script>
+    </body>
+
+</html>
