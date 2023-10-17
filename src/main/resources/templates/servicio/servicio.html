@@ -25,8 +25,8 @@
                 </div>
             </div>
             <div class="mensaje-alerta" id="contenedor-alertas"> </div>
-            <div class="table-responsive-sm">
-                <table id="tabla-servicio" class="table  table-dark table-border table-striped table-colapse table-hover table-sm " >
+            <div class="table-responsive-xl">
+                <table id="tabla-servicio" class="table  table-dark table-border table-striped table-colapse table-hover" >
                    
                     <thead class="thead-dark">
                         <tr>
@@ -194,7 +194,7 @@
                                 $(numeroDocumento).val(respuesta.numeroDocumento);
                                 $("#codigoUsuario").val(respuesta.usuario.codigoUsuario);
                                 $(numeroDocumento).val(respuesta.usuario.numeroDocumento);
-                                $(buscarUsuario).val(respuesta.nombreUsuario);
+                                $(buscarUsuario).val(respuesta.usuario.nombre+' '+respuesta.usuario.apellido);
                                 $("#categoria").val(respuesta.categoria.codigoCategoria);
                                 $("#estado").val(respuesta.estado.codigoEstado);
                                 $("#accion").val("editar");
@@ -226,10 +226,6 @@
                     $("#servicioModal").modal('hide');
                     
                 });
-                     $("#fechaInicio").on('change', function (){
-                          var fecha = $("#fechaInicio").val();
-                    console.log(fecha);                        
-                    });
             });
         </script>
     </body>

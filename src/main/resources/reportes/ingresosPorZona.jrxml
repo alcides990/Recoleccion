@@ -4,7 +4,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="conexion"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="desde" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
@@ -33,10 +33,12 @@ JOIN detallecomprobantes AS dtc
     AND dtc.codigo_tipo_factura = comp.codigo_tipo_factura
 LEFT JOIN servicios AS servi 
   ON comp.`cuenta_corriente`= servi.`cuenta_corriente`
-LEFT JOIN detallezonas AS dtz
- ON dtz.`manzana`=servi.`manzana`
+
+LEFT JOIN manzanas AS man
+  ON man.codigo_manzana=servi.codigo_manzana
+  AND man.codigo_sucursal=comp.codigo_sucursal
 LEFT JOIN zonas AS zon
-  ON zon.`codigo_zona`=dtz.`codigo_zona`
+  ON zon.`codigo_zona`=man.`codigo_zona`
 LEFT JOIN cobradores AS cob 
   ON cob.`codigo_cobrador` = comp.`codigo_cobrador`
 

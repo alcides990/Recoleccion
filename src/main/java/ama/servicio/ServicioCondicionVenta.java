@@ -1,16 +1,16 @@
  
 package ama.servicio;
  
-import ama.dominio.Condicionventa;
+import ama.dominio.CondicionVenta;
 import java.util.List;
 
 public interface ServicioCondicionVenta {
     
-    public List<Condicionventa> listar();
+    public List<CondicionVenta> listar();
     
-    public void guardar(Condicionventa condicionVenta);
+    public void guardar(CondicionVenta condicionVenta);
     
-    public void eliminar(Condicionventa condicionVenta);
+    public void eliminar(CondicionVenta condicionVenta);
     
-    public void encontrar(Condicionventa condicionVenta);
+    public void encontrar(CondicionVenta condicionVenta);
 }

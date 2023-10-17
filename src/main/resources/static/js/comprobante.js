@@ -8,15 +8,49 @@ $(document).ready(function () {
             e.preventDefault();
             var cuentaCorriente = $("#cuentaCorriente").val();
             var url = '/comprobante/facturar';
-            var datos = { cuentaCorriente: cuentaCorriente };
+            var datos = {cuentaCorriente: cuentaCorriente};
             cargarDatosComprobante(datos, url);
         }
     });
-    //Abrir ventans modal al precionar boton editar
+
+    function cargarDatosComprobante(datos, url) {
+        consultar(datos, url)
+                .then(function (data) {
+//                    console.log(data);
+                    let usuario = data.usuario.nombre + ' ' + data.usuario.apellido;
+                    $("#razonSocial").val(usuario);
+                    $("#numeroDocumento").val(data.usuario.numeroDocumento);
+                    $("#categoria").empty();
+                    $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
+                    $("#cobrador").empty();
+                    $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
+                    $("#tarifa").val(data.categoria.tarifa);
+                    $("#tarifa").val(data.categoria.tarifa);
+                    var fecha = new Date(data.estadoCuenta.pagoHasta); // Crea un objeto Date a partir de la cadena de fecha y hora
+                    var anio = fecha.getFullYear(); // Obtiene el año de cuatro dígitos
+                    var mes = fecha.getMonth() + 1; // Obtiene el mes (0-11). Sumamos 1 porque los meses se indexan desde 0.
+                    var dia = fecha.getDate(); // Obtiene el día del mes (1-31)
+                    // Formatea la fecha en el formato deseado (por ejemplo, DD/MM/AAAA)
+                    var fechaFormateada = dia.toString().padStart(2, '0') + '-' + mes.toString().padStart(2, '0') + '-' + anio;
+                    $("#pagoHasta").val(fechaFormateada);
+                    $("#cantidadDeuda").val(data.estadoCuenta.cantidadDeuda);
+                    $("#subTotal").val(data.estadoCuenta.subTotal.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+                    $("#recargoPago").val(data.estadoCuenta.recargo);
+                    $("#totalDeuda").val(data.estadoCuenta.totalDeuda.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+
+                    if ($("#tipoFactura option:selected").text() == 'MANUAL') {
+                        $("#numeroComprobante").focus();
+                    } else {
+                        $("#cantidadPago").focus();
+                        $("#cantidadPago").val("");
+                    }
+                });
+    }
+
     $(document).on('click', '#anular', function (event) {
-        var url = '/comprobante/anular';
+        var url = '/comprobante/getComprobante';
         var dataId = $(this).data('id').split('-');
-        console.log(dataId);
+//        console.log(dataId);
         var codigoSucursal = dataId[0];
         var codigoPuntoExpedicion = dataId[1];
         var codigoTipoFactura = dataId[2];
@@ -27,104 +61,52 @@ $(document).ready(function () {
             codigoPuntoExpedicion: codigoPuntoExpedicion,
             codigoTipoFactura: codigoTipoFactura,
             codigoSerie: codigoSerie,
-            numeroComprobante: numeroComprobante
+            numeroComprobante: numeroComprobante,
         };
-        cargarDatosComprobante(datos, url);
+        consultar(datos, url)
+                .then(function (data) {
+//                    console.log(data);
+                    $("#cuentaCorriente").val(data.cuentaCorriente);
+                    $("#razonSocial").val(data.nombreUsuario);
+                    $("#numeroDocumento").val(data.numeroDocumento);
+                    $("#numeroComprobante").val(data.numeroComprobante);
+                    $("#categoria").empty();
+                    $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
+                    $("#cobrador").empty();
+                    $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
+                    $("#tarifa").val(data.categoria.tarifa);
+                    $("#sucursal").empty();
+                    $("#sucursal").append('<option value="' + data.sucursal.codigoSucursal + '">' + data.sucursal.nombreSucursal + '</option>');
+                    $("#tarifa").val(data.categoria.tarifa);
+                    $("#puntoExpedicion").empty();
+                    $("#puntoExpedicion").append('<option value="' + data.puntoExpedicion.codigoPuntoExpedicion + '">' + data.puntoExpedicion.nombrePuntoExpedicion + '</option>');
+                    $("#tarifa").val(data.categoria.tarifa);
+                    $("#tipoFactura").empty();
+                    $("#tipoFactura").append('<option value="' + data.tipoFactura.codigoTipoFactura + '">' + data.tipoFactura.tipoFactura + '</option>');
+                    $("#tarifa").val(data.categoria.tarifa);
+                    $("#condicionVenta").empty();
+                    $("#condicionVenta").append('<option value="' + data.condicionVenta.codigoCondicionVenta + '">' + data.condicionVenta.condicionVenta + '</option>');
+
+                    $("#periodoPago").val(data.periodoPago);
+                    $("#cantidadPago").val(data.cantidadPago);
+                    $("#subTotal").val(data.importe.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+                    $("#recargoPago").val(data.recargo);
+                    $("#totalDeuda").val((data.importe + data.recargo).toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+
+                });
     });
     tabulador("#numeroComprobante", "#cantidadPago");
     tabulador("#recargoPago", "#guardar");
 
-    function cargarDatosComprobante(datos, url) {
-        consultar(datos, url)
-            .then(function (data) {
-                //                    console.log(data);
-                $("#razonSocial").val(data.nombreUsuario);
-                $("#numeroDocumento").val(data.usuario.numeroDocumento);
-                $("#categoria").empty();
-                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
-                $("#cobrador").empty();
-                $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
-                $("#tarifa").val(data.categoria.tarifa);
-
-                var fecha = new Date(data.estadoCuenta.pagoHasta); // Crea un objeto Date a partir de la cadena de fecha y hora
-                var anio = fecha.getFullYear(); // Obtiene el año de cuatro dígitos
-                var mes = fecha.getMonth() + 1; // Obtiene el mes (0-11). Sumamos 1 porque los meses se indexan desde 0.
-                var dia = fecha.getDate(); // Obtiene el día del mes (1-31)
-                // Formatea la fecha en el formato deseado (por ejemplo, DD/MM/AAAA)
-                var fechaFormateada = dia.toString().padStart(2, '0') + '-' + mes.toString().padStart(2, '0') + '-' + anio;
-                $("#pagoHasta").val(fechaFormateada);
-                $("#cantidadDeuda").val(data.estadoCuenta.cantidadDeuda);
-                $("#subTotal").val(data.estadoCuenta.subTotal.toLocaleString('es-ES', { style: 'currency', currency: 'PYG' }));
-                $("#recargoPago").val(data.estadoCuenta.recargo);
-                $("#totalDeuda").val(data.estadoCuenta.totalDeuda.toLocaleString('es-ES', { style: 'currency', currency: 'PYG' }));
-
-                if ($("#tipoFactura option:selected").text() == 'MANUAL') {
-                    $("#numeroComprobante").focus();
-                } else {
-                    $("#cantidadPago").focus();
-                    $("#cantidadPago").val("");
-                }
-            });
-    }
-    //----------- obtener numero de comprobante para registrar-----------
-    function getNumComprobante() {
-        var seleccionado = $("#tipoFactura option:selected").text();
-        if (seleccionado != 'MANUAL') {
-            $("#numeroComprobante").prop('readonly', true);
-            $("#puntoExpedicion").prop('readonly', true);
-            var codigoSucursal = $("#sucursal").val();
-            var codigoPuntoExpedicion = $("#puntoExpedicion").val();
-            var codigoTipoFactura = $("#tipoFactura").val();
-            var codigoSerie = 0;
-            var url = '/comprobante/numComprobante';
-            var datos = {
-                codigoSucursal: codigoSucursal,
-                codigoPuntoExpedicion: codigoPuntoExpedicion,
-                codigoTipoFactura: codigoTipoFactura,
-                codigoSerie: codigoSerie
-            };
-            $.ajax({
-                url: url,
-                data: JSON.stringify(datos),
-                type: "post",
-                dataType: "json",
-                contentType: 'application/json',
-                success: function (data) {
-                    $("#numeroComprobante").val(data);
-                    $("#cuentaCorriente").focus();
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-
-                    mostrarAlerta(jqXHR.responseText, url, 'danger');
-                }
-            });
-
-
-        } else {
-            $("#numeroComprobante").prop('readonly', false);
-            $("#numeroComprobante").val('');
-            $("#cuentaCorriente").focus();
-        }
-
-    }
-
-    //     Al cargar la pagina se genera numero de comprobante
-    getNumComprobante();
-
-
-    //     Al seleccionar puntoExpedicion se genera numero de comprobante
-    $('#puntoExpedicion').on('change', function () {
+    $(document).on('change', '#tipoFactura, #puntoExpedicion', function () {
         getNumComprobante();
     });
-    //     Al seleccionar tipoFactura se genera numero de comprobante
-    $(document).on('change', '#tipoFactura', function () {
-        getNumComprobante();
-    });
+
 
     var subTotal = 0;
     $("#cantidadPago").on('keydown', function (e) {
-        if (e.keyCode == 13 || e.keyCode == 9) { // 13 es el código de tecla de Enter
-            e.preventDefault(); // evita el comportamiento predeterminado de Enter (enviar formulario)
+        if (e.keyCode == 13 || e.keyCode == 9) {
+            e.preventDefault();
             $('#recargoPago').focus();
         }
     });
@@ -132,7 +114,7 @@ $(document).ready(function () {
         var cantidadPago = $('#cantidadPago').val();
         var tarifa = $('#tarifa').val();
         subTotal = cantidadPago * tarifa;
-        $('#subTotal').val(subTotal.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' }));
+        $('#subTotal').val(subTotal.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
     });
     $("#recargoPago").on('keyup', function (e) {
         var recargo = 0;
@@ -140,7 +122,7 @@ $(document).ready(function () {
         recargo = parseInt($("#recargoPago").val());
         total = recargo + subTotal;
         if ($("#recargoPago").val() !== '') {
-            $("#totalDeuda").val(total.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' }));
+            $("#totalDeuda").val(total.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
         }
     });
     $("#recargoPago").blur(function (e) {
@@ -148,7 +130,7 @@ $(document).ready(function () {
         var total = 0;
         recargo = parseInt($("#recargoPago").val());
         total = recargo + subTotal;
-        $("#totalDeuda").val(total.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' }));
+        $("#totalDeuda").val(total.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
     });
 
     //    -----------------GUARDAR COMPROBANTE-------------------------------
@@ -205,6 +187,29 @@ $(document).ready(function () {
         limpiar(campos);
     });
 
+    $('#frm-comprobante-anular').submit(function (event) {
+        event.preventDefault();
+        var codigoSerie = 0;
+        var codigoTimbrado = 1;
+        var numeroComprobante = $("#numeroComprobante").val();
+        var codigoSucursal = $("#sucursal").val();
+        var codigoPuntoExpedicion = $("#puntoExpedicion").val();
+        var codigoTipoFactura = $("#tipoFactura").val();
+        var motivoAnulacion = $("#motivoAnulacion").val();
+        var url = '/comprobante/anular';
+        var datos = {
+            codigoSerie: codigoSerie,
+            codigoTimbrado: codigoTimbrado,
+            numeroComprobante: numeroComprobante,
+            codigoSucursal: codigoSucursal,
+            codigoPuntoExpedicion: codigoPuntoExpedicion,
+            codigoTipoFactura: codigoTipoFactura,
+            motivoAnulacion: motivoAnulacion
+        };
+        guardar(datos, url);
+
+    });
+
     function guardar(datos, url) {
         $.ajax({
             url: url,
@@ -214,8 +219,7 @@ $(document).ready(function () {
             //            dataType: "json", //tipo de datos que espera recibir
 
             success: function (response) {
-                mostrarAlerta(response, url, 'success');
-//                limpiar(campos);
+                mostrarAlerta(response, url, 'success', false, true);
                 getNumComprobante();
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -237,7 +241,7 @@ $(document).ready(function () {
             var numeroPagina = 0;
             var catidadRegistro = 10;
             var url = '/comprobante/filtrar';
-            var datos = { filtro: filtro, numeroPagina: numeroPagina, catidadRegistro: catidadRegistro };
+            var datos = {filtro: filtro, numeroPagina: numeroPagina, catidadRegistro: catidadRegistro};
             $.ajax({
                 url: url,
                 data: datos,
@@ -245,15 +249,15 @@ $(document).ready(function () {
                 dataType: "json",
                 //                contentType: 'application/json',
                 success: function (data) {
-                    //                    console.log(data);
+//                    console.log(data);
                     $("tbody").empty();
                     $.each(data, function (llave, valor) {
                         var datosTabla = `
                                  <tr> 
-                                    <td> ${valor.tipoFactura} </td>
-                                    <td> ${valor.sucursal}- ${valor.puntoExpedicion}- ${valor.numeroComprobante}</td>
+                                    <td> ${valor.tipoFactura.tipoFactura} </td>
+                                    <td> ${valor.sucursal.nombreSucursal}- ${valor.puntoExpedicion.nombrePuntoExpedicion}- ${valor.numeroComprobante}</td>
                                     <td> ${valor.cuentaCorriente} </td>
-                                    <td> ${valor.usuario} </td>
+                                    <td> ${valor.nombreUsuario} </td>
                                     <td> ${valor.fechaPago} </td>
                                     <td> ${valor.periodoPago} </td>
                                     <td> ${valor.cantidadPago} </td>
@@ -265,7 +269,7 @@ $(document).ready(function () {
                                     <a   id="anular" 
                                         data-bs-toggle="modal"
                                         data-bs-target="#anularModal"
-                                        data-id='${valor.sucursal.codigoSucursal}-${valor.codigoPuntoExpedicion}-${valor.codigoTipoFactura}-${valor.codigoSerie}-${valor.numeroComprobante}'>
+                                        data-id='${valor.sucursal.codigoSucursal}-${valor.puntoExpedicion.codigoPuntoExpedicion}-${valor.tipoFactura.codigoTipoFactura}-${valor.codigoSerie}-${valor.numeroComprobante}'>
                                         <i class="btn-close fa-regular fa-pen-to-square"></i>
                                     </a>  
                                  </tr> `;
@@ -274,7 +278,11 @@ $(document).ready(function () {
 
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alert('Error...' + jqXHR);
+                    var mensajeError = jqXHR.responseText;
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
+                        mensajeError = jqXHR.responseJSON.message;
+                    }
+                    mostrarAlerta(mensajeError, url, 'danger');
                 }
             });
         }
@@ -292,6 +300,48 @@ $(document).ready(function () {
     });
 
 });
+
+//----------- obtener numero de comprobante para registrar-----------
+function getNumComprobante() {
+    var seleccionado = $("#tipoFactura option:selected").text();
+    if (seleccionado != 'MANUAL') {
+        $("#numeroComprobante").prop('readonly', true);
+        $("#puntoExpedicion").prop('readonly', true);
+        var codigoSucursal = $("#sucursal").val();
+        var codigoPuntoExpedicion = $("#puntoExpedicion").val();
+        var codigoTipoFactura = $("#tipoFactura").val();
+        var codigoSerie = 0;
+        var url = '/comprobante/numComprobante';
+        var datos = {
+            codigoSucursal: codigoSucursal,
+            codigoPuntoExpedicion: codigoPuntoExpedicion,
+            codigoTipoFactura: codigoTipoFactura,
+            codigoSerie: codigoSerie
+        };
+        $.ajax({
+            url: url,
+            data: JSON.stringify(datos),
+            type: "post",
+            dataType: "json",
+            contentType: 'application/json',
+            success: function (data) {
+                $("#numeroComprobante").val(data);
+                $("#cuentaCorriente").focus();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+
+                mostrarAlerta(jqXHR.responseText, url, 'danger');
+            }
+        });
+
+
+    } else {
+        $("#numeroComprobante").prop('readonly', false);
+        $("#numeroComprobante").val('');
+        $("#cuentaCorriente").focus();
+    }
+
+}
 
 
 

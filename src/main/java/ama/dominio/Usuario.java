@@ -24,27 +24,25 @@ public class Usuario implements Serializable {
     private String numeroDocumento;
     private String nombre;
     private String apellido;
-    @Transient
-    private String nombreCompleto;
     private String celular;
     private String telefono;
     private String barrio;
     private String direccion;
     private String observacion;
+    
     @JoinColumn(name = "codigo_estado", referencedColumnName = "codigo_estado")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JsonIgnore
     private Estado estado;
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario")
+    
     @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario")
     private  List<Servicio> servicio;
+    
     @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JsonIgnore
     private Sucursal sucursal;
-
-     @Transient
-    private String nombreSucursal;
      
     public Usuario() {
     }
@@ -53,18 +51,9 @@ public class Usuario implements Serializable {
         this.codigoUsuario = codigoUsuario;
     }
 
-    public String getNombreCompleto() {
-
-        return nombre + " " + apellido;
-    }
-    public String getNombreSucursal() {
-
-        return sucursal.getNombreSucursal() + " " + sucursal.getCiudad().getNombreCiudad();
-    }
-
     @Override
     public String toString() {
-        return "Usuario{" + "codigoUsuario=" + codigoUsuario + ", numeroDocumento=" + numeroDocumento + ", nombre=" + nombre + ", apellido=" + apellido + ", nombreCompleto=" + nombreCompleto + ", celular=" + celular + ", telefono=" + telefono + ", barrio=" + barrio + ", direccion=" + direccion + ", observacion=" + observacion + ", nombreSucursal=" + nombreSucursal + '}';
+        return "Usuario{" + "codigoUsuario=" + codigoUsuario + ", numeroDocumento=" + numeroDocumento + ", nombre=" + nombre + ", apellido=" + apellido  + ", celular=" + celular + ", telefono=" + telefono + ", barrio=" + barrio + ", direccion=" + direccion + ", observacion=" + observacion +  '}';
     }
 
    

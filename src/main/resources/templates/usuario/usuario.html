@@ -42,7 +42,7 @@
                         <tr  th:each="usuario : ${usuarios}" > 
                             <td th:text="${usuario.codigoUsuario}"> </td>
                             <td th:text="${usuario.numeroDocumento}">  </td>
-                            <td class="sticky-start" th:text="${usuario.nombreCompleto}"> </td>
+                            <td class="sticky-start" th:text="${usuario.nombre} +' '+${usuario.apellido}"> </td>
                             <td th:text="${usuario.celular}"></td>
                             <td th:text="${usuario.telefono}"></td>
                             <td th:text="${usuario.barrio}"></td>
@@ -55,8 +55,8 @@
                                 </a>
                                 <a id="eliminar" data-url="/usuario/eliminar/" 
                                    th:data-id="${usuario.codigoUsuario}" 
-                                   class="btn btn-danger eliminar btn-sm" > 
-                                    <i class="fa-solid fa-trash-can"></i> 
+                                   class="btn btn-danger btn-sm" > 
+                                    <i class="fa-solid fa-trash-can "></i> 
                                 </a>
                             </td>
                         </tr>

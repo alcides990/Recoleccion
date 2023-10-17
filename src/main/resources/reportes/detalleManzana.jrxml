@@ -5,16 +5,8 @@
 	<property name="ireport.x" value="164"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.report.description" value="Reporte de etado de cuentas por  zona"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="conexion"/>
-	<property name="com.jaspersoft.studio.data.sql.tables">
-		<![CDATA[Y2F0ZWdvcmlhcyBBUyAsNjI0LDE1LDQyYWFkNDg2LTRhYmMtNDBlZC1hYTY1LTRhMmQwNmY0NDM5
-MztkZXRhbGxlem9uYXMgQVMgLDE1LDE1LDE0NzY3MDdlLWI4MDUtNGRjYy05NmI1LThjZmVmMDMx
-ZTJiYztjb2JyYWRvcmVzIEFTICw0NjAsMTUsNzFjNmU4MjEtYjUyZS00N2U1LWIzYWUtNzY1YWQ4
-MjY5NmJmO3NlcnZpY2lvcyBBUyAsMzEwLDE1LGU1OTU0NWI1LTQ2NjctNGZiOS1hYTRhLTZhZTE2
-MTdjM2ZkMzt1c3VhcmlvcyBBUyAsNzg1LDE1LDFlNWIzNmZjLWFmODUtNGFlMC1hZTY0LTUwNGZh
-ZGY4YWUyMDt6b25hcyBBUyAsMTg0LDE1LGMwYzgyYTkxLTlmMmEtNDJkNy1iYWExLTk4NGJjMzEx
-MDBkOTs=]]>
-	</property>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<parameter name="codigoZona" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -25,7 +17,7 @@ MDBkOTs=]]>
 	<parameter name="hasta" class="java.lang.Integer"/>
 	<parameter name="manzana" class="java.lang.Integer"/>
 	<queryString>
-		<![CDATA[SELECT servi.cuenta_corriente, servi.`manzana`,
+		<![CDATA[SELECT servi.cuenta_corriente, man.codigo_manzana,
 fn_mes_deuda(servi.cuenta_corriente) AS mes_deuda, 
 fn_pago_hasta(servi.cuenta_corriente) AS pago_hasta,
 fn_ultimo_pago(servi.cuenta_corriente) AS ultimo_pago,
@@ -33,24 +25,27 @@ cate.`categoria`, cate.`tarifa`,
 usu.numero_documento, usu.`nombre`, usu.`apellido`, usu.`direccion`,
 cob.codigo_cobrador, CONCAT(cob.nombre, ' ', cob.apellido) AS cobrador,
 zon.codigo_zona, zon.zona
-FROM detallezonas AS dtz
+FROM servicios AS servi
+JOIN manzanas AS man
+  ON man.`codigo_manzana`=servi.`codigo_manzana`
+  
 INNER JOIN zonas AS zon
-  ON zon.codigo_zona=dtz.`codigo_zona`
-  AND zon.codigo_sucursal= dtz.`codigo_sucursal`
-INNER JOIN servicios AS servi
-  ON servi.`codigo_sucursal`=dtz.`codigo_sucursal`
-  AND servi.`manzana`=dtz.`manzana`
+  ON zon.codigo_zona=man.`codigo_zona`
+  AND zon.codigo_sucursal= man.`codigo_sucursal`
+  
 INNER JOIN cobradores AS cob
-  ON cob.`codigo_cobrador`=dtz.`codigo_cobrador`
-  AND cob.`codigo_sucursal`=dtz.`codigo_sucursal`
+  ON cob.`codigo_cobrador`=man.`codigo_cobrador`
+  AND cob.`codigo_sucursal`=man.`codigo_sucursal`
+  
 INNER JOIN categorias AS cate
   ON cate.`codigo_categoria` = servi.`codigo_categoria` 
   AND cate.`codigo_sucursal`= servi.`codigo_sucursal`
 INNER JOIN usuarios AS usu
   ON servi.codigo_usuario = usu.codigo_usuario
+  
  WHERE cob.codigo_cobrador= $P{codigoCobrador} 
  AND zon.codigo_zona= $P{codigoZona}
-  AND dtz.manzana= $P{manzana}
+  AND man.codigo_manzana= $P{manzana}
  AND fn_mes_deuda(servi.cuenta_corriente)>= $P{desde} 
  AND fn_mes_deuda(servi.cuenta_corriente)  <= $P{hasta}]]>
 	</queryString>
@@ -59,11 +54,10 @@ INNER JOIN usuarios AS usu
 		<property name="com.jaspersoft.studio.field.label" value="cuenta_corriente"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="servicios"/>
 	</field>
-	<field name="manzana" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="manzana"/>
-		<property name="com.jaspersoft.studio.field.label" value="manzana"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="servicios"/>
-		<fieldDescription><![CDATA[]]></fieldDescription>
+	<field name="codigo_manzana" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="codigo_manzana"/>
+		<property name="com.jaspersoft.studio.field.label" value="codigo_manzana"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="manzanas"/>
 	</field>
 	<field name="mes_deuda" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="mes_deuda"/>
@@ -143,7 +137,7 @@ INNER JOIN usuarios AS usu
 		<variableExpression><![CDATA[$V{REPORT_COUNT}]]></variableExpression>
 	</variable>
 	<group name="manzana" keepTogether="true">
-		<groupExpression><![CDATA[$F{manzana}]]></groupExpression>
+		<groupExpression><![CDATA[$F{codigo_manzana}]]></groupExpression>
 		<groupHeader>
 			<band height="61">
 				<textField>
@@ -151,7 +145,7 @@ INNER JOIN usuarios AS usu
 					<textElement>
 						<font fontName="Arial"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{manzana}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{codigo_manzana}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement x="28" y="4" width="58" height="20" uuid="8d9d2d23-1349-4fc8-a18a-e3e92a225bfa"/>

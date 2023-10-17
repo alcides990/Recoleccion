@@ -54,7 +54,7 @@ public class ImplServicio implements ServicioServicio {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Servicio> listaServicioCuenta(Servicio servicio) {
+    public List<String> listaServicioCuenta(Servicio servicio) {
         return servicioDao.listaServicioCuenta(servicio.getUsuario().getCodigoUsuario());
     }
 

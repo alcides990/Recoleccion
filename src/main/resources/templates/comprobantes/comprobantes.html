@@ -8,6 +8,7 @@
         <aside th:replace="~{layout/layout :: aside}">  </aside>
         <div class="container-fluid"> 
             <div class="card-header"> <h3>Comprobantes</h3></div>
+            <div class="mensaje-alerta" id="contenedor-alertas"></div>
             <div class=" input-group my-3">
                 <input name="txtBuscar" id="txtBuscar" type="search" 
                        class="col-lg-6 col-12"  autofocus="true" 
@@ -15,8 +16,8 @@
                        aria-label="Buscar" aria-describedby="search-addon" />
             </div>
 
-            <div class="table-responsive-md">
-                <table id="tabla" class="table table-dark table-border table-striped  table-hover table-md" >
+            <div class="table-responsive-xl">
+                <table id="tabla" class="table table-dark table-border table-striped  table-hover" >
                     <thead class="sticky-top ">
                         <tr>
                             <th>Tipo Factura</th> 
@@ -25,8 +26,8 @@
                             <th>Usuario</th>
                             <th>FechaPago</th>
                             <th>PeriodoPago</th>
-                            <th>Cant.Pago</th>
                             <th>Tarifa</th>
+                            <th>Cant.Pago</th>
                             <th>Recargo</th>
                             <th>Importe</th>
                             <th>Estado</th>
@@ -38,18 +39,24 @@
                             <td th:text="${comprobante.tipoFactura.tipoFactura}"> </td>
                             <td th:text="${comprobante.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
                             <td th:text="${comprobante.servicio.cuentaCorriente}"> </td>
-                            <td th:text="${comprobante.usuario.nombreCompleto}" >   </td>
+                            <td th:text="${comprobante.usuario.nombre}+' '+ ${comprobante.usuario.apellido}" >   </td>
                             <td th:text="${comprobante.fechaPago}"></td>
                             <td th:text="${comprobante.detalleComprobante[0].periodoPago}"></td>
-                            <td th:text="${comprobante.detalleComprobante[0].cantidadPago}"></td>
                             <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"> 
+                            <td th:text="${comprobante.detalleComprobante[0].cantidadPago}"></td>
                                 <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].recargo, 0, 'COMMA', 0, 'POINT')}"></td>
-                                <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].importe, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].importe+comprobante.detalleComprobante[0].recargo, 0, 'COMMA', 0, 'POINT')}"></td>
                                 <td th:text="${comprobante.estado.estado}"></td>
                                 <td  title="Anular">
                                     <a   id="anular" 
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#anularModal">
+                                         th:data-id=
+                                         "${comprobante.comprobantePK.codigoSucursal}+'-'+
+                                         ${comprobante.comprobantePK.codigoPuntoExpedicion}+'-'+
+                                         ${comprobante.comprobantePK.codigoTipoFactura}+'-'+
+                                         ${comprobante.comprobantePK.codigoSerie}+'-'+
+                                         ${comprobante.comprobantePK.numeroComprobante}"
+                                         data-bs-toggle="modal"
+                                         data-bs-target="#anularModal">
                                         <i class="btn-close fa-regular fa-pen-to-square"></i>
                                     </a>
 
@@ -67,12 +74,12 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content bg-color">
                     <div class="modal-header">
-                        <h3 class="modal-title" id="titulo">Datos del Comprobante</h3>
+                        <h3 class="modal-title" id="titulo">Anular Comprobante</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form name="frm-comprobante" id="frm-comprobante" th:action="@{/comprobante/guardar}" method="post" >
+                    <form id="frm-comprobante-anular"  th:action="@{/comprobante/anular}"  method="post" >
                         <div class="row d-flex m-1">
                             <div class="col-sm-3"> 
                                 <label  for="cuentaCorriente">Cuentacorriente </label>
@@ -122,7 +129,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <label for="condicionVenta">CondicionVenta</label>
-                                <select class="form-select" name="condicionVenta" >
+                                <select class="form-select" name="condicionVenta" id="condicionVenta" >
                                     <option>Condicion Venta</option>
                                 </select>
                             </div>
@@ -140,18 +147,10 @@
                                 <input type="hidden" name="tarifa" id="tarifa"  />
                                 <div class="row">
                                     <div class="col-4">
-                                        <label  for="pagoHasta">Pago Hasta:</label>
+                                        <label  for="periodoPago">Period Pago:</label>
                                     </div>
                                     <div class="col">
-                                        <input  type="text" readonly="true" name="pagoHasta" id="pagoHasta"  class="form-control"  />
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4">
-                                        <label  for="cantidadDeuda">Cant.Deuda:</label>
-                                    </div>
-                                    <div class="col">
-                                        <input  type="text" readonly name="cantidadDeuda" id="cantidadDeuda"  class="form-control"  />
+                                        <input  type="text" readonly="true" name="periodoPago" id="periodoPago"  class="form-control"  />
                                     </div>
                                 </div>
                                 <div class="row">
@@ -187,13 +186,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-floating col-lg-6">
-                                <textarea class="form-control" placeholder="Ingrese motivo de anulacion" id="obs"></textarea>
+                            <div class="motivoAnulacion form-floating col-lg-6 ">
+                                <textarea class="form-control text-area" placeholder="Ingrese motivo de anulacion" id="motivoAnulacion"></textarea>
                                 <label for="obs">Motivo de anulacion </label>
                             </div>
                         </div>
 
-                        <input type="submit" id="gaurdar" name="guardar" value="Guardar" class="btn-guardar m-3"/>
+                        <input type="submit"  name="guardar" value="Anular" class="btn-guardar my-3 offset-10"/>
 
                     </form>
                 </div>

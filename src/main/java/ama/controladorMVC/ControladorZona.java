@@ -76,8 +76,10 @@ public class ControladorZona {
     @GetMapping("/editar/{codigoZona}")
     public String editar(Zona zona, Model model) {
         model.addAttribute("titulo", "zona");
-        log.info("zona a modificar:" + zona);
         zona = servicioZona.encontrar(zona);
+        if(zona==null){
+            throw  new Error("Zona no encontrada ");
+        }
         model.addAttribute("zona", zona);
 
         var sucursal = zona.getSucursal();

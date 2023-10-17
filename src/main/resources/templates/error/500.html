@@ -1,0 +1,20 @@
+ 
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" />
+<head  th:replace="~{layout/layout :: heat}"> </head>
+<body>
+    <header  th:replace="~{layout/layout :: header}"> </header>
+    <aside th:replace="~{layout/layout :: aside}">  </aside>
+    <div class="container h-50">
+
+        <h1>Oop Ocurrio un Error!! </h1>
+        <div th:text="${error}"></div>
+        <div th:text="${status}"></div>
+        <div th:text="${path}"></div>
+        <div th:text="${timestamp}"></div>
+        <div th:text="${message}"></div>
+
+    </div>
+    <footer  th:replace="~{layout/layout :: footer}"> </footer>
+</body>
+</html>

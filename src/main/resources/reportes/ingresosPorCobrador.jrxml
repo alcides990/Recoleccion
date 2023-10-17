@@ -4,7 +4,7 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="conexion"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="desde" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
@@ -195,11 +195,11 @@ GROUP BY comp.codigo_cobrador]]>
 				<text><![CDATA[Fact. Anuladas]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="252" y="12" width="65" height="20" uuid="084988a0-cc8e-40c4-a1f1-2bd274adbfd9"/>
+				<reportElement x="241" y="12" width="86" height="20" uuid="084988a0-cc8e-40c4-a1f1-2bd274adbfd9"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
-				<text><![CDATA[Fact.Cobradas]]></text>
+				<text><![CDATA[Fact. Cobradas]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="328" y="12" width="72" height="20" uuid="399fc12d-8072-4472-bf6e-e367123d9652"/>
@@ -248,35 +248,35 @@ GROUP BY comp.codigo_cobrador]]>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="166" y="0" width="75" height="20" uuid="5aa7ee44-ebbf-4509-96d7-1133a65079a5"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Anulada}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="252" y="0" width="65" height="20" uuid="320bd052-e5b9-451a-a88a-e0e91bfbfde9"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Manual}+$F{Fact. Impresa}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="328" y="0" width="72" height="20" uuid="6a4d422d-8d41-4c1b-a5d9-eaba1b40db1a"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Manual}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="410" y="0" width="67" height="20" uuid="b9214348-bbac-407e-b36e-4c4936c2cc20"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Impresa}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
-				<reportElement x="494" y="0" width="71" height="20" uuid="79574a73-f97a-4197-8eba-7309b8d01453"/>
-				<textElement>
+				<reportElement x="483" y="0" width="71" height="20" uuid="79574a73-f97a-4197-8eba-7309b8d01453"/>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{Monto_1}]]></textFieldExpression>
@@ -287,35 +287,35 @@ GROUP BY comp.codigo_cobrador]]>
 		<band height="39" splitType="Stretch">
 			<textField pattern=",###">
 				<reportElement x="477" y="12" width="71" height="20" uuid="d80bc612-dfdd-479c-b4cf-43b198099c2e"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{TOTALMONTO}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="410" y="12" width="67" height="20" uuid="15ae4100-1a00-4a02-b75a-2d699b95685e"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{Fact. Impresas_1}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="328" y="12" width="72" height="20" uuid="78f1a4d1-0226-45f3-9624-bdc1c21a872b"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{Fact. Manual_1}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="252" y="12" width="65" height="20" uuid="96262907-f7d6-4996-b621-df0851496dc5"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{Fact. Normal_1}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
-				<reportElement x="166" y="12" width="58" height="20" uuid="ffd11790-0aeb-432a-a147-90bce0dbb238"/>
-				<textElement>
+				<reportElement x="166" y="12" width="74" height="20" uuid="ffd11790-0aeb-432a-a147-90bce0dbb238"/>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{Fact. Anuladas_1}]]></textFieldExpression>
@@ -328,7 +328,7 @@ GROUP BY comp.codigo_cobrador]]>
 				<textElement>
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Total Cobrado :]]></text>
+				<text><![CDATA[Totales:]]></text>
 			</staticText>
 		</band>
 	</summary>

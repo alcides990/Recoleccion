@@ -4,113 +4,113 @@
     <head th:fragment="heat">
         <title th:text="${titulo}"></title>
         <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-            <link rel="stylesheet" href="/css/estilo.css"/>
-            <!-- Agrega esta línea para cargar los estilos de los iconos -->
-            <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, shrink-to-fit=no"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="/css/estilo.css"/>
+        <!-- Agrega esta línea para cargar los estilos de los iconos -->
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
 
-                <!-- Agrega esta línea para cargar los recursos de los iconos -->
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-                    <link rel="stylesheet" href="/css/jquery.dataTables.min.css"/>
-                    </head>
-                    <body>
+        <!-- Agrega esta línea para cargar los recursos de los iconos -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+        <link rel="stylesheet" href="/css/jquery.dataTables.min.css"/>
+    </head>
+    <body>
 
-                        <header th:fragment="header">
-                            <button id="menu-toggle">
-                                <div class="barra"></div>
-                                <div class="barra"></div>
-                                <div class="barra"></div>
+        <header th:fragment="header">
+            <button id="menu-toggle">
+                <div class="barra"></div>
+                <div class="barra"></div>
+                <div class="barra"></div>
+            </button>
+
+        </header >
+        <div th:fragment="modal">
+
+            <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel" aria-hidden="true">
+                <div class="modal-dialog "> 
+                    <div class="modal-content bg-color ">
+                        <div class="modal-header">
+                            <h5 class="modal-title text-center" id="confirmacionModalLabel"> Confirmacion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
+                                <span aria-hidden="true">&times;</span>
                             </button>
 
-                        </header >
-                        <div th:fragment="modal">
-
-                            <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel" aria-hidden="true">
-                                <div class="modal-dialog "> 
-                                    <div class="modal-content bg-color ">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title text-center" id="confirmacionModalLabel"> Confirmacion</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-
-                                        </div>
-                                        <div class="alert modal-body alert-dismissible fade show " role="alert">
-                                            Seguro que desea continuar...??
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                            <button type="button" class="btn btn-primario" id="confirmarBoton">Aceptar</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
                         </div>
-                        <aside id="menu_aside" th:fragment="aside" class="menu_aside">
-                            <ul>
-                                <li><a href="/"> <i class="fa-solid fa-house fa-xl"></i> INICIO </a> </li>
-                                <hr/>
-                                <ul id="cobranza"> <i class="fa-solid fa-guarani-sign fa-xl"></i> COBRANZA
-                                    <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-signature fa-xl"></i> FACTURA MANUAL </a></li>
-                                    <li id="factura-electronica"><a th:href="@{/comprobante/facturaElectronica}"> <i class="fa-solid fa-file-lines fa-xl"></i> FACTURA ELECTRONICA</a></li>
-                                    <li id="factura-electronica"><a th:href="@{/comprobante/listar}"> <i class="fa-solid fa-folder-open"></i> FACTURAS</a></li>
-                                </ul>
-
-                                <hr/>
-                                <li> <a th:href="@{/servicio/listar}"><i class="fa-solid fa-users fa-xl"></i> CUENTAS</a></li>
-                                <hr/>
-                                <li><a th:href="@{/usuario/listar}"> <i class="fa-solid fa-users-gear fa-xl"></i> USUARIOS</a></li>
-                                <hr/>
-                                <li><a th:href="@{/categoria/listar}"> <i class="fa-solid fa-list fa-xl"></i> CATEGORIAS</a></li>
-                                <hr/>
-                                <li> <a th:href="@{/cobrador/listar}"> <i class="fa-solid fa-people-group fa-xl"></i> COBRADORES</a></li>
-                                <hr/></li>
-                                <li> <a th:href="@{/zona/listar}"><i <i class="fa-solid fa-route fa-xl"></i> ZONAS</a></li>
-                                <hr/>
-                                <li><a th:href="@{/detalleZona/listar}"> <i class="fa-solid fa-sitemap fa-xl"></i> DETALLE ZONA </a></li>
-                                <hr/>
-                                <li>
-                                    <a th:href="@{/reporte}">
-                                       <i class="fa-solid fa-chart-pie fa-xl"></i>
-                                        REPORTES 
-                                    </a>
-                                </li>
-                            </ul>
-                        </aside>
-                        <footer th:fragment="footer">
-                           <!--incluir jquery-->
-                            <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-                             <!--incluir jquery ui-->
-                            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
-
-                            <!--incluir jquery dataTable-->
-                            <script src="/js/jquery.dataTables.min.js"></script>  
-                             <!--incluir bootstrap-->
-                           <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.min.js"></script>
-                           <!--incluir sweetalert2-->
-                           <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                            <script src="/js/ABM.js"></script> 
-                            <script>
-                                $(document).ready(function () {
-                                    $('#menu-toggle').click(function () {
-                                        $(this).toggleClass('active');
-                                        $('#menu_aside').toggleClass('active');
-                                    });
-
-                                    $('#cobranza').click(function () {
-                                        $('#cobranza li').slideToggle(300);
-                                    });
-                                });
-
-                            </script>
+                        <div class="alert modal-body alert-dismissible fade show " role="alert">
+                            Seguro que desea continuar...??
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-primario" id="confirmarBoton">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
-                            <p class="footer"> &copy; ALCMA Inc</p>
-                        </footer>
+        </div>
+        <aside id="menu_aside" th:fragment="aside" class="menu_aside">
+            <ul>
+                <li><a href="/"> <i class="fa-solid fa-house fa-xl"></i> INICIO </a> </li>
+                <hr/>
+                <ul id="cobranza"> <i class="fa-solid fa-guarani-sign fa-xl"></i> COBRANZA
+                    <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-signature fa-xl"></i> FACTURA MANUAL </a></li>
+                    <li id="factura-electronica"><a th:href="@{/comprobante/facturaElectronica}"> <i class="fa-solid fa-file-lines fa-xl"></i> FACTURA ELECTRONICA</a></li>
+                    <li id="facturas"><a th:href="@{/comprobante/listar}"> <i class="fa-solid fa-folder-open"></i> FACTURAS</a></li>
+                </ul>
+
+                <hr/>
+                <li> <a th:href="@{/servicio/listar}"><i class="fa-solid fa-users fa-xl"></i> CUENTAS</a></li>
+                <hr/>
+                <li><a th:href="@{/usuario/listar}"> <i class="fa-solid fa-users-gear fa-xl"></i> USUARIOS</a></li>
+                <hr/>
+                <li><a th:href="@{/categoria/listar}"> <i class="fa-solid fa-list fa-xl"></i> CATEGORIAS</a></li>
+                <hr/>
+                <li> <a th:href="@{/cobrador/listar}"> <i class="fa-solid fa-people-group fa-xl"></i> COBRADORES</a></li>
+                <hr/></li>
+                <li> <a th:href="@{/zona/listar}"><i <i class="fa-solid fa-route fa-xl"></i> ZONAS</a></li>
+                <hr/>
+                <li><a th:href="@{/detalleZona/listar}"> <i class="fa-solid fa-sitemap fa-xl"></i> DETALLE ZONA </a></li>
+                <hr/>
+                <li>
+                    <a th:href="@{/reporte}">
+                        <i class="fa-solid fa-chart-pie fa-xl"></i>
+                        REPORTES 
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        <footer th:fragment="footer">
+            <!--incluir jquery-->
+            <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+            <!--incluir jquery ui-->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+
+            <!--incluir jquery dataTable-->
+            <script src="/js/jquery.dataTables.min.js"></script>  
+            <!--incluir bootstrap-->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+            <!--incluir sweetalert2-->
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script src="/js/ABM.js"></script> 
+            <script>
+                $(document).ready(function () {
+                    $('#menu-toggle').click(function () {
+                        $(this).toggleClass('active');
+                        $('#menu_aside').toggleClass('active');
+                    });
+
+                    $('#cobranza').click(function () {
+                        $('#cobranza li').slideToggle(300);
+                    });
+                });
+
+            </script>
 
 
-                    </body>
-                    </html>
+            <p class="footer"> &copy; ALCMA Inc</p>
+        </footer>
+
+
+    </body>
+</html>

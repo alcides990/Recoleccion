@@ -17,13 +17,12 @@ $(document).ready(function () {
                 dataType: "json",
                 contentType: 'application/json',
                 success: function (data) {
-                     console.log(data);
                     $("td").closest('td').remove();
                     $.each(data.content, function (llave, valor) {
                         var cargaTabla = `
                         <tr>
                             <td> ${valor.cuentaCorriente} </td>
-                            <td> ${valor.nombreUsuario}</td>
+                            <td> ${valor.usuario.nombre} ${valor.usuario.apellido}</td>
                             <td> ${valor.fechaInicio}</td>
                             <td> ${valor.categoria.categoriaConTarifa}</td>
                             <td> ${valor.estado.estado}</td>

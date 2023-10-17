@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "condicionventa")
-public class Condicionventa implements Serializable {
+public class CondicionVenta implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -18,10 +18,10 @@ public class Condicionventa implements Serializable {
     @Column(name = "condicion_venta")
     private String condicionVenta;
 
-    public Condicionventa() {
+    public CondicionVenta() {
     }
 
-    public Condicionventa(Integer codigoCondicionVenta) {
+    public CondicionVenta(Integer codigoCondicionVenta) {
         this.codigoCondicionVenta = codigoCondicionVenta;
     }
      

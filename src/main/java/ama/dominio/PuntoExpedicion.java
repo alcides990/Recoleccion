@@ -5,9 +5,12 @@
 package ama.dominio;
 
 import ama.dominio.Estado;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+
 @Data
 @Entity
 @Table(name = "puntoexpedicion")
@@ -19,14 +22,21 @@ public class PuntoExpedicion implements Serializable {
     private Integer codigoPuntoExpedicion;
     @Column(name = "punto_expedicion")
     private String nombrePuntoExpedicion;
+    
+    @ToString.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "codigo_empresa", referencedColumnName = "codigo_empresa")
     @ManyToOne(fetch = FetchType.LAZY)
     private Empresa empresa;
+    
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "codigo_estado", referencedColumnName = "codigo_estado")
     @ManyToOne(fetch = FetchType.LAZY)
     private Estado estado;
+    
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
     @ManyToOne(fetch = FetchType.LAZY)
     private Sucursal sucursal;
-  
+
 }

@@ -137,6 +137,9 @@ public class ControladorUsuario {
     public String editar(Usuario usuario, Model model) {
         model.addAttribute("titulo", "Usuario");
         usuario = servicioUsuario.encontrar(usuario);
+        if(usuario==null){
+            throw  new Error("Usuario no encontrado");
+        }
         model.addAttribute("usuario", usuario);
         var tipoDocumento = servicioTipoDocumento.listar();
         model.addAttribute("tipoDocumento", tipoDocumento);
@@ -176,9 +179,9 @@ public class ControladorUsuario {
                     .body(ClaseError.excepcion("Usuario no exixte en la base de datos..! " , null));
            }
         } catch (Exception e) {
-
+ String nombreUsuario=usuarioRecuperado.getNombre()+" "+usuarioRecuperado.getApellido();
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ClaseError.excepcion("Error al eliminar usuario " + usuarioRecuperado.getNombreCompleto(), e));
+                    .body(ClaseError.excepcion("Error al eliminar usuario " + nombreUsuario, e));
         }
 
     }

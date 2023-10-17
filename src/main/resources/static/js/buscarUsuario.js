@@ -53,7 +53,7 @@ $(document).ready(function () {
                                 " <tr> " +
                                 " <td> " + valor.codigoUsuario +
                                 "</td><td>" + valor.numeroDocumento +
-                                " </td><td>" + valor.nombreCompleto +
+                                " </td><td>" + valor.nombre +' '+valor.apellido +
                                 "</td><td>" + valor.celular +
                                 " </td><td>" + valor.telefono +
                                 "</td><td>" + valor.barrio +

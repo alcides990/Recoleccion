@@ -1,6 +1,5 @@
 package ama.api.controladores;
 
-import ama.dominio.Manzana;
 import ama.servicio.ServicioCiudad;
 import ama.servicio.ServicioCobrador;
 import ama.servicio.ServicioZona;
@@ -133,16 +132,19 @@ public class controladorInforme {
     }
 
     @PostMapping("/detalle_manzana")
-    public ResponseEntity<?> reporteDetalleManzana(Manzana manzana,
+    public ResponseEntity<?> reporteDetalleManzana(
+            @RequestParam("codigoManzana") Integer codigoManzana,
+            @RequestParam("codigoCobrador") Integer codigoCobrador,
+            @RequestParam("codigoZona") Integer codigoZona,
             @RequestParam("desde") Integer desde,
             @RequestParam("hasta") Integer hasta
     ) throws JRException, IOException, SQLException {
         Map<String, Object> parametro = new HashMap<>();
         String rutaReporte = "reportes/detalleManzana.jasper";
         String nombeReporte = "Detalle Manzana";
-        parametro.put("manzana", manzana.getManzanaPK().getNumeroManzana());
-        parametro.put("codigoCobrador", manzana.getCobrador().getCodigoCobrador());
-        parametro.put("codigoZona", manzana.getZona().getCodigoZona());
+        parametro.put("manzana", codigoManzana);
+        parametro.put("codigoCobrador", codigoZona);
+        parametro.put("codigoZona", codigoZona);
         parametro.put("desde", desde);
         parametro.put("hasta", hasta);
         return getReporte(parametro, rutaReporte, nombeReporte);

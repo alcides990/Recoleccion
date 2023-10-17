@@ -19,7 +19,7 @@ public class Sucursal implements Serializable {
     private String nombreSucursal;
     @JoinColumn(name = "codigo_ciudad", referencedColumnName = "codigo_ciudad")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Ciudad ciudad;
     @JoinColumn(name = "codigo_empresa", referencedColumnName = "codigo_empresa")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

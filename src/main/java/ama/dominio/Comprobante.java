@@ -52,7 +52,7 @@ public class Comprobante implements Serializable {
     @JsonIgnore
     @JoinColumn(name = "codigo_condicion_venta", referencedColumnName = "codigo_condicion_venta", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private Condicionventa condicionVenta;
+    private CondicionVenta condicionVenta;
 
     @JsonIgnore
     @JoinColumn(name = "codigo_estado", referencedColumnName = "codigo_estado", nullable = false)

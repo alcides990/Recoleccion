@@ -35,7 +35,7 @@ public class Timbrado implements Serializable {
     private Sucursal sucursal;
     @JoinColumn(name = "codigo_tipo_factura", referencedColumnName = "codigo_tipo_factura")
     @ManyToOne(optional = false)
-    private TipoFactura tipoDocumento;
+    private TipoFactura tipoFactura;
 
     public Timbrado() {
     }

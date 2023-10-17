@@ -92,6 +92,9 @@ public class ControladorCobrador {
     @GetMapping("/editar/{codigoCobrador}")
     public String editar(Cobrador cobrador, Model model) {
         cobrador = servicioCobrador.encontrar(cobrador);
+        if(cobrador==null){
+            throw  new Error("Cobrar no encontrado ");
+        }
         model.addAttribute("cobrador", cobrador);
 //        log.info("Cobrador a modificar "+cobrador);
         var sucursal = cobrador.getSucursal();

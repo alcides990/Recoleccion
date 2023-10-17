@@ -14,8 +14,7 @@ $(document).ready(function () {
 
     $.datepicker.setDefaults($.datepicker.regional["es"]);
     $("#fechaInicio").datepicker({
-        changeYear: true,
-        dateFormat: "yy-mm-dd "
+        changeYear: true
     }
     );
 

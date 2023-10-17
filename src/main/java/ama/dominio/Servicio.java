@@ -45,9 +45,6 @@ public class Servicio implements Serializable {
     @JoinColumn(name = "codigo_usuario", referencedColumnName = "codigo_usuario")
     private Usuario usuario;
 
-    @Transient
-    String nombreUsuario;
-
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal", insertable = false, updatable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -58,7 +55,7 @@ public class Servicio implements Serializable {
         @JoinColumn(name = "codigo_manzana", referencedColumnName = "codigo_manzana"),
         @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
     })
-//    @MapsId("codigo_sucursal")
+   
     @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Manzana manzana;
 
@@ -74,9 +71,5 @@ public class Servicio implements Serializable {
 
     @Transient
     Cobrador cobrador;
-
-    public String getNombreUsuario() {
-        return usuario.getNombreCompleto();
-    }
 
 }

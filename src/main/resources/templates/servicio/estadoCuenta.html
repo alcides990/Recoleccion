@@ -51,7 +51,7 @@
                         </div>
                         <div class="col">
                             <label for="buscarUsuario">Usuario </label>
-                            <input  type="text" disabled="true" name="buscarUsuario" id="buscarUsuario" th:value="${servicio.nombreUsuario}"  class="form-control"  required="campo ogligatorio"/>
+                            <input  type="text" disabled="true" name="buscarUsuario" id="buscarUsuario" th:value="${servicio.usuario.nombre}+' '+${servicio.usuario.nombre}"  class="form-control"  required="campo ogligatorio"/>
                         </div>
 
 
@@ -67,7 +67,7 @@
                 </div>
             </form>
             <hr>
-                <div class="row d-flex">
+                <div class="row">
 
                     <div class="col-md-4 mb-3"> 
                         <div class="estadoCuenta  my-1 "> 
@@ -116,13 +116,13 @@
 
                         </div>
                     </div>
-                    <div class=" col-md-12"> 
-                        <div class="table-responsive-md">
-                            <table id="tabla" class="table table-dark table-border table-striped  table-hover table-md" >
+                    <div class=" col-md-12 col-lg-8"> 
+                        <div class="table-responsive-xxl">
+                            <table id="tabla" class="table table-responsive-xxl table-dark table-border table-striped  table-hover " >
                                 <thead class="sticky-top">
                                     <tr>
-                                        <th>Tipo Factura</th>
-                                        <th>Nro. Factura</th>
+                                        <th>Tipo</th>
+                                        <th>Nro.Factura</th>
                                         <th>Cuentacorriente</th>
                                         <th>Usuario</th>
                                         <th>FechaPago</th>
@@ -139,7 +139,7 @@
                                         <td th:text="${comprobante.tipoFactura.tipoFactura}"> </td>
                                         <td th:text="${comprobante.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
                                         <td th:text="${comprobante.servicio.cuentaCorriente}"> </td>
-                                        <td th:text="${comprobante.usuario.nombreCompleto}" >   </td>
+                                        <td th:text="${comprobante.usuario.nombre}+' '+ ${comprobante.usuario.apellido}" >   </td>
                                         <td th:text="${comprobante.fechaPago}"></td>
                                         <td th:text="${comprobante.detalleComprobante[0].periodoPago}"></td>
                                         <td th:text="${comprobante.detalleComprobante[0].cantidadPago}"></td>

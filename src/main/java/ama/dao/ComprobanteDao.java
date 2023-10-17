@@ -2,6 +2,7 @@ package ama.dao;
 
 import ama.dominio.Comprobante;
 import ama.dominio.ComprobantePK;
+import ama.dominio.Servicio;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -55,9 +56,11 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, Integer> {
             LEFT JOIN FETCH c.tipoFactura AS tf
             LEFT JOIN FETCH c.usuario AS usu
             LEFT JOIN FETCH c.servicio AS servi
-            LEFT JOIN FETCH c.estado AS e  """,
-            countQuery = "SELECT COUNT(c) FROM Comprobante c")
-    Page<Comprobante> getComprobantesCuenta(Pageable pageable, String cuentaCorriente);
+            LEFT JOIN FETCH c.estado AS e  
+            WHERE servi=?1      
+                   """,
+            countQuery = "SELECT COUNT(c) FROM Comprobante c ")
+    Page<Comprobante> getComprobantesCuenta(Pageable pageable, Servicio servicio);
 
 //    Encontrar comprobante por  ComprobantePK
     @Query("""
@@ -65,10 +68,14 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, Integer> {
                        LEFT JOIN FETCH c.comprobantePK AS cPK
                        JOIN FETCH c.detalleComprobante AS dtc
                        LEFT JOIN FETCH c.sucursal AS suc
+                       LEFT JOIN FETCH suc.ciudad ciud
                        LEFT JOIN FETCH c.puntoExpedicion AS pe
                        LEFT JOIN FETCH c.tipoFactura AS tf
+                       LEFT JOIN FETCH c.condicionVenta AS cv
                        LEFT JOIN FETCH c.usuario AS usu
+                       LEFT JOIN FETCH c.cobrador AS cob
                        LEFT JOIN FETCH c.servicio AS servi
+                       LEFT JOIN FETCH servi.categoria AS cat
                        LEFT JOIN FETCH c.estado AS e  
            WHERE c.comprobantePK= ?1
            """)

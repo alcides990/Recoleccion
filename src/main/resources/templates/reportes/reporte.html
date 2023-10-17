@@ -8,26 +8,26 @@
         <div th:replace="~{layout/layout :: modal}"> </div>
         <div class="container">
             <div class="card-header" ><h3>REPORTES</h3> </div>
-            <div class=" d-md-inline-flex ">
-                <div class="container-btn-reporte col-sm-4">
+            <div class=" row">
+                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
                     <button 
-                            class="btn btn-primario btn-sm mb-3 " 
-                            data-bs-toggle="modal" data-bs-target="#modificarModal"
-                            data-bs-placement="top" title="Ver reporte ingresos diario">
+                        class="btn btn-primario btn-sm mb-3 " 
+                        data-bs-toggle="modal" data-bs-target="#modificarModal"
+                        data-bs-placement="top" title="Ver reporte ingresos diario">
                         <i class="fa-solid fa-money-bill-trend-up"></i> 
                         Ingreso Diario
                     </button>
                 </div>
-                <div class="container-btn-reporte col-sm-4">
+                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
                     <button  
-                            class="btn btn-primario btn-sm mb-3 " 
-                            data-bs-toggle="modal" data-bs-target="#ingresos-modal"
-                            data-bs-placement="top" title="Ver reporte de cobranza">
+                        class="btn btn-primario btn-sm mb-3 " 
+                        data-bs-toggle="modal" data-bs-target="#ingresos-modal"
+                        data-bs-placement="top" title="Ver reporte de cobranza">
                         <i class="fa-solid fa-money-bill-trend-up"></i> Cobranza
 
                     </button>
                 </div>
-                <div class="container-btn-reporte col-sm-4">
+                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
                     <button   id="saldos"  
                               class="btn btn-primario btn-sm mb-3 " 
                               data-bs-toggle="modal" data-bs-target="#detalle-zona-modal"
@@ -147,6 +147,7 @@
         </div>
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
         <script src="js/validarFormulario.js"></script>
+         <script src="/js/datepicker-es.js"></script>
         <script>
             $(document).ready(function () {
                 //posicionar focus al abrir modal detalle saldo
@@ -189,9 +190,8 @@
                         codigoZona: codigoZona,
                         desde: desde,
                         hasta: hasta,
-                        manzana: manzana
+                        codigoManzana : manzana
                     };
-//                    var datos = $('#frm-detalle-zona').serialize();
                     getReporte(datos, url);
 
                 });

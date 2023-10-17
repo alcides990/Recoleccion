@@ -2,7 +2,7 @@
 package ama.servicios.implementaciones;
  
 import ama.dao.CondicionVentaDao;
-import ama.dominio.Condicionventa;
+import ama.dominio.CondicionVenta;
 import ama.servicio.ServicioCondicionVenta;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,22 +15,22 @@ public class ImplCondicionVenta implements ServicioCondicionVenta{
     CondicionVentaDao condicionVentaDao;
     
     @Override
-    public List<Condicionventa> listar() {
-        return (List<Condicionventa>) condicionVentaDao.findAll();
+    public List<CondicionVenta> listar() {
+        return (List<CondicionVenta>) condicionVentaDao.findAll();
     }
 
     @Override
-    public void guardar(Condicionventa condicioVenta) {
+    public void guardar(CondicionVenta condicioVenta) {
        condicionVentaDao.save(condicioVenta);
     }
 
     @Override
-    public void eliminar(Condicionventa condicioVenta) {
+    public void eliminar(CondicionVenta condicioVenta) {
        condicionVentaDao.delete(condicioVenta);
     }
 
     @Override
-    public void encontrar(Condicionventa condicioVenta) {
+    public void encontrar(CondicionVenta condicioVenta) {
        condicionVentaDao.findById(condicioVenta.getCodigoCondicionVenta()).orElse(null);
     }
     

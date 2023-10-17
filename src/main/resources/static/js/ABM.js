@@ -118,11 +118,9 @@ function getReporte(datos, url) {
             window.location.href = (url);// abrir en la misma pestaña
 //            window.open(url);
 
-
         },
         error: function (xhr, textStatus, error) {
             var mensajeError = 'Error al imprimir reporte ' + xhr.responseText;
-            console.log(xhr);
             mostrarAlerta(mensajeError, url, 'danger');
         }
     });

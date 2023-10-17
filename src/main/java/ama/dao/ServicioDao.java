@@ -24,6 +24,8 @@ public interface ServicioDao extends JpaRepository<Servicio, Integer> {
                       JOIN FETCH s.usuario u
                       JOIN FETCH s.categoria cat
                       JOIN FETCH s.manzana m
+                      JOIN FETCH m.cobrador cob
+                      JOIN FETCH m.zona 
                       JOIN FETCH m.sucursal suc
                       JOIN FETCH suc.ciudad
                       JOIN FETCH s.estado est
@@ -36,8 +38,8 @@ public interface ServicioDao extends JpaRepository<Servicio, Integer> {
 
     // Page<Servicio> findByCuentaCorriente(Pageable pagina, String
     // cuentaCorriente);
-    @Query("SELECT s FROM Servicio s  JOIN s.usuario u WHERE u.codigoUsuario= ?1")
-    List<Servicio> listaServicioCuenta(Integer codigoUsuario);
+    @Query("SELECT cuentaCorriente FROM Servicio s  JOIN s.usuario u WHERE u.codigoUsuario= ?1")
+    List<String> listaServicioCuenta(Integer codigoUsuario);
 
     @Query("""
             SELECT s FROM Servicio s

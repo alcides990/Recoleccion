@@ -44,7 +44,7 @@ h3 {
     position: fixed;
     display: block;
     top: 10px;
-    z-index: 1051;
+    z-index: 1056;
 }
 
 #ui-id-1 {
@@ -60,9 +60,11 @@ h3 {
     background-color: var(--bg-color);
     font-size: 1rem;
     overflow: auto;
-    margin: 1px;
-    padding: 2px;
     z-index: 1021;
+
+}
+.menu_aside:hover {
+    /*width: 220px;*/
 
 }
 
@@ -80,6 +82,7 @@ li {
     padding: 4px 2px;
     text-decoration: none;
 }
+
 
 .menu_aside>* :hover:not(.active) {
     background-color: #a97d50d3;
@@ -344,7 +347,9 @@ header {
     margin-bottom: 5px;
     background-color: #a97c50;
 }
-
+textarea.form-control{
+    min-height: 150px;
+}
 
 
 @media screen and (max-width: 1020px) {

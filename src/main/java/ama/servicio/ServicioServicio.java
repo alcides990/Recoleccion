@@ -12,7 +12,7 @@ public interface ServicioServicio {
     public Page<Servicio> buscar(Pageable pageable, String filtro);
 
 
-    public List<Servicio> listaServicioCuenta(Servicio servicio);
+    public List<String> listaServicioCuenta(Servicio servicio);
 
     public void guardar(Servicio servicio);
 

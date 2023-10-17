@@ -58,7 +58,7 @@ public class ImplComprobante implements ServicioComprobante {
     @Transactional(readOnly = true)
     @Override
     public Page<Comprobante> getComprobantesCuenta(Pageable page, Servicio servicio) {
-        return comprobanteDao.getComprobantesCuenta(page, servicio.getCuentaCorriente());
+        return comprobanteDao.getComprobantesCuenta(page, servicio);
     }
 
     @Override

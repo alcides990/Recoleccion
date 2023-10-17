@@ -156,8 +156,7 @@ public class ControladorServicio {
         servicio = servicioServicio.encontrar(servicio.getCuentaCorriente());
         modelo.addAttribute("servicio", servicio);
 
-        Usuario usuario = servicio.getUsuario();
-        modelo.addAttribute("usuario", usuario);
+        modelo.addAttribute("usuario", servicio.getUsuario());
         var categoria = servicio.getCategoria();
         modelo.addAttribute("categoria", categoria);
         // CARGAR DATOS PARA CARCULAR ESTADO DE CUENTA
@@ -173,8 +172,8 @@ public class ControladorServicio {
 
         var servicios = servicioServicio.listaServicioCuenta(servicio);
         var cuentas = new ArrayList<String>();
-        servicios.forEach(servi -> {
-            cuentas.add(servi.getCuentaCorriente());
+        servicios.forEach(cuenta -> {
+            cuentas.add(cuenta);
         });
         modelo.addAttribute("cuentas", cuentas);
 
@@ -205,7 +204,8 @@ public class ControladorServicio {
         // Verificar si la cuenta corriente ya se encuentra registrada
         Servicio servicioEncontrada = servicioServicio.encontrar(servicio.getCuentaCorriente());
         if (servicioEncontrada != null && !accion.equals("editar")) {
-            mensaje = "La cuenta ya se encuentra registrada a nombre de: " + servicioEncontrada.getNombreUsuario();
+            String nombreUsuario = servicio.getUsuario().getNombre() + " " + servicio.getUsuario().getApellido();
+            mensaje = "La cuenta ya se encuentra registrada a nombre de: " + nombreUsuario;
             return ResponseEntity.status(HttpStatus.CONFLICT).body(mensaje);
         }
         if (accion.equals("editar")) {
