@@ -22,7 +22,7 @@ public class UsuarioSistema implements Serializable {
     private Estado estado;
     @JoinColumn(name = "codigo_nivel_usuario", referencedColumnName = "codigo_nivel_usuario")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private Nivelusuario nivelUsuario;
+    private NivelUsuario nivelUsuario;
     @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Sucursal sucursal;
