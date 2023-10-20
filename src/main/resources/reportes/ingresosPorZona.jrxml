@@ -308,7 +308,7 @@ ORDER BY zon.`codigo_zona`]]>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="410" y="0" width="67" height="16" uuid="b9214348-bbac-407e-b36e-4c4936c2cc20"/>
-				<textElement textAlignment="Center">
+				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Impresa}]]></textFieldExpression>
@@ -367,7 +367,7 @@ ORDER BY zon.`codigo_zona`]]>
 				<textElement>
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Totales:]]></text>
+				<text><![CDATA[Total Cobrado :]]></text>
 			</staticText>
 		</band>
 	</summary>
