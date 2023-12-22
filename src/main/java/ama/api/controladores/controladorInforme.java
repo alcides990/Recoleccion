@@ -82,6 +82,7 @@ public class controladorInforme {
         }
     }
 
+    @ResponseBody
     public ResponseEntity<?> getReporte(
             Map<String, Object> parameters,
             String rutaReporte,
@@ -95,7 +96,7 @@ public class controladorInforme {
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conexion);
             byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
             if (jasperPrint.getPages().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
+                return ResponseEntity.status(HttpStatus.NO_CONTENT)
                         //                        .header("Content-Type", "application/json")
                         .body("El reporte no tiene pagina para mostrar!!");
             } else {

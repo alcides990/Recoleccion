@@ -10,7 +10,11 @@ $(document).ready(function () {
             var catidadRegistro = 5;
             var url = '/servicio/buscar';
             var datos = {filtro: filtro, numeroPagina: numeroPagina, catidadRegistro: catidadRegistro};
+            let token = $("#token").val();
             $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
                 url: url,
                 data: JSON.stringify(datos),
                 type: "post",

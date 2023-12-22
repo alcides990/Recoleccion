@@ -175,7 +175,7 @@
                 tabulador("#desde", "#hasta"); //tabular campos
                 //Recuperar los datos al enviar formulario
                 $("#frm-detalle-zona").submit(function (event) {
-                    event.preventDefault();
+//                    event.preventDefault();
                     var desde = $("#desde").val();
                     var hasta = $("#hasta").val();
                     var codigoCobrador = $("#cobrador").val();
@@ -192,7 +192,7 @@
                         hasta: hasta,
                         codigoManzana : manzana
                     };
-                    getReporte(datos, url);
+//                    getReporte(datos, url);
 
                 });
             });

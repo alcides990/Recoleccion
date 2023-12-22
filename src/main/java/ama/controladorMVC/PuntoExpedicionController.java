@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Slf4j
 @Controller
 @RequestMapping("/puntoExpedicion")
-public class ControladorPuntoExpedicion {
+public class PuntoExpedicionController {
 
     @Autowired
     private ServicioPuntoExpedicion servicioPuntoExpedicion;

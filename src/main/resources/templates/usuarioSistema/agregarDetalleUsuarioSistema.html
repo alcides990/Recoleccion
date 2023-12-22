@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+
+        <head th:replace="~{layout/layout :: heat}"> </head>
+
+        <body>
+            <header th:replace="~{layout/layout :: header}"> </header>
+            <aside th:replace="~{layout/layout :: aside}"> </aside>
+            <div th:replace="~{layout/layout :: modal}"> </div>
+            <div class="container">
+                <div class="card-title">
+                    <h3>Asignacion de Roles al Usuario </h3>
+                </div>
+
+                <a th:href="@{/usuarioSistema/listar}" class="btn btn-primario">
+                    <i class="fa-solid fa-arrow-left "></i>
+                    Regresar</a>
+                <div class="mensaje-alerta" id="contenedor-alertas"></div>
+                <div th:if="${mensaje}" class="mensaje-alerta alert alert-success">
+                    <span th:text="${mensaje}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <form id="frm-detalleUsuarioSistema" th:action="@{/detalleUsuarioSistema/guardar}" method="post" th:object="${detalleUsuarioSistema}">
+                    <div class="row m-2">
+                        <input class="form-control" hidden="" name="codigoUsuarioSistema" th:value="${usuarioSistema.codigoUsuarioSistema}">  </input>
+                        <div class="form-group col-sm-4">
+                            <label class="form-label " for="usuario">Usuario</label>
+                            <input class="form-control" name="nombre" th:value="${usuarioSistema.nombre}">  </input>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="roles">Rol</label>
+                            <select class="form-control" name="rol" >
+                                <option th:each="rol : ${roles}" 
+                                        th:value="${rol.codigoRol}"
+                                        th:text="${rol.nombre}" 
+                                        />
+                            </select>
+                        </div>
+
+                    </div>
+                    <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3" />
+                </form>
+
+                <div class="table-responsive-lg">
+                    <table id="tabla" class="table caption-top table-dark table-border table-striped table-colapse  ">
+                        <caption>Roles Asignados </caption>
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-secondary table-hover">
+                            <tr th:each="detalleUsuarioSistema : ${detallesUsuarioSistema}">
+                                <td th:text="${detalleUsuarioSistema.usuarioSistema.nombre}"> </td>
+                                <td th:text="${detalleUsuarioSistema.rol.nombre}"> </td>
+
+                                <td>
+                                    <a id="eliminar" data-url="/detalleUsuarioSistema/eliminar/" th:data-id="${detalleUsuarioSistema.detalleUsuarioSistemaPK.codigoUsuarioSistema}+'/'
+                                       +${detalleUsuarioSistema.detalleUsuarioSistemaPK.codigoRol}"
+                                       class="btn btn-danger eliminar btn-sm" title="Eliminar">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <footer  th:replace="~{layout/layout :: footer}"> </footer>
+            <script>
+                $(document).ready(function () {
+//            Lamara al metodo eliminar al hacer click en el boton eliminar
+                    eliminar();
+//               
+                });
+            </script>
+
+        </body>
+
+</html>

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Controller
 @RequestMapping("/detalleZona")
-public class ControladorDetalleZona {
+public class DetalleZonaController {
 
     @Autowired
     private ServicioDetalleZona servicioDetalleZona;

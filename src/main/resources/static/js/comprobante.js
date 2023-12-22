@@ -8,49 +8,49 @@ $(document).ready(function () {
             e.preventDefault();
             var cuentaCorriente = $("#cuentaCorriente").val();
             var url = '/comprobante/facturar';
-            var datos = {cuentaCorriente: cuentaCorriente};
+            var datos = { cuentaCorriente: cuentaCorriente };
             cargarDatosComprobante(datos, url);
         }
     });
 
     function cargarDatosComprobante(datos, url) {
         consultar(datos, url)
-                .then(function (data) {
-//                    console.log(data);
-                    let usuario = data.usuario.nombre + ' ' + data.usuario.apellido;
-                    $("#razonSocial").val(usuario);
-                    $("#numeroDocumento").val(data.usuario.numeroDocumento);
-                    $("#categoria").empty();
-                    $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
-                    $("#cobrador").empty();
-                    $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
-                    $("#tarifa").val(data.categoria.tarifa);
-                    $("#tarifa").val(data.categoria.tarifa);
-                    var fecha = new Date(data.estadoCuenta.pagoHasta); // Crea un objeto Date a partir de la cadena de fecha y hora
-                    var anio = fecha.getFullYear(); // Obtiene el año de cuatro dígitos
-                    var mes = fecha.getMonth() + 1; // Obtiene el mes (0-11). Sumamos 1 porque los meses se indexan desde 0.
-                    var dia = fecha.getDate(); // Obtiene el día del mes (1-31)
-                    // Formatea la fecha en el formato deseado (por ejemplo, DD/MM/AAAA)
-                    var fechaFormateada = dia.toString().padStart(2, '0') + '-' + mes.toString().padStart(2, '0') + '-' + anio;
-                    $("#pagoHasta").val(fechaFormateada);
-                    $("#cantidadDeuda").val(data.estadoCuenta.cantidadDeuda);
-                    $("#subTotal").val(data.estadoCuenta.subTotal.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
-                    $("#recargoPago").val(data.estadoCuenta.recargo);
-                    $("#totalDeuda").val(data.estadoCuenta.totalDeuda.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+            .then(function (data) {
+                //                    console.log(data);
+                let usuario = data.usuario.nombre + ' ' + data.usuario.apellido;
+                $("#razonSocial").val(usuario);
+                $("#numeroDocumento").val(data.usuario.numeroDocumento);
+                $("#categoria").empty();
+                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
+                $("#cobrador").empty();
+                $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
+                $("#tarifa").val(data.categoria.tarifa);
+                $("#tarifa").val(data.categoria.tarifa);
+                var fecha = new Date(data.estadoCuenta.pagoHasta); // Crea un objeto Date a partir de la cadena de fecha y hora
+                var anio = fecha.getFullYear(); // Obtiene el año de cuatro dígitos
+                var mes = fecha.getMonth() + 1; // Obtiene el mes (0-11). Sumamos 1 porque los meses se indexan desde 0.
+                var dia = fecha.getDate(); // Obtiene el día del mes (1-31)
+                // Formatea la fecha en el formato deseado (por ejemplo, DD/MM/AAAA)
+                var fechaFormateada = dia.toString().padStart(2, '0') + '-' + mes.toString().padStart(2, '0') + '-' + anio;
+                $("#pagoHasta").val(fechaFormateada);
+                $("#cantidadDeuda").val(data.estadoCuenta.cantidadDeuda);
+                $("#subTotal").val(data.estadoCuenta.subTotal.toLocaleString('es-ES', { style: 'currency', currency: 'PYG' }));
+                $("#recargoPago").val(data.estadoCuenta.recargo);
+                $("#totalDeuda").val(data.estadoCuenta.totalDeuda.toLocaleString('es-ES', { style: 'currency', currency: 'PYG' }));
 
-                    if ($("#tipoFactura option:selected").text() == 'MANUAL') {
-                        $("#numeroComprobante").focus();
-                    } else {
-                        $("#cantidadPago").focus();
-                        $("#cantidadPago").val("");
-                    }
-                });
+                if ($("#tipoFactura option:selected").text() == 'MANUAL') {
+                    $("#numeroComprobante").focus();
+                } else {
+                    $("#cantidadPago").focus();
+                    $("#cantidadPago").val("");
+                }
+            });
     }
 
     $(document).on('click', '#anular', function (event) {
         var url = '/comprobante/getComprobante';
         var dataId = $(this).data('id').split('-');
-//        console.log(dataId);
+        //        console.log(dataId);
         var codigoSucursal = dataId[0];
         var codigoPuntoExpedicion = dataId[1];
         var codigoTipoFactura = dataId[2];
@@ -64,36 +64,36 @@ $(document).ready(function () {
             numeroComprobante: numeroComprobante,
         };
         consultar(datos, url)
-                .then(function (data) {
-//                    console.log(data);
-                    $("#cuentaCorriente").val(data.cuentaCorriente);
-                    $("#razonSocial").val(data.nombreUsuario);
-                    $("#numeroDocumento").val(data.numeroDocumento);
-                    $("#numeroComprobante").val(data.numeroComprobante);
-                    $("#categoria").empty();
-                    $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
-                    $("#cobrador").empty();
-                    $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
-                    $("#tarifa").val(data.categoria.tarifa);
-                    $("#sucursal").empty();
-                    $("#sucursal").append('<option value="' + data.sucursal.codigoSucursal + '">' + data.sucursal.nombreSucursal + '</option>');
-                    $("#tarifa").val(data.categoria.tarifa);
-                    $("#puntoExpedicion").empty();
-                    $("#puntoExpedicion").append('<option value="' + data.puntoExpedicion.codigoPuntoExpedicion + '">' + data.puntoExpedicion.nombrePuntoExpedicion + '</option>');
-                    $("#tarifa").val(data.categoria.tarifa);
-                    $("#tipoFactura").empty();
-                    $("#tipoFactura").append('<option value="' + data.tipoFactura.codigoTipoFactura + '">' + data.tipoFactura.tipoFactura + '</option>');
-                    $("#tarifa").val(data.categoria.tarifa);
-                    $("#condicionVenta").empty();
-                    $("#condicionVenta").append('<option value="' + data.condicionVenta.codigoCondicionVenta + '">' + data.condicionVenta.condicionVenta + '</option>');
+            .then(function (data) {
+                //                    console.log(data);
+                $("#cuentaCorriente").val(data.cuentaCorriente);
+                $("#razonSocial").val(data.nombreUsuario);
+                $("#numeroDocumento").val(data.numeroDocumento);
+                $("#numeroComprobante").val(data.numeroComprobante);
+                $("#categoria").empty();
+                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
+                $("#cobrador").empty();
+                $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
+                $("#tarifa").val(data.categoria.tarifa);
+                $("#sucursal").empty();
+                $("#sucursal").append('<option value="' + data.sucursal.codigoSucursal + '">' + data.sucursal.nombreSucursal + '</option>');
+                $("#tarifa").val(data.categoria.tarifa);
+                $("#puntoExpedicion").empty();
+                $("#puntoExpedicion").append('<option value="' + data.puntoExpedicion.codigoPuntoExpedicion + '">' + data.puntoExpedicion.nombrePuntoExpedicion + '</option>');
+                $("#tarifa").val(data.categoria.tarifa);
+                $("#tipoFactura").empty();
+                $("#tipoFactura").append('<option value="' + data.tipoFactura.codigoTipoFactura + '">' + data.tipoFactura.tipoFactura + '</option>');
+                $("#tarifa").val(data.categoria.tarifa);
+                $("#condicionVenta").empty();
+                $("#condicionVenta").append('<option value="' + data.condicionVenta.codigoCondicionVenta + '">' + data.condicionVenta.condicionVenta + '</option>');
 
-                    $("#periodoPago").val(data.periodoPago);
-                    $("#cantidadPago").val(data.cantidadPago);
-                    $("#subTotal").val(data.importe.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
-                    $("#recargoPago").val(data.recargo);
-                    $("#totalDeuda").val((data.importe + data.recargo).toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+                $("#periodoPago").val(data.periodoPago);
+                $("#cantidadPago").val(data.cantidadPago);
+                $("#subTotal").val(data.importe.toLocaleString('es-ES', { style: 'currency', currency: 'PYG' }));
+                $("#recargoPago").val(data.recargo);
+                $("#totalDeuda").val((data.importe + data.recargo).toLocaleString('es-ES', { style: 'currency', currency: 'PYG' }));
 
-                });
+            });
     });
     tabulador("#numeroComprobante", "#cantidadPago");
     tabulador("#recargoPago", "#guardar");
@@ -114,7 +114,7 @@ $(document).ready(function () {
         var cantidadPago = $('#cantidadPago').val();
         var tarifa = $('#tarifa').val();
         subTotal = cantidadPago * tarifa;
-        $('#subTotal').val(subTotal.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
+        $('#subTotal').val(subTotal.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' }));
     });
     $("#recargoPago").on('keyup', function (e) {
         var recargo = 0;
@@ -122,7 +122,7 @@ $(document).ready(function () {
         recargo = parseInt($("#recargoPago").val());
         total = recargo + subTotal;
         if ($("#recargoPago").val() !== '') {
-            $("#totalDeuda").val(total.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
+            $("#totalDeuda").val(total.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' }));
         }
     });
     $("#recargoPago").blur(function (e) {
@@ -130,7 +130,7 @@ $(document).ready(function () {
         var total = 0;
         recargo = parseInt($("#recargoPago").val());
         total = recargo + subTotal;
-        $("#totalDeuda").val(total.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
+        $("#totalDeuda").val(total.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' }));
     });
 
     //    -----------------GUARDAR COMPROBANTE-------------------------------
@@ -211,7 +211,11 @@ $(document).ready(function () {
     });
 
     function guardar(datos, url) {
+        let token = $("#token").val();
         $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': token
+            },
             url: url,
             data: datos,
             type: "post",
@@ -241,7 +245,7 @@ $(document).ready(function () {
             var numeroPagina = 0;
             var catidadRegistro = 10;
             var url = '/comprobante/filtrar';
-            var datos = {filtro: filtro, numeroPagina: numeroPagina, catidadRegistro: catidadRegistro};
+            var datos = { filtro: filtro, numeroPagina: numeroPagina, catidadRegistro: catidadRegistro };
             $.ajax({
                 url: url,
                 data: datos,
@@ -249,7 +253,7 @@ $(document).ready(function () {
                 dataType: "json",
                 //                contentType: 'application/json',
                 success: function (data) {
-//                    console.log(data);
+                    //                    console.log(data);
                     $("tbody").empty();
                     $.each(data, function (llave, valor) {
                         var datosTabla = `
@@ -318,7 +322,11 @@ function getNumComprobante() {
             codigoTipoFactura: codigoTipoFactura,
             codigoSerie: codigoSerie
         };
+        let token = $("#token").val();
         $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': token
+            },
             url: url,
             data: JSON.stringify(datos),
             type: "post",

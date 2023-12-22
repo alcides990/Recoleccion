@@ -30,8 +30,9 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 @Controller
 @SessionAttributes("sucursal")
 @RequestMapping("/categoria")
-public class ControladorCategoria {
+public class CategoriaController {
 
+    
     @Autowired
     private Vadidador validar;
 

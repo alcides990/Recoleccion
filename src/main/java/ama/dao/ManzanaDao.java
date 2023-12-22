@@ -29,7 +29,8 @@ public interface ManzanaDao extends JpaRepository<Manzana, Integer> {
             JOIN FETCH m.cobrador c 
             JOIN FETCH m.sucursal suc
             JOIN FETCH suc.ciudad ciud 
-            WHERE c=?1 AND z=?2""")
+            WHERE c=?1 AND z=?2
+                   """)
     List<Manzana> listar(Cobrador cobrador, Zona zona);
 
     //Encontrar  detallezona correspomdiende a una zona y cobrador

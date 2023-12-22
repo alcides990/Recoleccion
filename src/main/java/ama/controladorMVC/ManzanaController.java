@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Controller
 @RequestMapping("/manzana")
-public class ControladorManzana {
+public class ManzanaController {
 
     @Autowired
     private ServicioManzana servicioManzana;
@@ -81,56 +82,7 @@ public class ControladorManzana {
         }
 
     }
-//
-//    @PostMapping("/modificar")
-//    public String modificar(DetalleZona detalleZona,
-//            @RequestParam int codigoCobradorActual,
-//            RedirectAttributes redirectAttributes,
-//            Model model
-//    ) {
-//        String mensaje = "";
-//        Cobrador cobradorNuevo = detalleZona.getCobrador();
-//
-//        DetalleZonaPK detalleZonaPK = new DetalleZonaPK();
-//        detalleZonaPK.setCodigoCobrador(codigoCobradorActual);
-//        detalleZonaPK.setCodigoZona(detalleZona.getZona().getCodigoZona());
-//        detalleZonaPK.setCodigoSucursal(detalleZona.getSucursal().getCodigoSucursal());
-//        detalleZona.setDetalleZonaPK(detalleZonaPK);
-//        try {
-//            servicioDetalleZona.modificar(detalleZonaPK, cobradorNuevo);
-//            mensaje = "Cobrador de la zona modificado!!";
-//            redirectAttributes.addFlashAttribute("mensaje", mensaje);
-//        } catch (DataAccessException e) {
-//            
-//            model.addAttribute("errores", "Error al cambiar cobrador " + e.getMostSpecificCause().getMessage());
-//            return "/errores/error";
-//        } catch (Exception e) {
-//            model.addAttribute("mensaje", "Error al cambiar cobrador " + e.getMessage());
-//            return "/errores/error";
-//        }
-//        return "redirect:/detalleZona/agregar/" + detalleZonaPK.getCodigoZona();
-//    }
-//
-//    @GetMapping("/editar/{codigoZona}/{codigoCobrador}")
-//    public String editar(DetalleZonaPK detalleZonaPK, DetalleZona detalleZona, Model modelo) {
-//        modelo.addAttribute("titulo", "Detalle Zona");
-//        detalleZona = new DetalleZona(detalleZonaPK);
-//        detalleZona.setZona(new Zona(detalleZonaPK.getCodigoZona()));
-//        detalleZona.setCobrador(new Cobrador(detalleZonaPK.getCodigoCobrador()));
-//        DetalleZona detalleZonaRecuperado = servicioDetalleZona.encontrar(detalleZona);
-//
-//        Zona zona = detalleZonaRecuperado.getZona();
-//        modelo.addAttribute("zona", zona);
-//
-//        modelo.addAttribute("cobradores", servicioCobrador.listar());
-//
-//        modelo.addAttribute("codigoCobradorActual", detalleZonaRecuperado.getCobrador().getCodigoCobrador());
-//
-//        modelo.addAttribute("sucursal", zona.getSucursal());
-//
-//        return "detalleZona/modificarDetalleZona";
-//    }
-//
+    @Secured("hasAuthority('ADMIN')")
     @PostMapping("/eliminar/{numeroManzana}/{codigoSucursal}")
     public ResponseEntity<String> eliminar(ManzanaPK manzanaPK) {
         try {

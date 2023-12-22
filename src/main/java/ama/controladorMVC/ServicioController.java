@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Controller
 @RequestMapping("/servicio")
-public class ControladorServicio {
+public class ServicioController {
 
     @Autowired
     private ServicioServicio servicioServicio;
@@ -285,7 +285,7 @@ public class ControladorServicio {
                 JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ControladorServicio.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ServicioController.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             conexion.close();
         }

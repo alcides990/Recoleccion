@@ -26,7 +26,11 @@ function  tabular(campoDestino) {
 
 function consultar(datos, url) {
     return new Promise(function (resolve, reject) {
+        let token = $("#token").val();
         $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': token
+            },
             url: url,
             data: JSON.stringify(datos),
             type: "post",
@@ -48,11 +52,15 @@ function consultar(datos, url) {
     });
 }
 function guardar(datos, url, contentType) {
-   if(contentType === 'application/json'){
-       datos=JSON.stringify(datos);
-   }
+    if (contentType === 'application/json') {
+        datos = JSON.stringify(datos);
+    }
+    let token = $("#token").val();
     $.ajax({
         url: url,
+        headers: {
+            'X-CSRF-TOKEN': token
+        },
         data: datos,
         type: "post",
         contentType: contentType, // tipo datos que se envia 
@@ -79,7 +87,11 @@ function eliminar() {
         $('#confirmacionModal').modal('show');
         $('#confirmacionModal').on('click', '#confirmarBoton', function () {
             $('#confirmacionModal').modal('hide');
+            let token = $("#token").val();
             $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
                 url: url + id,
                 async: false,
                 method: 'post',
@@ -94,6 +106,9 @@ function eliminar() {
                     if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
                         mensajeError = jqXHR.responseJSON.message;
                     }
+                    if(jqXHR.status===403){
+                        mensajeError="Acceso denegado, no tiene acceso a este recurso!!";
+                    }
                     mostrarAlerta(mensajeError, url, 'danger');
                 }
             });
@@ -103,7 +118,11 @@ function eliminar() {
 
 function getReporte(datos, url) {
 //    console.log(datos);
+    let token = $("#token").val();
     $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': token
+        },
         url: url,
 //            data: JSON.stringify(datos),
         data: datos,
@@ -128,7 +147,7 @@ function getReporte(datos, url) {
 
 //Funcion para mostrar mensaje de alerta
 
-function mostrarAlerta(mensaje, url, tipo, redirigir = false, recargar =false) {
+function mostrarAlerta(mensaje, url, tipo, redirigir = false, recargar = false) {
     $('#contenedor-alertas').empty();
     var alerta =
             `<div class="alert modal-header 
@@ -152,5 +171,5 @@ function mostrarAlerta(mensaje, url, tipo, redirigir = false, recargar =false) {
                 window.location.reload();
             }
         });
-    } 
+}
 }

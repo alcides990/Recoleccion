@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container "> 
+            <div class="card-header">  <h3>Datos Usuario de Sistema</h3></div>
+            <a th:href="@{/usuarioSistema/listar}" class="btn btn-primario">Regresar</a>
+            <form th:action="@{/usuarioSistema/guardar}" method="post" th:object="${usuarioSistema}">
+                <div class="row d-flex m-3">
+                    <div class="col-md-6 ">
+                        <input type="hidden" name="codigoUsuarioSistema"  th:value="*{codigoUsuarioSistema}" />
+                        <label class="form-label" for="usuarioSistema">Usuario </label>
+                        <input class="form-control" type="text" readonly="" name="nombre"  th:value="*{nombre}" autofocus=""  placeholder="Ingrese nombre de usuario" required=""/>
+                        <label class="form-label" for="clave">Clave </label>
+                        <input class="form-control" type="password" id="clave" name="clave"  th:value="*{clave}" autofocus=""  placeholder="Ingrese su clave" required=""/>
+
+                    </div>
+                </div>
+                <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3"/>
+            </form>
+        </div>
+        </div>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+        <script>
+            $(document).ready(function () {
+//                let clave = $("#clave").val();
+//                console.log(clave);
+//                if (clave !== '') {
+//                    $("#clave").prop('disabled', true);
+//                }
+            });
+        </script>
+    </body>
+</html>

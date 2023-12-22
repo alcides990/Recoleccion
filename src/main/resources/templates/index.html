@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head  th:replace="~{layout/layout :: heat}"> </head>
 
 </head>
-<body>
+<body> 
+     
     <header  th:replace="~{layout/layout :: header}"> </header>
-    <aside th:replace="~{layout/layout :: aside}"></aside>
+    
+        <aside th:replace="~{layout/layout :: aside}"></aside>
+
+    <div th:if="${info}" class="mensaje-alerta alert alert-success">
+        <span th:text="${info}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="mensaje-alerta alert alert-danger">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
     <footer th:replace="~{layout/layout :: footer}"></footer>
 </body>

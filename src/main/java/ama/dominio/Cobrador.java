@@ -52,5 +52,4 @@ public class Cobrador implements Serializable {
     public String toString() {
         return "Cobrador{" + "codigoCobrador=" + codigoCobrador + ", nombre=" + nombre + ", apellido=" + apellido + ", celular=" + celular + ", direccion=" + direccion + ", nombreCompleto=" + nombreCompleto + '}';
     }
-
 }

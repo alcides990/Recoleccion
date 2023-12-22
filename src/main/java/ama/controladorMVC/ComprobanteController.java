@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Controller
 @RequestMapping("/comprobante")
-public class ControladorComprobante {
+public class ComprobanteController {
 
     @Autowired
     private ServicioServicio servicioServicio;

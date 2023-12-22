@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,12 +24,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
 @Controller
 @SessionAttributes(names = {"sucursal", "ciudad", "estado"})
 @RequestMapping("/cobrador")
-public class ControladorCobrador {
+public class CobradorController {
 
     @Autowired
     private Vadidador validar;
@@ -76,7 +78,9 @@ public class ControladorCobrador {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@Valid Cobrador cobrador, BindingResult resul, SessionStatus status) {
+    public String guardar(@Valid Cobrador cobrador,
+            BindingResult resul, SessionStatus status,
+            RedirectAttributes flash) {
         if (resul.hasFieldErrors()) {
             return "cobrador/modificarCobrador";
         }
@@ -84,16 +88,18 @@ public class ControladorCobrador {
             Integer codigoCobrador = servicioCobrador.getCodigoCobrador() + 1;
             cobrador.setCodigoCobrador(codigoCobrador);
         }
+        flash.addFlashAttribute("info", "Registro guardado correctamente!!");
         status.setComplete();
         servicioCobrador.guardar(cobrador);
         return "redirect:/cobrador/listar";
     }
 
+  @PreAuthorize("hasAnyAuthority({'ADMIN'})")
     @GetMapping("/editar/{codigoCobrador}")
     public String editar(Cobrador cobrador, Model model) {
         cobrador = servicioCobrador.encontrar(cobrador);
-        if(cobrador==null){
-            throw  new Error("Cobrar no encontrado ");
+        if (cobrador == null) {
+            throw new Error("Cobrar no encontrado ");
         }
         model.addAttribute("cobrador", cobrador);
 //        log.info("Cobrador a modificar "+cobrador);
@@ -109,10 +115,10 @@ public class ControladorCobrador {
         return "cobrador/modificarCobrador";
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/eliminar/{codigoCobrador}")
     public ResponseEntity<?> eliminar(Cobrador cobrador) {
         try {
-            log.info("cobrador recibido "+cobrador);
             servicioCobrador.eliminar(cobrador);
             return ResponseEntity.ok("Cobrador Eliminado Correctamente");
         } catch (Exception e) {

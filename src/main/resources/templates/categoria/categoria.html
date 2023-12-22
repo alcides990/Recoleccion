@@ -48,6 +48,7 @@
                                 <i class="fa-solid fa-trash-can"></i>
                             </a>
                         </td>
+                        
                     </tr>
                 </tbody>
             </table>
@@ -121,6 +122,7 @@
 
             //Abrir ventans modal al precionar boton editar
             $(document).on('click', '#editar', function (event) {
+                console.log($('meta[name="csrf-token"]').attr('content'));
                 var url = '/categoria/editar';
                 var datos = { codigoCategoria: $(this).data('id') };
                 consultar(datos, url)

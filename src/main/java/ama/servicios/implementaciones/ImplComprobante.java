@@ -10,7 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ama.servicio.ServicioComprobante;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 
 @Slf4j
 @Service
@@ -58,7 +60,11 @@ public class ImplComprobante implements ServicioComprobante {
     @Transactional(readOnly = true)
     @Override
     public Page<Comprobante> getComprobantesCuenta(Pageable page, Servicio servicio) {
-        return comprobanteDao.getComprobantesCuenta(page, servicio);
+       Page<ComprobantePK> comprobantePKs = comprobanteDao.getComprobantePKs(page, servicio);
+       
+       List<Comprobante> comprobantes=comprobanteDao.getComprobantesCuenta(comprobantePKs.getContent());
+        
+        return new PageImpl<Comprobante>( comprobantes,page, comprobantePKs.getTotalElements());
     }
 
     @Override

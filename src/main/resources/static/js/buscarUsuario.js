@@ -1,9 +1,12 @@
 $(document).ready(function () {
 
     $("#buscarUsuario").autocomplete({
-        
         source: function (request, response) {
+            let token = $("#token").val();
             $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
                 url: "/usuario/buscar/" + request.term,
                 dataType: "json",
                 data: {
@@ -29,7 +32,7 @@ $(document).ready(function () {
             return false;
         }
     });
-    
+
 //Filtar tabla de usuario
 
     $("#txtBuscar").keyup(function (e) {
@@ -39,7 +42,11 @@ $(document).ready(function () {
             var catidadRegistro = 5;
             var url = '/usuario/listar/pagina';
             var datos = {filtro: filtro, numeroPagina: numeroPagina, catidadRegistro: catidadRegistro};
+            let token = $("#token").val();
             $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
                 url: url,
                 data: JSON.stringify(datos),
                 type: "post",
@@ -53,7 +60,7 @@ $(document).ready(function () {
                                 " <tr> " +
                                 " <td> " + valor.codigoUsuario +
                                 "</td><td>" + valor.numeroDocumento +
-                                " </td><td>" + valor.nombre +' '+valor.apellido +
+                                " </td><td>" + valor.nombre + ' ' + valor.apellido +
                                 "</td><td>" + valor.celular +
                                 " </td><td>" + valor.telefono +
                                 "</td><td>" + valor.barrio +

@@ -1,8 +1,8 @@
- 
 package ama.dominio;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -11,18 +11,24 @@ import lombok.Data;
 public class UsuarioSistema implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
-    @Basic(optional = false)
     @Column(name = "codigo_usuario_sistema")
     private Integer codigoUsuarioSistema;
-    private String usuario;
-    private String calve;
+
+    @Column(name = "usuario")
+    private String nombre;
+
+    private String clave;
+
     @JoinColumn(name = "codigo_estado", referencedColumnName = "codigo_estado")
-    @ManyToOne(optional = false,fetch = FetchType.LAZY)
-    private Estado estado;
-    @JoinColumn(name = "codigo_nivel_usuario", referencedColumnName = "codigo_nivel_usuario")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private NivelUsuario nivelUsuario;
+    private Estado estado;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "codigo_usuario_sistema", referencedColumnName = "codigo_usuario_sistema", updatable = false, insertable = false)
+    private List<DetalleUsuarioSistema> detalleUsuarioSistema;
+
     @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Sucursal sucursal;
@@ -30,8 +36,8 @@ public class UsuarioSistema implements Serializable {
     public UsuarioSistema() {
     }
 
-    public UsuarioSistema(Integer codigoUsuarioSistema) {
-        this.codigoUsuarioSistema = codigoUsuarioSistema;
+    public UsuarioSistema(int codigoUsuario) {
+        this.codigoUsuarioSistema = codigoUsuario;
     }
-    
+
 }

@@ -31,7 +31,6 @@ h3 {
 
 .error {
     display: flex;
-    flex-direction: row;
     margin: 5px;
     padding: 5px;
     align-content: center;
@@ -64,7 +63,7 @@ h3 {
 
 }
 .menu_aside:hover {
-    /*width: 220px;*/
+    width: 220px;
 
 }
 
@@ -92,7 +91,15 @@ li {
 #cobranza li {
     display: none;
 }
-
+ aside div {
+     display: none;
+     position: fixed;
+     left: 2px;
+     bottom : 50px;
+     background-color: #999999;
+     border: solid 2px #926d48;
+     border-bottom-left-radius: 10px;
+}
 
 
 
@@ -111,6 +118,7 @@ li {
 }
 
 .container {
+   
     margin: 10px 10px 50px 155px;
     padding: 5px;
     border-radius: 20px;
@@ -295,6 +303,18 @@ td .btn-primario {
     color: white;
 }
 
+.user-session {
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    /*width: 50px;*/
+    text-align: center;
+    border-radius: 50px 50px;
+    /*padding: 5px;*/
+    background-color: var(--bg-color);
+    font-size: 25px;
+}
+
 /*
 
 
@@ -367,7 +387,6 @@ textarea.form-control{
     }
 
     .error {
-        display: inline-block;
         margin: 5px;
         padding: 5px;
         align-content: center;

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Slf4j
 @Controller
 @RequestMapping("/ciudad")
-public class ControladorCiudad {
+public class CiudadController {
 
     @Autowired
     private Vadidador validar;

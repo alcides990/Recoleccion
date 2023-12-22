@@ -12,6 +12,10 @@
                 <i class="fa-solid fa-plus fa-xl"></i>
                 Agregar </a>
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
+            <div th:if="${info}" class="mensaje-alerta alert alert-success">
+                <span th:text="${info}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             <div class="table-responsive-md">
                 <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-md" >
                     <thead>

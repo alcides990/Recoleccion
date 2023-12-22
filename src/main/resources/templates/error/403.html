@@ -1,0 +1,22 @@
+ 
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" />
+<head  th:replace="~{layout/layout :: heat}"> </head>
+<body>
+    <header  th:replace="~{layout/layout :: header}"> </header>
+    <aside th:replace="~{layout/layout :: aside}">  </aside>
+
+        <div class="card bg-danger text-white error">
+            <div class="card-header">Error: Acceso Denegado!</div>
+            <div class="card-body">
+                <h5 class="card-title">
+                    Los sentimos <span th:text="${#authentication.name}"></span>,
+                    NO tienes permisos para acceder a este recurso.
+                </h5>
+
+            </div>
+        </div>
+
+    <footer  th:replace="~{layout/layout :: footer}"> </footer>
+</body>
+</html>

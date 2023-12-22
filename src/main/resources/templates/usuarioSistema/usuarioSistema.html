@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div th:replace="~{layout/layout :: modal}"> </div>
+        <div class="container-fluid">
+            <div class="card-header" ><h3 >Usuarios del Sistema</h3></div>
+            <div th:if="${mensaje}" class="mensaje-alerta alert alert-success">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="d-md-flex bg-opacity-100">
+                <div class="col-sm-2">
+                    <a th:href="@{/usuarioSistema/agregar}" 
+                       class="btn btn-primario btn-sm m-2 ">
+                        <i class="fas fa-user-plus fa-lg" title="Agregar usuario"></i>
+
+                    </a>
+                </div >
+                <div class="input-group m-2">
+                    <input name="txtBuscar" id="txtBuscar" type="search" 
+                           class="col"
+                           autofocus="true" placeholder="Buscar por ruc/ci o nombres" 
+                           aria-label="Buscar" aria-describedby="search-addon" />
+                </div> 
+            </div>
+            <div class="mensaje-alerta"id="contenedor-alertas" ></div>
+            <div class="table-responsive-xl">
+                <table class="table table-dark table-border table-striped table-colapse table-hover table-xl" >
+                    <thead  class="thead-dark">
+                        <tr>
+                            <th>Codigo</th>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody  id="tbody" class="table-secondary"  >
+                        <tr  th:each="usuario : ${usuariosSistema}" > 
+                            <td th:text="${usuario.codigoUsuarioSistema}"> </td>
+                            <td th:text="${usuario.nombre}">  </td>
+                            <td>
+                                <a sec:authorize="hasAuthority('ADMIN')" th:href="@{/detalleUsuarioSistema/agregar/} + ${usuario.codigoUsuarioSistema}"
+                                   class="btn btn-primario btn-sm">
+                                    <i class="fas fa-cog"></i> 
+                                </a>
+                                <a sec:authorize="hasAuthority('ROOT')" th:href="@{/usuarioSistema/editar/} + ${usuario.codigoUsuarioSistema}"
+                                   class="btn btn-info btn-sm">
+                                    <i class="fa-regular fa-pen-to-square"></i> 
+                                </a>
+                                <a id="eliminar" data-url="/usuarioSistema/eliminar/" 
+                                   th:data-id="${usuario.codigoUsuarioSistema}" 
+                                   class="btn btn-danger btn-sm" > 
+                                    <i class="fa-solid fa-trash-can "></i> 
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <nav  th:replace="~{layout/paginador :: paginador}"> </nav>
+            </div>
+
+
+        </div>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+        <script>
+//           Lamara al metodo eliminar al hacer click en el boton eliminar
+            $(document).ready(function () {
+                eliminar();
+            });
+        </script>
+
+    </body>
+
+</html>
