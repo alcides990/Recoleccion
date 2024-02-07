@@ -9,12 +9,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 @Slf4j
 public class recolecion implements CommandLineRunner {
-// @Autowired
-//    private  BCryptPasswordEncoder encoder;
+ @Autowired
+    private  BCryptPasswordEncoder encoder;
 
     @Autowired
     UsuarioSistemaService usuarioSistemaService;
@@ -44,7 +45,7 @@ public class recolecion implements CommandLineRunner {
 //        });
 //        comprobante.forEach(System.out::println);
 
-//       
+//        log.info(encoder.encode("1234"));
     }
 
 }

@@ -36,7 +36,7 @@ public class LoginController {
         if (error != null) {
             if (usuarioSistema == null) {
                 mensaje = "Usuario no encontrado";
-            } else if (usuarioSistema !=null && usuarioSistema.getDetalleUsuarioSistema().isEmpty()) {
+            } else if (usuarioSistema != null && usuarioSistema.getDetalleUsuarioSistema().isEmpty()) {
                 mensaje = usuarioSistema.getNombre() + " no tiene rol asignado";
                 session.invalidate();
             } else {

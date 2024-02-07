@@ -147,8 +147,24 @@
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
         <script src="/js/comprobante.js"></script>
         <script>
-             $(document).ready(function () {
-                getNumComprobante();
+            $(document).ready(function () {
+                generarNumeroComprobante();
+                $(document).on('change', '#tipoFactura, #puntoExpedicion', function () {
+                    generarNumeroComprobante();
+                });
+                $("#cuentaCorriente").on('keypress', function (e) {
+                    if (e.keyCode === 13) {
+                        e.preventDefault();
+                        var cuentaCorriente = $("#cuentaCorriente").val();
+                        var url = '/comprobante/facturar';
+                        var datos = {cuentaCorriente: cuentaCorriente};
+                        cargarDatosComprobante(datos, url);
+                    }
+                });
+                 $("#numeroComprobante").keyup(function (e){
+               var textoRecuperado= parseInt($("#numeroComprobante").val());
+               $("#numeroComprobante").val(textoRecuperado.toString().padStart(7,0));
+            });
             });
         </script>
     </body>

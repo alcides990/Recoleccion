@@ -9,7 +9,7 @@ function limpiar(campos) {
 }
 //Funcion tabulador
 function  tabulador(campoActual, campoDestino) {
-    $(campoActual).keypress(function (event) {
+    $(campoActual).keydown(function (event) {
         if (event.keyCode === 13) {
             event.preventDefault();
             $(campoDestino).focus();
@@ -79,9 +79,9 @@ function guardar(datos, url, contentType) {
     });
 }
 
-function eliminar() {
+function eliminar(mensaje = 'Seguro que desea eliminar este registro??') {
     $(document).on('click', '#eliminar', function (event) {
-//        event.preventDefault();
+        confirmacioModal('Eliminacion de Registro!', mensaje);
         var url = $(this).data('url');
         var id = $(this).data('id');
         $('#confirmacionModal').modal('show');
@@ -96,7 +96,6 @@ function eliminar() {
                 async: false,
                 method: 'post',
                 cache: false,
-//                     dataType: "json", //tipo de datos que espera recibir
                 success: function (response) {
                     mostrarAlerta(response, url, 'success', false, true);
                     return false;
@@ -106,8 +105,8 @@ function eliminar() {
                     if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
                         mensajeError = jqXHR.responseJSON.message;
                     }
-                    if(jqXHR.status===403){
-                        mensajeError="Acceso denegado, no tiene acceso a este recurso!!";
+                    if (jqXHR.status === 403) {
+                        mensajeError = "Acceso denegado, no tiene acceso a este recurso!!";
                     }
                     mostrarAlerta(mensajeError, url, 'danger');
                 }
@@ -117,7 +116,6 @@ function eliminar() {
 }
 
 function getReporte(datos, url) {
-//    console.log(datos);
     let token = $("#token").val();
     $.ajax({
         headers: {
@@ -132,11 +130,9 @@ function getReporte(datos, url) {
             responseType: "blob" // Especificar el tipo de respuesta como Blob
         },
         success: function (response, status, xhr) {
-//            let blob = new Blob([response], {type: "application/pdf"});
             var url = URL.createObjectURL(new Blob([response], {type: "application/pdf"}));
             window.location.href = (url);// abrir en la misma pestaña
 //            window.open(url);
-
         },
         error: function (xhr, textStatus, error) {
             var mensajeError = 'Error al imprimir reporte ' + xhr.responseText;
@@ -145,7 +141,6 @@ function getReporte(datos, url) {
     });
 }
 
-//Funcion para mostrar mensaje de alerta
 
 function mostrarAlerta(mensaje, url, tipo, redirigir = false, recargar = false) {
     $('#contenedor-alertas').empty();
@@ -172,4 +167,31 @@ function mostrarAlerta(mensaje, url, tipo, redirigir = false, recargar = false) 
             }
         });
 }
+}
+
+function confirmacioModal(titulo, mensaje) {
+    $("#confirmacionModal").remove();
+    var frm = `
+ <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog ">
+                    <div class="modal-content bg-color ">
+                        <div class="modal-header">
+                            <h5 class="modal-title text-center" id="confirmacionModalLabel"> ${titulo}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+
+                        </div>
+                        <div class="alert modal-body alert-dismissible fade show " role="alert">
+                            ${mensaje}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-primario" id="confirmarBoton">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    $("body").append(frm);
 }

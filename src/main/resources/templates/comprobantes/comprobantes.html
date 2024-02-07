@@ -9,19 +9,41 @@
         <div class="container-fluid"> 
             <div class="card-header"> <h3>Comprobantes</h3></div>
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
-            <div class=" input-group my-3">
+            <div class=" my-3 d-inline-flex justify-content-sm-start w-100">
+                <div class="form-floating col-sm-2 me-2">  
+                    <select th:object="${sucursal}" class="form-control" name="sucursal"  id="sucursal">
+                        <option th:each="sucursal : ${sucursal}" 
+                                th:value="${sucursal.codigoSucursal}"
+                                th:text="${sucursal.nombreSucursal} +' '+${sucursal.ciudad.nombreCiudad} " />
+                    </select>
+                    <label class="form-label" for="sucursal">Sucursal</label>
+                </div>
+                <div class="form-floating col-sm-2 me-2"> 
+                    <select th:object="${puntoExpedicion}"
+                            class="form-control" name="puntoExpedicion"  id="puntoExpedicion"
+                            >
+                        <option th:each="puntoExpedicion : ${puntosExpedicion}" 
+                                th:value="${puntoExpedicion.codigoPuntoExpedicion}"
+                                th:text="${puntoExpedicion.nombrePuntoExpedicion} "  />
+                    </select>
+                    <label class="form-label" for="puntoExpedicion">PuntoExpedicion</label>
+                </div>
+                <div class="form-floating">
                 <input name="txtBuscar" id="txtBuscar" type="search" 
-                       class="col-lg-6 col-12"  autofocus="true" 
-                       placeholder="Ingrese numero de factura ej:001-001-1" 
+                       class="form-control col-sm-6 col-12 me-0"  autofocus="true" 
+                       placeholder="Ingrese numero de comprobante" 
                        aria-label="Buscar" aria-describedby="search-addon" />
+                <label>Numero de Comprobante</label>
+                </div>
             </div>
 
-            <div class="table-responsive-xl">
-                <table id="tabla" class="table table-dark table-border table-striped  table-hover" >
+
+            <div class="table-responsive-xl ">
+                <table id="tabla" class="table table-dark table-border table-striped  table-hover small" >
                     <thead class="sticky-top ">
                         <tr>
-                            <th>Tipo Factura</th> 
-                            <th>Nro. Factura</th>
+                            <th>Tipo Comprobante</th> 
+                            <th>Nro.Comprobante</th>
                             <th>Cuentacorriente</th>
                             <th>Usuario</th>
                             <th>FechaPago</th>
@@ -34,16 +56,16 @@
                             <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody  class="table-secondary"  >
+                    <tbody  class="table-secondary "  >
                         <tr  th:each="comprobante : ${comprobantes}" > 
                             <td th:text="${comprobante.tipoFactura.tipoFactura}"> </td>
-                            <td th:text="${comprobante.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
+                            <td th:text="${#numbers.formatInteger(comprobante.comprobantePK.numeroComprobante,7)}"> </td>
                             <td th:text="${comprobante.servicio.cuentaCorriente}"> </td>
                             <td th:text="${comprobante.usuario.nombre}+' '+ ${comprobante.usuario.apellido}" >   </td>
                             <td th:text="${comprobante.fechaPago}"></td>
                             <td th:text="${comprobante.detalleComprobante[0].periodoPago}"></td>
                             <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"> 
-                            <td th:text="${comprobante.detalleComprobante[0].cantidadPago}"></td>
+                                <td th:text="${comprobante.detalleComprobante[0].cantidadPago}"></td>
                                 <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].recargo, 0, 'COMMA', 0, 'POINT')}"></td>
                                 <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].importe+comprobante.detalleComprobante[0].recargo, 0, 'COMMA', 0, 'POINT')}"></td>
                                 <td th:text="${comprobante.estado.estado}"></td>
@@ -202,7 +224,36 @@
 
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
         <script src="/js/comprobante.js"></script>
-
+        <script>
+            $("#puntoExpedicion").on('change', function () {
+                buscarComprobantes();
+            });
+            var numeroComprobante;
+            $("#txtBuscar").keyup(function (e) {
+                numeroComprobante = $("#txtBuscar").val();
+                if (numeroComprobante !== '') {
+                    numeroComprobante = parseInt(numeroComprobante);
+                    $("#txtBuscar").val(numeroComprobante.toString().padStart(7, 0));
+                }
+            });
+            console.log('numero comprobante; ' +numeroComprobante);
+            var time;
+            $("#txtBuscar").keyup(function (e) {
+                clearTimeout(time);
+                time = setTimeout(function () {
+                    if (numeroComprobante > 0) {
+                        buscarComprobantes();
+                    } else if (numeroComprobante === '') {
+                        window.location.reload();
+                    }
+                }, 500);
+            });
+            $('#tabla').on('click', 'tr', function () {
+                var id = $(this).find('td:eq(1)').text();
+                console.log('Tipo comprobante: ' + id);
+            });
+             
+        </script>
     </body>
 
 </html>

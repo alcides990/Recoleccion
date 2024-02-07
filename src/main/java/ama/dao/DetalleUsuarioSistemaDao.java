@@ -17,11 +17,10 @@ public interface DetalleUsuarioSistemaDao extends JpaRepository<DetalleUsuarioSi
                    WHERE us=?1
                 """)
     List<DetalleUsuarioSistema> findByUser(UsuarioSistema usuarioSistema);
-    
-   @Modifying
-@Transactional
-@Query("DELETE FROM DetalleUsuarioSistema dtus WHERE dtus.usuarioSistema = ?1")
-void deleteByUsuarioSistema(UsuarioSistema usuarioSistema);
 
+    @Modifying()
+    @Transactional
+    @Query("DELETE FROM DetalleUsuarioSistema dtus WHERE dtus.usuarioSistema = ?1")
+    void deleteByUsuarioSistema(UsuarioSistema usuarioSistema);
 
 }

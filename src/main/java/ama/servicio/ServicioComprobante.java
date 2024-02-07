@@ -10,7 +10,7 @@ public interface ServicioComprobante {
 
     public Page<Comprobante> listar(Pageable pageable);
     
-    public Page<Comprobante> filtrar(Pageable pageable, String filtro);
+    public Page<Comprobante> filtrar(Pageable pageable, ComprobantePK comprobantePK);
 
     public Comprobante guardar(Comprobante comprobante);
 

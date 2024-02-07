@@ -87,7 +87,7 @@ public class ManzanaController {
     public ResponseEntity<String> eliminar(ManzanaPK manzanaPK) {
         try {
             servicioManzana.eliminar(new Manzana(manzanaPK));
-            return ResponseEntity.ok().body("Registro Eliminado Correctamente!!");
+            return ResponseEntity.ok().body("Manzana Eliminado Correctamente!!");
 
         } catch (Exception e) {
 

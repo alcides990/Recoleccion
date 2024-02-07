@@ -121,25 +121,7 @@ public class DetalleZonaController {
         return ResponseEntity.ok(detalleZonaRecuperado);
     }
 
-//    @GetMapping("/editar/{codigoZona}/{codigoCobrador}")
-//    public String editar(DetalleZonaPK detalleZonaPK, DetalleZona detalleZona, Model modelo) {
-//        modelo.addAttribute("titulo", "Detalle Zona");
-//        detalleZona = new DetalleZona(detalleZonaPK);
-//        detalleZona.setZona(new Zona(detalleZonaPK.getCodigoZona()));
-//        detalleZona.setCobrador(new Cobrador(detalleZonaPK.getCodigoCobrador()));
-//        DetalleZona detalleZonaRecuperado = servicioDetalleZona.encontrar(detalleZona);
-//
-//        Zona zona = detalleZonaRecuperado.getZona();
-//        modelo.addAttribute("zona", zona);
-//
-//        modelo.addAttribute("cobradores", servicioCobrador.listar());
-//
-//        modelo.addAttribute("codigoCobradorActual", detalleZonaRecuperado.getCobrador().getCodigoCobrador());
-//
-//        modelo.addAttribute("sucursal", zona.getSucursal());
-//
-//        return "detalleZona/modificarDetalleZona";
-//    }
+
     @PostMapping("/eliminar/{codigoCobrador}/{codigoZona}/{codigoSucursal}")
     public ResponseEntity<String> eliminar(DetalleZonaPK detalleZonaPK) {
         try {
@@ -149,7 +131,7 @@ public class DetalleZonaController {
         } catch (Exception e) {
 
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Error al Elimar Registro: " + ClaseError.excepcion("Error al eliminar manzana. ", e));
+                    .body("Error al Elimar Registro: " + ClaseError.excepcion("Error al eliminar cobrador de la zona. ", e));
         }
     }
 }

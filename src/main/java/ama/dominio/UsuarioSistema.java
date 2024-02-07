@@ -25,7 +25,7 @@ public class UsuarioSistema implements Serializable {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Estado estado;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "codigo_usuario_sistema", referencedColumnName = "codigo_usuario_sistema", updatable = false, insertable = false)
     private List<DetalleUsuarioSistema> detalleUsuarioSistema;
 

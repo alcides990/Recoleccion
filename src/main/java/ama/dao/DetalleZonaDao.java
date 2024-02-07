@@ -31,8 +31,8 @@ public interface DetalleZonaDao extends JpaRepository<DetalleZona, Integer> {
            SELECT  dtz FROM DetalleZona dtz 
             JOIN FETCH dtz.zona z 
             JOIN FETCH dtz.cobrador c
-            JOIN FETCH dtz.sucursal suc
-            JOIN FETCH suc.ciudad ciud
+            JOIN FETCH z.sucursal s
+            JOIN FETCH s.ciudad ciud
             WHERE z=?1
             AND c= ?2 
             """)

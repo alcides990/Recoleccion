@@ -5,7 +5,6 @@
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div th:replace="~{layout/layout :: modal}"> </div>
         <div class="container">
             <h3 class="card-header">Detalle zona </h3> 
             <a th:href="@{/detalleZona/agregar}"
@@ -56,7 +55,6 @@
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
         <script>
             $(document).ready(function () {
-//              Lamara al metodo eliminar al hacer click en el boton eliminar
                 eliminar();
 //                Cargar idioma español a la tabla paginado con Jquerry data
                 $('#tabla').DataTable({

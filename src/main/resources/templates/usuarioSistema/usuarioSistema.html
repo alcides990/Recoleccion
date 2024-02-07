@@ -6,7 +6,6 @@
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div th:replace="~{layout/layout :: modal}"> </div>
         <div class="container-fluid">
             <div class="card-header" ><h3 >Usuarios del Sistema</h3></div>
             <div th:if="${mensaje}" class="mensaje-alerta alert alert-success">
@@ -69,7 +68,7 @@
         <script>
 //           Lamara al metodo eliminar al hacer click en el boton eliminar
             $(document).ready(function () {
-                eliminar();
+                eliminar('Seguro que desea eliminar usuario');
             });
         </script>
 

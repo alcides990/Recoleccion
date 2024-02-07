@@ -9,7 +9,7 @@
         <div class="container "> 
             <div class="card-header">  <h3>Datos Usuario de Sistema</h3></div>
             <a th:href="@{/usuarioSistema/listar}" class="btn btn-primario">Regresar</a>
-            <form th:action="@{/usuarioSistema/guardar}" method="post" th:object="${usuarioSistema}">
+            <form th:action="@{/usuarioSistema/editarClave}" method="post" th:object="${usuarioSistema}">
                 <div class="row d-flex m-3">
                     <div class="col-md-6 ">
                         <input type="hidden" name="codigoUsuarioSistema"  th:value="*{codigoUsuarioSistema}" />
@@ -25,14 +25,6 @@
         </div>
         </div>
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
-        <script>
-            $(document).ready(function () {
-//                let clave = $("#clave").val();
-//                console.log(clave);
-//                if (clave !== '') {
-//                    $("#clave").prop('disabled', true);
-//                }
-            });
-        </script>
+      
     </body>
 </html>

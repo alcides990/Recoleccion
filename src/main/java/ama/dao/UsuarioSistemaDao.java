@@ -10,6 +10,8 @@ public interface UsuarioSistemaDao extends JpaRepository<UsuarioSistema, Integer
            SELECT u  FROM UsuarioSistema u 
            LEFT JOIN FETCH u.detalleUsuarioSistema AS dtus
            LEFT JOIN FETCH dtus.rol as r
+           LEFT JOIN FETCH u.sucursal s
+           LEFT JOIN FETCH s.ciudad
            LEFT JOIN FETCH u.estado
            WHERE u.nombre= ?1
            """)

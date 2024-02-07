@@ -29,8 +29,10 @@ public class ImplComprobante implements ServicioComprobante {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<Comprobante> filtrar(Pageable pageable, String filtro) {
-        return (Page<Comprobante>) comprobanteDao.filtrarComprobantes(pageable, filtro);
+    public Page<Comprobante> filtrar(Pageable pageable, ComprobantePK comprobantePK) {
+        return (Page<Comprobante>) comprobanteDao.filtrarComprobantes(pageable, 
+                comprobantePK.getCodigoSucursal(), comprobantePK.getCodigoPuntoExpedicion(),
+                comprobantePK.getNumeroComprobante());
     }
 
     @Transactional

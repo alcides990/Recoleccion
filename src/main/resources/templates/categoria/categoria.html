@@ -6,7 +6,6 @@
 <body>
     <header th:replace="~{layout/layout :: header}"> </header>
     <aside th:replace="~{layout/layout :: aside}"> </aside>
-    <div th:replace="~{layout/layout :: modal}"> </div>
     <div class="container">
         <h3 class="card-header"> Categorias</h3>
         <a id="btnAgrerar" class="btn btn-primario btn-sm mb-3 " data-bs-toggle="modal"
@@ -102,7 +101,7 @@
     <script>
         $(document).ready(function () {
             // Lamara al metodo eliminar al hacer click en el boton eliminar
-            eliminar();
+            eliminar('Seguro que desea eliminar esta categoria??');
             //  Cargar idioma español a la tabla paginado con Jquerry data
             $('#tabla').DataTable({
                 language: {
@@ -122,7 +121,6 @@
 
             //Abrir ventans modal al precionar boton editar
             $(document).on('click', '#editar', function (event) {
-                console.log($('meta[name="csrf-token"]').attr('content'));
                 var url = '/categoria/editar';
                 var datos = { codigoCategoria: $(this).data('id') };
                 consultar(datos, url)

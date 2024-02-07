@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @Entity
 @Table(name = "sucursales")
 public class Sucursal implements Serializable {
@@ -17,13 +19,17 @@ public class Sucursal implements Serializable {
     private Integer codigoSucursal;
      @Column(name = "sucursal")
     private String nombreSucursal;
+     
     @JoinColumn(name = "codigo_ciudad", referencedColumnName = "codigo_ciudad")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
+     @ToString.Exclude
     private Ciudad ciudad;
+    
     @JoinColumn(name = "codigo_empresa", referencedColumnName = "codigo_empresa")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ToString.Exclude
     private Empresa empresa; 
 
     public Sucursal(Integer codigoSucursal) {
@@ -34,10 +40,7 @@ public class Sucursal implements Serializable {
     }
 
     
-    @Override
-    public String toString() {
-        return "Sucursal{" + "codigoSucursal=" + codigoSucursal + ", nombreSucursal=" + nombreSucursal + '}';
-    }
+   
     
 
 }

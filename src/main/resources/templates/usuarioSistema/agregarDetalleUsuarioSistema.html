@@ -9,10 +9,9 @@
         <body>
             <header th:replace="~{layout/layout :: header}"> </header>
             <aside th:replace="~{layout/layout :: aside}"> </aside>
-            <div th:replace="~{layout/layout :: modal}"> </div>
             <div class="container">
                 <div class="card-title">
-                    <h3>Asignacion de Roles al Usuario </h3>
+                    <h3>Mantenimiento Usuario </h3>
                 </div>
 
                 <a th:href="@{/usuarioSistema/listar}" class="btn btn-primario">
@@ -25,10 +24,10 @@
                 </div>
                 <form id="frm-detalleUsuarioSistema" th:action="@{/detalleUsuarioSistema/guardar}" method="post" th:object="${detalleUsuarioSistema}">
                     <div class="row m-2">
-                        <input class="form-control" hidden="" name="codigoUsuarioSistema" th:value="${usuarioSistema.codigoUsuarioSistema}">  </input>
+                        <input class="form-control" hidden=""  id="codigoUsuarioSistema" name="codigoUsuarioSistema" th:value="${usuarioSistema.codigoUsuarioSistema}">  </input>
                         <div class="form-group col-sm-4">
                             <label class="form-label " for="usuario">Usuario</label>
-                            <input class="form-control" name="nombre" th:value="${usuarioSistema.nombre}">  </input>
+                            <input class="form-control" readonly="" name="nombre" th:value="${usuarioSistema.nombre}">  </input>
                         </div>
                         <div class="col-sm-6">
                             <label for="roles">Rol</label>
@@ -41,7 +40,8 @@
                         </div>
 
                     </div>
-                    <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3" />
+                    <input type="submit" name="guardar" value="Asignar Rol" class="btn btn-guardar m-3" />
+                    <a title="Resetear a Clave por defecto" type="button" id="passwordReset"  class="btn btn-primario m-3">Clave Reset</a>
                 </form>
 
                 <div class="table-responsive-lg">
@@ -70,13 +70,51 @@
                         </tbody>
                     </table>
                 </div>
+                <div id="contenedor-confirmacion"></div>
             </div>
             <footer  th:replace="~{layout/layout :: footer}"> </footer>
             <script>
                 $(document).ready(function () {
 //            Lamara al metodo eliminar al hacer click en el boton eliminar
-                    eliminar();
-//               
+                        var mensaje;
+                        eliminar(mensaje);
+                   
+                    $("#passwordReset").on('click', function () {
+                        let  titulo = "Reseteo de clave";
+                         mensaje = "Seguro que desea realizar la operacion? ";
+                        confirmacioModal(titulo, mensaje);
+                        $('#confirmacionModal').modal('show');
+                        $('#confirmacionModal').on('click', '#confirmarBoton', function () {
+                            $('#confirmacionModal').modal('hide');
+                            let token = $("#token").val();
+                            let url = '/usuarioSistema/passwordReset/';
+                            let id = $("#codigoUsuarioSistema").val();
+                            $.ajax({
+                                headers: {
+                                    'X-CSRF-TOKEN': token
+                                },
+                                url: url + id,
+                                async: false,
+                                method: 'post',
+                                cache: false,
+//                     dataType: "json", //tipo de datos que espera recibir
+                                success: function (response) {
+                                    mostrarAlerta(response, url, 'success', false, false);
+                                    return false;
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    var mensajeError = jqXHR.responseText;
+                                    if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
+                                        mensajeError = jqXHR.responseJSON.message;
+                                    }
+                                    if (jqXHR.status === 403) {
+                                        mensajeError = "Acceso denegado, no tiene acceso a este recurso!!";
+                                    }
+                                    mostrarAlerta(mensajeError, url, 'danger');
+                                }
+                            });
+                        });
+                    });
                 });
             </script>
 

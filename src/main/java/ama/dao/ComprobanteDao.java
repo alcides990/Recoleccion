@@ -18,7 +18,6 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, Integer> {
     //recuperar comprobantes paginados
     @Query(value = """
             SELECT c FROM Comprobante AS c 
-            LEFT JOIN FETCH c.comprobantePK AS cPK
             JOIN FETCH c.detalleComprobante AS dtc
             LEFT JOIN FETCH c.sucursal AS suc
             LEFT JOIN FETCH c.puntoExpedicion AS pe
@@ -43,12 +42,16 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, Integer> {
             LEFT JOIN FETCH c.cobrador AS cob
             LEFT JOIN FETCH c.estado AS e  
             LEFT JOIN FETCH c.usuarioSistema AS uSist
-                   WHERE CONCAT(suc.nombreSucursal, '-', pe.nombrePuntoExpedicion, '-', cPK.numeroComprobante) LIKE  %?1% 
+                   WHERE suc.codigoSucursal=?1 AND  pe.codigoPuntoExpedicion=?2 AND CONCAT(cPK.numeroComprobante) LIKE  %?3% 
               """,
-            countQuery = "SELECT COUNT(c) FROM Comprobante c ")
-    Page<Comprobante> filtrarComprobantes(Pageable pageable, String flitro);
+            countQuery = """
+                         SELECT COUNT(c) FROM Comprobante c 
+                         WHERE c.comprobantePK.codigoSucursal=?1 
+                         AND  c.comprobantePK.codigoPuntoExpedicion=?2 
+                         AND CONCAT(c.comprobantePK.numeroComprobante) LIKE  %?3% 
+                         """)
+    Page<Comprobante> filtrarComprobantes(Pageable pageable, Integer sucursal, Integer puntoExpedicion, Integer numeroComprobante);
 
-    //recuperar comprobantes de la cuenta paginados
     @Query(value = """
                       SELECT c.comprobantePK FROM Comprobante AS c 
                      WHERE c.servicio = :servicio

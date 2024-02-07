@@ -148,8 +148,21 @@
         <script src="/js/comprobante.js"></script>
         <script>
             $(document).ready(function () {
-//                genera numero de comprobante;
-                getNumComprobante();
+                generarNumeroComprobante();
+                $(document).on('change', '#tipoFactura, #puntoExpedicion', function () {
+                    generarNumeroComprobante();
+                });
+
+                $("#cuentaCorriente").on('keypress', function (e) {
+                    if (e.keyCode === 13) {
+                        e.preventDefault();
+                        var cuentaCorriente = $("#cuentaCorriente").val();
+                        var url = '/comprobante/facturar';
+                        var datos = {cuentaCorriente: cuentaCorriente};
+                        cargarDatosComprobante(datos, url);
+                    }
+                });
+
             });
         </script>
     </body>

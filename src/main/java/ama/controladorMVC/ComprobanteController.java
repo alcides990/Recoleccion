@@ -6,6 +6,7 @@ import ama.servicio.*;
 import ama.utilerias.PageRender;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validation;
@@ -62,36 +63,47 @@ public class ComprobanteController {
     private ServicioPuntoExpedicion servicioPuntoExpedicion;
     @Autowired
     private ServicioCondicionVenta servicioCondicionVenta;
-
     @Autowired
     private DataSource dataSource;
+    @Autowired
+    private HttpSession httpSession;
 
     List<String> errores = new ArrayList<>();
 
     @GetMapping("/listar")
     public String listar(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "cantElemento", defaultValue = "10") int cantElemento,
+            @RequestParam(name = "cantidadRegistro", defaultValue = "10") int cantidadRegistro,
             Model modelo) {
         modelo.addAttribute("titulo", "Comprobates");
-        Pageable pageable = PageRequest.of(page, cantElemento);
+        UsuarioSistema usuarioSistema = (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
+        modelo.addAttribute("sucursal", usuarioSistema.getSucursal());
+        modelo.addAttribute("puntosExpedicion", servicioPuntoExpedicion.listar());
+        Pageable pageable = PageRequest.of(page, cantidadRegistro);
         Page<Comprobante> comprobantes = servicioComprobate.listar(pageable);
         modelo.addAttribute("comprobantes", comprobantes);
         PageRender pageRender = new PageRender("/comprobante/listar", comprobantes);
         modelo.addAttribute("page", pageRender);
-        modelo.addAttribute("cantElemento", cantElemento);
+        modelo.addAttribute("cantidadRegistro", cantidadRegistro);
         return "comprobantes/comprobantes";
     }
 
     @ResponseBody
     @PostMapping("/filtrar")
-    public ResponseEntity<?> filtrar(
+    public ResponseEntity<?> filtrarComprobantes(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "cantElemento", defaultValue = "5") int cantElemento,
-            @RequestParam(name = "filtro", defaultValue = "") String filtro, Model modelo) {
-        Pageable pageable = PageRequest.of(page, cantElemento);
+            @RequestParam(name = "cantidadRegistro", defaultValue = "5") int cantidadRegistro,
+            @RequestParam(name = "codigoSucursal", defaultValue = "") Integer codigoSucursal,
+            @RequestParam(name = "codigoPuntoExpedicion", defaultValue = "") Integer codigoPuntoExpedicion,
+            @RequestParam(name = "numeroComprobante", defaultValue = "") Integer numeroComprobante,
+            Model modelo) {
+        Pageable pageable = PageRequest.of(page, cantidadRegistro);
+        ComprobantePK comprobantePK = new ComprobantePK();
+        comprobantePK.setCodigoSucursal(codigoSucursal);
+        comprobantePK.setCodigoPuntoExpedicion(codigoPuntoExpedicion);
+        comprobantePK.setNumeroComprobante(numeroComprobante);
 
-        Page<Comprobante> comprobantes = servicioComprobate.filtrar(pageable, filtro);
+        Page<Comprobante> comprobantes = servicioComprobate.filtrar(pageable, comprobantePK);
         List<ComprobanteDTO> comprobantesDTOs = new ArrayList<>();
         comprobantes.forEach(comprobante -> {
             ComprobanteDTO comprobanteDTO = new ComprobanteDTO();
@@ -125,11 +137,8 @@ public class ComprobanteController {
     @PostMapping("/listar/pagina")
     public @ResponseBody
     Page<Servicio> listarServicios(@RequestBody Paginador paginador) {
-        // el primer parametro corresponde al numero de pagina y el segundo cantidad der
-        // registro por pagina
         Pageable pageable = PageRequest.of(paginador.getNumeroPagina(), paginador.getCatidadRegistro());
         var servicios = servicioServicio.buscar(pageable, paginador.getFiltro());
-        // log.info("resultado: " + paginador);
 
         return servicios;
     }
@@ -248,21 +257,20 @@ public class ComprobanteController {
     @GetMapping("/facturar/{cuentaCorriente}")
     public String getServiciosCuenta(Servicio servicio, Comprobante comprobante, Model modelo) {
         modelo.addAttribute("titulo", "Comprobate");
-        
+
         servicio = servicioServicio.encontrar(servicio.getCuentaCorriente());
         modelo.addAttribute("servicio", servicio);
 
-        var comprobantePK = new ComprobantePK();
+        ComprobantePK comprobantePK = new ComprobantePK();
         modelo.addAttribute("comprobantePK", comprobantePK);
 
-        
         modelo.addAttribute("comprobante", comprobante);
 
         modelo.addAttribute("usuario", servicio.getUsuario());
 
         Categoria categoria = servicio.getCategoria();
         modelo.addAttribute("categoria", servicio.getCategoria());
-        
+
         Manzana manzana = servicio.getManzana();
         Cobrador cobrador = manzana.getCobrador();
         modelo.addAttribute("cobrador", cobrador);
@@ -299,20 +307,20 @@ public class ComprobanteController {
     @Transactional
     @ResponseBody
     public ResponseEntity<?> guardar(
-            @RequestParam String cuentaCorriente,
-            @RequestParam Integer codigoSerie,
-            @RequestParam Integer codigoTimbrado,
-            @RequestParam Integer numeroComprobante,
-            @RequestParam Integer codigoSucursal,
-            @RequestParam Integer codigoPuntoExpedicion,
-            @RequestParam Integer codigoTipoFactura,
-            @RequestParam Integer codigoMetodoPago,
-            @RequestParam Integer codigoCondicionVenta,
-            @RequestParam Integer codigoUsuario,
-            @RequestParam Integer codigoCobrador,
-            @RequestParam Integer codigoComision,
-            @RequestParam Integer cantidadPago,
-            @RequestParam double recargoPago) {
+            @RequestParam(required = false) String cuentaCorriente,
+            @RequestParam(required = false) Integer codigoSerie,
+            @RequestParam(required = false) Integer codigoTimbrado,
+            @RequestParam(required = false) Integer numeroComprobante,
+            @RequestParam(required = false) Integer codigoSucursal,
+            @RequestParam(required = false) Integer codigoPuntoExpedicion,
+            @RequestParam(required = false) Integer codigoTipoFactura,
+            @RequestParam(required = false) Integer codigoMetodoPago,
+            @RequestParam(required = false) Integer codigoCondicionVenta,
+            @RequestParam(required = false) Integer codigoUsuario,
+            @RequestParam(required = false) Integer codigoCobrador,
+            @RequestParam(required = false) Integer codigoComision,
+            @RequestParam(required = false) Integer cantidadPago,
+            @RequestParam(required = false) double recargoPago) {
 
         ComprobantePK comprobantePK = new ComprobantePK();
         comprobantePK.setNumeroComprobante(numeroComprobante);
@@ -402,7 +410,7 @@ public class ComprobanteController {
         Comprobante comprobante = servicioComprobate.getComprobante(comprobantePK);
         comprobante.setEstado(new Estado(3));
         comprobante.getDetalleComprobante().get(0).setObs(motivoAnulacion);
-        
+
         servicioComprobate.anular(comprobante);
         return ResponseEntity.ok("Comprobante anulada correctamente!!");
     }
@@ -411,8 +419,8 @@ public class ComprobanteController {
     @PostMapping("/getComprobante")
     public ResponseEntity<?> getComprobante(@RequestBody ComprobantePK comprobantePK) {
         Comprobante comprobante = servicioComprobate.getComprobante(comprobantePK);
-        if(comprobante.getEstado().getCodigoEstado()==3){
-           return ResponseEntity.status(HttpStatus.CONFLICT).body("Comprobante ya se encuentra anulada");
+        if (comprobante.getEstado().getCodigoEstado() == 3) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Comprobante ya se encuentra anulada");
         }
         ComprobanteDTO comprobanteDTO = new ComprobanteDTO();
         Servicio servicio = comprobante.getServicio();

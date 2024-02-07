@@ -26,32 +26,7 @@
 
 
         </header>
-        <div th:fragment="modal">
 
-            <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog ">
-                    <div class="modal-content bg-color ">
-                        <div class="modal-header">
-                            <h5 class="modal-title text-center" id="confirmacionModalLabel"> Confirmacion</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-
-                        </div>
-                        <div class="alert modal-body alert-dismissible fade show " role="alert">
-                            Seguro que desea continuar...??
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="button" class="btn btn-primario" id="confirmarBoton">Aceptar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-        </div>
         <aside id="menu_aside" th:fragment="aside" class="menu_aside">
             <ul>
                 <li><a href="/"> <i class="fa-solid fa-house fa-xl"></i> INICIO </a>
@@ -62,7 +37,7 @@
                             MANUAL </a></li>
                     <li id="factura-electronica"><a th:href="@{/comprobante/facturaElectronica}"> <i
                                 class="fa-solid fa-file-lines fa-xl"></i> FACTURA ELECTRONICA</a></li>
-                    <li id="facturas"><a th:href="@{/comprobante/listar}"> <i class="fa-solid fa-folder-open"></i>
+                    <li id="facturas" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"><a th:href="@{/comprobante/listar}"> <i class="fa-solid fa-folder-open"></i>
                             FACTURAS</a></li>
                 </ul>
 
@@ -71,21 +46,21 @@
                 <hr />
                 <li><a th:href="@{/usuario/listar}"> <i class="fa-solid fa-users-gear fa-xl"></i> USUARIOS</a></li>
                 <hr />
-                <li><a th:href="@{/categoria/listar}"> <i class="fa-solid fa-list fa-xl"></i> CATEGORIAS</a></li>
+                <li><a th:href="@{/categoria/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"> <i class="fa-solid fa-list fa-xl"></i> CATEGORIAS</a></li>
                 <hr />
-                <li> <a th:href="@{/cobrador/listar}"> <i class="fa-solid fa-people-group fa-xl"></i> COBRADORES</a></li>
+                <li> <a th:href="@{/cobrador/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"> <i class="fa-solid fa-people-group fa-xl"></i> COBRADORES</a></li>
                 <hr />
                 </li>
-                <li> <a th:href="@{/zona/listar}"><i <i class="fa-solid fa-route fa-xl"></i> ZONAS</a></li>
-                <hr />
-                <li><a  sec:authorize="hasAuthority('ADMIN')" th:href="@{/usuarioSistema/listar}"><i class="fas fa-users-cog fa-xl"></i> </i>USUARIOS SISTEMA</a></li>
+                <li> <a th:href="@{/zona/listar}"sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"><i <i class="fa-solid fa-route fa-xl"></i> ZONAS</a></li>
                 <hr />
                 <li>
-                    <a sec:authorize="hasAnyAuthority('ADMIN','SECRETARIO')" th:href="@{/reporte}">
+                    <a sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')" th:href="@{/reporte}">
                         <i class="fa-solid fa-chart-pie fa-xl"></i>
                         REPORTES
                     </a>
                 </li>
+                <hr />
+                <li sec:authorize="hasAnyAuthority('ROOT','ADMIN')"><a th:href="@{/usuarioSistema/listar}"><i class="fas fa-users-cog fa-xl"></i> </i>USUARIOS SISTEMA</a></li>
             </ul>
             <button id="btn-user" class="user-session">
                 <i class="fas fa-user-circle"></i>
@@ -134,8 +109,8 @@
             </script>
             <input type="hidden" id="token" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-            <p class="footer"> &copy; ALCMA Inc 2023
-                | Roles: <span  sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"></span>
+            <p class="footer">&copy; ALCMA Inc 2023
+               |S Roles: <span  sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"></span>
             </p>
 
         </footer>

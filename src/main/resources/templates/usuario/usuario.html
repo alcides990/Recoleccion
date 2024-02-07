@@ -5,7 +5,6 @@
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div th:replace="~{layout/layout :: modal}"> </div>
         <div class="container-fluid">
             <div class="card-header" ><h3 >Usuarios</h3></div>
             <div class="d-md-flex bg-opacity-100">
@@ -49,11 +48,11 @@
                             <td th:text="${usuario.direccion}"></td>
                             <td th:text= "${usuario.sucursal.nombreSucursal}+' '+${usuario.sucursal.ciudad.nombreCiudad}"></td>
                             <td>
-                                <a th:href="@{/usuario/editar/} + ${usuario.codigoUsuario}"
+                                <a sec:authorize="hasAnyAuthority('ROOT','ADMIN')" th:href="@{/usuario/editar/} + ${usuario.codigoUsuario}"
                                    class="btn btn-info btn-sm">
                                     <i class="fa-regular fa-pen-to-square"></i> 
                                 </a>
-                                <a id="eliminar" data-url="/usuario/eliminar/" 
+                                <a sec:authorize="hasAnyAuthority('ROOT','ADMIN')" id="eliminar" data-url="/usuario/eliminar/" 
                                    th:data-id="${usuario.codigoUsuario}" 
                                    class="btn btn-danger btn-sm" > 
                                     <i class="fa-solid fa-trash-can "></i> 
@@ -72,7 +71,7 @@
         <script>
 //           Lamara al metodo eliminar al hacer click en el boton eliminar
             $(document).ready(function () {
-                eliminar();
+                eliminar('Seguro que desea eliminar el usuario');
             });
         </script>
 

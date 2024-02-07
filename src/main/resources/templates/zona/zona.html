@@ -6,7 +6,6 @@
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div th:replace="~{layout/layout :: modal}"> </div>
         <div class="container">
             <div class="card-header"><h3>Zona</h3></div> 
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
@@ -64,7 +63,7 @@
         <script>
             $(document).ready(function () {
 //            Lamara al metodo eliminar al hacer click en el boton eliminar
-                eliminar();
+                eliminar('Seguro que desea eliminar la zona');
 //                Cargar idioma español a la tabla paginado con Jquerry data
                 $('#tabla').DataTable({
                     language: {

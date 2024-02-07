@@ -10,6 +10,7 @@ import ama.servicio.UsuarioSistemaService;
 import ama.utilerias.PageRender;
 import ama.validador.Mayuscula;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class UsuarioSistemaController {
     }
 
     @GetMapping("/listar")
-     @PreAuthorize("hasAnyAuthority({'ADMIN'})")
+    @PreAuthorize("hasAnyAuthority({'ADMIN','ROOT'})")
     public String listaUsuario(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "cantElemento", defaultValue = "10") int cantElemento,
@@ -93,7 +94,6 @@ public class UsuarioSistemaController {
         }
         String clave = encoder.encode(usuarioSistema.getClave());
         usuarioSistema.setClave(clave);
-        log.info(usuarioSistema.getCodigoUsuarioSistema().toString());
         usuarioSistemaService.save(usuarioSistema);
         flash.addFlashAttribute("mensaje", mensaje);
         return "redirect:/usuarioSistema/listar";
@@ -121,6 +121,7 @@ public class UsuarioSistemaController {
 
         return "usuarioSistema/modificarUsuarioSistema";
     }
+
     @GetMapping("/editarClave/{codigoUsuarioSistema}")
     public String editarClave(UsuarioSistema usuarioSistema, Model model) {
         model.addAttribute("titulo", "Usuario");
@@ -133,6 +134,38 @@ public class UsuarioSistemaController {
         return "usuarioSistema/editarClave";
     }
 
+    @PostMapping("/editarClave")
+    public String modifgicarContraseña(UsuarioSistema usuario, RedirectAttributes flash) {
+        UsuarioSistema usuarioSistema = usuarioSistemaService.findById(usuario.getCodigoUsuarioSistema()).orElse(null);
+        if (usuarioSistema == null) {
+            throw new Error("Usuario no encontrado !!");
+        }
+        String clave = encoder.encode(usuario.getClave());
+        usuarioSistema.setClave(clave);
+        usuarioSistemaService.save(usuarioSistema);
+        flash.addFlashAttribute("info", "Contraseña modificada corectamente!!");
+        return "redirect:/";
+
+    }
+
+    @PostMapping("/passwordReset/{codigoUsuarioSistema}")
+    public ResponseEntity<?> passwordReset(UsuarioSistema usuarioSistema) {
+        try {
+            usuarioSistema = usuarioSistemaService.findById(usuarioSistema.getCodigoUsuarioSistema()).orElse(null);
+            String clave = encoder.encode("1234");
+            usuarioSistema.setClave(clave);
+            usuarioSistema = usuarioSistemaService.save(usuarioSistema);
+
+            return ResponseEntity.ok("Clave reseteado al 1234, inicie secion y mofifique su clave!!");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ClaseError.excepcion("Error al realizar reseteo de Clave ", e));
+        }
+
+    }
+
+    @Transactional
     @PostMapping("/eliminar/{codigoUsuarioSistema}")
     public ResponseEntity<?> modal(UsuarioSistema usuarioSistema) {
         try {
@@ -143,10 +176,9 @@ public class UsuarioSistemaController {
             return ResponseEntity.ok("Usuario eliminado correctamente !!");
 
         } catch (Exception e) {
-            log.info(e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(ClaseError.excepcion("Error al eliminar usuario ", e));
-        }
+        } 
 
     }
 }

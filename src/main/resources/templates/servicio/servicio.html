@@ -7,7 +7,6 @@
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div th:replace="~{layout/layout :: modal}"> </div>
         <div class="container-fluid">
 
             <div class="card-header" ><h3>Cuentas</h3> </div>
@@ -151,7 +150,7 @@
         <script>
             $(document).ready(function ()
             {
-                eliminar();// Se carga la funcion eliminar  
+                eliminar('Seguro que desea eliminar esta cuenta');// Se carga la funcion eliminar  
                 //Cargar idioma español a la tabla paginado con Jquerry data
                 $('#tabla').DataTable({
                     language: {

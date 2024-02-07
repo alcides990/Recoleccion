@@ -56,7 +56,6 @@ public class Usuario implements Serializable {
         return "Usuario{" + "codigoUsuario=" + codigoUsuario + ", numeroDocumento=" + numeroDocumento + ", nombre=" + nombre + ", apellido=" + apellido  + ", celular=" + celular + ", telefono=" + telefono + ", barrio=" + barrio + ", direccion=" + direccion + ", observacion=" + observacion +  '}';
     }
 
-   
     
 
 }
