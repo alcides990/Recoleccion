@@ -14,6 +14,7 @@ public interface ZonaDao extends CrudRepository<Zona, Integer> {
     @Query("""
            SELECT z FROM Zona z 
            JOIN FETCH z.sucursal suc
+           JOIN FETCH z.cobrador cob
            JOIN FETCH suc.ciudad ciud
            """)
     List<Zona> listar();
@@ -21,9 +22,10 @@ public interface ZonaDao extends CrudRepository<Zona, Integer> {
 //  Enconrar zonas
     @Query("""
            SELECT z FROM Zona z 
+           JOIN FETCH z.cobrador cob
            JOIN FETCH z.sucursal suc
            JOIN FETCH suc.ciudad ciud
            WHERE z=?1
            """)
-    Zona econtrar(Zona zona);
+   Zona econtrar(Zona zona);
 }

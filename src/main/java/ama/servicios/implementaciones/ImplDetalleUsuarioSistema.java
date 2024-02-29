@@ -4,17 +4,17 @@ import ama.dao.DetalleUsuarioSistemaDao;
 import ama.dominio.DetalleUsuarioSistema;
 import ama.dominio.DetalleUsuarioSistemaPK;
 import ama.dominio.UsuarioSistema;
-import ama.servicio.ServicioDetalleUsuarioSistema;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
+import ama.servicio.DetalleUsuarioSistemaService;
 
 @Slf4j
 @Service
-public class ImplDetalleUsuarioSistema implements ServicioDetalleUsuarioSistema {
+public class ImplDetalleUsuarioSistema implements DetalleUsuarioSistemaService {
 
     @Autowired
     DetalleUsuarioSistemaDao detalleUsuarioSistemaDao;

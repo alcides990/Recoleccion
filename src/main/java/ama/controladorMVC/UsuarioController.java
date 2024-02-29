@@ -4,12 +4,6 @@ import ama.DTO.UsuarioDTO;
 import ama.dominio.Paginador;
 import ama.dominio.Usuario;
 import ama.errores.ClaseError;
-import ama.servicio.ServicioCiudad;
-import ama.servicio.ServicioCobrador;
-import ama.servicio.ServicioEstado;
-import ama.servicio.ServicioSucursal;
-import ama.servicio.ServicioTipoDocumento;
-import ama.servicio.ServicioUsuario;
 import ama.utilerias.PageRender;
 import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
@@ -36,6 +30,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import ama.servicio.CobradorService;
+import ama.servicio.SucursalService;
+import ama.servicio.CiudadService;
+import ama.servicio.EstadoService;
+import ama.servicio.TipoDocumentoService;
+import ama.servicio.UsuarioService;
 
 @Slf4j
 @Controller
@@ -43,20 +43,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class UsuarioController {
 
     @Autowired
-    private ServicioUsuario servicioUsuario;
+    private UsuarioService servicioUsuario;
 
     @Autowired
-    private ServicioSucursal servicioSucursal;
+    private SucursalService servicioSucursal;
 
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
     @Autowired
-    private ServicioCobrador servicioCobrador;
+    private CobradorService servicioCobrador;
     @Autowired
-    private ServicioEstado servicioEstado;
+    private EstadoService servicioEstado;
 
     @Autowired
-    private ServicioTipoDocumento servicioTipoDocumento;
+    private TipoDocumentoService servicioTipoDocumento;
 
     @Autowired
     private ModelMapper modelMapper;

@@ -2,13 +2,13 @@ package ama.servicios.implementaciones;
 
 import ama.dao.CobradorDao;
 import ama.dominio.Cobrador;
-import ama.servicio.ServicioCobrador;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ama.servicio.CobradorService;
 
 @Service
-public class ImplCobrador implements ServicioCobrador {
+public class ImplCobrador implements CobradorService {
 
     @Autowired
     CobradorDao cobradorDao;

@@ -3,13 +3,13 @@ package ama.servicios.implementaciones;
  
 import ama.dao.ComisionDao;
 import ama.dominio.Comision;
-import ama.servicio.ServicioComision;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ama.servicio.ComisionService;
 
 @Service
-public class ImplComision implements ServicioComision{
+public class ImplComision implements ComisionService{
 
     @Autowired
     ComisionDao comisionDao;

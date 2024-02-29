@@ -1,16 +1,13 @@
 $(document).ready(function () {
 
-//validar formulario de servicio--------------------------------------------
-//    Desabilitar cuenta corriente si la url es para editar
-    var url = window.location.pathname; //obtener url
+    var url = window.location.pathname;
     var cuentaCorriente = $("#cuentaCorriente").val();
     if (url === '/servicio/editar/' + cuentaCorriente) {
         $("#cuentaCorriente").prop('readonly', true);
         $("#fechaInicio").prop('readonly', true);
     }
-//    $("#fechaInicio").datepicker({
-//        dateFormat: "dd-mm-yy" // Formato de fecha personalizado
-//    });
+   
+
 
     $.datepicker.setDefaults($.datepicker.regional["es"]);
     $("#fechaInicio").datepicker({
@@ -19,5 +16,29 @@ $(document).ready(function () {
     );
 
 });
+
+ function formaterarCuentaCorriente() {
+        var cuentaCorriente = $("#cuentaCorriente").val();
+        var longitudCuentaCorriente = cuentaCorriente.length;
+
+        switch (longitudCuentaCorriente) {
+            case 2:
+                $("#cuentaCorriente").val(cuentaCorriente + '-');
+
+                break;
+            case 7:
+                $("#cuentaCorriente").val(cuentaCorriente + '-');
+
+                break;
+            case 11:
+                $("#cuentaCorriente").val(cuentaCorriente.substring(0, cuentaCorriente.length - 1) + '/' + cuentaCorriente.substring(cuentaCorriente.length - 1));
+
+                break;
+
+            default:
+
+                break;
+        }
+    }
 
 

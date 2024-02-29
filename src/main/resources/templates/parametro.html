@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}">  </head>
+    <body> 
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
+
+        <div class="container p-1"> 
+            <div class="card-header"> <h3>Datos del Parametro</h3> </div>
+            <div th:if="${mensaje}" class="mensaje-alerta alert alert-success">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="mensaje-alerta alert alert-danger">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/parametro/guardar}" method="post" th:object="${parametro}">
+                <div class="row d-flex m-1">
+                    <input type="hidden" name="codigoEmpresa"  th:value="${empresa.codigoEmpresa}" />
+                    <input type="hidden" name="codigoParametro"  th:value="*{codigoParametro}" />
+                    <div class="form-group col-sm-3">
+                        <label class="  form-label" for="ruc">RUC </label>
+                        <input type="text" name="ruc"  th:value="${empresa.ruc}" class="form-control"  required="campo ogligatorio"/>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label class="  form-label" for="razonSocial">Razon social </label>
+                        <input type="text" name="razonSocial"  th:value="${empresa.razonSocial}" class="form-control"  required="campo ogligatorio"/>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        <label class="  form-label" for="sucursal">Sucursal</label>
+                        <select th:object="${sucursal}" class="form-control" name="sucursal" >
+                            <option th:each="sucursal : ${sucursal}" 
+                                    th:value="${sucursal.codigoSucursal}"
+                                    th:text="${sucursal.nombreSucursal} +' '+${sucursal.ciudad.nombreCiudad} "  />
+                        </select>
+                    </div>
+                </div>
+                <div class="row d-flex m-1">
+                    <div class="form-group col-sm-2">
+                        <label class="  form-label" for="recargoMora">Recargo Mora %</label>
+                        <input type="text" name="recargoMora"  th:value="*{recargoMora}" class="form-control"  required="campo ogligatorio"/>
+                    </div>
+                    <div class="form-group col-sm-2">
+                        <label class="  form-label" for="cierrePeriodo">Cierre Periodo</label>
+                        <input type="text" name="cierrePeriodo" id="cierrePeriodo"  th:value="*{cierrePeriodo}" class="form-control"  required="campo ogligatorio"/>
+                    </div>
+                    <div class="form-group col-sm-3">
+                        <label class="  form-label" for="comision">Comision </label>
+                        <select th:object="${comision}" class="form-select" name="comision" >
+                            <option th:each="comision : ${comisiones}" 
+                                    th:value="${comision.codigoComision}"
+                                    th:text="${comision.nombreComision} " 
+                                    th:selected="${comision}== ${parametro.comision}"/>
+                        </select>
+                    </div>
+                </div>
+                <input type="submit" name="guardar" value="Guardar" class="btn-primario m-3"/>
+            </form>
+        </div>
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="/js/datepicker-es.js"></script>
+        <script>
+            $.datepicker.setDefaults($.datepicker.regional["es"]);
+            $("#cierrePeriodo").datepicker({
+                changeYear: true
+            }
+            );
+        </script>
+    </body>
+</html>

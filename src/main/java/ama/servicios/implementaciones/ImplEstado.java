@@ -3,13 +3,13 @@ package ama.servicios.implementaciones;
 
 import ama.dao.EstadoDao;
 import ama.dominio.Estado;
-import ama.servicio.ServicioEstado;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ama.servicio.EstadoService;
 
  @Service
-public class ImplEstado implements ServicioEstado {
+public class ImplEstado implements EstadoService {
 
     @Autowired
     EstadoDao EstadoDao;

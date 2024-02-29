@@ -1,13 +1,13 @@
 package ama.api.controladores;
 
 import ama.dominio.Ciudad;
-import ama.servicio.ServicioCiudad;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ama.servicio.CiudadService;
 
 @Slf4j
 @CrossOrigin(origins = {"*"})
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class ControladorCiudadApi {
 
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
 
     @GetMapping("/ciudades")
 

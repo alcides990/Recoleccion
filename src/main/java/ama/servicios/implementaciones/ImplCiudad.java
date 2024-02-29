@@ -2,13 +2,13 @@ package ama.servicios.implementaciones;
 
 import ama.dao.CiudadDao;
 import ama.dominio.Ciudad;
-import ama.servicio.ServicioCiudad;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ama.servicio.CiudadService;
 
 @Service
-public class ImplCiudad implements ServicioCiudad {
+public class ImplCiudad implements CiudadService {
 
     @Autowired
     CiudadDao ciudadDao;

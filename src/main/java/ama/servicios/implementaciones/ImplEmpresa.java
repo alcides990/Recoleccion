@@ -3,13 +3,13 @@ package ama.servicios.implementaciones;
  
 import ama.dao.EmpresaDao;
 import ama.dominio.Empresa;
-import ama.servicio.ServicioEmpresa;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ama.servicio.EmpresaServise;
 
 @Service
-public class ImplEmpresa implements ServicioEmpresa{
+public class ImplEmpresa implements EmpresaServise{
 
     @Autowired
     EmpresaDao empresaDao;
@@ -30,8 +30,8 @@ public class ImplEmpresa implements ServicioEmpresa{
     }
 
     @Override
-    public void encontrar(Empresa empresa) {
-       empresaDao.findById(empresa.getCodigoEmpresa()).orElse(null);
+    public Empresa encontrar(Empresa empresa) {
+      return empresaDao.findById(empresa.getCodigoEmpresa()).orElse(null);
     }
     
 }

@@ -24,8 +24,8 @@ public interface ServicioDao extends JpaRepository<Servicio, Integer> {
                       JOIN FETCH s.usuario u
                       JOIN FETCH s.categoria cat
                       JOIN FETCH s.manzana m
-                      JOIN FETCH m.cobrador cob
-                      JOIN FETCH m.zona 
+                      JOIN FETCH m.zona z
+                      JOIN FETCH z.cobrador cob
                       JOIN FETCH m.sucursal suc
                       JOIN FETCH suc.ciudad
                       JOIN FETCH s.estado est
@@ -47,8 +47,8 @@ public interface ServicioDao extends JpaRepository<Servicio, Integer> {
                      JOIN FETCH s.categoria cat
                      JOIN FETCH s.estado est
                      JOIN FETCH s.manzana m
-                     JOIN FETCH m.cobrador c
                      JOIN FETCH m.zona z
+                     JOIN FETCH z.cobrador c
                      JOIN FETCH m.sucursal suc
                      JOIN FETCH suc.ciudad
             WHERE s.cuentaCorriente= ?1

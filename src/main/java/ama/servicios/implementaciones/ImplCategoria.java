@@ -2,14 +2,14 @@ package ama.servicios.implementaciones;
 
 import ama.dao.CategoriaDao;
 import ama.dominio.Categoria;
-import ama.servicio.ServicioCategoria;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ama.servicio.CategoriaService;
 
 @Service
-public class ImplCategoria implements ServicioCategoria {
+public class ImplCategoria implements CategoriaService {
 
     @Autowired
     CategoriaDao categoriaDao;

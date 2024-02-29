@@ -2,20 +2,20 @@ package ama.servicios.implementaciones;
 
 import ama.dao.PuntoExpedicionDao;
 import ama.dominio.PuntoExpedicion;
-import ama.servicio.ServicioPuntoExpedicion;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ama.servicio.PuntoExpedicionService;
 
 @Service
-public class ImplPuntoiExpedicion implements ServicioPuntoExpedicion {
+public class ImplPuntoiExpedicion implements PuntoExpedicionService {
 
     @Autowired
     PuntoExpedicionDao puntoExpedicionDao;
 
     @Override
     public List<PuntoExpedicion> listar() {
-        return (List<PuntoExpedicion>) puntoExpedicionDao.findAll();
+        return (List<PuntoExpedicion>) puntoExpedicionDao.getPuntosExpedicion();
     }
 
     @Override

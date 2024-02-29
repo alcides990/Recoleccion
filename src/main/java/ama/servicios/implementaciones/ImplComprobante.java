@@ -9,14 +9,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ama.servicio.ServicioComprobante;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
+import ama.servicio.ComprobanteService;
+import java.util.Optional;
 
 @Slf4j
 @Service
-public class ImplComprobante implements ServicioComprobante {
+public class ImplComprobante implements ComprobanteService {
 
     @Autowired
     ComprobanteDao comprobanteDao;
@@ -30,7 +31,7 @@ public class ImplComprobante implements ServicioComprobante {
     @Transactional(readOnly = true)
     @Override
     public Page<Comprobante> filtrar(Pageable pageable, ComprobantePK comprobantePK) {
-        return (Page<Comprobante>) comprobanteDao.filtrarComprobantes(pageable, 
+        return (Page<Comprobante>) comprobanteDao.filtrarComprobantes(pageable,
                 comprobantePK.getCodigoSucursal(), comprobantePK.getCodigoPuntoExpedicion(),
                 comprobantePK.getNumeroComprobante());
     }
@@ -62,11 +63,11 @@ public class ImplComprobante implements ServicioComprobante {
     @Transactional(readOnly = true)
     @Override
     public Page<Comprobante> getComprobantesCuenta(Pageable page, Servicio servicio) {
-       Page<ComprobantePK> comprobantePKs = comprobanteDao.getComprobantePKs(page, servicio);
-       
-       List<Comprobante> comprobantes=comprobanteDao.getComprobantesCuenta(comprobantePKs.getContent());
-        
-        return new PageImpl<Comprobante>( comprobantes,page, comprobantePKs.getTotalElements());
+        Page<ComprobantePK> comprobantePKs = comprobanteDao.getComprobantePKs(page, servicio);
+
+        List<Comprobante> comprobantes = comprobanteDao.getComprobantesCuenta(comprobantePKs.getContent());
+
+        return new PageImpl<Comprobante>(comprobantes, page, comprobantePKs.getTotalElements());
     }
 
     @Override
@@ -76,7 +77,17 @@ public class ImplComprobante implements ServicioComprobante {
                 comprobantePK.getCodigoPuntoExpedicion(),
                 comprobantePK.getCodigoTipoFactura(),
                 comprobantePK.getCodigoSerie());
-        return numeroComprobante == null? 1: numeroComprobante + 1;
+        return numeroComprobante == null ? 1 : numeroComprobante + 1;
     }
 
+    @Override
+    public int getCantidadPago(String cuentaCorriente) {
+        Integer cantidadPago = comprobanteDao.getCantidadPago(cuentaCorriente);
+        return cantidadPago != null ? cantidadPago : 0;
+    }
+
+    @Override
+    public Optional<Comprobante> getUltimoComprobanteCuenta(String cuentaCorriente) {
+       return comprobanteDao.getUltimoComprobanteCuenta(cuentaCorriente);
+    }
 }

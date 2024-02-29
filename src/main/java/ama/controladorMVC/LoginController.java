@@ -29,7 +29,7 @@ public class LoginController {
             flash.addFlashAttribute("info", "Ya ha inciado sesión anteriormente");
             return "redirect:/";
         }
-        HttpSession session = request.getSession(false);
+        HttpSession session = request.getSession();
         UsuarioSistema usuarioSistema = (UsuarioSistema) session.getAttribute("usuarioSistema");
         String mensaje = null;
 
@@ -47,7 +47,7 @@ public class LoginController {
 
         if (logout
                 != null) {
-            model.addAttribute("logout", "Ha cerrado secion con exito!!");
+            model.addAttribute("info", "Ha cerrado secion con exito!!");
         }
 
         return "login";

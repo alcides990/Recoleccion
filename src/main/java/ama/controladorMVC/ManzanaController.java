@@ -1,23 +1,23 @@
 package ama.controladorMVC;
 
-import ama.dominio.Manzana;
-import ama.dominio.ManzanaPK;
+import ama.dominio.*;
 import ama.errores.ClaseError;
-import ama.servicio.ServicioCiudad;
-import ama.servicio.ServicioCobrador;
-import ama.servicio.ServicioDetalleZona;
-import ama.servicio.ServicioManzana;
-import ama.servicio.ServicioSucursal;
-import ama.servicio.ServicioZona;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import ama.servicio.CobradorService;
+import ama.servicio.ZonaService;
+import ama.servicio.SucursalService;
+import jakarta.servlet.http.HttpSession;
+import ama.servicio.ManzanaService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ama.servicio.CiudadService;
 
 @Slf4j
 @Controller
@@ -25,55 +25,63 @@ import org.springframework.web.bind.annotation.*;
 public class ManzanaController {
 
     @Autowired
-    private ServicioManzana servicioManzana;
+    private HttpSession httpSession;
     @Autowired
-    private ServicioDetalleZona servicioDetalleZona;
+    private ManzanaService manzanaService;
     @Autowired
-    private ServicioCobrador servicioCobrador;
+    private CobradorService cobradorService;
     @Autowired
-    private ServicioZona servicioZona;
+    private ZonaService zonaService;
     @Autowired
-    private ServicioSucursal servicioSucursal;
+    private SucursalService sucursalService;
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
 
-    @PostMapping("/listar")
+    @GetMapping("/listar")
     public ResponseEntity<?> listaDetalleZonaPorZona(@RequestBody Manzana manzana) {
-        return ResponseEntity.ok(servicioManzana.listar(manzana.getCobrador(), manzana.getZona()));
+        return ResponseEntity.ok(manzanaService.listar(manzana.getZona()));
     }
 
-//    @GetMapping("/agregar/{codigoZona}")
-//    public String agregar(Zona zona, Model model) {
-//        model.addAttribute("titulo", "Detalle Zona");
-//
-//        Zona zonaEcontrada = servicioZona.encontrar(zona);
-//        model.addAttribute("zona", zonaEcontrada);
-//
-//        model.addAttribute("sucursal", zonaEcontrada.getSucursal());
-//
-//        model.addAttribute("detalleZona", servicioDetalleZona.listar(zona));
-//
-//        model.addAttribute("cobradores", servicioCobrador.listar());
-//
-//        return "detalleZona/agregarDetalleZona";
-//    }
-//
+    @GetMapping("/editar")
+    public ResponseEntity<?> editarManzana(
+            @RequestParam Integer numeroManzana,
+            @RequestParam Integer codigoSucursal
+    ) {
+        ManzanaPK manzanaPK = new ManzanaPK(numeroManzana, codigoSucursal);
+        return ResponseEntity.ok(manzanaService.encontrar(manzanaPK));
+    }
+
+    @GetMapping("/agregar/{codigoZona}")
+    public String agregarManzana(Zona zona, Model model) {
+        Zona resultadoZona = zonaService.encontrar(zona);
+        model.addAttribute("zona", resultadoZona);
+
+        model.addAttribute("zonas", zonaService.listar());
+        model.addAttribute("cobrador", resultadoZona.getCobrador());
+
+        model.addAttribute("manzana", new Manzana());
+
+        model.addAttribute("manzanas", manzanaService.listar(zona));
+
+        model.addAttribute("sucursal", getUserSession().getSucursal());
+        return "manzana/agregar";
+    }
+
     @PostMapping("/guardar")
-    public ResponseEntity<String> guardar(Manzana manzana,
-            @RequestParam int numeroManzana, Model model) {
-        ManzanaPK manzanaPK = new ManzanaPK();
+    public ResponseEntity<String> guardar(Manzana manzana, ManzanaPK manzanaPK, Model model) {
+
         manzanaPK.setCodigoSucursal(manzana.getSucursal().getCodigoSucursal());
-        manzanaPK.setNumeroManzana(numeroManzana);
-        manzana.setManzanaPK(manzanaPK);
-        Manzana manzanaRecuperada = servicioManzana.encontrar(manzanaPK);
+        Manzana manzanaRecuperada = manzanaService.encontrar(manzanaPK);
+
         if (manzanaRecuperada != null) {
-            String mensaje = "Manzana N° " + manzanaPK.getNumeroManzana() + " ya se encueantra registrada en zona "+
-                    manzanaRecuperada.getZona().getNombreZona();
+            String mensaje = "Manzana N° " + manzanaPK.getNumeroManzana() + " ya se encueantra registrada en zona "
+                    + manzanaRecuperada.getZona().getNombreZona();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(mensaje);
         }
 
         try {
-            servicioManzana.guardar(manzana);
+            manzana.setManzanaPK(manzanaPK);
+            manzanaService.guardar(manzana);
             return ResponseEntity.ok("Manzana agregada correctamente!!");
 
         } catch (DataAccessException e) {
@@ -82,11 +90,38 @@ public class ManzanaController {
         }
 
     }
-    @Secured("hasAuthority('ADMIN')")
+
+    @PostMapping("/modificar")
+    public String modificar(Manzana manzana, ManzanaPK manzanaPK, RedirectAttributes flash,
+            @RequestParam Integer zonaVieja
+    ) {
+        manzanaPK.setCodigoSucursal(manzana.getSucursal().getCodigoSucursal());
+        Manzana manzanaRecuperada = manzanaService.encontrar(manzanaPK);
+        String mensaje;
+        if (manzanaRecuperada == null) {
+            mensaje = "Manzana N° " + manzanaPK.getNumeroManzana() + " no se encueantra registrada en la base de datos ";
+            flash.addFlashAttribute("mensaje", mensaje);
+        }
+
+        try {
+            manzana.setManzanaPK(manzanaPK);
+            manzanaService.guardar(manzana);
+            mensaje = "Manzana Modificada correctamente!!";
+            flash.addFlashAttribute("mensaje", mensaje);
+
+        } catch (DataAccessException e) {
+            mensaje = "Error al agregar manzana " + e.getMostSpecificCause().getMessage();
+            flash.addFlashAttribute("mensaje", mensaje);
+        }
+        return "redirect:/manzana/agregar/" + zonaVieja;
+
+    }
+
+    @PreAuthorize("hasAnyAuthority({'ADMIN'})")
     @PostMapping("/eliminar/{numeroManzana}/{codigoSucursal}")
     public ResponseEntity<String> eliminar(ManzanaPK manzanaPK) {
         try {
-            servicioManzana.eliminar(new Manzana(manzanaPK));
+            manzanaService.eliminar(new Manzana(manzanaPK));
             return ResponseEntity.ok().body("Manzana Eliminado Correctamente!!");
 
         } catch (Exception e) {
@@ -94,5 +129,9 @@ public class ManzanaController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("Error al Elimar Registro: " + ClaseError.excepcion("Error al eliminar manzana, ", e));
         }
+    }
+
+    private UsuarioSistema getUserSession() {
+        return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
     }
 }

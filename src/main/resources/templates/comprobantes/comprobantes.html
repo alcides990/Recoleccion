@@ -9,7 +9,7 @@
         <div class="container-fluid"> 
             <div class="card-header"> <h3>Comprobantes</h3></div>
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
-            <div class=" my-3 d-inline-flex justify-content-sm-start w-100">
+            <div class=" my-3 d-flex">
                 <div class="form-floating col-sm-2 me-2">  
                     <select th:object="${sucursal}" class="form-control" name="sucursal"  id="sucursal">
                         <option th:each="sucursal : ${sucursal}" 
@@ -61,13 +61,13 @@
                             <td th:text="${comprobante.tipoFactura.tipoFactura}"> </td>
                             <td th:text="${#numbers.formatInteger(comprobante.comprobantePK.numeroComprobante,7)}"> </td>
                             <td th:text="${comprobante.servicio.cuentaCorriente}"> </td>
-                            <td th:text="${comprobante.usuario.nombre}+' '+ ${comprobante.usuario.apellido}" >   </td>
+                            <td th:text="${comprobante.razonSocial}" >   </td>
                             <td th:text="${comprobante.fechaPago}"></td>
-                            <td th:text="${comprobante.detalleComprobante[0].periodoPago}"></td>
-                            <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"> 
-                                <td th:text="${comprobante.detalleComprobante[0].cantidadPago}"></td>
-                                <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].recargo, 0, 'COMMA', 0, 'POINT')}"></td>
-                                <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].importe+comprobante.detalleComprobante[0].recargo, 0, 'COMMA', 0, 'POINT')}"></td>
+                            <td th:text="${comprobante.detalleComprobante.periodoPago}"></td>
+                            <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"> 
+                                <td th:text="${comprobante.cantidadPago}"></td>
+                                <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
                                 <td th:text="${comprobante.estado.estado}"></td>
                                 <td  title="Anular">
                                     <a   id="anular" 
@@ -125,14 +125,14 @@
                                 </div>
 
                                 <div class="col-sm-2"> 
-                                    <label  for="sucursal">Sucursal</label>
-                                    <select class="form-select"  name="sucursal"  id="sucursal">
+                                    <label  for="sucursalAnular">Sucursal</label>
+                                    <select class="form-select"  name="sucursalAnular"  id="sucursalAnular">
                                         <option>Sucursal</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-2"> 
-                                    <label for="puntoExpedicion">PuntoExpedicion</label>
-                                    <select  class="form-select" name="puntoExpedicion"  id="puntoExpedicion">
+                                    <label for="puntoExpedicionaAnular">PuntoExpedicion</label>
+                                    <select  class="form-select" name="puntoExpedicionaAnular"  id="puntoExpedicionaAnular">
                                         <option/>Punto Expedicion</select>
                                     </select>
                                 </div>
@@ -201,10 +201,10 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-4">
-                                        <label  for="totalDeuda">Total:</label>
+                                        <label  for="totalPago">Total:</label>
                                     </div>
                                     <div class="col">
-                                        <input  type="text" readonly="true" name="totalDeuda" id="totalDeuda" class="form-control"  />
+                                        <input  type="text" readonly="true" name="totalPago" id="totalPago" class="form-control"  />
                                     </div>
                                 </div>
                             </div>
@@ -236,7 +236,6 @@
                     $("#txtBuscar").val(numeroComprobante.toString().padStart(7, 0));
                 }
             });
-            console.log('numero comprobante; ' +numeroComprobante);
             var time;
             $("#txtBuscar").keyup(function (e) {
                 clearTimeout(time);

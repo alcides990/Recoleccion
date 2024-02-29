@@ -1,6 +1,6 @@
 package ama;
 
-import ama.dao.DetalleUsuarioSistemaDao;
+import ama.servicio.ParametroService;
 import ama.servicio.UsuarioSistemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,19 +14,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @SpringBootApplication
 @Slf4j
 public class recolecion implements CommandLineRunner {
- @Autowired
-    private  BCryptPasswordEncoder encoder;
-
+    
+    @Autowired
+    private BCryptPasswordEncoder encoder;
+    
     @Autowired
     UsuarioSistemaService usuarioSistemaService;
     @Autowired
-    DetalleUsuarioSistemaDao detalleUsuarioSistemaDao;
-
+    ParametroService parametroService;
+    
     public static void main(String[] args) {
-
+        
         SpringApplication.run(recolecion.class, args);
     }
-
+    
     @Override
     public void run(String... args) throws Exception {
         Pageable pageable = PageRequest.of(0, 5);
@@ -45,7 +46,8 @@ public class recolecion implements CommandLineRunner {
 //        });
 //        comprobante.forEach(System.out::println);
 
-//        log.info(encoder.encode("1234"));
+//        log.info(encoder.encode("123"));
+      
     }
-
+    
 }

@@ -3,17 +3,20 @@ package ama.dominio;
 
 import java.io.Serializable;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Embeddable
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Embeddable
 public class DetalleComprobantePK implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Basic(optional = false)
-    @Column(name = "codigo_metodo_pago")
-    private Integer codigoMetodoPago;
     
     @Basic(optional = false)
     @Column(name = "codigo_sucursal")

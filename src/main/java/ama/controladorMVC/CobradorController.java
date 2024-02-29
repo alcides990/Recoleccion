@@ -2,10 +2,6 @@ package ama.controladorMVC;
 
 import ama.dominio.Cobrador;
 import ama.errores.ClaseError;
-import ama.servicio.ServicioCiudad;
-import ama.servicio.ServicioCobrador;
-import ama.servicio.ServicioEstado;
-import ama.servicio.ServicioSucursal;
 import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
 import jakarta.validation.Valid;
@@ -25,6 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ama.servicio.CobradorService;
+import ama.servicio.SucursalService;
+import ama.servicio.CiudadService;
+import ama.servicio.EstadoService;
 
 @Slf4j
 @Controller
@@ -41,14 +41,14 @@ public class CobradorController {
     }
 
     @Autowired
-    private ServicioSucursal servicioSucursal;
+    private SucursalService servicioSucursal;
 
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
     @Autowired
-    private ServicioCobrador servicioCobrador;
+    private CobradorService servicioCobrador;
     @Autowired
-    private ServicioEstado servicioEstado;
+    private EstadoService servicioEstado;
 
     @GetMapping("/listar")
     public String listaCobradores(Model modelo) {
@@ -94,7 +94,7 @@ public class CobradorController {
         return "redirect:/cobrador/listar";
     }
 
-  @PreAuthorize("hasAnyAuthority({'ADMIN'})")
+    @PreAuthorize("hasAnyAuthority({'ADMIN'})")
     @GetMapping("/editar/{codigoCobrador}")
     public String editar(Cobrador cobrador, Model model) {
         cobrador = servicioCobrador.encontrar(cobrador);

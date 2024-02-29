@@ -6,7 +6,7 @@
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container"> 
+        <div class="container "> 
             <h1>Datos de Punto de Expedicion</h1>
             <a th:href="@{/puntoExpedicion/listar}" class="btn-primario ">Regresar</a>
             <form th:action="@{/puntoExpedicion/guardar}" method="post" th:object="${puntosExpedicion}">
@@ -41,7 +41,7 @@
                         </select>
                     </div>
                 </div>
-                <input type="submit" name="guardar" value="Guardar" class="btn btn-success"/>
+                <input type="submit" name="guardar" value="Guardar" class="btn btn-primario my-3"/>
             </form>
             <br/>
         </div>

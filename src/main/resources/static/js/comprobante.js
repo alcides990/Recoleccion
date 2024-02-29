@@ -1,28 +1,30 @@
 
 function fechaPagoHastaFormateada(pagoHasta) {
-    var fecha = new Date(pagoHasta);
+    var fecha = new Date(pagoHasta + 'T00:00:00');
     var anio = fecha.getFullYear();
     var mes = fecha.getMonth() + 1;
     var dia = fecha.getDate();
-    var fechaFormateada = dia.toString().padStart(2, '0') + '-' + mes.toString().padStart(2, '0') + '-' + anio;
+    var fechaFormateada = anio + '-' + mes.toString().padStart(2, '0') + '-' + dia.toString().padStart(2, '0');
     return fechaFormateada;
 }
+
 function cargarDatosComprobante(datos, url) {
     consultar(datos, url)
             .then(function (data) {
                 $("#razonSocial").val(data.usuario.nombre + ' ' + data.usuario.apellido);
                 $("#numeroDocumento").val(data.usuario.numeroDocumento);
                 $("#categoria").empty();
-                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
+                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.nombreCategoria + '-' + data.categoria.tarifa + '</option>');
                 $("#cobrador").empty();
-                $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
+                $("#cobrador").append('<option value="' + data.manzana.zona.cobrador.codigoCobrador + '">' + data.manzana.zona.cobrador.nombre + ' ' + data.manzana.zona.cobrador.apellido + '</option>');
                 $("#tarifa").val(data.categoria.tarifa);
 
                 $("#pagoHasta").val(fechaPagoHastaFormateada(data.estadoCuenta.pagoHasta));
                 $("#cantidadDeuda").val(data.estadoCuenta.cantidadDeuda);
-                $("#subTotal").val(data.estadoCuenta.subTotal.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+                $("#subTotal").val(formatPYG(data.estadoCuenta.subTotal));
+                $("#saldoAnterior").val(formatPYG(data.estadoCuenta.saldoAnterior));
                 $("#recargoPago").val(data.estadoCuenta.recargo);
-                $("#totalDeuda").val(data.estadoCuenta.totalDeuda.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+                $("#totalPagar").val(formatPYG(data.estadoCuenta.totalDeuda));
                 if ($("#tipoFactura option:selected").text() == 'MANUAL') {
                     $("#numeroComprobante").focus();
                 } else {
@@ -61,26 +63,23 @@ $(document).on('click', '#anular', function (event) {
                 $("#numeroDocumento").val(data.numeroDocumento);
                 $("#numeroComprobante").val(data.numeroComprobante);
                 $("#categoria").empty();
-                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.categoriaConTarifa + '</option>');
+                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.tarifa + '-' + data.categoria.nombreCategoria + '</option>');
+                $("#tarifa").val(data.categoria.tarifa);
                 $("#cobrador").empty();
                 $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
-                $("#tarifa").val(data.categoria.tarifa);
-                $("#sucursal").empty();
-                $("#sucursal").append('<option value="' + data.sucursal.codigoSucursal + '">' + data.sucursal.nombreSucursal + '</option>');
-                $("#tarifa").val(data.categoria.tarifa);
-                $("#puntoExpedicion").empty();
-                $("#puntoExpedicion").append('<option value="' + data.puntoExpedicion.codigoPuntoExpedicion + '">' + data.puntoExpedicion.nombrePuntoExpedicion + '</option>');
-                $("#tarifa").val(data.categoria.tarifa);
+                $("#sucursalAnular").empty();
+                $("#sucursalAnular").append('<option value="' + data.sucursal.codigoSucursal + '">' + data.sucursal.nombreSucursal + '</option>');
+                $("#puntoExpedicionaAnular").empty();
+                $("#puntoExpedicionaAnular").append('<option value="' + data.puntoExpedicion.codigoPuntoExpedicion + '">' + data.puntoExpedicion.nombrePuntoExpedicion + '</option>');
                 $("#tipoFactura").empty();
                 $("#tipoFactura").append('<option value="' + data.tipoFactura.codigoTipoFactura + '">' + data.tipoFactura.tipoFactura + '</option>');
-                $("#tarifa").val(data.categoria.tarifa);
                 $("#condicionVenta").empty();
                 $("#condicionVenta").append('<option value="' + data.condicionVenta.codigoCondicionVenta + '">' + data.condicionVenta.condicionVenta + '</option>');
                 $("#periodoPago").val(data.periodoPago);
                 $("#cantidadPago").val(data.cantidadPago);
-                $("#subTotal").val(data.importe.toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+                $("#subTotal").val(formatPYG(data.importe));
                 $("#recargoPago").val(data.recargo);
-                $("#totalDeuda").val((data.importe + data.recargo).toLocaleString('es-ES', {style: 'currency', currency: 'PYG'}));
+                $("#totalPago").val(formatPYG(data.importe + data.recargo));
             });
 });
 tabulador("#numeroComprobante", "#cantidadPago");
@@ -98,23 +97,24 @@ $("#cantidadPago").blur(function (e) {
     var cantidadPago = $('#cantidadPago').val();
     var tarifa = $('#tarifa').val();
     subTotal = cantidadPago * tarifa;
-    $('#subTotal').val(subTotal.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
+    $('#subTotal').val(formatPYG(subTotal));
 });
 $("#recargoPago").on('keyup', function (e) {
-    var recargo = 0;
-    var total = 0;
-    recargo = parseInt($("#recargoPago").val());
-    total = recargo + subTotal;
+    let recargo = parseInt(soloNumero($("#recargoPago").val()));
+    let saldoAnterior = parseInt(soloNumero($("#saldoAnterior").val()));
+    let total = 0;
+    total = recargo + subTotal - saldoAnterior;
     if ($("#recargoPago").val() !== '') {
-        $("#totalDeuda").val(total.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
+        $("#totalPagar").val(formatPYG(total));
     }
+    ;
 });
 $("#recargoPago").blur(function (e) {
-    var recargo = 0;
-    var total = 0;
-    recargo = parseInt($("#recargoPago").val());
+    let recargo = parseInt($("#recargoPago").val());
+    let total = 0;
+
     total = recargo + subTotal;
-    $("#totalDeuda").val(total.toLocaleString('es-PY', {style: 'currency', currency: 'PYG'}));
+    $("#totalDeuda").val(formatPYG(total));
 });
 //    -----------------GUARDAR COMPROBANTE-------------------------------
 //Campos a limpira
@@ -132,49 +132,159 @@ var campos = [
     "#recargoPago",
     "#totalDeuda"
 ];
+
+function metosdosPagoAgregados() {
+    return  $("#tablaMetodoPago tbody tr").length;
+}
+
+$(document).on('click', 'tr  td #eliminar', function (event) {
+    $(this).closest('tr').remove();
+    sumarImportes();
+});
+
+function formatPYG(number) {
+    return parseInt(number).toLocaleString('es-PY', {style: 'currency', currency: 'PYG'});
+}
+
+function soloNumero(value) {
+    return value.replace(/[^0-9]/g, '');
+}
+
+$("#importe").on('keypress', function (e) {
+    if (e.keyCode === 13) {
+        agregarMetodoPago();
+    }
+});
+
+function limpiarMetodosPago() {
+    $('#tablaMetodoPago tbody ').empty();
+    limpiar([$("#totalImporte")]);
+}
+function agregarMetodoPago() {
+    if ($("#importe").val().trim() !== '') {
+        let importe = parseInt($("#importe").val());
+        let codigoMetodoPago = $("#metodoPagoSelect").val();
+        let metodoPago = $("#metodoPagoSelect").find('option:selected').text();
+
+        $('#tablaMetodoPago tbody tr').each(function (index, element) {
+            if (codigoMetodoPago == $(this).find('td:eq(0)').text()) {
+                importeTr = parseInt($(this).find('td:eq(2)').text());
+                importe += importeTr;
+                element.remove();
+            }
+
+        });
+        let datos = `
+            <tr> 
+                <td>${codigoMetodoPago}</td>
+                <td>${metodoPago}</td>
+                <td>${importe}</td>
+                <td> <a id="eliminar" class="btn btn-danger eliminar btn-sm" >
+                                    <i class="fa-regular fa-trash-can"></i>
+                     </a>
+                </td>
+            </tr>
+`;
+        $("#tablaMetodoPago tbody").append(datos);
+        sumarImportes();
+        limpiar([$("#importe")]);
+    }
+}
+function sumarImportes() {
+    let totalImporte = 0;
+    if (metosdosPagoAgregados() > 0) {
+        $('#tablaMetodoPago tbody tr').each(function (index, element) {
+            importe = parseInt($(this).find('td:eq(2)').text());
+            totalImporte += importe;
+        });
+    }
+    $("#totalImporte").val(formatPYG(totalImporte));
+}
+
+$('#configModal').on('hidden.bs.modal', function (e) {
+    if (metosdosPagoAgregados() !== 0) {
+        $("#metodoPago").hide();
+    } else {
+        $("#metodoPago").show();
+    }
+});
+function getDetallePago() {
+    let detallePago = [];
+    if (metosdosPagoAgregados() > 0) {
+        $('#tablaMetodoPago tbody tr').each(function (index, element) {
+            let codigoMetodoPago = parseInt($(this).find('td:eq(0)').text());
+            let  importe = parseInt($(this).find('td:eq(2)').text());
+            let metodoPago = {
+                detallePagoPK: {
+                    codigoMetodoPago: codigoMetodoPago
+                },
+                importe: importe
+            };
+            detallePago.push(metodoPago);
+        });
+    } else {
+        let codigoMetodoPago = $("#metodoPago").val();
+        let importe = (soloNumero($("#totalPagar").val()));
+        let metodoPago = {
+            detallePagoPK: {
+                codigoMetodoPago: codigoMetodoPago
+            },
+            importe: importe
+        };
+        detallePago.push(metodoPago);
+    }
+    return detallePago;
+}
+
+
+
 $('#frm-comprobante').submit(function (event) {
     event.preventDefault();
-    var codigoSerie = 0;
-    var codigoTimbrado = 1;
-    var codigoUsuario = 1;
-    var codigoMetodoPago = 1;
-    var codigoComision = 1;
-    var codigoCondicionVenta = 1;
-    var cuentaCorriente = $("#cuentaCorriente").val();
-    var numeroComprobante = $("#numeroComprobante").val();
-    var codigoSucursal = $("#sucursal").val();
-    var codigoPuntoExpedicion = $("#puntoExpedicion").val();
-    var codigoTipoFactura = $("#tipoFactura").val();
-    var codigoCobrador = $("#cobrador").val();
-    var cantidadPago = $("#cantidadPago").val();
-    var recargoPago = $("#recargoPago").val();
-    var url = '/comprobante/guardar';
-    var datos = {
+    let codigoSerie = 0;
+    let codigoTimbrado = 1;
+    let codigoComision = 1;
+    let codigoCondicionVenta = 1;
+    let pagoHasta = $("#pagoHasta").val();
+    let cuentaCorriente = $("#cuentaCorriente").val();
+    let numeroComprobante = $("#numeroComprobante").val();
+    let codigoPuntoExpedicion = $("#puntoExpedicion").val();
+    let codigoTipoFactura = $("#tipoFactura").val();
+    let codigoCobrador = $("#cobrador").val();
+    let cantidadPago = $("#cantidadPago").val();
+    let recargoPago = $("#recargoPago").val();
+    let saldoAnterior = soloNumero($("#saldoAnterior").val());
+    let url = '/comprobante/guardar';
+
+    console.log();
+
+    let datos = {
         codigoSerie: codigoSerie,
         codigoTimbrado: codigoTimbrado,
         cuentaCorriente: cuentaCorriente,
         numeroComprobante: numeroComprobante,
-        codigoSucursal: codigoSucursal,
         codigoPuntoExpedicion: codigoPuntoExpedicion,
         codigoTipoFactura: codigoTipoFactura,
-        codigoUsuario: codigoUsuario,
         codigoCobrador: codigoCobrador,
         codigoCondicionVenta: codigoCondicionVenta,
-        codigoMetodoPago: codigoMetodoPago,
         codigoComision: codigoComision,
+        pagoHasta: pagoHasta,
         cantidadPago: cantidadPago,
-        recargoPago: recargoPago
+        recargoPago: recargoPago,
+        saldoAnterior: saldoAnterior,
+        detallePago: getDetallePago()
     };
-    guardar(datos, url);
-    limpiar(campos);
+    let contenType = 'application/json';
+    guardar(datos, url, contenType);
+
 });
+
 $('#frm-comprobante-anular').submit(function (event) {
     event.preventDefault();
     var codigoSerie = 0;
     var codigoTimbrado = 1;
     var numeroComprobante = $("#numeroComprobante").val();
-    var codigoSucursal = $("#sucursal").val();
-    var codigoPuntoExpedicion = $("#puntoExpedicion").val();
+    var codigoSucursal = $("#sucursalAnular").val();
+    var codigoPuntoExpedicion = $("#puntoExpedicionAnular").val();
     var codigoTipoFactura = $("#tipoFactura").val();
     var motivoAnulacion = $("#motivoAnulacion").val();
     var url = '/comprobante/anular';
@@ -187,9 +297,9 @@ $('#frm-comprobante-anular').submit(function (event) {
         codigoTipoFactura: codigoTipoFactura,
         motivoAnulacion: motivoAnulacion
     };
-    guardar(datos, url);
+    guardarComprobante(datos, url);
 });
-function guardar(datos, url) {
+function guardarComprobante(datos, url) {
     let token = $("#token").val();
     $.ajax({
         headers: {
@@ -199,15 +309,26 @@ function guardar(datos, url) {
         data: datos,
         type: "post",
         success: function (response) {
-            mostrarAlerta(response, url, 'success', false, true);
-            getNumComprobante();
+            mostrarAlerta({
+                mensaje: response,
+                url: url,
+                tipo: 'success',
+                redirigir: false,
+                recargar: false
+            });
+            limpiar(campos);
+            generarNumeroComprobante();
         },
-        error: function (jqXHR, textStatus, errorThrown) {
-            var mensajeError = jqXHR.responseText;
-            if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
-                mensajeError = jqXHR.responseJSON.message;
+        error: function (error) {
+            var mensajeError = error.responseText;
+            if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                mensajeError = error.responseJSON.message;
             }
-            mostrarAlerta(mensajeError, url, 'danger');
+            mostrarAlerta({
+                mensaje: mensajeError,
+                url: url,
+                tipo: 'danger'
+            });
         }
     });
 }
@@ -259,12 +380,16 @@ function buscarComprobantes() {
                     $("tbody").append(datosTabla);
                 });
             },
-            error: function (jqXHR, textStatus, errorThrown) {
-                var mensajeError = jqXHR.responseText;
-                if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
-                    mensajeError = jqXHR.responseJSON.message;
+            error: function (error) {
+                var mensajeError = error.responseText;
+                if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                    mensajeError = error.responseJSON.message;
                 }
-                mostrarAlerta(mensajeError, url, 'danger');
+                mostrarAlerta({
+                    mensaje: mensajeError,
+                    url: url,
+                    tipo: 'danger'
+                });
             }
         });
     }
@@ -291,13 +416,11 @@ function generarNumeroComprobante() {
         $("#numeroComprobante").prop('readonly', true);
     }
 
-    var codigoSucursal = $("#sucursal").val();
     var codigoPuntoExpedicion = $("#puntoExpedicion").val();
     var codigoTipoFactura = $("#tipoFactura").val();
     var codigoSerie = 0;
     var url = '/comprobante/numComprobante';
     var datos = {
-        codigoSucursal: codigoSucursal,
         codigoPuntoExpedicion: codigoPuntoExpedicion,
         codigoTipoFactura: codigoTipoFactura,
         codigoSerie: codigoSerie
@@ -316,9 +439,13 @@ function generarNumeroComprobante() {
             $("#numeroComprobante").val(data.toString().padStart(7, 0));
             $("#cuentaCorriente").focus();
         },
-        error: function (jqXHR, textStatus, errorThrown) {
+        error: function (error) {
 
-            mostrarAlerta(jqXHR.responseText, url, 'danger');
+            mostrarAlerta({
+                mensaje: error,
+                url: url,
+                tipo: 'success'
+            });
         }
     });
 

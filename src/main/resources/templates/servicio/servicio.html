@@ -28,7 +28,7 @@
             <div class="mensaje-alerta" id="contenedor-alertas"> </div>
             <div class="table-responsive-xl">
                 <table id="tabla-servicio" class="table  table-dark table-border table-striped table-colapse table-hover" >
-                   
+
                     <thead class="thead-dark">
                         <tr>
                             <th class="sticky-start ">Cuentacorriente</th>
@@ -37,7 +37,6 @@
                             <th>cagtegoria</th>
                             <th>Estado</th>
                             <th>EstadoCuenta</th>
-                            <th>Faturar</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -49,8 +48,10 @@
                             <td th:text="${servicio.categoria.tarifa}+'-'+${servicio.categoria.nombreCategoria}"></td>
                             <td th:text="${servicio.estado.estado}"></td>
                             <td ><a th:href="@{/servicio/estadoCuenta/} + ${servicio.cuentaCorriente}" class="btn btn-primario btn-sm"th:text="EstadoCuenta"/> </td>
-                            <td ><a th:href="@{/comprobante/facturar/} + ${servicio.cuentaCorriente}" class="btn btn-primario btn-sm"th:text="Facturar"/> </td>
                             <td>
+                                <a th:href="@{/comprobante/facturar/} + ${servicio.cuentaCorriente}"
+                                   class="btn btn-primario btn-sm"th:text="Facturar">
+                                </a>
                                 <a  sec:authorize="hasAnyAuthority('ADMIN')" 
                                     id="editar"  th:data-id="${servicio.cuentaCorriente}"
                                     class="btn btn-info btn-sm"
@@ -85,7 +86,7 @@
                                 <input type="text"  hidden="true" name="accion" id="accion"> 
                                     <div class="form-label col-md-3"> 
                                         <label class="form-label"  for="cuentaCorriente">Cuentacorriente </label>
-                                        <input type="text"  id="cuentaCorriente" name="cuentaCorriente" class="form-control " />
+                                        <input onkeyup="formaterarCuentaCorriente()" type="text"  id="cuentaCorriente" name="cuentaCorriente" class="form-control " />
                                     </div>
 
                                     <input type="text" hidden="true" id="codigoUsuario" name="codigoUsuario" />
@@ -148,86 +149,84 @@
         <script src="/js/buscarUsuario.js"></script>
         <script src="/js/validarFormulario.js" async="true"></script>
         <script>
-            $(document).ready(function ()
-            {
-                eliminar('Seguro que desea eliminar esta cuenta');// Se carga la funcion eliminar  
-                //Cargar idioma español a la tabla paginado con Jquerry data
-                $('#tabla').DataTable({
-                    language: {
-                        url: '/i18n/es-ES.json'
-                    }
-                });
-                //Definir nombres de los campos
-                var cuentaCorriente = "#cuentaCorriente";
-                var fechaInicio = "#fechaInicio";
-                var buscarUsuario = "#buscarUsuario";
-                var numeroDocumento = "#numeroDocumento";
-                var buscarUsuario = "#buscarUsuario";
-                var accion = "";
+                                            $(document).ready(function () {
+                                                eliminar('Seguro que desea eliminar esta cuenta');// Se carga la funcion eliminar  
+                                                //Cargar idioma español a la tabla paginado con Jquerry data
+                                                $('#tabla').DataTable({
+                                                    language: {
+                                                        url: '/i18n/es-ES.json'
+                                                    }
+                                                });
+                                                //Definir nombres de los campos
+                                                var cuentaCorriente = "#cuentaCorriente";
+                                                var fechaInicio = "#fechaInicio";
+                                                var buscarUsuario = "#buscarUsuario";
+                                                var numeroDocumento = "#numeroDocumento";
+                                                var buscarUsuario = "#buscarUsuario";
+                                                var accion = "";
 
-                var campos = [cuentaCorriente, fechaInicio, buscarUsuario, numeroDocumento];
+                                                var campos = [cuentaCorriente, fechaInicio, buscarUsuario, numeroDocumento];
 
-                $("#servicioModal").on('shown.bs.modal', function () {
-                    tabular(cuentaCorriente);
-                });
-                // Abrir ventana categoria al presionar agregar categoria
-                $("#btnAgrerar").click(function (event) {
-                    event.preventDefault();
-                    limpiar(campos);
-                    $("#accion").val("agregar");
-                    $("#servicioModal").modal('show');
-                });
-                // Tabular campos
-                tabulador(cuentaCorriente, buscarUsuario);
-                tabulador(buscarUsuario, fechaInicio);
-                //Cargar Datos al Abrir ventana modal para editar
-                $(document).on('click', '#editar', function (event)
-                {
-                    $(cuentaCorriente).prop("readonly", true);
-                    $(fechaInicio).prop("disabled", true);
-                    var url = '/servicio/editar';
-                    var servicio = {cuentaCorriente: $(this).data('id')};
+                                                $("#servicioModal").on('shown.bs.modal', function () {
+                                                    tabular(cuentaCorriente);
+                                                });
+                                                // Abrir ventana categoria al presionar agregar categoria
+                                                $("#btnAgrerar").click(function (event) {
+                                                    event.preventDefault();
+                                                    limpiar(campos);
+                                                    $("#accion").val("agregar");
+                                                    $("#servicioModal").modal('show');
+                                                });
+                                                // Tabular campos
+                                                tabulador(cuentaCorriente, buscarUsuario);
+                                                tabulador(buscarUsuario, fechaInicio);
+                                                //Cargar Datos al Abrir ventana modal para editar
+                                                $(document).on('click', '#editar', function (event) {
+                                                    $(cuentaCorriente).prop("readonly", true);
+                                                    $(fechaInicio).prop("disabled", true);
+                                                    var url = '/servicio/editar';
+                                                    var servicio = {cuentaCorriente: $(this).data('id')};
 
-                    consultar(servicio, url)
-                            .then(function (respuesta) {
-                                $(cuentaCorriente).val(respuesta.cuentaCorriente);
-                                $(fechaInicio).val(respuesta.fechaInicio);
-                                $(numeroDocumento).val(respuesta.numeroDocumento);
-                                $("#codigoUsuario").val(respuesta.usuario.codigoUsuario);
-                                $(numeroDocumento).val(respuesta.usuario.numeroDocumento);
-                                $(buscarUsuario).val(respuesta.usuario.nombre+' '+respuesta.usuario.apellido);
-                                $("#categoria").val(respuesta.categoria.codigoCategoria);
-                                $("#estado").val(respuesta.estado.codigoEstado);
-                                $("#accion").val("editar");
-                            });
-                });
-                //Recuperar los datos al enviar formulario
-                $('#frm-servicio').submit(function (event) {
-                    event.preventDefault();
-                    var servicio = {
-                        cuentaCorriente: $("#cuentaCorriente").val(),
-                        fechaInicio: $("#fechaInicio").val(),
-                        usuario: {
-                            codigoUsuario: $("#codigoUsuario").val()
-                        },
-                        categoria: {
-                            codigoCategoria: $("#categoria").val()
-                        },
-                        sucursal: {
-                            codigoSucursal: $("#sucursal").val()
-                        },
-                        estado: {
-                            codigoEstado: $("#estado").val()
-                        }
-                    };
-                    accion = $("#accion").val();
-                    var contentType = 'application/json';
-                    var url = "/servicio/guardar/" + accion;
-                    guardar(servicio, url, contentType);
-                    $("#servicioModal").modal('hide');
-                    
-                });
-            });
+                                                    consultar(servicio, url)
+                                                            .then(function (respuesta) {
+                                                                $(cuentaCorriente).val(respuesta.cuentaCorriente);
+                                                                $(fechaInicio).val(respuesta.fechaInicio);
+                                                                $(numeroDocumento).val(respuesta.numeroDocumento);
+                                                                $("#codigoUsuario").val(respuesta.usuario.codigoUsuario);
+                                                                $(numeroDocumento).val(respuesta.usuario.numeroDocumento);
+                                                                $(buscarUsuario).val(respuesta.usuario.nombre + ' ' + respuesta.usuario.apellido);
+                                                                $("#categoria").val(respuesta.categoria.codigoCategoria);
+                                                                $("#estado").val(respuesta.estado.codigoEstado);
+                                                                $("#accion").val("editar");
+                                                            });
+                                                });
+                                                //Recuperar los datos al enviar formulario
+                                                $('#frm-servicio').submit(function (event) {
+                                                    event.preventDefault();
+                                                    var servicio = {
+                                                        cuentaCorriente: $("#cuentaCorriente").val(),
+                                                        fechaInicio: $("#fechaInicio").val(),
+                                                        usuario: {
+                                                            codigoUsuario: $("#codigoUsuario").val()
+                                                        },
+                                                        categoria: {
+                                                            codigoCategoria: $("#categoria").val()
+                                                        },
+                                                        sucursal: {
+                                                            codigoSucursal: $("#sucursal").val()
+                                                        },
+                                                        estado: {
+                                                            codigoEstado: $("#estado").val()
+                                                        }
+                                                    };
+                                                    accion = $("#accion").val();
+                                                    var contentType = 'application/json';
+                                                    var url = "/servicio/guardar/" + accion;
+                                                    guardar(servicio, url, contentType);
+                                                    $("#servicioModal").modal('hide');
+
+                                                });
+                                            });
         </script>
     </body>
 

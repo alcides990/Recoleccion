@@ -1,29 +1,28 @@
 package ama.servicios.implementaciones;
 
 import ama.dao.ManzanaDao;
-import ama.dominio.Cobrador;
 import ama.dominio.Manzana;
 import ama.dominio.ManzanaPK;
 import ama.dominio.Zona;
-import ama.servicio.ServicioManzana;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
+import ama.servicio.ManzanaService;
 
 @Slf4j
 @Service
-public class ImplManzana implements ServicioManzana {
+public class ImplManzana implements ManzanaService {
 
     @Autowired
     ManzanaDao manzanaDao;
 
     @Transactional(readOnly = true)
     @Override
-    public List<Manzana> listar(Cobrador cobrador, Zona zona) {
-        return (List<Manzana>) manzanaDao.listar(cobrador, zona);
+    public List<Manzana> listar(Zona zona) {
+        return (List<Manzana>) manzanaDao.listar(zona);
     }
 
     @Transactional

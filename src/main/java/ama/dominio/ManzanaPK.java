@@ -10,8 +10,8 @@ import lombok.Data;
 public class ManzanaPK implements Serializable {
 
     @Basic(optional = false)
-    @Column(name = "codigo_manzana")
     @Min(value = 1, message = "Numero de manzana debe ser mayor a 0")
+    @Column(name = "codigo_manzana")
     private int numeroManzana;
 
     @Basic(optional = false)

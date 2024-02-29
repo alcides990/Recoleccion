@@ -2,14 +2,14 @@ package ama.servicios.implementaciones;
 
 import ama.dao.ZonaDao;
 import ama.dominio.Zona;
-import ama.servicio.ServicioZona;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ama.servicio.ZonaService;
 
 @Service
-public class ImplZona implements ServicioZona {
+public class ImplZona implements ZonaService {
 
     @Autowired
     ZonaDao zonaDao;

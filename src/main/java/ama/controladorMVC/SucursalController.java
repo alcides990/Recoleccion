@@ -2,8 +2,6 @@ package ama.controladorMVC;
 
 import ama.dominio.Empresa;
 import ama.dominio.Sucursal;
-import ama.servicio.ServicioCiudad;
-import ama.servicio.ServicioSucursal;
 import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ama.servicio.SucursalService;
+import ama.servicio.CiudadService;
 
 @Slf4j
 @Controller
@@ -29,9 +29,9 @@ public class SucursalController {
         binder.registerCustomEditor(String.class, new Mayuscula());
     }
     @Autowired
-    private ServicioSucursal servicioSucursal;
+    private SucursalService servicioSucursal;
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
 
     @GetMapping("/listar")
     public String listaSucursal(Model modelo) {

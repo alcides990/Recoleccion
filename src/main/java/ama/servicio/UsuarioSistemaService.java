@@ -34,19 +34,18 @@ public class UsuarioSistemaService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UsuarioSistema usuarioSistema = UsuarioSistemaDao.findByNombre(username);
+        httpSession.setAttribute("usuarioSistema", usuarioSistema);
         var roles = new ArrayList<GrantedAuthority>();
         if (usuarioSistema != null) {
-            httpSession.setAttribute("usuarioSistema", usuarioSistema);
             usuarioSistema.getDetalleUsuarioSistema().forEach(detalleUsuario -> {
                 roles.add(new SimpleGrantedAuthority(detalleUsuario.getRol().getNombre()));
             });
             if (usuarioSistema.getDetalleUsuarioSistema().isEmpty()) {
-                throw new UsernameNotFoundException("Usuario no tiene roles");
+                throw new UsernameNotFoundException("Usuario no tiene roles S");
             }
         } else {
-            throw new UsernameNotFoundException("Usuario no se encuentra registrado");
+            throw new UsernameNotFoundException("Usuario no se encuentra registrado s");
         }
-
         return new User(usuarioSistema.getNombre(), usuarioSistema.getClave(), roles);
     }
 
@@ -61,10 +60,12 @@ public class UsuarioSistemaService implements UserDetailsService {
     public Optional<UsuarioSistema> findById(Integer id) {
         return UsuarioSistemaDao.findById(id);
     }
+
     @Transactional
     public void deleteById(Integer id) {
         UsuarioSistemaDao.deleteById(id);
     }
+
     @Transactional
     public void delete(UsuarioSistema entity) {
         UsuarioSistemaDao.delete(entity);

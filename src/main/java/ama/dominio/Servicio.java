@@ -29,7 +29,7 @@ public class Servicio implements Serializable {
     @Temporal(TemporalType.DATE)
     @Column(name = "fecha_inicio")
     private LocalDate fechaInicio;
-
+    
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "codigo_categoria", referencedColumnName = "codigo_categoria")
@@ -68,8 +68,5 @@ public class Servicio implements Serializable {
 
     @Transient
     EstadoCuenta estadoCuenta;
-
-    @Transient
-    Cobrador cobrador;
 
 }

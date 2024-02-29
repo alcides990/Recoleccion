@@ -1,11 +1,9 @@
 package ama.controladorMVC;
 
 import ama.dominio.Zona;
-import ama.servicio.ServicioCiudad;
-import ama.servicio.ServicioSucursal;
-import ama.servicio.ServicioZona;
 import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +16,10 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ama.servicio.CobradorService;
+import ama.servicio.ZonaService;
+import ama.servicio.SucursalService;
+import ama.servicio.CiudadService;
 
 @Slf4j
 @Controller
@@ -33,16 +35,20 @@ public class ZonaController {
     }
 
     @Autowired
-    private ServicioZona servicioZona;
+    private ZonaService zonaService;
     @Autowired
-    private ServicioSucursal servicioSucursal;
+    private CobradorService cobradorService;
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private SucursalService servicioSucursal;
+    @Autowired
+    private CiudadService servicioCiudad;
+    @Autowired
+    private HttpSession httpSession;
 
     @GetMapping("/listar")
     public String listaZona(Model modelo) {
         modelo.addAttribute("titulo", "Zona");
-        var zonas = servicioZona.listar();
+        var zonas = zonaService.listar();
         modelo.addAttribute("zonas", zonas);
 
         return "zona/zona";
@@ -51,11 +57,15 @@ public class ZonaController {
     @GetMapping("/agregar")
     public String agregar(Model model) {
         model.addAttribute("titulo", "zona");
+        
         Zona zona = new Zona();
         model.addAttribute("zona", zona);
+        
+        var cobradores = cobradorService.listar();
+        model.addAttribute("cobradores", cobradores);
 
-        var sucursal = servicioSucursal.listar();
-        model.addAttribute("sucursal", sucursal);
+        var sucursales = servicioSucursal.listar();
+        model.addAttribute("sucursales", sucursales);
 
         var ciudad = servicioCiudad.listarCiudad();
         model.addAttribute("ciudad", ciudad);
@@ -65,10 +75,10 @@ public class ZonaController {
     @PostMapping("/guardar")
     public String guardar(Zona zona, RedirectAttributes redirectAttributes) {
         if (zona.getCodigoZona() == null) {
-            Integer codigoZona = servicioZona.getCodigoZona() + 1;
+            Integer codigoZona = zonaService.getCodigoZona() + 1;
             zona.setCodigoZona(codigoZona);
         }
-        servicioZona.guardar(zona);
+        zonaService.guardar(zona);
         redirectAttributes.addFlashAttribute("mensaje", "Registro guardado corectamente!!");
         return "redirect:/zona/listar";
     }
@@ -76,16 +86,18 @@ public class ZonaController {
     @GetMapping("/editar/{codigoZona}")
     public String editar(Zona zona, Model model) {
         model.addAttribute("titulo", "zona");
-        zona = servicioZona.encontrar(zona);
+        zona = zonaService.encontrar(zona);
         if(zona==null){
             throw  new Error("Zona no encontrada ");
         }
         model.addAttribute("zona", zona);
 
-        var sucursal = zona.getSucursal();
-        model.addAttribute(sucursal);
-        var ciudad = zona.getSucursal().getCiudad();
-        model.addAttribute(ciudad);
+        model.addAttribute("cobradores",cobradorService.listar());
+        
+        model.addAttribute("sucursales",zona.getSucursal());
+        
+        model.addAttribute("ciudad", zona.getSucursal().getCiudad());
+        
         return "zona/modificarZona";
     }
 
@@ -93,11 +105,12 @@ public class ZonaController {
     @PostMapping("/eliminar/{codigoZona}")
     public ResponseEntity<String> eliminar(Zona zona) {
         try {
-            servicioZona.eliminar(zona);
+            zonaService.eliminar(zona);
             return ResponseEntity.ok("Zona Eliminado Correctamente !!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("No se pudo eliminar el usuario " + e.getMessage());
         }
     }
+    
 }

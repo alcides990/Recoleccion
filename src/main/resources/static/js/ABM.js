@@ -7,7 +7,7 @@ function limpiar(campos) {
         });
     }
 }
-//Funcion tabulador
+
 function  tabulador(campoActual, campoDestino) {
     $(campoActual).keydown(function (event) {
         if (event.keyCode === 13) {
@@ -16,13 +16,10 @@ function  tabulador(campoActual, campoDestino) {
         }
     });
 }
-;
-//Funcion tabulador
+
 function  tabular(campoDestino) {
     $(campoDestino).focus();
 }
-;
-
 
 function consultar(datos, url) {
     return new Promise(function (resolve, reject) {
@@ -39,14 +36,18 @@ function consultar(datos, url) {
             success: function (response) {
                 resolve(response);
             },
-            error: function (jqXHR, textStatus, errorThrown) {
-                var mensajeError = jqXHR.responseText;
-                if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
-                    mensajeError = jqXHR.responseJSON.message;
+            error: function (error) {
+                var mensajeError = error.responseText;
+                if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                    mensajeError = error.responseJSON.message;
                 }
-                mostrarAlerta(mensajeError, url, 'danger');
+                mostrarAlerta({
+                    mensaje: mensajeError,
+                    url: url,
+                    tipo: 'danger'
+                });
 
-                reject(errorThrown);
+                reject(mensajeError);
             }
         });
     });
@@ -67,14 +68,24 @@ function guardar(datos, url, contentType) {
 //        dataType: "json", //tipo de datos que espera recibir
 
         success: function (response) {
-            mostrarAlerta(response, url, 'success', false, true);
+            mostrarAlerta({
+                mensaje: response,
+                url: url,
+                tipo: 'success',
+                redirigir: false,
+                recargar: true
+            });
         },
-        error: function (jqXHR, textStatus, errorThrown) {
-            var mensajeError = jqXHR.responseText;
-            if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
-                mensajeError = jqXHR.responseJSON.message;
+        error: function (error) {
+            var mensajeError = error.responseText;
+            if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                mensajeError = error.responseJSON.message;
             }
-            mostrarAlerta(mensajeError, url, 'danger');
+            mostrarAlerta({
+                mensaje: mensajeError,
+                url: url,
+                tipo: 'danger'
+            });
         }
     });
 }
@@ -97,18 +108,27 @@ function eliminar(mensaje = 'Seguro que desea eliminar este registro??') {
                 method: 'post',
                 cache: false,
                 success: function (response) {
-                    mostrarAlerta(response, url, 'success', false, true);
+                    mostrarAlerta({
+                        mensaje: response,
+                        url: url,
+                        tipo: 'success',
+                        recargar: true
+                    });
                     return false;
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    var mensajeError = jqXHR.responseText;
-                    if (jqXHR.responseJSON && jqXHR.responseJSON.hasOwnProperty("message")) {
-                        mensajeError = jqXHR.responseJSON.message;
+                error: function (error) {
+                    var mensajeError = error.responseText;
+                    if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                        mensajeError = error.responseJSON.message;
                     }
-                    if (jqXHR.status === 403) {
+                    if (error.status === 403) {
                         mensajeError = "Acceso denegado, no tiene acceso a este recurso!!";
                     }
-                    mostrarAlerta(mensajeError, url, 'danger');
+                    mostrarAlerta({
+                        mensaje: mensajeError,
+                        url: url,
+                        tipo: 'danger'
+                    });
                 }
             });
         });
@@ -122,12 +142,10 @@ function getReporte(datos, url) {
             'X-CSRF-TOKEN': token
         },
         url: url,
-//            data: JSON.stringify(datos),
         data: datos,
         type: "post",
-//        responseType: "arraybuffer",
         xhrFields: {
-            responseType: "blob" // Especificar el tipo de respuesta como Blob
+            responseType: "blob"
         },
         success: function (response, status, xhr) {
             var url = URL.createObjectURL(new Blob([response], {type: "application/pdf"}));
@@ -137,12 +155,25 @@ function getReporte(datos, url) {
         error: function (xhr, textStatus, error) {
             var mensajeError = 'Error al imprimir reporte ' + xhr.responseText;
             mostrarAlerta(mensajeError, url, 'danger');
+            mostrarAlerta({
+                mensaje: mensajeError,
+                url: url,
+                tipo: 'danger'
+            });
         }
     });
 }
 
 
-function mostrarAlerta(mensaje, url, tipo, redirigir = false, recargar = false) {
+function mostrarAlerta(opciones) {
+    const {
+        mensaje,
+        url,
+        tipo,
+        redirigir = false,
+        recargar = false
+    } = opciones;
+
     $('#contenedor-alertas').empty();
     var alerta =
             `<div class="alert modal-header 
@@ -166,7 +197,7 @@ function mostrarAlerta(mensaje, url, tipo, redirigir = false, recargar = false) 
                 window.location.reload();
             }
         });
-}
+    }
 }
 
 function confirmacioModal(titulo, mensaje) {

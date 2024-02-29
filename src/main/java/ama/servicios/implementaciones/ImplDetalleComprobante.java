@@ -2,16 +2,16 @@ package ama.servicios.implementaciones;
 
 import ama.dao.DetalleComprobanteDao;
 import ama.dominio.DetalleComprobante;
-import ama.servicio.ServicioDetalleComprobante;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ama.servicio.DetalleComprobanteService;
 
 @Slf4j
 @Service
-public class ImplDetalleComprobante implements ServicioDetalleComprobante {
+public class ImplDetalleComprobante implements DetalleComprobanteService {
 
     @Autowired
     DetalleComprobanteDao detalleComprobanteDao;
@@ -42,10 +42,6 @@ public class ImplDetalleComprobante implements ServicioDetalleComprobante {
 
     
 
-    @Override
-    public int getCantidadPago(String cuentaCorriente) {
-        Integer cantidadPago =detalleComprobanteDao.getCantidadPago(cuentaCorriente);
-       return   cantidadPago != null ? cantidadPago : 0;
-    }
+ 
 
 }

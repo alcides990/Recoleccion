@@ -6,7 +6,6 @@ import ama.dominio.Rol;
 import ama.dominio.UsuarioSistema;
 import ama.errores.ClaseError;
 import ama.servicio.RolService;
-import ama.servicio.ServicioDetalleUsuarioSistema;
 import ama.servicio.UsuarioSistemaService;
 import ama.validador.Mayuscula;
 import java.util.List;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ama.servicio.DetalleUsuarioSistemaService;
 
 @Slf4j
 @Controller
@@ -29,7 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class DetalleUsuarioSistemaController {
 
     @Autowired
-    private ServicioDetalleUsuarioSistema servicioDetalleUsuarioSistema;
+    private DetalleUsuarioSistemaService servicioDetalleUsuarioSistema;
     
     @Autowired
     private UsuarioSistemaService usuarioSistemaService;

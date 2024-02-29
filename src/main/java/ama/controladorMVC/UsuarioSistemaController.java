@@ -9,6 +9,8 @@ import ama.servicio.RolService;
 import ama.servicio.UsuarioSistemaService;
 import ama.utilerias.PageRender;
 import ama.validador.Mayuscula;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -20,7 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
@@ -135,7 +139,7 @@ public class UsuarioSistemaController {
     }
 
     @PostMapping("/editarClave")
-    public String modifgicarContraseña(UsuarioSistema usuario, RedirectAttributes flash) {
+    public String modifgicarContraseña(UsuarioSistema usuario, RedirectAttributes flash, HttpServletRequest request, HttpServletResponse response) {
         UsuarioSistema usuarioSistema = usuarioSistemaService.findById(usuario.getCodigoUsuarioSistema()).orElse(null);
         if (usuarioSistema == null) {
             throw new Error("Usuario no encontrado !!");
@@ -143,8 +147,10 @@ public class UsuarioSistemaController {
         String clave = encoder.encode(usuario.getClave());
         usuarioSistema.setClave(clave);
         usuarioSistemaService.save(usuarioSistema);
+         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+   
         flash.addFlashAttribute("info", "Contraseña modificada corectamente!!");
-        return "redirect:/";
+        return "redirect:/login";
 
     }
 

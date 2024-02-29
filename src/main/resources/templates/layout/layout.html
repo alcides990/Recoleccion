@@ -32,7 +32,7 @@
                 <li><a href="/"> <i class="fa-solid fa-house fa-xl"></i> INICIO </a>
                 </li>
                 <hr />
-                <ul id="cobranza"> <i class="fa-solid fa-guarani-sign fa-xl"></i> COBRANZA
+                <ul id="cobranza"> COBRANZA
                     <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-signature fa-xl"></i> FACTURA
                             MANUAL </a></li>
                     <li id="factura-electronica"><a th:href="@{/comprobante/facturaElectronica}"> <i
@@ -42,11 +42,14 @@
                 </ul>
 
                 <hr />
+                <ul>DATOS BASICOS
+                    <li> <a th:href="@{/parametro/listar}"><i class="fa-solid fa-tasks fa-xl"></i> PARAMETRO</a></li>
+                    <li><a th:href="@{/categoria/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"> <i class="fa-solid fa-list fa-xl"></i> CATEGORIAS</a></li>
+                </ul>
+                <hr />
                 <li> <a th:href="@{/servicio/listar}"><i class="fa-solid fa-users fa-xl"></i> CUENTAS</a></li>
                 <hr />
                 <li><a th:href="@{/usuario/listar}"> <i class="fa-solid fa-users-gear fa-xl"></i> USUARIOS</a></li>
-                <hr />
-                <li><a th:href="@{/categoria/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"> <i class="fa-solid fa-list fa-xl"></i> CATEGORIAS</a></li>
                 <hr />
                 <li> <a th:href="@{/cobrador/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"> <i class="fa-solid fa-people-group fa-xl"></i> COBRADORES</a></li>
                 <hr />
@@ -61,6 +64,7 @@
                 </li>
                 <hr />
                 <li sec:authorize="hasAnyAuthority('ROOT','ADMIN')"><a th:href="@{/usuarioSistema/listar}"><i class="fas fa-users-cog fa-xl"></i> </i>USUARIOS SISTEMA</a></li>
+                <li sec:authorize="hasAnyAuthority('ROOT')"><a th:href="@{/puntoExpedicion/listar}"><i class="fas fa-code-branch fa-xl"></i> SUCURSALES</a></li>
             </ul>
             <button id="btn-user" class="user-session">
                 <i class="fas fa-user-circle"></i>
@@ -88,8 +92,7 @@
             <!--incluir bootstrap-->
             <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.min.js"></script>
-            <!--incluir sweetalert2-->
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
             <script src="/js/ABM.js"></script>
             <script>
                         $(document).ready(function () {
@@ -110,7 +113,7 @@
             <input type="hidden" id="token" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
             <p class="footer">&copy; ALCMA Inc 2023
-               |S Roles: <span  sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"></span>
+                | Roles: <span  sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"></span>
             </p>
 
         </footer>

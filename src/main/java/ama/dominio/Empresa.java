@@ -3,8 +3,10 @@ package ama.dominio;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "empresas")
 public class Empresa implements Serializable {
@@ -15,12 +17,12 @@ public class Empresa implements Serializable {
     @Column(name = "codigo_empresa")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer codigoEmpresa;
-    private String empresa;
-    private String telefono;
-    private String celular;
+    @Column(name = "razon_social")
+    private String razonSocial;
     private String ruc;
-    private String direccion;
- 
-     
+
+    public Empresa(Integer codigoEmpresa) {
+        this.codigoEmpresa = codigoEmpresa;
+    }
 
 }

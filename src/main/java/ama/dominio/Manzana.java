@@ -1,6 +1,5 @@
 package ama.dominio;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import jakarta.persistence.*;
 import java.util.Objects;
@@ -8,30 +7,16 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "manzanas", catalog = "cliba_sa", schema = "")
+@Table(name = "manzanas")
 public class Manzana implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected ManzanaPK manzanaPK;
 
-    @JoinColumn(name = "codigo_cobrador", referencedColumnName = "codigo_cobrador", nullable = false, insertable = true, updatable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private Cobrador cobrador;
-
-    @JoinColumn(name = "codigo_zona", referencedColumnName = "codigo_zona", nullable = false, insertable = true, updatable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST )
+    @JoinColumn(name = "codigo_zona", referencedColumnName = "codigo_zona", nullable = false, insertable = true)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY )
     private Zona zona;
-    
-     @JoinColumns({
-        @JoinColumn(name = "codigo_cobrador", referencedColumnName = "codigo_cobrador", nullable = false, insertable = false, updatable = false),
-        @JoinColumn(name = "codigo_zona", referencedColumnName = "codigo_zona", nullable = false, insertable = false, updatable = false),
-        @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal", nullable = false, insertable = false, updatable = false)
-    })
-     @JsonIgnore
-     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-    private DetalleZona detalleZona;
-    
     
     @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal", nullable = false, insertable = false, updatable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
@@ -46,7 +31,7 @@ public class Manzana implements Serializable {
 
     @Override
     public String toString() {
-        return "Manzana{" + "manzanaPK=" + manzanaPK + ", cobrador=" + cobrador + ", zona=" + zona + ", sucursal=" + sucursal + '}';
+        return "Manzana{" + "manzanaPK=" + manzanaPK + ", zona=" + zona + ", sucursal=" + sucursal + '}';
     }
 
     @Override

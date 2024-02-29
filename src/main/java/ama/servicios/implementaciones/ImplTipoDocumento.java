@@ -3,13 +3,13 @@ package ama.servicios.implementaciones;
 
 import ama.dao.TipoDocumentoDao;
 import ama.dominio.TipoDocumento;
-import ama.servicio.ServicioTipoDocumento;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ama.servicio.TipoDocumentoService;
 
  @Service
-public class ImplTipoDocumento implements ServicioTipoDocumento {
+public class ImplTipoDocumento implements TipoDocumentoService {
 
     @Autowired
     TipoDocumentoDao tipoDocumentoDao;

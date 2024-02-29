@@ -18,9 +18,17 @@
 
                     </div>
                     <div class="col-sm-4"> 
+                        <label class="form-label" for="cobrador">Cobrador</label>
+                        <select th:field="*{cobrador}" class="form-control" name="sucursal" >
+                            <option th:each="cobrador : ${cobradores}" 
+                                    th:value="${cobrador.codigoCobrador}"
+                                    th:text="${cobrador.nombre}+' '+${cobrador.apellido}"  />
+                        </select>
+                    </div>
+                    <div class="col-sm-4"> 
                         <label class="form-label" for="sucursal">Sucursal</label>
                         <select th:field="*{sucursal}" class="form-control" name="sucursal" >
-                            <option th:each="sucursal : ${sucursal}" 
+                            <option th:each="sucursal : ${sucursales}" 
                                     th:value="${sucursal.codigoSucursal}"
                                     th:text="${sucursal.nombreSucursal}+' '+${sucursal.ciudad.nombreCiudad}"  />
                         </select>

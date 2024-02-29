@@ -1,8 +1,5 @@
 package ama.api.controladores;
 
-import ama.servicio.ServicioCiudad;
-import ama.servicio.ServicioCobrador;
-import ama.servicio.ServicioZona;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +30,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import ama.servicio.CobradorService;
+import ama.servicio.ZonaService;
+import ama.servicio.CiudadService;
 
 @Slf4j
 @Controller
@@ -40,11 +40,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class controladorInforme {
 
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
     @Autowired
-    private ServicioZona servicioZona;
+    private ZonaService servicioZona;
     @Autowired
-    private ServicioCobrador servicioCobrador;
+    private CobradorService servicioCobrador;
     @Autowired
     private DataSource dataSource;
 

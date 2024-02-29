@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "tipo_documento")
+@Table(name = "tipos_documento")
 public class TipoDocumento implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -19,7 +19,5 @@ public class TipoDocumento implements Serializable {
     private Integer codigoTipoDocumento;
     @Column(name = "tipo_documento")
     private String tipoDocumento;
-//    @OneToOne(cascade = CascadeType.ALL, mappedBy = "tipoDocumento")
-//    private Usuario usuario;
 
 }

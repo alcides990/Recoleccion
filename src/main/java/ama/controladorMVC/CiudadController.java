@@ -1,7 +1,6 @@
 package ama.controladorMVC;
 
 import ama.dominio.Ciudad;
-import ama.servicio.ServicioCiudad;
 import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ama.servicio.CiudadService;
 
 @Slf4j
 @Controller
@@ -27,7 +27,7 @@ public class CiudadController {
     }
     
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
 
     @GetMapping("/listar")
     public String listaCiudad(Model modelo) {

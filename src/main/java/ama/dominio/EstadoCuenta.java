@@ -1,52 +1,45 @@
 package ama.dominio;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.time.Period;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
 
+@Slf4j
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Controller
 public class EstadoCuenta implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private LocalDate fechaInicio;
     private double tarifa;
-    private int periodoPagado;
     private int cantidadDeuda;
-    @NotNull
-    @Max(value = 1)
-    private int cantidadPago;
-    private String periodoPago;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate pagoHasta;
     private double recargo;
     private double subTotal;
     private double totalDeuda;
+    private double saldoAnterior;
+    private Parametro parametro;
 
-    private double subTotalImpporte;
-    private double totalImporte;
-
-    private double recargoPago;
-
-//    private LocalDate fecham = LocalDate.of(2012, 6, 30);
-//   para sumar mes a la fecha
-//    LocalDate b = a.plusMonths(2);
-    public LocalDate getFechaInicio() {
-        return fechaInicio;
-    }
-
-    public void setFechaInicio(LocalDate fechaInicio) {
-        this.fechaInicio = fechaInicio;
+    public EstadoCuenta(double tarifa, Parametro parametro, LocalDate pagoHasta) {
+        this.tarifa = tarifa;
+        this.parametro = parametro;
+        this.pagoHasta = pagoHasta;
     }
 
     public int getCantidadDeuda() {
-        LocalDate hoy = LocalDate.now();
-        if (fechaInicio != null) {
-            LocalDate fechaInicio = LocalDate.parse(getFechaInicio().toString());
-            int cantidadPeriodo = (int) (ChronoUnit.DAYS.between(fechaInicio, hoy)) / 30;
-            cantidadDeuda = cantidadPeriodo - getPeriodoPagado();
+        LocalDate crrrePeriodo = parametro != null ? parametro.getCierrePeriodo() : null;
+        if (pagoHasta != null) {
+            int anos = Period.between(pagoHasta, crrrePeriodo).getYears();
+            int meses = Period.between(pagoHasta, crrrePeriodo).getMonths();
+            this.cantidadDeuda = (anos * 12) + meses;
         }
 
         return cantidadDeuda;
@@ -64,32 +57,7 @@ public class EstadoCuenta implements Serializable {
         this.tarifa = tarifa;
     }
 
-    public int getCantidadPago() {
-        return cantidadPago;
-    }
-
-    public void setCantidadPago(int cantidadPago) {
-        this.cantidadPago = cantidadPago;
-    }
-
-    public String getPeriodoPago() {
-        if (cantidadPago > 0) {
-            periodoPago = fechaInicio.plusMonths(this.periodoPagado).toString() + " / " + fechaInicio.plusMonths(this.periodoPagado + cantidadPago).toString();
-        }
-        return periodoPago;
-    }
-
-    public void setPeriodoPago(String periodoPago) {
-        this.periodoPago = periodoPago;
-    }
-
     public LocalDate getPagoHasta() {
-        if (this.pagoHasta == null) {
-            this.pagoHasta = getFechaInicio();
-        } else {
-            this.pagoHasta = LocalDate.parse(fechaInicio.plusMonths(periodoPagado + cantidadPago).toString(),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        }
         return this.pagoHasta;
     }
 
@@ -99,7 +67,7 @@ public class EstadoCuenta implements Serializable {
 
     public double getRecargo() {
         if (cantidadDeuda >= 3) {
-            recargo = (cantidadDeuda * tarifa) * 0.1;
+            recargo = (cantidadDeuda * tarifa) * (parametro.getRecargoMora() / 100);
 
         }
         return recargo;
@@ -123,7 +91,7 @@ public class EstadoCuenta implements Serializable {
     public double getTotalDeuda() {
         if (cantidadDeuda > 0) {
             recargo = getRecargo();
-            totalDeuda = getSubTotal() + getRecargo();
+            totalDeuda = getSubTotal() + getRecargo() - saldoAnterior;
         }
 
         return totalDeuda;
@@ -133,42 +101,25 @@ public class EstadoCuenta implements Serializable {
         this.totalDeuda = totalDeuda;
     }
 
-    public int getPeriodoPagado() {
-        return periodoPagado;
+    public double getSaldoAnterior() {
+        return this.saldoAnterior;
     }
 
-    public void setPeriodoPagado(int periodoPagado) {
-        this.periodoPagado = periodoPagado;
+    public void setSaldoAnterior(double saldoAnterior) {
+        this.saldoAnterior = saldoAnterior;
     }
 
-    public double getSubTotalImpporte() {
-        return tarifa * cantidadPago;
+    public Parametro getParametro() {
+        return this.parametro;
     }
 
-    public void setSubTotalImpporte(double subTotalImpporte) {
-        this.subTotalImpporte = subTotalImpporte;
-    }
-
-    public double getRecargoPago() {
-        return recargoPago;
-    }
-
-    public void setRecargoPago(double recargoPago) {
-        this.recargoPago = recargoPago;
-    }
-
-    public double getTotalImporte() {
-        totalImporte = getSubTotalImpporte() + getRecargoPago();
-        return totalImporte;
-    }
-
-    public void setTotalImporte(double totalImporte) {
-        this.totalImporte = totalImporte;
+    public void setParametro(Parametro parametro) {
+        this.parametro = parametro;
     }
 
     @Override
     public String toString() {
-        return "EstadoCuenta{" + "fechaInicio=" + fechaInicio + ", tarifa=" + tarifa + ", periodoPagado=" + periodoPagado + ", cantidadDeuda=" + cantidadDeuda + ", cantidadPago=" + cantidadPago + ", periodoPago=" + periodoPago + ", pagoHasta=" + pagoHasta + ", recargo=" + recargo + ", subTotal=" + subTotal + ", totalDeuda=" + totalDeuda + ", subTotalImpporte=" + subTotalImpporte + ", totalImporte=" + totalImporte + ", recargoPago=" + recargoPago + '}';
+        return "EstadoCuenta{" + ", tarifa=" + tarifa + ", cantidadDeuda=" + cantidadDeuda + ", pagoHasta=" + pagoHasta + ", recargo=" + recargo + ", subTotal=" + subTotal + ", totalDeuda=" + totalDeuda + ", saldoAnterior=" + saldoAnterior + '}';
     }
 
 }

@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class PuntoExpedicionController {
 
     @Autowired
-    private ServicioPuntoExpedicion servicioPuntoExpedicion;
+    private PuntoExpedicionService servicioPuntoExpedicion;
     @Autowired
-    private ServicioSucursal servicioSucursal;
+    private SucursalService servicioSucursal;
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
     @Autowired
-    private ServicioEstado servicioEstado;
+    private EstadoService servicioEstado;
 
     @GetMapping("/listar")
     public String listaPuntoExpediciones(Model modelo) {

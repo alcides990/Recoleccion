@@ -3,9 +3,6 @@ package ama.controladorMVC;
 import ama.dominio.Categoria;
 import ama.dominio.Sucursal;
 import ama.errores.ClaseError;
-import ama.servicio.ServicioCategoria;
-import ama.servicio.ServicioCiudad;
-import ama.servicio.ServicioSucursal;
 import ama.validador.Vadidador;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -25,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import ama.servicio.SucursalService;
+import ama.servicio.CategoriaService;
+import ama.servicio.CiudadService;
 
 @Slf4j
 @Controller
@@ -43,11 +43,11 @@ public class CategoriaController {
     }
 
     @Autowired
-    private ServicioCategoria servicioCategoria;
+    private CategoriaService servicioCategoria;
     @Autowired
-    private ServicioSucursal servicioSucursal;
+    private SucursalService servicioSucursal;
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
 
     @GetMapping("/listar")
     public String listaCtegoria(Model modelo) {

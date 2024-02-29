@@ -17,20 +17,24 @@ public class Sucursal implements Serializable {
     @Basic(optional = false)
     @Column(name = "codigo_sucursal")
     private Integer codigoSucursal;
-     @Column(name = "sucursal")
+    @Column(name = "sucursal")
     private String nombreSucursal;
-     
+
     @JoinColumn(name = "codigo_ciudad", referencedColumnName = "codigo_ciudad")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
-     @ToString.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ToString.Exclude
     private Ciudad ciudad;
-    
+
     @JoinColumn(name = "codigo_empresa", referencedColumnName = "codigo_empresa")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ToString.Exclude
-    private Empresa empresa; 
+    private Empresa empresa;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @OneToOne(mappedBy = "sucursal")
+    private Parametro parametro;
 
     public Sucursal(Integer codigoSucursal) {
         this.codigoSucursal = codigoSucursal;
@@ -38,9 +42,5 @@ public class Sucursal implements Serializable {
 
     public Sucursal() {
     }
-
-    
-   
-    
 
 }

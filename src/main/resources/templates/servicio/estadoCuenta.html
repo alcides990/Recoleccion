@@ -99,12 +99,21 @@
                             </div>
                             <div class="row">
                                 <div class="col-4 my-1">
+                                    <label  for="saldo">Saldo</label>
+                                </div>
+                                <div class="col my-1">
+                                    <input  type="text" disabled="true" name="recargo" id="saldo" th:value="${#numbers.formatDecimal(estadoCuenta.saldoAnterior, 0, 'COMMA', 0, 'POINT')}"   class="form-control"  />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4 my-1">
                                     <label  for="recargo">Recargo:</label>
                                 </div>
                                 <div class="col my-1">
                                     <input  type="text" disabled="true" name="recargo" id="recargo" th:value="${#numbers.formatDecimal(estadoCuenta.recargo, 0, 'COMMA', 0, 'POINT')}"   class="form-control"  />
                                 </div>
                             </div>
+
                             <div class="row">
                                 <div class="col-4 my-1">
                                     <label  for="totalDeuda">Total:</label>
@@ -118,36 +127,34 @@
                     </div>
                     <div class=" col-md-12 col-lg-8"> 
                         <div class="table-responsive-xxl">
-                            <table id="tabla" class="table table-responsive-xxl table-dark table-border table-striped  table-hover " >
+                            <table id="tabla" class="table table-responsive-xxl table-dark table-border table-striped  table-hover small" >
                                 <thead class="sticky-top">
                                     <tr>
                                         <th>Tipo</th>
                                         <th>Nro.Factura</th>
                                         <th>FechaPago</th>
                                         <th>PeriodoPago</th>
-                                        <th>Cant.Pago</th>
                                         <th>Tarifa</th>
+                                        <th>Cant.Pago</th>
                                         <th>Recargo</th>
                                         <th>Importe</th>
                                         <th>Estado</th>
                                     </tr>
                                 </thead>
                                 <tbody class="table-secondary"  >
-                                    <a id="saludo">
-                                        <tr  th:each="comprobante : ${comprobantes}"> 
-                                            <td th:text="${comprobante.tipoFactura.tipoFactura}" > </td>
-                                            <td th:text="${comprobante.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
-                                            <!--<td th:text="${comprobante.servicio.cuentaCorriente}"> </td>-->
-                                            <!--<td th:text="${comprobante.usuario.nombre}+' '+ ${comprobante.usuario.apellido}" >   </td>-->
-                                            <td th:text="${comprobante.fechaPago}"></td>
-                                            <td th:text="${comprobante.detalleComprobante[0].periodoPago}"></td>
-                                            <td th:text="${comprobante.detalleComprobante[0].cantidadPago}"></td>
-                                            <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"></td>
-                                            <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].recargo, 0, 'COMMA', 0, 'POINT')}"></td>
-                                            <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante[0].importe, 0, 'COMMA', 0, 'POINT')}"></td>
-                                            <td th:text="${estado.estado}"></td>
-                                        </tr>
-                                    </a>
+                                    <tr  th:each="comprobante : ${comprobantes}"> 
+                                        <td th:text="${comprobante.tipoFactura.tipoFactura}" > </td>
+                                        <td th:text="${comprobante.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
+                                        <!--<td th:text="${comprobante.servicio.cuentaCorriente}"> </td>-->
+                                        <!--<td th:text="${comprobante.usuario.nombre}+' '+ ${comprobante.usuario.apellido}" >   </td>-->
+                                        <td th:text="${#dates.format(comprobante.fechaPago,'yyyy-MM-dd')}"></td>
+                                        <td th:text="${comprobante.detalleComprobante.periodoPago}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td th:text="${comprobante.cantidadPago}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td th:text="${estado.estado}"></td>
+                                    </tr>
                                 </tbody>
                             </table>
                             <nav  th:replace="~{layout/paginador :: paginador}"> </nav>
@@ -160,9 +167,16 @@
         <script src="/js/buscarUsuario.js"></script>
         <script src="/js/estadoCuenta.js"></script>
         <script>
-            $("#saludo").click(function (){
-                console.log(Hola);
-            });
+            $("#cantidadRegistro").change(function () {
+                var cantidadRegistro = $(this).val();
+                var url = new URL(window.location.href);
+                var searchParams = new URLSearchParams(url.search);
+                searchParams.set('page', 0);
+                searchParams.set('cantidadRegistro', cantidadRegistro);
+                url.search = searchParams.toString();
+                window.location.href = url;
+            }
+            );
         </script>
 
     </body>

@@ -21,6 +21,7 @@ public class Categoria implements Serializable {
     @Basic(optional = false)
     @Column(name = "codigo_categoria")
     private Integer codigoCategoria;
+    
     @NotEmpty(message = "Nombre de la categoria no puede estar vacio")
     @Column(name = "categoria")
     private String nombreCategoria;
@@ -28,12 +29,18 @@ public class Categoria implements Serializable {
     @NotNull(message = "Tarifa no puede estar vacio")
     @Min(value = 1, message = "El monto de la tarifa debe ser mayor a cero")
     private Double tarifa;
+    
     @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotNull
     private Sucursal sucursal;
 
+    public Categoria() {
+    }
+
+    
+    
     @Transient
     private String nombreEstado;
 
@@ -62,13 +69,6 @@ public class Categoria implements Serializable {
         }
     }
 
-    public String getCategoriaConTarifa() {
-        return nombreCategoria + " " + tarifa;
-    }
-
-    public String getNombreEstado() {
-        return nombreEstado;
-    }
 
     @Override
     public String toString() {

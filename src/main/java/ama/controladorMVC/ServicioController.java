@@ -11,9 +11,11 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -38,26 +40,30 @@ import org.springframework.web.bind.annotation.*;
 public class ServicioController {
 
     @Autowired
-    private ServicioServicio servicioServicio;
+    private HttpSession httpSession;
     @Autowired
-    private ServicioCategoria servicioCategoria;
+    private ServicioService servicioServicio;
+    @Autowired
+    private CategoriaService servicioCategoria;
+    @Autowired
+    private ParametroService parametroService;
 
     @Autowired
-    private ServicioSucursal servicioSucursal;
+    private SucursalService servicioSucursal;
 
     @Autowired
-    private ServicioCiudad servicioCiudad;
+    private CiudadService servicioCiudad;
 
     @Autowired
-    private ServicioEstado servicioEstado;
+    private EstadoService servicioEstado;
 
     @Autowired
-    private ServicioComprobante servicioComprobate;
+    private ComprobanteService comprobanteService;
 
     @Autowired
-    private ServicioUsuario servicioUsuario;
+    private UsuarioService servicioUsuario;
     @Autowired
-    private ServicioManzana servicioManzana;
+    private ManzanaService servicioManzana;
 
     @Autowired
     private DataSource dataSource;
@@ -69,7 +75,7 @@ public class ServicioController {
             Model modelo) {
         modelo.addAttribute("titulo", "Cuenta");
         Pageable pageable = PageRequest.of(page, cantElemento);
-                var servicios = servicioServicio.listar(pageable);
+        var servicios = servicioServicio.listar(pageable);
         PageRender pageRender = new PageRender("/servicio/listar", servicios);
         modelo.addAttribute("page", pageRender);
         modelo.addAttribute("cantElemento", cantElemento);
@@ -88,7 +94,8 @@ public class ServicioController {
     }
 
     @PostMapping("/buscar")
-    public @ResponseBody Page<Servicio> listarServicios(@RequestBody Paginador paginador) {
+    public @ResponseBody
+    Page<Servicio> listarServicios(@RequestBody Paginador paginador) {
         Pageable pageable = PageRequest.of(paginador.getNumeroPagina(), paginador.getCatidadRegistro());
         var servicios = servicioServicio.buscar(pageable, paginador.getFiltro());
         return servicios;
@@ -149,7 +156,7 @@ public class ServicioController {
 
     @GetMapping("/estadoCuenta/{cuentaCorriente}")
     public String getServiciosCuenta(@RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "cantElemento", defaultValue = "5") int cantElemento,
+            @RequestParam(name = "cantidadRegistro", defaultValue = "5") int cantidadRegistro,
             @RequestParam(name = "filtro", defaultValue = "") String filtro,
             Servicio servicio, Model modelo) {
         modelo.addAttribute("titulo", "EstadoCuenta");
@@ -159,16 +166,7 @@ public class ServicioController {
         modelo.addAttribute("usuario", servicio.getUsuario());
         var categoria = servicio.getCategoria();
         modelo.addAttribute("categoria", categoria);
-        // CARGAR DATOS PARA CARCULAR ESTADO DE CUENTA
-        int cantidadPagado = servicioComprobate.getCantidadComprobante(servicio.getCuentaCorriente());
-        EstadoCuenta estadoCuenta = new EstadoCuenta();
-        estadoCuenta.setPeriodoPagado(cantidadPagado);
-        estadoCuenta.setFechaInicio(servicio.getFechaInicio());
-        estadoCuenta.setTarifa(categoria.getTarifa());
-        estadoCuenta.getSubTotal();
-        estadoCuenta.getTotalDeuda();
-        estadoCuenta.getPagoHasta();
-        modelo.addAttribute("estadoCuenta", estadoCuenta);
+        modelo.addAttribute("estadoCuenta", getEstadoCuenta(servicio));
 
         var servicios = servicioServicio.listaServicioCuenta(servicio);
         var cuentas = new ArrayList<String>();
@@ -177,11 +175,11 @@ public class ServicioController {
         });
         modelo.addAttribute("cuentas", cuentas);
 
-        Pageable pageable = PageRequest.of(page, cantElemento);
-        Page<Comprobante> comprobantes = servicioComprobate.getComprobantesCuenta(pageable, servicio);
+        Pageable pageable = PageRequest.of(page, cantidadRegistro);
+        Page<Comprobante> comprobantes = comprobanteService.getComprobantesCuenta(pageable, servicio);
         PageRender pageRender = new PageRender("/servicio/estadoCuenta/" + servicio.getCuentaCorriente(), comprobantes);
         modelo.addAttribute("page", pageRender);
-        modelo.addAttribute("cantElemento", cantElemento);
+        modelo.addAttribute("cantElemento", cantidadRegistro);
 
         modelo.addAttribute("comprobantes", comprobantes);
 
@@ -257,15 +255,6 @@ public class ServicioController {
 
     }
 
-    /**
-     *
-     * @param parameters
-     * @param response
-     * @param request
-     * @throws JRException
-     * @throws IOException
-     * @throws SQLException
-     */
     @GetMapping("/report")
     // @ResponseBody
     public ResponseEntity<?> getRpt1(Map<String, Object> parameters, HttpServletResponse response,
@@ -290,5 +279,31 @@ public class ServicioController {
             conexion.close();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    private EstadoCuenta getEstadoCuenta(Servicio servicio) {
+        Optional<Comprobante> ultimoComprobante = comprobanteService.getUltimoComprobanteCuenta(servicio.getCuentaCorriente());
+        LocalDate pagoHasta;
+        double saldo = 0;
+        if (ultimoComprobante.isEmpty()) {
+            pagoHasta = servicio.getFechaInicio();
+        } else {
+            pagoHasta = ultimoComprobante.get().getDetalleComprobante().getPagoHasta();
+            saldo = ultimoComprobante.get().getDetalleComprobante().getSaldo();
+        }
+        EstadoCuenta estadoCuenta = new EstadoCuenta(
+                servicio.getCategoria().getTarifa(),
+                getParametro(),
+                pagoHasta);
+        estadoCuenta.setSaldoAnterior(saldo);
+        return estadoCuenta;
+    }
+
+    private Parametro getParametro() {
+        return parametroService.encontrar(getUserSession().getSucursal());
+    }
+
+    private UsuarioSistema getUserSession() {
+        return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
     }
 }

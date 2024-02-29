@@ -2,13 +2,13 @@ package ama.servicios.implementaciones;
 
 import ama.dao.SucursalDao;
 import ama.dominio.Sucursal;
-import ama.servicio.ServicioSucursal;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ama.servicio.SucursalService;
 
 @Service
-public class ImplSucursal implements ServicioSucursal {
+public class ImplSucursal implements SucursalService {
 
     @Autowired
     SucursalDao sucursalDao;

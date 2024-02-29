@@ -2,18 +2,27 @@ package ama.dominio;
 
 import ama.dominio.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "comprobantes", catalog = "cliba_sa", schema = "")
+@Table(name = "comprobantes")
 
 public class Comprobante implements Serializable {
 
@@ -22,34 +31,37 @@ public class Comprobante implements Serializable {
     @EmbeddedId
     protected ComprobantePK comprobantePK;
 
+    @Column(name = "razon_social")
+    private String razonSocial;
+    
     @Column(name = "fecha_emision")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaEmision;
 
-    @Column(name = "hora_emision")
-    @Temporal(TemporalType.TIME)
-    private Date horaEmision;
-
     @Column(name = "fecha_pago")
-    @Temporal(TemporalType.DATE)
+     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaPago;
 
-    @Column(name = "cantidad_deuda")
-    private Integer cantidadDeuda;
+    @Column(name = "cantidad_pago")
+    @Min(value = 1, message = "Cantidad pago no puede ser menor que 1")
+    @Digits(integer = 10, fraction = 0, message = "Cantidad pago debe ser un numero entero")
+    private Integer cantidadPago;
 
-    private Double tarifa;
-    
+    @DecimalMin(value = "0", message = "Tarifa no puede negativo")
+    @Column(name = "total_importe")
+    private double totalImporte;
+
     @ToString.Exclude
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "comprobante")
-    private List<DetalleComprobante> detalleComprobante;
+    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
+    @OneToOne(mappedBy = "comprobante", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private DetalleComprobante detalleComprobante;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @JoinColumn(name = "codigo_cobrador", referencedColumnName = "codigo_cobrador", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private Cobrador cobrador;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @JoinColumn(name = "codigo_condicion_venta", referencedColumnName = "codigo_condicion_venta", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private CondicionVenta condicionVenta;
@@ -99,9 +111,6 @@ public class Comprobante implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private Serie serie;
 
-    public Comprobante() {
-    }
-
     public Comprobante(ComprobantePK comprobantePK) {
         this.comprobantePK = comprobantePK;
     }
@@ -110,14 +119,8 @@ public class Comprobante implements Serializable {
     public void getEmision() {
         Date now = new Date();
         this.fechaEmision = now;
-        this.horaEmision = now;
         this.fechaPago = now;
     }
-
-//    @Override
-//    public String toString() {
-//        return "Comprobante{" + "comprobantePK=" + comprobantePK + ", fechaEmision=" + fechaEmision + ", horaEmision=" + horaEmision + ", fechaPago=" + fechaPago + ", cantidadDeuda=" + cantidadDeuda + ", tarifa=" + tarifa + '}';
-//    }
 
     @Override
     public int hashCode() {

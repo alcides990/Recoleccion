@@ -22,23 +22,21 @@
                 <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-md " >
                     <thead class="thead-dark">
                         <tr>
-                            <th>Codigo</th>
-                            <th>Zona</th>
                             <th>Sucursal</th>
-                            <th>Ciudad</th>
+                            <th>Zona</th>
+                            <th>Cobrador</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="table-secondary">
                         <tr th:each="zona : ${zonas}">
-                            <td th:text="${zona.codigoZona}">  </td>
+                            <td th:text="${zona.sucursal.nombreSucursal}+' '+${zona.sucursal.ciudad.nombreCiudad}">   </td>
                             <td th:text="${zona.nombreZona}">   </td>
-                            <td th:text="${zona.sucursal.nombreSucursal}">   </td>
-                            <td th:text="${zona.sucursal.ciudad.nombreCiudad}">   </td>
+                            <td th:text="${zona.cobrador.nombre}+' '+${zona.cobrador.apellido}">   </td>
                             <td>
-                                <a th:href="@{/detalleZona/agregar/} + ${zona.codigoZona}"
+                                <a th:href="@{/manzana/agregar/} + ${zona.codigoZona}"
                                    class="btn btn-primario btn-sm"
-                                   title="Asignar Cobrador">
+                                   title="Agregar Manzana">
                                    <i class="fas fa-cog"></i>
                                 </a>
                                 <a th:href="@{/zona/editar/} + ${zona.codigoZona}"

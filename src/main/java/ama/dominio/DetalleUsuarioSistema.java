@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "detalle_usuario_sistema", catalog = "cliba_sa", schema = "")
+@Table(name = "detalle_usuario_sistema")
 public class DetalleUsuarioSistema implements Serializable {
 
     private static final long serialVersionUID = 1L;
