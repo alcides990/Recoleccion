@@ -19,9 +19,15 @@ public class ImplPuntoiExpedicion implements PuntoExpedicionService {
     public List<PuntoExpedicion> listar() {
         return (List<PuntoExpedicion>) puntoExpedicionDao.getAll();
     }
+
     @Override
     public List<PuntoExpedicion> listar(Sucursal sucursal) {
         return (List<PuntoExpedicion>) puntoExpedicionDao.getAllFiandSucursal(sucursal);
+    }
+
+    @Override
+    public List<PuntoExpedicion> isMayorCero(Sucursal sucursal) {
+        return (List<PuntoExpedicion>) puntoExpedicionDao.fiandBySucursalAndCodigoPunteExpedicionMayorCero(sucursal);
     }
 
     @Override

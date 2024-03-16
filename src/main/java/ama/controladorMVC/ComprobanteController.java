@@ -188,7 +188,7 @@ public class ComprobanteController {
 
         modelo.addAttribute("sucursal", getSucursalSession());
 
-        modelo.addAttribute("puntoExpedicion", servicioPuntoExpedicion.listar(getSucursalSession()));
+        modelo.addAttribute("puntoExpedicion", servicioPuntoExpedicion.isMayorCero(getSucursalSession()));
 
         modelo.addAttribute("condicionVenta", servicioCondicionVenta.listar());
     }
