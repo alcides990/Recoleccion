@@ -45,7 +45,7 @@ function cargarDatosComprobante(datos, url) {
             });
         });
 }
-function anularComprobante(datos) {
+function getComprobanteAnular(datos) {
     var url = '/comprobante/getComprobante';
 
     consultar(datos, url)
@@ -364,7 +364,7 @@ function buscarComprobantes() {
                                  <tr> 
                                     <td data-id=${valor.tipoFactura.codigoTipoFactura}> ${valor.tipoFactura.tipoFactura} </td>
                                     <td data-id=${valor.puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}> ${valor.puntoExpedicion.nombrePuntoExpedicion} </td>
-                                    <td> ${valor.numeroComprobante.toString().padStart(7, 0)}</td>
+                                    <td data-id=${valor.numeroComprobante}>  ${valor.numeroComprobante.toString().padStart(7, 0)}</td>
                                     <td> ${valor.cuentaCorriente} </td>
                                     <td> ${valor.nombreUsuario} </td>
                                     <td> ${valor.fechaPago} </td>
@@ -376,9 +376,7 @@ function buscarComprobantes() {
                                     <td> ${valor.estado} </td>
                                     <td  title="Anular">
                                     <a   id="anular" 
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#anularModal"
-                                        data-id='${valor.sucursal.codigoSucursal}-${valor.puntoExpedicion.codigoPuntoExpedicion}-${valor.tipoFactura.codigoTipoFactura}-${valor.codigoSerie}-${valor.numeroComprobante}'>
+                                        data-id=''>
                                         <i class="btn-close fa-regular fa-pen-to-square"></i>
                                     </a>  
                                  </tr> `;

@@ -279,7 +279,6 @@
                 let numeroComprobante = $(this).closest('tr').find('td:eq(2)').data('id');
                 let codigoSucursal = $('#sucursal').val();
                 let codigoSerie = $('#serie').val();
-                 console.log(numeroComprobante);
                 var datos = {
                     puntoExpedicionPK: {
                         codigoSucursal: codigoSucursal,
@@ -289,7 +288,7 @@
                     codigoSerie: codigoSerie,
                     numeroComprobante: numeroComprobante
                 };
-                anularComprobante(datos);
+                getComprobanteAnular(datos);
 
             });
 

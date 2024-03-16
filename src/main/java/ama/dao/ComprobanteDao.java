@@ -51,7 +51,7 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobanteP
                JOIN FETCH c.cobrador AS cob
                JOIN FETCH c.estado AS e
                JOIN FETCH c.usuarioSistema AS uSist
-                      WHERE  suc=?1 AND s=?2 AND CONCAT(cPK.numeroComprobante) LIKE  %?3%
+                      WHERE  suc=?1 AND s=?2 AND CONCAT(cPK.numeroComprobante) LIKE  %?3%  ORDER BY c.fechaEmision DESC
                  """, countQuery = """
                SELECT COUNT(c) FROM Comprobante c
                 INNER JOIN c.puntoExpedicion.sucursal AS suc
@@ -75,7 +75,7 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobanteP
                JOIN FETCH c.cobrador AS cob
                JOIN FETCH c.estado AS e
                JOIN FETCH c.usuarioSistema AS uSist
-                      WHERE  pe=?1 AND s=?2 AND CONCAT(cPK.numeroComprobante) LIKE  %?3%
+                      WHERE  pe=?1 AND s=?2 AND CONCAT(cPK.numeroComprobante) LIKE  %?3%  ORDER BY c.fechaEmision DESC
                  """, countQuery = """
                SELECT COUNT(c) FROM Comprobante c
                 JOIN  c.serie s
@@ -101,7 +101,7 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobanteP
                       WHERE  pe=?1 AND s=?2
                  """, countQuery = """
                SELECT COUNT(c) FROM Comprobante c
-               WHERE c.puntoExpedicion=?1   AND c.serie=?2
+               WHERE c.puntoExpedicion=?1   AND c.serie=?2  ORDER BY c.fechaEmision DESC
                """)
      Page<Comprobante> findByPuntoExpedicion(Pageable pageable, PuntoExpedicion puntoExpedicion, Serie serie);
 
