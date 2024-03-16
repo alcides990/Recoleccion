@@ -4,6 +4,8 @@ import ama.dominio.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -33,14 +35,12 @@ public class Comprobante implements Serializable {
 
     @Column(name = "razon_social")
     private String razonSocial;
-    
+
     @Column(name = "fecha_emision")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaEmision;
+    private LocalDateTime fechaEmision;
 
     @Column(name = "fecha_pago")
-     @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaPago;
+    private LocalDate fechaPago;
 
     @Column(name = "cantidad_pago")
     @Min(value = 1, message = "Cantidad pago no puede ser menor que 1")
@@ -72,7 +72,10 @@ public class Comprobante implements Serializable {
     private Estado estado;
 
     @JsonIgnore
-    @JoinColumn(name = "codigo_punto_expedicion", referencedColumnName = "codigo_punto_expedicion", nullable = false, insertable = false, updatable = false)
+    @JoinColumns({
+            @JoinColumn(name = "codigo_punto_expedicion", referencedColumnName = "codigo_punto_expedicion", insertable = false, updatable = false),
+            @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal", insertable = false, updatable = false)
+    })
     @ManyToOne(fetch = FetchType.LAZY)
     private PuntoExpedicion puntoExpedicion;
 
@@ -81,12 +84,7 @@ public class Comprobante implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private Servicio servicio;
 
-    @JsonIgnore
-    @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal", nullable = false, insertable = false, updatable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Sucursal sucursal;
-
-//    @JsonIgnore
+    // @JsonIgnore
     @JoinColumn(name = "codigo_tipo_factura", referencedColumnName = "codigo_tipo_factura", nullable = false, insertable = false, updatable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private TipoFactura tipoFactura;
@@ -117,9 +115,8 @@ public class Comprobante implements Serializable {
 
     @PrePersist
     public void getEmision() {
-        Date now = new Date();
-        this.fechaEmision = now;
-        this.fechaPago = now;
+        this.fechaEmision = LocalDateTime.now();
+        this.fechaPago = LocalDate.now();
     }
 
     @Override

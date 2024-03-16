@@ -2,6 +2,8 @@ package ama.servicios.implementaciones;
 
 import ama.dao.PuntoExpedicionDao;
 import ama.dominio.PuntoExpedicion;
+import ama.dominio.PuntoExpedicionPK;
+import ama.dominio.Sucursal;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,11 @@ public class ImplPuntoiExpedicion implements PuntoExpedicionService {
 
     @Override
     public List<PuntoExpedicion> listar() {
-        return (List<PuntoExpedicion>) puntoExpedicionDao.getPuntosExpedicion();
+        return (List<PuntoExpedicion>) puntoExpedicionDao.getAll();
+    }
+    @Override
+    public List<PuntoExpedicion> listar(Sucursal sucursal) {
+        return (List<PuntoExpedicion>) puntoExpedicionDao.getAllFiandSucursal(sucursal);
     }
 
     @Override
@@ -24,22 +30,20 @@ public class ImplPuntoiExpedicion implements PuntoExpedicionService {
     }
 
     @Override
-    public void eliminar(PuntoExpedicion cobrador) {
-        puntoExpedicionDao.delete(cobrador);
+    public void eliminar(PuntoExpedicionPK puntoExpedicionPK) {
+        puntoExpedicionDao.eliminar(puntoExpedicionPK);
     }
 
     @Override
-    public PuntoExpedicion encontrar(PuntoExpedicion puntoExpedicion) {
-        return puntoExpedicionDao.findById(puntoExpedicion.getCodigoPuntoExpedicion()).orElse(null);
+    public PuntoExpedicion encontrar(PuntoExpedicionPK puntoExpedicionPK) {
+        return puntoExpedicionDao.getPuntoExpedicion(puntoExpedicionPK);
     }
 
     @Override
-    public Integer getCodigoPuntoExpedicion() {
-        Integer codigoPuntoExpedicion = 0;
-        if (puntoExpedicionDao.getCodigoPuntoExpedicion()!= null) {
-            codigoPuntoExpedicion = puntoExpedicionDao.getCodigoPuntoExpedicion();
-        }
-        return codigoPuntoExpedicion;
+    public Integer getCodigoPuntoExpedicion(Sucursal sucursal) {
+        Integer codigoPuntoExpedicion = puntoExpedicionDao.getCodigoPuntoExpedicion(sucursal);
+
+        return codigoPuntoExpedicion != null ? codigoPuntoExpedicion : 0;
     }
 
 }

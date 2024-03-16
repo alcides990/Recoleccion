@@ -28,7 +28,7 @@ import ama.servicio.EstadoService;
 
 @Slf4j
 @Controller
-@SessionAttributes(names = {"sucursal", "ciudad", "estado"})
+@SessionAttributes(names = { "sucursal", "ciudad", "estado" })
 @RequestMapping("/cobrador")
 public class CobradorController {
 
@@ -94,7 +94,7 @@ public class CobradorController {
         return "redirect:/cobrador/listar";
     }
 
-    @PreAuthorize("hasAnyAuthority({'ADMIN'})")
+    @PreAuthorize("hasAnyAuthority({'ROOT','ADMIN'})")
     @GetMapping("/editar/{codigoCobrador}")
     public String editar(Cobrador cobrador, Model model) {
         cobrador = servicioCobrador.encontrar(cobrador);
@@ -102,7 +102,7 @@ public class CobradorController {
             throw new Error("Cobrar no encontrado ");
         }
         model.addAttribute("cobrador", cobrador);
-//        log.info("Cobrador a modificar "+cobrador);
+        // log.info("Cobrador a modificar "+cobrador);
         var sucursal = cobrador.getSucursal();
         model.addAttribute("sucursal", sucursal);
         var ciudad = cobrador.getSucursal().getCiudad();
@@ -115,7 +115,7 @@ public class CobradorController {
         return "cobrador/modificarCobrador";
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMIN')")
     @PostMapping("/eliminar/{codigoCobrador}")
     public ResponseEntity<?> eliminar(Cobrador cobrador) {
         try {

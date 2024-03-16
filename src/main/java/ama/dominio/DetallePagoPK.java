@@ -13,18 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Embeddable
 public class DetallePagoPK implements Serializable {
-
+ private static final long serialVersionUID = 1L;
+ 
     @Basic(optional = false)
     @Column(name = "codigo_metodo_pago")
     private Integer codigoMetodoPago;
 
-    @Basic(optional = false)
-    @Column(name = "codigo_sucursal")
-    private Integer codigoSucursal;
-
-    @Basic(optional = false)
-    @Column(name = "codigo_punto_expedicion")
-    private Integer codigoPuntoExpedicion;
+    private PuntoExpedicionPK puntoExpedicionPK;
 
     @Basic(optional = false)
     @Column(name = "numero_comprobante")

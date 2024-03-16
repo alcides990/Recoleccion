@@ -12,8 +12,8 @@ public interface SucursalDao extends CrudRepository<Sucursal, Integer> {
 
     //    listar Sucursal
     @Query(value = """
-           SELECT  s FROM Sucursal AS s
-           JOIN FETCH s.ciudad AS ciud
+           SELECT  s FROM Sucursal s
+           JOIN FETCH s.ciudad c
            """)
     List<Sucursal> listar();
 

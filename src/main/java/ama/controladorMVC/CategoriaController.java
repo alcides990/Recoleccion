@@ -2,6 +2,7 @@ package ama.controladorMVC;
 
 import ama.dominio.Categoria;
 import ama.dominio.Sucursal;
+import ama.dominio.UsuarioSistema;
 import ama.errores.ClaseError;
 import ama.validador.Vadidador;
 import jakarta.validation.Valid;
@@ -14,9 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +24,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import ama.servicio.SucursalService;
 import ama.servicio.CategoriaService;
 import ama.servicio.CiudadService;
+import jakarta.servlet.http.HttpSession;
 
 @Slf4j
 @Controller
@@ -32,33 +32,26 @@ import ama.servicio.CiudadService;
 @RequestMapping("/categoria")
 public class CategoriaController {
 
-    
     @Autowired
     private Vadidador validar;
-
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-//        binder.registerCustomEditor(String.class, new Mayuscula());
-//        binder.addValidators(validar);
-    }
-
     @Autowired
     private CategoriaService servicioCategoria;
     @Autowired
     private SucursalService servicioSucursal;
     @Autowired
     private CiudadService servicioCiudad;
+    @Autowired
+    private HttpSession httpSession;
 
     @GetMapping("/listar")
     public String listaCtegoria(Model modelo) {
         modelo.addAttribute("titulo", "Categoria");
-        List<Categoria> categorias = servicioCategoria.listar();
-        modelo.addAttribute("categorias", categorias);
-        List<Sucursal> sucursal = servicioSucursal.listar();
+        Sucursal sucursal = getUserSession().getSucursal();
         modelo.addAttribute("sucursal", sucursal);
+        List<Categoria> categorias = servicioCategoria.listar(sucursal);
+        modelo.addAttribute("categorias", categorias);
         return "categoria/categoria";
     }
-
 
     @PostMapping("/guardar")
     @ResponseBody
@@ -89,6 +82,7 @@ public class CategoriaController {
     @ResponseBody
     public ResponseEntity<?> editar(@RequestBody Categoria categoria) {
         var categoriaEncontrada = servicioCategoria.encontrar(categoria);
+
         if (categoriaEncontrada == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Registro no encontrado");
         }
@@ -101,8 +95,12 @@ public class CategoriaController {
             servicioCategoria.eliminar(categoria);
             return ResponseEntity.ok().body("Categoria Eliminda Correctamente ");
         } catch (DataIntegrityViolationException e) {
-           
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ClaseError.excepcion("Error al Eliminar Categoria ", e) );
+
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ClaseError.excepcion("Error al Eliminar Categoria ", e));
         }
+    }
+
+    private UsuarioSistema getUserSession() {
+        return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
     }
 }

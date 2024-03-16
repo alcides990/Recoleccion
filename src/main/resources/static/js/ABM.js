@@ -8,7 +8,7 @@ function limpiar(campos) {
     }
 }
 
-function  tabulador(campoActual, campoDestino) {
+function tabulador(campoActual, campoDestino) {
     $(campoActual).keydown(function (event) {
         if (event.keyCode === 13) {
             event.preventDefault();
@@ -17,21 +17,24 @@ function  tabulador(campoActual, campoDestino) {
     });
 }
 
-function  tabular(campoDestino) {
+function tabular(campoDestino) {
     $(campoDestino).focus();
 }
 
-function consultar(datos, url) {
+function consultar(datos, url, contentType = 'application/json') {
     return new Promise(function (resolve, reject) {
         let token = $("#token").val();
+        if (contentType === 'application/json') {
+            datos = JSON.stringify(datos);
+        }
         $.ajax({
             headers: {
                 'X-CSRF-TOKEN': token
             },
             url: url,
-            data: JSON.stringify(datos),
+            data: datos,
             type: "post",
-            contentType: 'application/json',
+            contentType: contentType,
             dataType: "json",
             success: function (response) {
                 resolve(response);
@@ -53,40 +56,37 @@ function consultar(datos, url) {
     });
 }
 function guardar(datos, url, contentType) {
-    if (contentType === 'application/json') {
-        datos = JSON.stringify(datos);
-    }
-    let token = $("#token").val();
-    $.ajax({
-        url: url,
-        headers: {
-            'X-CSRF-TOKEN': token
-        },
-        data: datos,
-        type: "post",
-        contentType: contentType, // tipo datos que se envia 
-//        dataType: "json", //tipo de datos que espera recibir
+    return new Promise(function (resolve, reject) {
 
-        success: function (response) {
-            mostrarAlerta({
-                mensaje: response,
-                url: url,
-                tipo: 'success',
-                redirigir: false,
-                recargar: true
-            });
-        },
-        error: function (error) {
-            var mensajeError = error.responseText;
-            if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
-                mensajeError = error.responseJSON.message;
-            }
-            mostrarAlerta({
-                mensaje: mensajeError,
-                url: url,
-                tipo: 'danger'
-            });
+        if (contentType === 'application/json') {
+            datos = JSON.stringify(datos);
         }
+        let token = $("#token").val();
+        $.ajax({
+            url: url,
+            headers: {
+                'X-CSRF-TOKEN': token
+            },
+            data: datos,
+            type: "post",
+            contentType: contentType,
+
+            success: function (response) {
+                resolve(response);
+            },
+            error: function (error) {
+                var mensajeError = error.responseText;
+                if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                    mensajeError = error.responseJSON.message;
+                }
+                mostrarAlerta({
+                    mensaje: mensajeError,
+                    url: url,
+                    tipo: 'danger'
+                });
+                reject(mensajeError);
+            }
+        });
     });
 }
 
@@ -148,9 +148,9 @@ function getReporte(datos, url) {
             responseType: "blob"
         },
         success: function (response, status, xhr) {
-            var url = URL.createObjectURL(new Blob([response], {type: "application/pdf"}));
+            var url = URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
             window.location.href = (url);// abrir en la misma pestaña
-//            window.open(url);
+            //            window.open(url);
         },
         error: function (xhr, textStatus, error) {
             var mensajeError = 'Error al imprimir reporte ' + xhr.responseText;
@@ -176,9 +176,9 @@ function mostrarAlerta(opciones) {
 
     $('#contenedor-alertas').empty();
     var alerta =
-            `<div class="alert modal-header 
+        `<div class="alert modal-header 
              alert-${tipo} alert-dismissible fade show" role="alert"> 
-            ${ mensaje} 
+            ${mensaje} 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
             <span aria-hidden="true"> &times; </span>
             </button>
@@ -225,4 +225,6 @@ function confirmacioModal(titulo, mensaje) {
                 </div>
             </div>`;
     $("body").append(frm);
+
+
 }

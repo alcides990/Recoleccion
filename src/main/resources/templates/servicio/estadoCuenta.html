@@ -34,9 +34,8 @@
                         </div>
 
                         <div class="col-sm-3">
-                            <label for="fechaInicio">Fecha Inicio   </label>
+                            <label for="fechaInicio"> Fecha Inicio   </label>
                             <input type="text" readonly="true"  name="fechaInicio" id="fechaInicio" th:value="*{fechaInicio}" class="form-control"  required="campo ogligatorio"  />
-
                         </div>
 
                     </div>
@@ -144,14 +143,14 @@
                                 <tbody class="table-secondary"  >
                                     <tr  th:each="comprobante : ${comprobantes}"> 
                                         <td th:text="${comprobante.tipoFactura.tipoFactura}" > </td>
-                                        <td th:text="${comprobante.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
+                                        <td th:text="${comprobante.puntoExpedicion.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
                                         <!--<td th:text="${comprobante.servicio.cuentaCorriente}"> </td>-->
                                         <!--<td th:text="${comprobante.usuario.nombre}+' '+ ${comprobante.usuario.apellido}" >   </td>-->
                                         <td th:text="${#dates.format(comprobante.fechaPago,'yyyy-MM-dd')}"></td>
                                         <td th:text="${comprobante.detalleComprobante.periodoPago}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'POINT', 0, 'COMMA')}"></td>
                                         <td th:text="${comprobante.cantidadPago}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'POINT', 0, 'COMMA')}"></td>
                                         <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
                                         <td th:text="${estado.estado}"></td>
                                     </tr>

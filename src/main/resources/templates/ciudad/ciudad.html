@@ -4,13 +4,19 @@
     <head  th:replace="~{layout/layout :: heat}"> </head>
 
     <body>
-         <header  th:replace="~{layout/layout :: header}"> </header>
+        <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-            <div class="container">
-                <div class="form-control"> <h3>Ciudades</h3> </div>
-                <a th:href="@{/ciudad/agregar}"  class="btn-primario">Crear Ciudad</a>
-                <table  class="table ">
-                    <thead class="thead-dark">
+        <div class="card-header"> <h3>Ciudades</h3> </div>
+        <div class="container">
+            <a th:href="@{/ciudad/agregar}"  class="btn-primario m-3">Crear Ciudad</a>
+            <div class="mensaje-alerta" id="contenedor-alertas"></div>
+            <div th:if="${info}" class="mensaje-alerta alert alert-success">
+                <span th:text="${info}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="table-responsive-md m-3">
+                <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-md" >
+                    <thead>
                         <tr>
                             <th>Codigo Ciudad</th>
                             <th>ciudad</th>
@@ -18,7 +24,7 @@
                             <th>Eliminar</th>
                         </tr>
                     </thead>
-                    <tbody class="">
+                    <tbody class="table-secondary">
                         <tr th:each="ciudad : ${ciudades}">
                             <td th:text="${ciudad.codigoCiudad}">  Mostrar Codigo Ciudad</td>
                             <td th:text="${ciudad.nombreCiudad}"> Mostrar ciudad </td>
@@ -29,12 +35,11 @@
                 </table>
 
             </div>
+        </div>
 
 
         </header>
-        <footer>
-
-        </footer>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
     </body>
 
 </html>

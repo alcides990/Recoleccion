@@ -1,49 +1,57 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-    <head  th:replace="~{layout/layout :: heat}"> </head>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+    <head th:replace="~{layout/layout :: heat}"> </head>
+
     <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside th:replace="~{layout/layout :: aside}">  </aside>
-        <div class="container-fluid"> 
-            <div class="card-header"> <h3>Comprobantes</h3></div>
-            <div class="mensaje-alerta" id="contenedor-alertas"></div>
-            <div class=" my-3 d-flex">
-                <div class="form-floating col-sm-2 me-2">  
-                    <select th:object="${sucursal}" class="form-control" name="sucursal"  id="sucursal">
-                        <option th:each="sucursal : ${sucursal}" 
-                                th:value="${sucursal.codigoSucursal}"
+        <header th:replace="~{layout/layout :: header}"> </header>
+        <aside th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container-fluid">
+            <div class="card-header">
+                <h3>Comprobantes</h3>
+            </div>
+
+            <div class=" comprobante-filter">
+                <div class="mensaje-alerta" id="contenedor-alertas"></div>
+                <div class="form-floating buscar">
+                    <select th:object="${sucursal}" class="form-control" name="sucursal" id="sucursal">
+                        <option th:each="sucursal : ${sucursal}" th:value="${sucursal.codigoSucursal}"
                                 th:text="${sucursal.nombreSucursal} +' '+${sucursal.ciudad.nombreCiudad} " />
                     </select>
                     <label class="form-label" for="sucursal">Sucursal</label>
                 </div>
-                <div class="form-floating col-sm-2 me-2"> 
-                    <select th:object="${puntoExpedicion}"
-                            class="form-control" name="puntoExpedicion"  id="puntoExpedicion"
-                            >
-                        <option th:each="puntoExpedicion : ${puntosExpedicion}" 
-                                th:value="${puntoExpedicion.codigoPuntoExpedicion}"
-                                th:text="${puntoExpedicion.nombrePuntoExpedicion} "  />
+                <div class="form-floating  serie">
+                    <select th:object="${serie}" class="form-control" name="serie" id="serie">
+                        <option th:each="serie : ${series}" th:value="${serie.codigoSerie}" th:text="${serie.serie} "
+                                th:selected="${serie.codigoSerie == 0} " />
+                    </select>
+                    <label class="form-label" for="serie">Serie</label>
+                </div>
+                <div class="form-floating">
+                    <select th:object="${puntoExpedicion}" class="form-control" name="puntoExpedicion" id="puntoExpedicion">
+                        <option th:each="puntoExpedicion : ${puntosExpedicion}"
+                                th:value="${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}"
+                                th:text="${puntoExpedicion.nombrePuntoExpedicion} "
+                                th:selected="${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion == 0} " />
                     </select>
                     <label class="form-label" for="puntoExpedicion">PuntoExpedicion</label>
                 </div>
-                <div class="form-floating">
-                <input name="txtBuscar" id="txtBuscar" type="search" 
-                       class="form-control col-sm-6 col-12 me-0"  autofocus="true" 
-                       placeholder="Ingrese numero de comprobante" 
-                       aria-label="Buscar" aria-describedby="search-addon" />
-                <label>Numero de Comprobante</label>
+                <div class="form-floating buscar">
+                    <input name="txtBuscar" id="txtBuscar" type="search" class="form-control " autofocus="true"
+                           placeholder="Ingrese numero de comprobante" aria-label="Buscar" aria-describedby="search-addon" />
+                    <label>Numero de Comprobante</label>
                 </div>
             </div>
 
 
             <div class="table-responsive-xl ">
-                <table id="tabla" class="table table-dark table-border table-striped  table-hover small" >
+                <table id="tabla" class="table table-dark table-border table-striped  table-hover small">
                     <thead class="sticky-top ">
                         <tr>
-                            <th>Tipo Comprobante</th> 
-                            <th>Nro.Comprobante</th>
+                            <th>Tipo</th>
+                            <th>PuntoExp.</th>
+                            <th>Nro. Fact</th>
                             <th>Cuentacorriente</th>
                             <th>Usuario</th>
                             <th>FechaPago</th>
@@ -56,30 +64,40 @@
                             <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody  class="table-secondary "  >
-                        <tr  th:each="comprobante : ${comprobantes}" > 
-                            <td th:text="${comprobante.tipoFactura.tipoFactura}"> </td>
-                            <td th:text="${#numbers.formatInteger(comprobante.comprobantePK.numeroComprobante,7)}"> </td>
+                    <tbody class="table-secondary ">
+                        <tr th:each="comprobante : ${comprobantes}">
+                            <td th:text="${comprobante.tipoFactura.tipoFactura}"
+                                th:data-id="${comprobante.comprobantePK.codigoTipoFactura}"> </td>
+                            <td th:text="${comprobante.puntoExpedicion.nombrePuntoExpedicion}"
+                                th:data-id="${comprobante.comprobantePK.puntoExpedicionPK.codigoPuntoExpedicion}">
+                            </td>
+                            <td th:text="${#numbers.formatInteger(comprobante.comprobantePK.numeroComprobante,7)}" th:data-id="${comprobante.comprobantePK.numeroComprobante}"> </td>
                             <td th:text="${comprobante.servicio.cuentaCorriente}"> </td>
-                            <td th:text="${comprobante.razonSocial}" >   </td>
+                            <td th:text="${comprobante.razonSocial}"> </td>
                             <td th:text="${comprobante.fechaPago}"></td>
                             <td th:text="${comprobante.detalleComprobante.periodoPago}"></td>
-                            <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'COMMA', 0, 'POINT')}"> 
+                            <td
+                                th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'COMMA', 0, 'POINT')}">
                                 <td th:text="${comprobante.cantidadPago}"></td>
-                                <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td
+                                    th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'COMMA', 0, 'POINT')}">
+                                </td>
                                 <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
                                 <td th:text="${comprobante.estado.estado}"></td>
-                                <td  title="Anular">
-                                    <a   id="anular" 
-                                         th:data-id=
-                                         "${comprobante.comprobantePK.codigoSucursal}+'-'+
-                                         ${comprobante.comprobantePK.codigoPuntoExpedicion}+'-'+
-                                         ${comprobante.comprobantePK.codigoTipoFactura}+'-'+
-                                         ${comprobante.comprobantePK.codigoSerie}+'-'+
-                                         ${comprobante.comprobantePK.numeroComprobante}"
-                                         data-bs-toggle="modal"
-                                         data-bs-target="#anularModal">
-                                        <i class="btn-close fa-regular fa-pen-to-square"></i>
+                                <td>
+                                    <a title="ver comprobante" id="ver" th:data-id="${comprobante.comprobantePK.puntoExpedicionPK.codigoSucursal}+'-'+
+                                       ${comprobante.comprobantePK.puntoExpedicionPK.codigoPuntoExpedicion}+'-'+
+                                       ${comprobante.comprobantePK.codigoTipoFactura}+'-'+
+                                       ${comprobante.comprobantePK.codigoSerie}+'-'+
+                                       ${comprobante.comprobantePK.numeroComprobante}" <i
+                                       class="fa-regular fa-eye btn-primario"></i>
+                                    </a>
+                                    <a title="Anular" id="anular" th:data-id="${comprobante.comprobantePK.puntoExpedicionPK.codigoSucursal}+'-'+
+                                       ${comprobante.comprobantePK.puntoExpedicionPK.codigoPuntoExpedicion}+'-'+
+                                       ${comprobante.comprobantePK.codigoTipoFactura}+'-'+
+                                       ${comprobante.comprobantePK.codigoSerie}+'-'+
+                                       ${comprobante.comprobantePK.numeroComprobante}" <i
+                                       class="btn-close fa-regular fa-pen-to-square"></i>
                                     </a>
 
 
@@ -87,7 +105,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <nav  th:replace="~{layout/paginador :: paginador}"> </nav>
+                <nav th:replace="~{layout/paginador :: paginador}"> </nav>
             </div>
         </div>
 
@@ -101,62 +119,67 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="frm-comprobante-anular"  th:action="@{/comprobante/anular}"  method="post" >
+
+                    <form id="frm-comprobante-anular" th:action="@{/comprobante/anular}" method="post">
                         <div class="row d-flex m-1">
-                            <div class="col-sm-3"> 
-                                <label  for="cuentaCorriente">Cuentacorriente </label>
-                                <input class="form-control" type="search"  name="cuentaCorriente" id="cuentaCorriente"   />
+                            <div class="col-sm-3">
+                                <label for="cuentaCorriente">Cuentacorriente </label>
+                                <input class="form-control" readonly="true" type="search" name="cuentaCorriente"
+                                       id="cuentaCorriente" />
                             </div>
 
-                            <input type="text" class="d-none" name="codigoUsuario" id="codigoUsuario"  >
+                            <input type="text" class="d-none" name="codigoUsuario" id="codigoUsuario">
                                 <div class="col-sm-3">
-                                    <label  for="numeroDocumento">RUC/CI </label>
-                                    <input class="form-control"  type="text" id="numeroDocumento" name="numeroDocumento" readonly="true"  />
+                                    <label for="numeroDocumento">RUC/CI </label>
+                                    <input class="form-control" type="text" id="numeroDocumento" name="numeroDocumento"
+                                           readonly="true" />
                                 </div>
                                 <div class="col-sm-6">
                                     <label for="buscarUsuario">Razon Social </label>
-                                    <input class="form-control"  type="text"  id="razonSocial" />
+                                    <input class="form-control" type="text" id="razonSocial" />
                                 </div>
-                                <div class="form-group col-sm-6"> 
+                                <div class="form-group col-sm-6">
                                     <label for="categoria">Categoria</label>
-                                    <select  class="form-select" id="categoria" >
-                                        <option >Categoria</option>
+                                    <select class="form-control" id="categoria">
+                                        <option>Categoria</option>
                                     </select>
                                 </div>
 
-                                <div class="col-sm-2"> 
-                                    <label  for="sucursalAnular">Sucursal</label>
-                                    <select class="form-select"  name="sucursalAnular"  id="sucursalAnular">
+                                <div class="col-sm-2">
+                                    <label for="sucursalAnular">Sucursal</label>
+                                    <select class="form-control" name="sucursalAnular" id="sucursalAnular">
                                         <option>Sucursal</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-2"> 
+                                <div class="col-sm-2">
                                     <label for="puntoExpedicionaAnular">PuntoExpedicion</label>
-                                    <select  class="form-select" name="puntoExpedicionaAnular"  id="puntoExpedicionaAnular">
-                                        <option/>Punto Expedicion</select>
+                                    <select class="form-control" name="puntoExpedicionaAnular" id="puntoExpedicionAnular">
+                                        <option />Punto Expedicion
+                                    </select>
                                     </select>
                                 </div>
                         </div>
                         <div class="row d-flex m-1">
-                            <div class="col-sm-3"> 
+                            <div class="col-sm-3">
                                 <label for="N°Factura">N°Factura </label>
-                                <input class="form-control" type="text"  autofocus="true"  name="numeroComprobante" id="numeroComprobante" />
+                                <input class="form-control" readonly="true" type="text" autofocus="true"
+                                       name="numeroComprobante" id="numeroComprobante" />
                             </div>
 
                             <div class="col-sm-3">
-                                <label  for="tipoFactura">TipoFactura</label>
-                                <select class="form-select" name="tipoFactura" id="tipoFactura"  >
+                                <label for="tipoFactura">TipoFactura</label>
+                                <select class="form-control" name="tipoFactura" id="tipoFactura">
                                     <option> Tipo Fctura</option>
                                 </select>
                             </div>
                             <div class="col-sm-3">
                                 <label for="condicionVenta">CondicionVenta</label>
-                                <select class="form-select" name="condicionVenta" id="condicionVenta" >
+                                <select class="form-control" name="condicionVenta" id="condicionVenta">
                                     <option>Condicion Venta</option>
                                 </select>
                             </div>
-                            <div class="col-sm-6" >
-                                <label  for="cobrador">Cobrador</label>
+                            <div class="col-sm-6">
+                                <label for="cobrador">Cobrador</label>
                                 <select class="form-control" id="cobrador" name="cobrador">
                                     <option>Cobrador</option>
                                 </select>
@@ -166,21 +189,23 @@
                         <div class="row m-3">
                             <div class="col-lg-6">
                                 <h5>Detalle Pago</h5>
-                                <input type="hidden" name="tarifa" id="tarifa"  />
+                                <input type="hidden" name="tarifa" id="tarifa" />
                                 <div class="row">
                                     <div class="col-4">
-                                        <label  for="periodoPago">Period Pago:</label>
+                                        <label for="periodoPago">Period Pago:</label>
                                     </div>
                                     <div class="col">
-                                        <input  type="text" readonly="true" name="periodoPago" id="periodoPago"  class="form-control"  />
+                                        <input type="text" readonly="true" name="periodoPago" id="periodoPago"
+                                               class="form-control" />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-4">
-                                        <label  for="cantidadPago">Cant.Pago:</label>
+                                        <label for="cantidadPago">Cant.Pago:</label>
                                     </div>
                                     <div class="col">
-                                        <input  type="text" name="cantidadPago" id="cantidadPago" class="form-control"  />
+                                        <input type="text" readonly="true" name="cantidadPago" id="cantidadPago"
+                                               class="form-control" />
                                     </div>
                                 </div>
                                 <div class="row">
@@ -188,33 +213,37 @@
                                         <label for="subTotal">SubTotal:</label>
                                     </div>
                                     <div class="col">
-                                        <input  type="text" readonly="true" name="subTotal" id="subTotal"   class="form-control"  />
+                                        <input type="text" readonly="true" name="subTotal" id="subTotal"
+                                               class="form-control" />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-4">
-                                        <label  for="recargoPago">Recargo:</label>
+                                        <label for="recargoPago">Recargo:</label>
                                     </div>
                                     <div class="col">
-                                        <input  type="text"  name="recargoPago" id="recargoPago"  class="form-control"  />
+                                        <input type="text" readonly="true" name="recargoPago" id="recargoPago"
+                                               class="form-control" />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-4">
-                                        <label  for="totalPago">Total:</label>
+                                        <label for="totalPago">Total:</label>
                                     </div>
                                     <div class="col">
-                                        <input  type="text" readonly="true" name="totalPago" id="totalPago" class="form-control"  />
+                                        <input type="text" readonly="true" name="totalPago" id="totalPago"
+                                               class="form-control" />
                                     </div>
                                 </div>
                             </div>
                             <div class="motivoAnulacion form-floating col-lg-6 ">
-                                <textarea class="form-control text-area" placeholder="Ingrese motivo de anulacion" id="motivoAnulacion"></textarea>
+                                <textarea class="form-control text-area" placeholder="Ingrese motivo de anulacion"
+                                          id="motivoAnulacion"></textarea>
                                 <label for="obs">Motivo de anulacion </label>
                             </div>
                         </div>
 
-                        <input type="submit"  name="guardar" value="Anular" class="btn-guardar my-3 offset-10"/>
+                        <input type="submit" name="guardar" value="Anular" class="btn-guardar my-3 offset-10" />
 
                     </form>
                 </div>
@@ -222,36 +251,48 @@
         </div>
 
 
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+        <footer th:replace="~{layout/layout :: footer}"> </footer>
         <script src="/js/comprobante.js"></script>
         <script>
-            $("#puntoExpedicion").on('change', function () {
+            $(document).on('change', '#serie, #puntoExpedicion', function () {
                 buscarComprobantes();
             });
-            var numeroComprobante;
-            $("#txtBuscar").keyup(function (e) {
+
+            let numeroComprobante='';
+            $("#txtBuscar").keypress(function (e) {
                 numeroComprobante = $("#txtBuscar").val();
-                if (numeroComprobante !== '') {
-                    numeroComprobante = parseInt(numeroComprobante);
-                    $("#txtBuscar").val(numeroComprobante.toString().padStart(7, 0));
-                }
+//                numeroComprobante = parseInt(numeroComprobante);
+                $("#txtBuscar").val(numeroComprobante.replace(/[^0-9]/g, '').padStart(7, 0));
             });
+
             var time;
             $("#txtBuscar").keyup(function (e) {
                 clearTimeout(time);
-                time = setTimeout(function () {
-                    if (numeroComprobante > 0) {
-                        buscarComprobantes();
-                    } else if (numeroComprobante === '') {
-                        window.location.reload();
-                    }
-                }, 500);
+                time = setTimeout(() => {
+                    buscarComprobantes();
+                }, 300);
             });
-            $('#tabla').on('click', 'tr', function () {
-                var id = $(this).find('td:eq(1)').text();
-                console.log('Tipo comprobante: ' + id);
+
+            $('#tabla').on('click', 'tr td #anular', function () {
+                let codigoTipoFactura = $(this).closest('tr').find('td:eq(0)').data('id');
+                let codigoPuntoExpedicion = $(this).closest('tr').find('td:eq(1)').data('id');
+                let numeroComprobante = $(this).closest('tr').find('td:eq(2)').data('id');
+                let codigoSucursal = $('#sucursal').val();
+                let codigoSerie = $('#serie').val();
+                 console.log(numeroComprobante);
+                var datos = {
+                    puntoExpedicionPK: {
+                        codigoSucursal: codigoSucursal,
+                        codigoPuntoExpedicion: codigoPuntoExpedicion
+                    },
+                    codigoTipoFactura: codigoTipoFactura,
+                    codigoSerie: codigoSerie,
+                    numeroComprobante: numeroComprobante
+                };
+                anularComprobante(datos);
+
             });
-             
+
         </script>
     </body>
 

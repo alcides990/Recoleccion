@@ -1,4 +1,4 @@
- 
+
 package ama.dominio;
 
 import java.io.Serializable;
@@ -9,14 +9,16 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
 public class ComprobantePK implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
 
     @NotNull(message = "Numero comprobante no puede ser nulo!!")
@@ -25,19 +27,13 @@ public class ComprobantePK implements Serializable {
     @Basic(optional = false)
     @Column(name = "numero_comprobante", nullable = false)
     private Integer numeroComprobante;
-    
-    @Basic(optional = false)
-    @Column(name = "codigo_sucursal", nullable = false)
-    private Integer codigoSucursal;
-    
-    @Basic(optional = false)
-    @Column(name = "codigo_punto_expedicion", nullable = false)
-    private Integer codigoPuntoExpedicion;
-    
+
+    private PuntoExpedicionPK puntoExpedicionPK;
+
     @Basic(optional = false)
     @Column(name = "codigo_tipo_factura", nullable = false)
     private Integer codigoTipoFactura;
-    
+
     @Basic(optional = false)
     @Column(name = "codigo_serie", nullable = false)
     private Integer codigoSerie;

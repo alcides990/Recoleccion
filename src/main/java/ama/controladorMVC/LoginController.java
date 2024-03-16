@@ -36,11 +36,13 @@ public class LoginController {
         if (error != null) {
             if (usuarioSistema == null) {
                 mensaje = "Usuario no encontrado";
-            } else if (usuarioSistema != null && usuarioSistema.getDetalleUsuarioSistema().isEmpty()) {
-                mensaje = usuarioSistema.getNombre() + " no tiene rol asignado";
-                session.invalidate();
-            } else {
-                mensaje = "Usuario o contraña incorrecta!!";
+            } else if (usuarioSistema != null) {
+                if (!usuarioSistema.getDetalleUsuarioSistema().isEmpty()) {
+                    mensaje = "Contraña incorrecta!!";
+                } else if (usuarioSistema.getDetalleUsuarioSistema().isEmpty()) {
+                    mensaje = usuarioSistema.getNombre() + " no tiene rol asignado !!";
+                    session.invalidate();
+                }
             }
             model.addAttribute("error", mensaje);
         }

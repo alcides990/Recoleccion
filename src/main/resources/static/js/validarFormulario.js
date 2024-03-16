@@ -1,12 +1,15 @@
 $(document).ready(function () {
 
-    var url = window.location.pathname;
+    var pathname = window.location.pathname;
     var cuentaCorriente = $("#cuentaCorriente").val();
-    if (url === '/servicio/editar/' + cuentaCorriente) {
+    if (pathname === '/servicio/editar/' + cuentaCorriente) {
         $("#cuentaCorriente").prop('readonly', true);
         $("#fechaInicio").prop('readonly', true);
     }
-   
+    if (pathname === '/comprobante/facturaElectronica') {
+        $("#fechaPago").prop('disabled', true);
+
+    }
 
 
     $.datepicker.setDefaults($.datepicker.regional["es"]);
@@ -17,28 +20,28 @@ $(document).ready(function () {
 
 });
 
- function formaterarCuentaCorriente() {
-        var cuentaCorriente = $("#cuentaCorriente").val();
-        var longitudCuentaCorriente = cuentaCorriente.length;
+function formaterarCuentaCorriente() {
+    var cuentaCorriente = $("#cuentaCorriente").val();
+    var longitudCuentaCorriente = cuentaCorriente.length;
 
-        switch (longitudCuentaCorriente) {
-            case 2:
-                $("#cuentaCorriente").val(cuentaCorriente + '-');
+    switch (longitudCuentaCorriente) {
+        case 2:
+            $("#cuentaCorriente").val(cuentaCorriente + '-');
 
-                break;
-            case 7:
-                $("#cuentaCorriente").val(cuentaCorriente + '-');
+            break;
+        case 7:
+            $("#cuentaCorriente").val(cuentaCorriente + '-');
 
-                break;
-            case 11:
-                $("#cuentaCorriente").val(cuentaCorriente.substring(0, cuentaCorriente.length - 1) + '/' + cuentaCorriente.substring(cuentaCorriente.length - 1));
+            break;
+        case 11:
+            $("#cuentaCorriente").val(cuentaCorriente.substring(0, cuentaCorriente.length - 1) + '/' + cuentaCorriente.substring(cuentaCorriente.length - 1));
 
-                break;
+            break;
 
-            default:
+        default:
 
-                break;
-        }
+            break;
     }
+}
 
 

@@ -2,6 +2,7 @@
 package ama.dominio;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,16 +24,15 @@ public class ComprobanteGuardar {
     private Integer codigoTipoFactura;
     private Integer codigoCobrador;
     private Integer codigoCondicionVenta;
-    private Integer codigoComision;
     private LocalDate pagoHasta;
+    private LocalDate fechaPago;
     private Integer cantidadPago;
     private double recargoPago;
     private double saldoAnterior;
-    
+
     private List<DetallePago> detallePago;
     private Parametro parametro;
     private Servicio servicio;
-    
 
     public ComprobanteGuardar(List<DetallePago> detallePagos) {
         this.detallePago = detallePagos;
@@ -61,6 +61,5 @@ public class ComprobanteGuardar {
     public void setServicio(Servicio servicio) {
         this.servicio = servicio;
     }
-    
-    
+
 }

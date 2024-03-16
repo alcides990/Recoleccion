@@ -2,11 +2,14 @@
 package ama.servicio;
  
 import ama.dominio.Categoria;
+import ama.dominio.Sucursal;
 import java.util.List;
 
 public interface CategoriaService {
     
     public List<Categoria> listar();
+    
+    public List<Categoria> listar(Sucursal sucursal);
     
     public Categoria guardar(Categoria categoria);
     

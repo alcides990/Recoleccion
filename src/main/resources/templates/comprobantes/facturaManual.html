@@ -1,261 +1,272 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org" >
-    <head  th:replace="~{layout/layout :: heat}"> </head>
-    <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside th:replace="~{layout/layout :: aside}">  </aside>
-        <div class="container p-1"> 
-            <div class="card-header"><h3>Datos Factura</h3></div>
-            <a th:href="@{/servicio/listar}" class="btn btn-primario">Regresar</a>
-            <div class="mensaje-alerta" id="contenedor-alertas"></div>
-            <form name="frm-comprobante" id="frm-comprobante"  th:action="@{/comprobante/guardar}" method="post" th:object="${comprobante}">
-                <div class="row d-flex m-1">
-                    <div class="col-sm-3"> 
-                        <label class="form-label" for="cuentaCorriente">Cuentacorriente </label>
-                        <input onkeyup="formaterarCuentaCorriente()" class="form-control" type="search"  name="cuentaCorriente" id="cuentaCorriente"  th:value="${servicio.cuentaCorriente}"  />
-                    </div>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
-                    <input type="text" class="d-none" name="codigoUsuario" id="codigoUsuario" th:value="${usuario.codigoUsuario}">
-                        <div class="col-sm-3">
-                            <label class="form-label" for="numeroDocumento">RUC/CI </label>
-                            <input class="form-control"  type="text" id="numeroDocumento" name="numeroDocumento" readonly="true" th:value="${usuario.numeroDocumento}"  required="campo ogligatorio"/>
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label" for="razonSocial">Razon Social </label>
-                            <input class="form-control"  type="text"  id="razonSocial" th:value="${usuario.nombre +' '+usuario.apellido}"  required="campo ogligatorio"/>
-                        </div>
-                        <div class="form-group col-sm-6"> 
-                            <label for="categoria">Categoria</label>
-                            <select th:object="${categoria}" class="form-control" id="categoria" >
-                                <option th:each="categoria : ${categoria}" 
-                                        th:value="${categoria.codigoCategoria}"
-                                        th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} ">
-                            </select>
-                        </div>
+<head th:replace="~{layout/layout :: heat}"> </head>
 
-                        <div class="col-sm-2"> 
-                            <label class="form-label" for="puntoExpedicion">PuntoExpedicion</label>
-                            <select  th:object="${puntoExpedicion}" class="form-control" name="puntoExpedicion"  id="puntoExpedicion">
-                                <option th:each="puntoExpedicion : ${puntoExpedicion}" 
-                                        th:value="${puntoExpedicion.codigoPuntoExpedicion}"
-                                        th:text="${puntoExpedicion.nombrePuntoExpedicion}"  />
-                            </select>
-                        </div>
-                        <div class="col-sm-3">
-                            <label class="form-label"for="condicionVenta">CondicionVenta</label>
-                            <select th:object="${condicionVenta}" class="form-control" name="condicionVenta" id="condicionVenta" >
-                                <option th:each="condicionVenta : ${condicionVenta} " 
-                                        th:value="${condicionVenta.codigoCondicionVenta}"
-                                        th:text="${condicionVenta.condicionVenta}"  />
-                            </select>
-                        </div>
-                </div>
-                <div class="row d-flex m-1">
-                    <div class="col-sm-3"> 
-                        <label class="form-label" for="numeroComprobante">N°Factura </label>
-                        <input class="form-control" type="text"  autofocus="true"  name="numeroComprobante" id="numeroComprobante"  th:value="${numeroComprobante}" />
-                        <span class="alert-danger" role="alert" th:if="${#fields.hasErrors('comprobantePK')}" th:errors="${comprobantePK.numeroComprobante}"> error</span>
-                    </div>
-
-                    <div class="col-sm-3">
-                        <label class="form-label" for="tipoFactura">TipoFactura</label>
-                        <select  th:object="${tipoFactura}" class="form-control" name="tipoFactura" id="tipoFactura"  >
-                            <option th:each="tipoFactura : ${tiposFactura} " 
-                                    th:value="${tipoFactura.codigoTipoFactura}"
-                                    th:text="${tipoFactura.tipoFactura}"  
-                                    th:selected="${tipoFactura.tipoFactura}== 'ELECTRONICA'"/>
-                        </select>
-                    </div>
-
-                    <div class="col-sm-6" >
-                        <label class="form-label" for="cobrador">Cobrador</label>
-                        <select th:object="${cobrador}" class="form-control" id="cobrador" name="cobrador">
-                            <option th:each="cobrador : ${cobrador} " 
-                                    th:value="${cobrador.codigoCobrador}"
-                                    th:text="${cobrador.nombreCompleto}"  />
-                        </select>
-
-                    </div>
-                </div>
-                <div class="row m-2">
-                    <div class="estadoCuenta mt-3">
-                        <h5>Detalle Pago</h5>
-                        <input type="hidden" name="tarifa" id="tarifa" th:value="${categoria.tarifa}"  />
-                        <div class="row">
-                            <div class="col-4">
-                                <label  for="pagoHasta">Pago Hasta:</label>
-                            </div>
-                            <div class="col">
-                                <input  type="text" readonly="true" name="pagoHasta" id="pagoHasta" th:value="${#temporals.format(estadoCuenta.pagoHasta,'yyyy-MM-dd')}"  class="form-control"  />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <label  for="cantidadDeuda">Cant.Deuda:</label>
-                            </div>
-                            <div class="col">
-                                <input  type="text" readonly name="cantidadDeuda" id="cantidadDeuda" th:value="${estadoCuenta.cantidadDeuda}"   class="form-control"  />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <label  for="cantidadPago">Cant.Pago:</label>
-                            </div>
-                            <div class="col">
-                                <input  type="text" name="cantidadPago" id="cantidadPago" th:field="${estadoCuenta.cantidadDeuda}"   class="form-control"  />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <label for="subTotal">SubTotal:</label>
-                            </div>
-                            <div class="col">
-                                <input  type="text" readonly="true" name="subTotal" id="subTotal"  th:value="${#numbers.formatDecimal(estadoCuenta.subTotal, 0, 'COMMA', 0, 'POINT')}"  class="form-control"  />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <label  for="saldoAnterior">Saldo Anterior</label>
-                            </div>
-                            <div class="col">
-                                <input  type="text" readonly=""  name="saldoAnterior" id="saldoAnterior" th:value="${#numbers.formatDecimal(estadoCuenta.saldoAnterior, 0, 'COMMA', 0, 'POINT')}"   class="form-control"  />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <label  for="recargoPago">Recargo:</label>
-                            </div>
-                            <div class="col">
-                                <input  type="text"  name="recargoPago" id="recargoPago" th:value="${#numbers.formatDecimal(estadoCuenta.recargo, 0, 'COMMA', 0, 'POINT')}"   class="form-control"  />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <label  for="totalDeuda">Total a Pagar:</label>
-                            </div>
-                            <div class="col">
-                                <input  type="text" readonly="true" name="totalPagar" id="totalPagar" th:value="${#numbers.formatDecimal(estadoCuenta.totalDeuda, 0, 'COMMA', 0, 'POINT')}"class="form-control"  />
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="col-sm-4" >
-                        <label class="form-label" for="metodoPago">Metodo Pago</label>
-                        <div class="d-inline-flex">
-                            <select th:object="${metodoPago}" class="form-control" id="metodoPago" name="metodoPago">
-                                <option th:each="metodoPago : ${metodosPago} " 
-                                        th:value="${metodoPago.codigoMetodoPago}"
-                                        th:text="${metodoPago.metodoPago}"  
-                                        th:selected="${metodoPago.codigoMetodoPago}==1"/>
-                            </select>
-                            <i id="metodoPagoConfig" class="btn-primario fas fa-cog" 
-                               title="Configurar metodos de pago"
-                               data-bs-toggle="modal"
-                               data-bs-target="#configModal"></i>
-                        </div>
-                    </div>
-                </div>
-                <input type="submit" id="guardar" name="guardar" value="Guardar" class="btn-primario m-3"/>
-
-            </form>
+<body>
+    <header th:replace="~{layout/layout :: header}"> </header>
+    <aside th:replace="~{layout/layout :: aside}"> </aside>
+    <div class="container p-1">
+        <div class="card-header">
+            <h3>Datos Factura</h3>
         </div>
-        <!-- Ventana modal configuracion metodos pago -->
-        <div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="confirmacionModalLabel "  data-bs-backdrop="static"
-             aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content bg-color">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmacionModalLabel">Cofigurar Metodos de Pago </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+        <a th:href="@{/servicio/listar}" class="btn btn-primario">Regresar</a>
+        <div class="mensaje-alerta" id="contenedor-alertas"></div>
+        <form name="frm-comprobante" id="frm-comprobante" th:action="@{/comprobante/guardar}" method="post"
+            th:object="${comprobante}">
+            <div class="row d-flex m-1">
+                <div class="col-sm-3">
+                    <label class="form-label" for="cuentaCorriente">Cuentacorriente </label>
+                    <input onkeyup="formaterarCuentaCorriente()" class="form-control" type="search"
+                        name="cuentaCorriente" id="cuentaCorriente" th:value="${servicio.cuentaCorriente}" />
+                </div>
+
+                <input type="text" class="d-none" name="codigoUsuario" id="codigoUsuario"
+                    th:value="${usuario.codigoUsuario}">
+                <div class="col-sm-3">
+                    <label class="form-label" for="numeroDocumento">RUC/CI </label>
+                    <input class="form-control" type="text" id="numeroDocumento" name="numeroDocumento" readonly="true"
+                        th:value="${usuario.numeroDocumento}" required="campo ogligatorio" />
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label" for="razonSocial">Razon Social </label>
+                    <input class="form-control" type="text" id="razonSocial"
+                        th:value="${usuario.nombre +' '+usuario.apellido}" required="campo ogligatorio" />
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="categoria">Categoria</label>
+                    <select th:object="${categoria}" class="form-control" id="categoria">
+                        <option th:each="categoria : ${categoria}" th:value="${categoria.codigoCategoria}"
+                            th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} ">
+                    </select>
+                </div>
+
+                <div class="col-sm-2">
+                    <label class="form-label" for="puntoExpedicion">PuntoExpedicion</label>
+                    <select th:object="${puntoExpedicion}" class="form-control" name="puntoExpedicion"
+                        id="puntoExpedicion">
+                        <option th:each="puntoExpedicion : ${puntoExpedicion}"
+                            th:value="${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}"
+                            th:text="${puntoExpedicion.nombrePuntoExpedicion}" />
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label" for="fechaPago">Fecha Pago</label>
+                    <input class="form-control" type="text" name="fechaPago" id="fechaPago" />
+                </div>
+            </div>
+            <div class="row d-flex m-1">
+                <div class="col-sm-3">
+                    <label class="form-label" for="numeroComprobante">N°Factura </label>
+                    <input class="form-control" type="text" autofocus="true" name="numeroComprobante"
+                        id="numeroComprobante" th:value="${numeroComprobante}" />
+                    <span class="alert-danger" role="alert" th:if="${#fields.hasErrors('comprobantePK')}"
+                        th:errors="${comprobantePK.numeroComprobante}"> error</span>
+                </div>
+
+                <div class="col-sm-3">
+                    <label class="form-label" for="tipoFactura">TipoFactura</label>
+                    <select th:object="${tipoFactura}" class="form-control" name="tipoFactura" id="tipoFactura">
+                        <option th:each="tipoFactura : ${tiposFactura} " th:value="${tipoFactura.codigoTipoFactura}"
+                            th:text="${tipoFactura.tipoFactura}"
+                            th:selected="${tipoFactura.tipoFactura}== 'ELECTRONICA'" />
+                    </select>
+                </div>
+
+                <div class="col-sm-6">
+                    <label class="form-label" for="cobrador">Cobrador</label>
+                    <select th:object="${cobrador}" class="form-control" id="cobrador" name="cobrador">
+                        <option th:each="cobrador : ${cobrador} " th:value="${cobrador.codigoCobrador}"
+                            th:text="${cobrador.nombreCompleto}" />
+                    </select>
+
+                </div>
+            </div>
+            <div class="row m-2">
+                <div class="estadoCuenta mt-3">
+                    <h5>Detalle Pago</h5>
+                    <input type="hidden" name="tarifa" id="tarifa" th:value="${categoria.tarifa}" />
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="pagoHasta">Pago Hasta:</label>
+                        </div>
+                        <div class="col">
+                            <input type="text" readonly="true" name="pagoHasta" id="pagoHasta"
+                                th:value="${#temporals.format(estadoCuenta.pagoHasta,'yyyy-MM-dd')}"
+                                class="form-control" />
+                        </div>
                     </div>
-                    <div class="row m-3 p-3">
-
-                        <div class="col-md-6" >
-                            <label for="metodoPago">Metodo Pago</label>
-                            <select onchange="tabular('#importe')" th:object="${metodoPago}" class="form-control" 
-                                    id="metodoPagoSelect" name="metodoPago">
-                                <option th:each="metodoPago : ${metodosPago} " 
-                                        th:value="${metodoPago.codigoMetodoPago}"
-                                        th:text="${metodoPago.metodoPago}"  
-                                        th:selected="${metodoPago.codigoMetodoPago}==1"/>
-                            </select>
-
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="cantidadDeuda">Cant.Deuda:</label>
                         </div>
-                        <div class=" col-md-6">
-                            <div class="d-inline-flex mt-3">
-                                <input class="form-control "  type="text" name="importe" id="importe"
-                                       placeholder="ingrese monto importe">
-
-                                    <button id="metodoPagoAgregar" 
-                                            class="btn-primario" 
-                                            title="Agregar metodo de pago"
-                                            onclick="agregarMetodoPago()">
-                                        Agregar
-                                    </button>
-                            </div>
+                        <div class="col">
+                            <input type="text" readonly name="cantidadDeuda" id="cantidadDeuda"
+                                th:value="${estadoCuenta.cantidadDeuda}" class="form-control" />
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="cantidadPago">Cant.Pago:</label>
+                        </div>
+                        <div class="col">
+                            <input type="text" name="cantidadPago" id="cantidadPago"
+                                th:field="${estadoCuenta.cantidadDeuda}" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="subTotal">SubTotal:</label>
+                        </div>
+                        <div class="col">
+                            <input type="text" readonly="true" name="subTotal" id="subTotal"
+                                th:value="${#numbers.formatDecimal(estadoCuenta.subTotal, 0, 'POINT', 0, 'COMMA')}"
+                                class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="saldoAnterior">Saldo Anterior</label>
+                        </div>
+                        <div class="col">
+                            <input type="text" readonly="" name="saldoAnterior" id="saldoAnterior"
+                                th:value="${#numbers.formatDecimal(estadoCuenta.saldoAnterior, 0, 'POINT', 0, 'COMMA')}"
+                                class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="recargoPago">Recargo:</label>
+                        </div>
+                        <div class="col">
+                            <input type="text" name="recargoPago" id="recargoPago"
+                                th:value="${#numbers.formatDecimal(estadoCuenta.recargo, 0, 'POINT', 0, 'COMMA')}"
+                                class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="totalDeuda">Total a Pagar:</label>
+                        </div>
+                        <div class="col">
+                            <input type="text" readonly="true" name="totalPagar" id="totalPagar"
+                                th:value="${#numbers.formatDecimal(estadoCuenta.totalDeuda, 0, 'POINT', 0, 'COMMA')}"
+                                class="form-control" />
+                        </div>
+                    </div>
 
-                        <div class=" d-flex offset-9 mt-3">
-                            <button id="cancelar" 
-                                    class="btn-primario" 
-                                    onclick="limpiarMetodosPago()">
-                                Cancelar
+                </div>
+                <div class="col-sm-4">
+                    <label class="form-label" for="metodoPago">Metodo Pago</label>
+                    <div class="d-inline-flex">
+                        <select th:object="${metodoPago}" class="form-control" id="metodoPago" name="metodoPago">
+                            <option th:each="metodoPago : ${metodosPago} " th:value="${metodoPago.codigoMetodoPago}"
+                                th:text="${metodoPago.metodoPago}" th:selected="${metodoPago.codigoMetodoPago}==1" />
+                        </select>
+                        <i id="metodoPagoConfig" class="btn-primario fas fa-cog" title="Configurar metodos de pago"
+                            data-bs-toggle="modal" data-bs-target="#configModal"></i>
+                    </div>
+                </div>
+            </div>
+            <input type="submit" id="guardar" name="guardar" value="Guardar" class="btn-primario m-3" />
+
+        </form>
+    </div>
+    <!-- Ventana modal configuracion metodos pago -->
+    <div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="confirmacionModalLabel "
+        data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bg-color">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmacionModalLabel">Detalles Pago </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="row m-3 p-3">
+
+                    <div class="col-md-6">
+                        <label for="metodoPago">Metodo Pago</label>
+                        <select onchange="tabular('#importe')" th:object="${metodoPago}" class="form-control"
+                            id="metodoPagoSelect" name="metodoPago">
+                            <option th:each="metodoPago : ${metodosPago} " th:value="${metodoPago.codigoMetodoPago}"
+                                th:text="${metodoPago.metodoPago}" th:selected="${metodoPago.codigoMetodoPago}==1" />
+                        </select>
+
+                    </div>
+                    <div class=" col-md-6">
+                        <div class="d-inline-flex mt-3">
+                            <input class="form-control " type="text" name="importe" id="importe"
+                                placeholder="ingrese monto importe">
+
+                            <button id="metodoPagoAgregar" class="btn-primario" title="Agregar metodo de pago"
+                                onclick="agregarMetodoPago()">
+                                Agregar
                             </button>
                         </div>
                     </div>
-                    <div class="table-responsive-lg">
-                        <table id="tablaMetodoPago" class="table caption-top table-dark table-border table-striped table-colapse  ">
-                            <caption>Metodos de Pagos Agregados</caption>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Metodo Pago</th>
-                                    <th>Importe</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="table-secondary table-hover">
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-4 offset-4 my-2" >
-                        <label>Total Importe:</label>
-                        <input readonly="" class="form-control " type="text"  id="totalImporte">                        
+
+                    <div class=" d-flex offset-9 mt-3">
+                        <button id="cancelar" class="btn-primario" onclick="limpiarMetodosPago()">
+                            Cancelar
+                        </button>
                     </div>
                 </div>
-
+                <div class="table-responsive-lg">
+                    <table id="tablaMetodoPago"
+                        class="table caption-top table-dark table-border table-striped table-colapse  ">
+                        <caption>Metodos de Pagos Agregados</caption>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Metodo Pago</th>
+                                <th>Importe</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-secondary table-hover">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4 offset-4 my-2">
+                    <label>Total Importe:</label>
+                    <input readonly="" class="form-control " type="text" id="totalImporte">
+                </div>
             </div>
-        </div>
-        </div>
 
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
-        <script src="/js/comprobante.js"></script>
-        <script src="/js/validarFormulario.js" async="true"></script>
-        <script>
-                                        $(document).ready(function () {
-                                            generarNumeroComprobante();
-                                            $(document).on('change', '#tipoFactura, #puntoExpedicion', function () {
-                                                generarNumeroComprobante();
-                                            });
-                                            $("#cuentaCorriente").on('keypress', function (e) {
-                                                if (e.keyCode === 13) {
-                                                    e.preventDefault();
-                                                    var cuentaCorriente = $("#cuentaCorriente").val();
-                                                    var url = '/comprobante/facturar';
-                                                    var datos = {cuentaCorriente: cuentaCorriente};
-                                                    cargarDatosComprobante(datos, url);
-                                                }
-                                            });
-                                            $("#numeroComprobante").keyup(function (e) {
-                                                var numeroComprobante = parseInt($("#numeroComprobante").val());
-                                                $("#numeroComprobante").val(numeroComprobante.toString().padStart(7, 0));
-                                            });
-                                        });
-        </script>
-    </body>
+        </div>
+    </div>
+    </div>
+
+    <footer th:replace="~{layout/layout :: footer}"> </footer>
+    <script src="/js/comprobante.js"></script>
+    <script src="/js/validarFormulario.js"></script>
+    <script src="/js/datepicker-es.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#fechaPago").datepicker();
+            $("#fechaPago").datepicker("setDate", new Date());
+            generarNumeroComprobante();
+            $(document).on('change', '#tipoFactura, #puntoExpedicion', function () {
+                generarNumeroComprobante();
+            });
+            $("#cuentaCorriente").on('keypress', function (e) {
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                    var cuentaCorriente = $("#cuentaCorriente").val();
+                    var url = '/comprobante/facturar';
+                    var datos = { cuentaCorriente: cuentaCorriente };
+                    cargarDatosComprobante(datos, url);
+                }
+            });
+            $("#numeroComprobante").keyup(function (e) {
+                var numeroComprobante = parseInt($("#numeroComprobante").val());
+                $("#numeroComprobante").val(numeroComprobante.toString().padStart(7, 0));
+            });
+        });
+
+    </script>
+</body>
 
 
 </html>

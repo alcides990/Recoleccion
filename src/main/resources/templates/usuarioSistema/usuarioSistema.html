@@ -42,7 +42,7 @@
                             <td th:text="${usuario.codigoUsuarioSistema}"> </td>
                             <td th:text="${usuario.nombre}">  </td>
                             <td>
-                                <a sec:authorize="hasAuthority('ADMIN')" th:href="@{/detalleUsuarioSistema/agregar/} + ${usuario.codigoUsuarioSistema}"
+                                <a sec:authorize="hasAnyAuthority('ADMIN','ROOT')" th:href="@{/detalleUsuarioSistema/agregar/} + ${usuario.codigoUsuarioSistema}"
                                    class="btn btn-primario btn-sm">
                                     <i class="fas fa-cog"></i> 
                                 </a>
@@ -50,7 +50,8 @@
                                    class="btn btn-info btn-sm">
                                     <i class="fa-regular fa-pen-to-square"></i> 
                                 </a>
-                                <a id="eliminar" data-url="/usuarioSistema/eliminar/" 
+                                <a sec:authorize="hasAnyAuthority('ADMIN','ROOT')"
+                                    id="eliminar" data-url="/usuarioSistema/eliminar/" 
                                    th:data-id="${usuario.codigoUsuarioSistema}" 
                                    class="btn btn-danger btn-sm" > 
                                     <i class="fa-solid fa-trash-can "></i> 

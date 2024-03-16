@@ -18,13 +18,7 @@ public class DetalleComprobantePK implements Serializable {
     private static final long serialVersionUID = 1L;
 
     
-    @Basic(optional = false)
-    @Column(name = "codigo_sucursal")
-    private Integer codigoSucursal;
-    
-    @Basic(optional = false)
-    @Column(name = "codigo_punto_expedicion")
-    private Integer codigoPuntoExpedicion;
+   private PuntoExpedicionPK puntoExpedicionPK;
     
     @Basic(optional = false)
     @Column(name = "numero_comprobante")

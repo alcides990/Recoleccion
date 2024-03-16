@@ -8,7 +8,11 @@
         <div class="container card ">
             <div><h4>Puntos de expedicion</h4></div> 
             <div class="">
-                <a th:href="@{/puntoExpedicion/agregar}" class="btn btn-primary btn-sm mb-3">Agregar PuntoExpedicion</a>
+                <div th:if="${info}" class="mensaje-alerta alert alert-success">
+                    <span th:text="${info}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <a th:href="@{/puntoExpedicion/agregar}" class="btn btn-primario btn-sm mb-3"><i class="fas fa-plus fa-xl "></i> PuntoExpedicion</a>
                 <div class="table-responsive-sm">
                     <table class="table table-border table-striped table-colapse table-hover table-lg " >
                         <thead class="table-dark">
@@ -23,12 +27,14 @@
                         </thead>
                         <tbody class="table-secondary">
                             <tr th:each="puntoExpedicion : ${puntosExpedicion}">
-                                <td th:text="${puntoExpedicion.codigoPuntoExpedicion}">  </td>
+                                <td th:text="${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}">  </td>
                                 <td th:text="${puntoExpedicion.nombrePuntoExpedicion}">   </td>
-                                <td th:text="${puntoExpedicion.sucursal.nombreSucursal}" >   </td>
+                                <td th:text="${puntoExpedicion.sucursal.nombreSucursal} +' '+${puntoExpedicion.sucursal.ciudad.nombreCiudad}" >   </td>
                                 <td th:text="${puntoExpedicion.estado.estado}" >   </td>
-                                <td><a th:href="@{/puntoExpedicion/editar/} + ${puntoExpedicion.codigoPuntoExpedicion}" class="btn btn-info btn-sm"th:text="Editar"/></td>
-                                <td><a th:href="@{/puntoExpedicion/eliminar(codigoPuntoExpedicion=${puntoExpedicion.codigoPuntoExpedicion})}" class="btn btn-danger btn-sm "th:text="Eliminar"/></td>
+                                <td><a th:href="@{/puntoExpedicion/editar/} + ${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}+'/'+ ${puntoExpedicion.puntoExpedicionPK.codigoSucursal}" 
+                                       class="btn btn-info btn-sm"th:text="Editar"/></td>
+                                <td><a th:href="@{/puntoExpedicion/eliminar/} + ${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}+'/'+ ${puntoExpedicion.puntoExpedicionPK.codigoSucursal}"
+                                       class="btn btn-danger btn-sm "th:text="Eliminar"/></td>
                             </tr>
                         </tbody>
                     </table>

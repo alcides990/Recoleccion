@@ -19,6 +19,9 @@ public class Sucursal implements Serializable {
     private Integer codigoSucursal;
     @Column(name = "sucursal")
     private String nombreSucursal;
+    private String celular;
+    private String telefono;
+    private String direccion;
 
     @JoinColumn(name = "codigo_ciudad", referencedColumnName = "codigo_ciudad")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -33,7 +36,7 @@ public class Sucursal implements Serializable {
     private Empresa empresa;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @OneToOne(mappedBy = "sucursal")
+    @OneToOne(mappedBy = "sucursal", fetch = FetchType.LAZY)
     private Parametro parametro;
 
     public Sucursal(Integer codigoSucursal) {

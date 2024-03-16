@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -81,11 +82,11 @@ public class ServicioController {
         modelo.addAttribute("cantElemento", cantElemento);
         modelo.addAttribute("servicios", servicios);
 
-        var categorias = servicioCategoria.listar();
+        List<Categoria> categorias = servicioCategoria.listar(getSucursalSession());
         modelo.addAttribute("categorias", categorias);
 
-        var sucursales = servicioSucursal.listar();
-        modelo.addAttribute("sucursales", sucursales);
+        List<Sucursal> sucursales = servicioSucursal.listar();
+        modelo.addAttribute("sucursales", getSucursalSession());
 
         var estado = servicioEstado.listar();
         modelo.addAttribute("estado", estado);
@@ -202,7 +203,7 @@ public class ServicioController {
         // Verificar si la cuenta corriente ya se encuentra registrada
         Servicio servicioEncontrada = servicioServicio.encontrar(servicio.getCuentaCorriente());
         if (servicioEncontrada != null && !accion.equals("editar")) {
-            String nombreUsuario = servicio.getUsuario().getNombre() + " " + servicio.getUsuario().getApellido();
+            String nombreUsuario = servicioEncontrada.getUsuario().getNombre() + " " + servicioEncontrada.getUsuario().getApellido();
             mensaje = "La cuenta ya se encuentra registrada a nombre de: " + nombreUsuario;
             return ResponseEntity.status(HttpStatus.CONFLICT).body(mensaje);
         }
@@ -282,7 +283,7 @@ public class ServicioController {
     }
 
     private EstadoCuenta getEstadoCuenta(Servicio servicio) {
-        Optional<Comprobante> ultimoComprobante = comprobanteService.getUltimoComprobanteCuenta(servicio.getCuentaCorriente());
+        Optional<Comprobante> ultimoComprobante = comprobanteService.getUltimoComprobanteCuentaActivo(servicio.getCuentaCorriente());
         LocalDate pagoHasta;
         double saldo = 0;
         if (ultimoComprobante.isEmpty()) {
@@ -305,5 +306,8 @@ public class ServicioController {
 
     private UsuarioSistema getUserSession() {
         return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
+    }
+    private Sucursal getSucursalSession() {
+        return getUserSession().getSucursal();
     }
 }

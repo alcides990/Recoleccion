@@ -7,81 +7,74 @@ function fechaPagoHastaFormateada(pagoHasta) {
     var fechaFormateada = anio + '-' + mes.toString().padStart(2, '0') + '-' + dia.toString().padStart(2, '0');
     return fechaFormateada;
 }
+function nextNumber(number) {
+    var numeroComprobanteSiguiente = (parseInt(number) + 1).toString().padStart(7, 0);
+    return numeroComprobanteSiguiente;
+
+}
 
 function cargarDatosComprobante(datos, url) {
     consultar(datos, url)
-            .then(function (data) {
-                $("#razonSocial").val(data.usuario.nombre + ' ' + data.usuario.apellido);
-                $("#numeroDocumento").val(data.usuario.numeroDocumento);
-                $("#categoria").empty();
-                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.nombreCategoria + '-' + data.categoria.tarifa + '</option>');
-                $("#cobrador").empty();
-                $("#cobrador").append('<option value="' + data.manzana.zona.cobrador.codigoCobrador + '">' + data.manzana.zona.cobrador.nombre + ' ' + data.manzana.zona.cobrador.apellido + '</option>');
-                $("#tarifa").val(data.categoria.tarifa);
+        .then(function (data) {
+            $("#razonSocial").val(data.usuario.nombre + ' ' + data.usuario.apellido);
+            $("#numeroDocumento").val(data.usuario.numeroDocumento);
+            $("#categoria").empty();
+            $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.nombreCategoria + '-' + data.categoria.tarifa + '</option>');
+            $("#cobrador").empty();
+            $("#cobrador").append('<option value="' + data.manzana.zona.cobrador.codigoCobrador + '">' + data.manzana.zona.cobrador.nombre + ' ' + data.manzana.zona.cobrador.apellido + '</option>');
+            $("#tarifa").val(data.categoria.tarifa);
 
-                $("#pagoHasta").val(fechaPagoHastaFormateada(data.estadoCuenta.pagoHasta));
-                $("#cantidadDeuda").val(data.estadoCuenta.cantidadDeuda);
-                $("#subTotal").val(formatPYG(data.estadoCuenta.subTotal));
-                $("#saldoAnterior").val(formatPYG(data.estadoCuenta.saldoAnterior));
-                $("#recargoPago").val(data.estadoCuenta.recargo);
-                $("#totalPagar").val(formatPYG(data.estadoCuenta.totalDeuda));
-                if ($("#tipoFactura option:selected").text() == 'MANUAL') {
-                    $("#numeroComprobante").focus();
-                } else {
+            $("#pagoHasta").val(fechaPagoHastaFormateada(data.estadoCuenta.pagoHasta));
+            $("#cantidadDeuda").val(data.estadoCuenta.cantidadDeuda);
+            $("#subTotal").val(formatPYG(data.estadoCuenta.subTotal));
+            $("#saldoAnterior").val(formatPYG(data.estadoCuenta.saldoAnterior));
+            $("#recargoPago").val(data.estadoCuenta.recargo);
+            $("#totalPagar").val(formatPYG(data.estadoCuenta.totalDeuda));
+            if ($("#tipoFactura option:selected").text() == 'MANUAL') {
+                $("#numeroComprobante").focus();
+            } else {
+                $("#cantidadPago").focus();
+                $("#cantidadPago").val("");
+            }
+            $("#numeroComprobante").on('keydown', function (e) {
+                if (e.keyCode == 13 || e.keyCode == 9) {
+                    e.preventDefault();
                     $("#cantidadPago").focus();
                     $("#cantidadPago").val("");
                 }
-                $("#numeroComprobante").on('keydown', function (e) {
-                    if (e.keyCode == 13 || e.keyCode == 9) {
-                        e.preventDefault();
-                        $("#cantidadPago").focus();
-                        $("#cantidadPago").val("");
-                    }
-                });
             });
+        });
 }
-
-$(document).on('click', '#anular', function (event) {
+function anularComprobante(datos) {
     var url = '/comprobante/getComprobante';
-    var dataId = $(this).data('id').split('-');
-    var codigoSucursal = dataId[0];
-    var codigoPuntoExpedicion = dataId[1];
-    var codigoTipoFactura = dataId[2];
-    var codigoSerie = dataId[3];
-    var numeroComprobante = dataId[4];
-    var datos = {
-        codigoSucursal: codigoSucursal,
-        codigoPuntoExpedicion: codigoPuntoExpedicion,
-        codigoTipoFactura: codigoTipoFactura,
-        codigoSerie: codigoSerie,
-        numeroComprobante: numeroComprobante
-    };
+
     consultar(datos, url)
-            .then(function (data) {
-                $("#cuentaCorriente").val(data.cuentaCorriente);
-                $("#razonSocial").val(data.nombreUsuario);
-                $("#numeroDocumento").val(data.numeroDocumento);
-                $("#numeroComprobante").val(data.numeroComprobante);
-                $("#categoria").empty();
-                $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.tarifa + '-' + data.categoria.nombreCategoria + '</option>');
-                $("#tarifa").val(data.categoria.tarifa);
-                $("#cobrador").empty();
-                $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
-                $("#sucursalAnular").empty();
-                $("#sucursalAnular").append('<option value="' + data.sucursal.codigoSucursal + '">' + data.sucursal.nombreSucursal + '</option>');
-                $("#puntoExpedicionaAnular").empty();
-                $("#puntoExpedicionaAnular").append('<option value="' + data.puntoExpedicion.codigoPuntoExpedicion + '">' + data.puntoExpedicion.nombrePuntoExpedicion + '</option>');
-                $("#tipoFactura").empty();
-                $("#tipoFactura").append('<option value="' + data.tipoFactura.codigoTipoFactura + '">' + data.tipoFactura.tipoFactura + '</option>');
-                $("#condicionVenta").empty();
-                $("#condicionVenta").append('<option value="' + data.condicionVenta.codigoCondicionVenta + '">' + data.condicionVenta.condicionVenta + '</option>');
-                $("#periodoPago").val(data.periodoPago);
-                $("#cantidadPago").val(data.cantidadPago);
-                $("#subTotal").val(formatPYG(data.importe));
-                $("#recargoPago").val(data.recargo);
-                $("#totalPago").val(formatPYG(data.importe + data.recargo));
-            });
-});
+        .then(function (data) {
+            $("#anularModal").modal('show');
+            $("#cuentaCorriente").val(data.cuentaCorriente);
+            $("#razonSocial").val(data.nombreUsuario);
+            $("#numeroDocumento").val(data.numeroDocumento);
+            $("#numeroComprobante").val(data.numeroComprobante);
+            $("#categoria").empty();
+            $("#categoria").append('<option value="' + data.categoria.codigoCategoria + '">' + data.categoria.tarifa + '-' + data.categoria.nombreCategoria + '</option>');
+            $("#tarifa").val(data.categoria.tarifa);
+            $("#cobrador").empty();
+            $("#cobrador").append('<option value="' + data.cobrador.codigoCobrador + '">' + data.cobrador.nombre + ' ' + data.cobrador.apellido + '</option>');
+            $("#sucursalAnular").empty();
+            $("#sucursalAnular").append('<option value="' + data.sucursal.codigoSucursal + '">' + data.sucursal.nombreSucursal + '</option>');
+            $("#puntoExpedicionAnular").empty();
+            $("#puntoExpedicionAnular").append('<option value="' + data.puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion + '">' + data.puntoExpedicion.nombrePuntoExpedicion + '</option>');
+            $("#tipoFactura").empty();
+            $("#tipoFactura").append('<option value="' + data.tipoFactura.codigoTipoFactura + '">' + data.tipoFactura.tipoFactura + '</option>');
+            $("#condicionVenta").empty();
+            $("#condicionVenta").append('<option value="' + data.condicionVenta.codigoCondicionVenta + '">' + data.condicionVenta.condicionVenta + '</option>');
+            $("#periodoPago").val(data.periodoPago);
+            $("#cantidadPago").val(data.cantidadPago);
+            $("#subTotal").val(formatPYG(data.importe));
+            $("#recargoPago").val(data.recargo);
+            $("#totalPago").val(formatPYG(data.importe + data.recargo));
+        });
+}
 tabulador("#numeroComprobante", "#cantidadPago");
 tabulador("#recargoPago", "#guardar");
 
@@ -129,12 +122,13 @@ var campos = [
     "#cantidadDeuda",
     "#cantidadPago",
     "#subTotal",
+    "#saldoAnterior",
     "#recargoPago",
-    "#totalDeuda"
+    "#totalPagar"
 ];
 
 function metosdosPagoAgregados() {
-    return  $("#tablaMetodoPago tbody tr").length;
+    return $("#tablaMetodoPago tbody tr").length;
 }
 
 $(document).on('click', 'tr  td #eliminar', function (event) {
@@ -143,7 +137,7 @@ $(document).on('click', 'tr  td #eliminar', function (event) {
 });
 
 function formatPYG(number) {
-    return parseInt(number).toLocaleString('es-PY', {style: 'currency', currency: 'PYG'});
+    return parseInt(number).toLocaleString('es-PY', { style: 'currency', currency: 'PYG' });
 }
 
 function soloNumero(value) {
@@ -159,6 +153,7 @@ $("#importe").on('keypress', function (e) {
 function limpiarMetodosPago() {
     $('#tablaMetodoPago tbody ').empty();
     limpiar([$("#totalImporte")]);
+    $("#metodoPago").show();
 }
 function agregarMetodoPago() {
     if ($("#importe").val().trim() !== '') {
@@ -213,7 +208,7 @@ function getDetallePago() {
     if (metosdosPagoAgregados() > 0) {
         $('#tablaMetodoPago tbody tr').each(function (index, element) {
             let codigoMetodoPago = parseInt($(this).find('td:eq(0)').text());
-            let  importe = parseInt($(this).find('td:eq(2)').text());
+            let importe = parseInt($(this).find('td:eq(2)').text());
             let metodoPago = {
                 detallePagoPK: {
                     codigoMetodoPago: codigoMetodoPago
@@ -241,9 +236,9 @@ function getDetallePago() {
 $('#frm-comprobante').submit(function (event) {
     event.preventDefault();
     let codigoSerie = 0;
-    let codigoTimbrado = 1;
-    let codigoComision = 1;
+    let codigoTimbrado = 0;
     let codigoCondicionVenta = 1;
+    let fechaPago = $("#fechaPago").val();
     let pagoHasta = $("#pagoHasta").val();
     let cuentaCorriente = $("#cuentaCorriente").val();
     let numeroComprobante = $("#numeroComprobante").val();
@@ -251,11 +246,9 @@ $('#frm-comprobante').submit(function (event) {
     let codigoTipoFactura = $("#tipoFactura").val();
     let codigoCobrador = $("#cobrador").val();
     let cantidadPago = $("#cantidadPago").val();
-    let recargoPago = $("#recargoPago").val();
+    let recargoPago = soloNumero($("#recargoPago").val());
     let saldoAnterior = soloNumero($("#saldoAnterior").val());
     let url = '/comprobante/guardar';
-
-    console.log();
 
     let datos = {
         codigoSerie: codigoSerie,
@@ -265,8 +258,8 @@ $('#frm-comprobante').submit(function (event) {
         codigoPuntoExpedicion: codigoPuntoExpedicion,
         codigoTipoFactura: codigoTipoFactura,
         codigoCobrador: codigoCobrador,
+        fechaPago: fechaPago,
         codigoCondicionVenta: codigoCondicionVenta,
-        codigoComision: codigoComision,
         pagoHasta: pagoHasta,
         cantidadPago: cantidadPago,
         recargoPago: recargoPago,
@@ -274,30 +267,45 @@ $('#frm-comprobante').submit(function (event) {
         detallePago: getDetallePago()
     };
     let contenType = 'application/json';
-    guardar(datos, url, contenType);
+    guardar(datos, url, contenType).then(function (data) {
+        mostrarAlerta({
+            mensaje: data,
+            url: url,
+            tipo: 'success',
+            redirigir: false,
+            recargar: false
+        });
+        let numComprobante = $("#numeroComprobante").val();
+        limpiar(campos);
+        limpiarMetodosPago();
+        $("#numeroComprobante").val(nextNumber(numComprobante));
+        $("#cuentaCorriente").focus();
+    });
 
 });
 
 $('#frm-comprobante-anular').submit(function (event) {
     event.preventDefault();
-    var codigoSerie = 0;
-    var codigoTimbrado = 1;
-    var numeroComprobante = $("#numeroComprobante").val();
-    var codigoSucursal = $("#sucursalAnular").val();
-    var codigoPuntoExpedicion = $("#puntoExpedicionAnular").val();
-    var codigoTipoFactura = $("#tipoFactura").val();
-    var motivoAnulacion = $("#motivoAnulacion").val();
-    var url = '/comprobante/anular';
-    var datos = {
+    let codigoSerie = 0;
+    let codigoTimbrado = 1;
+    let numeroComprobante = $("#numeroComprobante").val();
+    let codigoPuntoExpedicion = $("#puntoExpedicionAnular").val();
+    let codigoTipoFactura = $("#tipoFactura").val();
+    let motivoAnulacion = $("#motivoAnulacion").val();
+    let url = '/comprobante/anular';
+   
+    let datos = {
         codigoSerie: codigoSerie,
         codigoTimbrado: codigoTimbrado,
         numeroComprobante: numeroComprobante,
-        codigoSucursal: codigoSucursal,
         codigoPuntoExpedicion: codigoPuntoExpedicion,
         codigoTipoFactura: codigoTipoFactura,
         motivoAnulacion: motivoAnulacion
     };
     guardarComprobante(datos, url);
+    $("#anularModal").modal('hide', function () {
+        $("#frm-comprobante-anular").trigger("reset");
+    });
 });
 function guardarComprobante(datos, url) {
     let token = $("#token").val();
@@ -337,28 +345,25 @@ function guardarComprobante(datos, url) {
 function buscarComprobantes() {
     var codigoSucursal = $("#sucursal").val();
     var codigoPuntoExpedicion = $("#puntoExpedicion").val();
-    var numeroComprobante = $("#txtBuscar").val();
-    if (numeroComprobante.length > 3 || numeroComprobante.length === 0) {
-        var numeroPagina = 0;
-        var cantidadRegistro = $("#cantidadRegistro").val();
-        var url = '/comprobante/filtrar';
-        var datos = {codigoSucursal: codigoSucursal, codigoPuntoExpedicion: codigoPuntoExpedicion,
-            numeroComprobante: numeroComprobante, numeroPagina: numeroPagina, cantidadRegistro: cantidadRegistro};
-        let token = $("#token").val();
-        $.ajax({
-            headers: {
-                'X-CSRF-TOKEN': token
-            },
-            url: url,
-            data: datos,
-            type: "post",
-            dataType: "json",
-            success: function (data) {
-                $("tbody").empty();
-                $.each(data, function (llave, valor) {
-                    var datosTabla = `
+    var codigoSerie = $("#serie").val();
+    var numeroComprobante = $("#txtBuscar").val().replace(/[^0-9]/g, '');
+    numeroComprobante = (numeroComprobante === '0000000') ? '' : numeroComprobante;
+    var numeroPagina = 0;
+    var cantidadRegistro = $("#cantidadRegistro").val();
+    var url = '/comprobante/filtrar';
+    var datos = {
+        codigoSucursal: codigoSucursal, codigoPuntoExpedicion: codigoPuntoExpedicion, numeroComprobante: numeroComprobante,
+        codigoSerie: codigoSerie, numeroPagina: numeroPagina, cantidadRegistro: cantidadRegistro
+    };
+    let contentType = 'application/x-www-form-urlencoded';
+    consultar(datos, url, contentType).then(function (data) {
+
+            $("tbody").empty();
+            $.each(data, function (llave, valor) {
+                var datosTabla = `
                                  <tr> 
-                                    <td> ${valor.tipoFactura.tipoFactura} </td>
+                                    <td data-id=${valor.tipoFactura.codigoTipoFactura}> ${valor.tipoFactura.tipoFactura} </td>
+                                    <td data-id=${valor.puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}> ${valor.puntoExpedicion.nombrePuntoExpedicion} </td>
                                     <td> ${valor.numeroComprobante.toString().padStart(7, 0)}</td>
                                     <td> ${valor.cuentaCorriente} </td>
                                     <td> ${valor.nombreUsuario} </td>
@@ -377,22 +382,10 @@ function buscarComprobantes() {
                                         <i class="btn-close fa-regular fa-pen-to-square"></i>
                                     </a>  
                                  </tr> `;
-                    $("tbody").append(datosTabla);
-                });
-            },
-            error: function (error) {
-                var mensajeError = error.responseText;
-                if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
-                    mensajeError = error.responseJSON.message;
-                }
-                mostrarAlerta({
-                    mensaje: mensajeError,
-                    url: url,
-                    tipo: 'danger'
-                });
-            }
-        });
-    }
+                $("tbody").append(datosTabla);
+
+            });
+    });
 }
 
 
@@ -421,7 +414,9 @@ function generarNumeroComprobante() {
     var codigoSerie = 0;
     var url = '/comprobante/numComprobante';
     var datos = {
-        codigoPuntoExpedicion: codigoPuntoExpedicion,
+        puntoExpedicionPK: {
+            codigoPuntoExpedicion: codigoPuntoExpedicion
+        },
         codigoTipoFactura: codigoTipoFactura,
         codigoSerie: codigoSerie
     };

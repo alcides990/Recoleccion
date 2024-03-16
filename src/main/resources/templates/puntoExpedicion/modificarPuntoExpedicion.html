@@ -7,29 +7,22 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container "> 
-            <h1>Datos de Punto de Expedicion</h1>
+            <h3>Datos de Punto de Expedicion</h3>
             <a th:href="@{/puntoExpedicion/listar}" class="btn-primario ">Regresar</a>
             <form th:action="@{/puntoExpedicion/guardar}" method="post" th:object="${puntosExpedicion}">
                 <div class="row ">
                     <div class="form-group col-sm-4">
-                        <input type="hidden" name="codigoPuntoExpedicion"  th:value="*{codigoPuntoExpedicion}" />
+                        <input type="hidden" name="codigoPuntoExpedicion"  th:value="*{puntoExpedicionPK.codigoPuntoExpedicion}" />
+                        <input type="hidden" name="codigoSucursal"  th:value="*{puntoExpedicionPK.codigoSucursal}" />
                         <label class="form-label" for="nombrePuntoExpedicion">Punto de expedicion </label>                                
-                        <input class="form-control" type="text" name="nombrePuntoExpedicion"  th:value="*{nombrePuntoExpedicion}" placeholder="Ingrese Punto Expedicion " required="campo ogligatorio"/>
+                        <input class="form-control" type="text" autofocus="" name="nombrePuntoExpedicion"  th:value="*{nombrePuntoExpedicion}" placeholder="Ingrese Punto Expedicion " required="campo ogligatorio"/>
                     </div>
                     <div class="form-group col-sm-4"> 
                         <label class="form-label" for="sucursal">Sucursal</label>
-                        <select class="form-control" th:object="${sucursal}" name="sucursal" >
+                        <select class="form-control" th:object="${sucursales}" name="sucursal" >
                             <option th:each="sucursal : ${sucursales}" 
                                     th:value="${sucursal.codigoSucursal}"
-                                    th:text="${sucursal.nombreSucursal}" />
-                        </select>
-                    </div>
-                    <div class="form-group col-sm-4"> 
-                        <label  class="form-label" for="ciudad">Ciudad</label>
-                        <select class="form-control" th:object="${ciudad}" name="ciudad" >
-                            <option th:each="ciudad : ${ciudades}" 
-                                    th:value="${ciudad.codigoCiudad}"
-                                    th:text="${ciudad.nombreCiudad}"  />
+                                    th:text="${sucursal.nombreSucursal} +' '+${sucursal.ciudad.nombreCiudad}" />
                         </select>
                     </div>
                     <div class="col-sm-4 form-group"> 

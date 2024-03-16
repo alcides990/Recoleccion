@@ -3,6 +3,7 @@ package ama.servicio;
 import ama.dominio.Comprobante;
 import ama.dominio.ComprobantePK;
 import ama.dominio.Servicio;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,9 @@ public interface ComprobanteService {
     public Page<Comprobante> getComprobantesCuenta(Pageable page, Servicio servicio);
 
     public int getCantidadPago(String cuentaCorriente);
-    
-    public Optional<Comprobante> getUltimoComprobanteCuenta(String cuentaCorriente);
+
+    public Optional<Comprobante> getUltimoComprobanteCuentaActivo(String cuentaCorriente);
+
+    public List<Object[]> getPagoHastaAndSaldo(String cuentaCorriente);
 
 }

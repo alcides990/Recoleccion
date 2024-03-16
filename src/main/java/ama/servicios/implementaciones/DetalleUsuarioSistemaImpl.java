@@ -14,7 +14,7 @@ import ama.servicio.DetalleUsuarioSistemaService;
 
 @Slf4j
 @Service
-public class ImplDetalleUsuarioSistema implements DetalleUsuarioSistemaService {
+public class DetalleUsuarioSistemaImpl implements DetalleUsuarioSistemaService {
 
     @Autowired
     DetalleUsuarioSistemaDao detalleUsuarioSistemaDao;

@@ -50,7 +50,7 @@ public class Servicio implements Serializable {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Sucursal sucursal;
 
-    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JoinColumns({
         @JoinColumn(name = "codigo_manzana", referencedColumnName = "codigo_manzana"),
         @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")

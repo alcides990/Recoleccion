@@ -6,6 +6,7 @@ import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import ama.servicio.SucursalService;
 import ama.servicio.CiudadService;
 
@@ -28,6 +31,7 @@ public class SucursalController {
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(String.class, new Mayuscula());
     }
+
     @Autowired
     private SucursalService servicioSucursal;
     @Autowired
@@ -42,6 +46,7 @@ public class SucursalController {
         return "sucursal/sucursal";
     }
 
+    @PreAuthorize("hasAnyAuthority({'ROOT'})")
     @GetMapping("/agregar")
     public String agregar(Model modelo) {
         modelo.addAttribute("titulo", "Sucursal");
@@ -53,7 +58,7 @@ public class SucursalController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(Sucursal sucursal) {
+    public String guardar(Sucursal sucursal, RedirectAttributes flash) {
         if (sucursal.getCodigoSucursal() == null) {
             Integer codigoSucursal = servicioSucursal.getCodigoSucursal() + 1;
             sucursal.setCodigoSucursal(codigoSucursal);
@@ -62,22 +67,23 @@ public class SucursalController {
         empresa.setCodigoEmpresa(1);
         sucursal.setEmpresa(empresa);
         servicioSucursal.guardar(sucursal);
+        flash.addFlashAttribute("info", "Sucursal guardada correctamente!!");
         return "redirect:/sucursal/listar";
     }
 
     @GetMapping("/editar/{codigoSucursal}")
     public String editar(Sucursal sucursal, Model model) {
-        model.addAttribute("titulo", "Sucursal");
+        model.addAttribute("titulo", "Editar Sucursal");
         sucursal = servicioSucursal.encontrar(sucursal);
         model.addAttribute("sucursal", sucursal);
-        var ciudades = servicioCiudad.listarCiudad();
-        model.addAttribute("ciudades", ciudades);
+        model.addAttribute("ciudades", sucursal.getCiudad());
         return "sucursal/modificarSucursal";
     }
 
     @GetMapping("/eliminar")
-    public String eliminar(Sucursal sucursal) {
+    public String eliminar(Sucursal sucursal, RedirectAttributes flash) {
         servicioSucursal.eliminar(sucursal);
+        flash.addFlashAttribute("info", "Sucursal eliminada correctamente!!");
         return "redirect:/sucursal/listar";
     }
 }

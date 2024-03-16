@@ -4,39 +4,32 @@
  */
 package ama.dominio;
 
-import ama.dominio.Estado;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
-@Data
-@Entity
-@Table(name = "puntos_expedicion")
-public class PuntoExpedicion implements Serializable {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Getter
+@Setter
+@Embeddable
+public class PuntoExpedicionPK implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Id
+    @Basic(optional = false)
+    @Column(name = "codigo_sucursal")
+    private Integer codigoSucursal;
+
+    @Basic(optional = false)
     @Column(name = "codigo_punto_expedicion")
     private Integer codigoPuntoExpedicion;
-    @Column(name = "punto_expedicion")
-    private String nombrePuntoExpedicion;
-    
-    @ToString.Exclude
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @JoinColumn(name = "codigo_empresa", referencedColumnName = "codigo_empresa")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Empresa empresa;
-    
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @JoinColumn(name = "codigo_estado", referencedColumnName = "codigo_estado")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Estado estado;
-    
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Sucursal sucursal;
 
+    
 }

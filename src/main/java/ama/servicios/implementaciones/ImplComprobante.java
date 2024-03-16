@@ -3,7 +3,10 @@ package ama.servicios.implementaciones;
 import ama.dao.ComprobanteDao;
 import ama.dominio.Comprobante;
 import ama.dominio.ComprobantePK;
+import ama.dominio.PuntoExpedicion;
+import ama.dominio.Serie;
 import ama.dominio.Servicio;
+import ama.dominio.Sucursal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,9 +34,35 @@ public class ImplComprobante implements ComprobanteService {
     @Transactional(readOnly = true)
     @Override
     public Page<Comprobante> filtrar(Pageable pageable, ComprobantePK comprobantePK) {
-        return (Page<Comprobante>) comprobanteDao.filtrarComprobantes(pageable,
-                comprobantePK.getCodigoSucursal(), comprobantePK.getCodigoPuntoExpedicion(),
-                comprobantePK.getNumeroComprobante());
+        Page<Comprobante> comprobantes = null;
+        if (comprobantePK.getNumeroComprobante() != null
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() != 0) {
+            comprobantes = comprobanteDao.filterByPuntoExpedicionAndNumeroComprobante(pageable,
+                    new PuntoExpedicion(comprobantePK.getPuntoExpedicionPK()),
+                    new Serie(comprobantePK.getCodigoSerie()),
+                    comprobantePK.getNumeroComprobante());
+            return comprobantes;
+        } else if (comprobantePK.getNumeroComprobante() != null
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() == 0) {
+            comprobantes = comprobanteDao.filterBySucursalAndNumeroComprobante(pageable,
+                    new Sucursal(comprobantePK.getPuntoExpedicionPK().getCodigoSucursal()),
+                    new Serie(comprobantePK.getCodigoSerie()),
+                    comprobantePK.getNumeroComprobante());
+            return comprobantes;
+        } else if (comprobantePK.getNumeroComprobante() == null
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() != 0) {
+            comprobantes = comprobanteDao.findByPuntoExpedicion(pageable,
+                    new PuntoExpedicion(comprobantePK.getPuntoExpedicionPK()),
+                    new Serie(comprobantePK.getCodigoSerie()));
+            return comprobantes;
+        } else if (comprobantePK.getNumeroComprobante() == null
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() == 0) {
+            comprobantes = comprobanteDao.findBySucursal(pageable,
+                    new Sucursal(comprobantePK.getPuntoExpedicionPK().getCodigoSucursal()),
+                    new Serie(comprobantePK.getCodigoSerie()));
+            return comprobantes;
+        }
+        return comprobantes;
     }
 
     @Transactional
@@ -73,8 +102,7 @@ public class ImplComprobante implements ComprobanteService {
     @Override
     public Integer getNumeroComprobante(ComprobantePK comprobantePK) {
         Integer numeroComprobante = numeroComprobante = comprobanteDao.getNumeroComprobante(
-                comprobantePK.getCodigoSucursal(),
-                comprobantePK.getCodigoPuntoExpedicion(),
+                comprobantePK.getPuntoExpedicionPK(),
                 comprobantePK.getCodigoTipoFactura(),
                 comprobantePK.getCodigoSerie());
         return numeroComprobante == null ? 1 : numeroComprobante + 1;
@@ -87,7 +115,12 @@ public class ImplComprobante implements ComprobanteService {
     }
 
     @Override
-    public Optional<Comprobante> getUltimoComprobanteCuenta(String cuentaCorriente) {
-       return comprobanteDao.getUltimoComprobanteCuenta(cuentaCorriente);
+    public Optional<Comprobante> getUltimoComprobanteCuentaActivo(String cuentaCorriente) {
+        return comprobanteDao.getUltimoComprobanteCuentaActivo(cuentaCorriente);
+    }
+
+    @Override
+    public List<Object[]> getPagoHastaAndSaldo(String cuentaCorriente) {
+        return comprobanteDao.getPagoHastaAndSaldo(cuentaCorriente);
     }
 }

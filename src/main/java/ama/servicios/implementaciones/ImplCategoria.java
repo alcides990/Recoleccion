@@ -2,6 +2,7 @@ package ama.servicios.implementaciones;
 
 import ama.dao.CategoriaDao;
 import ama.dominio.Categoria;
+import ama.dominio.Sucursal;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,11 @@ public class ImplCategoria implements CategoriaService {
     @Override
     public List<Categoria> listar() {
         return (List<Categoria>) categoriaDao.listar();
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public List<Categoria> listar(Sucursal sucursal) {
+        return (List<Categoria>) categoriaDao.listar(sucursal);
     }
 
     @Transactional

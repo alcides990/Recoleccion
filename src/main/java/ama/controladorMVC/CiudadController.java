@@ -27,11 +27,12 @@ public class CiudadController {
     }
     
     @Autowired
-    private CiudadService servicioCiudad;
+    private CiudadService ciudadService;
 
     @GetMapping("/listar")
-    public String listaCiudad(Model modelo) {
-       
+    public String listaCiudad(Model model) {
+       model.addAttribute("ciudades", ciudadService.listarCiudad());
+       ciudadService.listarCiudad().forEach(System.out::println);
             return "ciudad/ciudad";
     }
 
@@ -48,17 +49,17 @@ public class CiudadController {
         //Comprobar si codigoCiudad esta vacia
         if (ciudad.getCodigoCiudad() == null) {
             //recuperar el valor maximo del codigoCiuad y sumarle 1 para el nuevo registro
-            Integer codigoCiudad = servicioCiudad.getCodigoCiudad() + 1;
+            Integer codigoCiudad = ciudadService.getCodigoCiudad() + 1;
             //Asignar el nuevo valor codigoCiudad al objeto ciudad ;
             ciudad.setCodigoCiudad(codigoCiudad);
         }
-        servicioCiudad.guardar(ciudad);
+        ciudadService.guardar(ciudad);
         return "redirect:/ciudad/listar";
     }
 
     @GetMapping("/editar/{codigoCiudad}")
     public String editar(Ciudad ciudad, Model model) {
-        ciudad = servicioCiudad.encontrarCiudad(ciudad);
+        ciudad = ciudadService.encontrarCiudad(ciudad);
         model.addAttribute("ciudad", ciudad);
         model.addAttribute("titulo", "Ciudad");
         return "ciudad/modificarCiudad";
@@ -66,7 +67,7 @@ public class CiudadController {
 
     @GetMapping("/eliminar")
     public String eliminar(Ciudad ciudad) {
-        servicioCiudad.eliminar(ciudad);
+        ciudadService.eliminar(ciudad);
         return "redirect:/ciudad/listar";
     }
 }

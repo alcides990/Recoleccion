@@ -76,7 +76,9 @@ public class UsuarioSistemaController {
         return "usuarioSistema/usuarioSistema";
     }
 
+    
     @GetMapping("/agregar")
+     @PreAuthorize("hasAnyAuthority({'ADMIN','ROOT'})")
     public String agregar(Model modelo) {
         modelo.addAttribute("titulo", "Usuario");
         UsuarioSistema usuarioSistema = new UsuarioSistema();
@@ -86,6 +88,7 @@ public class UsuarioSistemaController {
     }
 
     @PostMapping("/guardar")
+      @PreAuthorize("hasAnyAuthority({'ADMIN','ROOT'})")
     public String guardar(UsuarioSistema usuarioSistema, RedirectAttributes flash) {
         String mensaje = "Usuario modificado correctamente!!";
         UsuarioSistema userSession = (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
@@ -103,6 +106,7 @@ public class UsuarioSistemaController {
         return "redirect:/usuarioSistema/listar";
     }
 
+       @PreAuthorize("hasAnyAuthority({'ROOT'})")
     @GetMapping("/roles/{codigoUsuarioSistema}")
     public String asignarRol(UsuarioSistema usuarioSistema, Model model) {
         usuarioSistema = usuarioSistemaService.findById(usuarioSistema.getCodigoUsuarioSistema()).orElse(null);
