@@ -25,6 +25,7 @@ import ama.servicio.CobradorService;
 import ama.servicio.SucursalService;
 import ama.servicio.CiudadService;
 import ama.servicio.EstadoService;
+import java.util.Arrays;
 
 @Slf4j
 @Controller
@@ -102,13 +103,12 @@ public class CobradorController {
             throw new Error("Cobrar no encontrado ");
         }
         model.addAttribute("cobrador", cobrador);
-        // log.info("Cobrador a modificar "+cobrador);
         var sucursal = cobrador.getSucursal();
         model.addAttribute("sucursal", sucursal);
         var ciudad = cobrador.getSucursal().getCiudad();
         model.addAttribute("ciudad", ciudad);
 
-        var estado = servicioEstado.listar();
+        var estado = servicioEstado.findByEstadoIn(Arrays.asList("ACTIVO", "INACTIVO"));
         model.addAttribute("estado", estado);
         model.addAttribute("titulo", "Cobrador");
 

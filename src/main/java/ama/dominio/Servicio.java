@@ -19,17 +19,18 @@ public class Servicio implements Serializable {
     @Basic(optional = false)
     @Column(name = "cuenta_corriente")
     @NotBlank(message = "Cuentacorriente no puede estar vacio")
-//    @Pattern(regexp = "[0-9]{2}-\\d{4}-\\d{2}", message = "Formato de cuenta corriente  no es valido")
+    // @Pattern(regexp = "[0-9]{2}-\\d{4}-\\d{2}", message = "Formato de cuenta
+    // corriente no es valido")
     private String cuentaCorriente;
 
-    @Column(name = "nombre_servicio")
-    private String nombreServicio;
+    @Column(name = "direccion")
+    private String direccion;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     @Column(name = "fecha_inicio")
     private LocalDate fechaInicio;
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "codigo_categoria", referencedColumnName = "codigo_categoria")
@@ -52,10 +53,10 @@ public class Servicio implements Serializable {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JoinColumns({
-        @JoinColumn(name = "codigo_manzana", referencedColumnName = "codigo_manzana"),
-        @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
+            @JoinColumn(name = "codigo_manzana", referencedColumnName = "codigo_manzana"),
+            @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
     })
-   
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Manzana manzana;
 

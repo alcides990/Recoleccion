@@ -34,7 +34,7 @@
                         <th class="sticky-start ">Cuentacorriente</th>
                         <th>Usuario</th>
                         <th>Fecha Inicio</th>
-                        <th>cagtegoria</th>
+                        <th>Cagtegoria</th>
                         <th>Estado</th>
                         <th>EstadoCuenta</th>
                         <th>Acciones</th>
@@ -50,9 +50,6 @@
                         <td><a th:href="@{/servicio/estadoCuenta/} + ${servicio.cuentaCorriente}"
                                 class="btn btn-primario btn-sm" th:text="EstadoCuenta" /> </td>
                         <td>
-                            <a th:href="@{/comprobante/facturar/} + ${servicio.cuentaCorriente}"
-                                class="btn btn-primario btn-sm" th:text="Facturar">
-                            </a>
                             <a sec:authorize="hasAnyAuthority('ADMIN','ROOT')" id="editar"
                                 th:data-id="${servicio.cuentaCorriente}" class="btn btn-info btn-sm"
                                 data-bs-toggle="modal" data-bs-target="#servicioModal">
@@ -114,6 +111,10 @@
                                     <option th:each="categoria : ${categorias}" th:value="${categoria.codigoCategoria}"
                                         th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} " />
                                 </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="direccion">Direccion</label>
+                                  <input type="text" name="direccion" id="direccion"  class="form-control" />
                             </div>
 
                             <div class="form-group col-md-4">
@@ -194,6 +195,7 @@
                         $(buscarUsuario).val(respuesta.usuario.nombre + ' ' + respuesta.usuario.apellido);
                         $("#categoria").val(respuesta.categoria.codigoCategoria);
                         $("#estado").val(respuesta.estado.codigoEstado);
+                        $("#direccion").val(respuesta.direccion);
                         $("#accion").val("editar");
                     });
             });
@@ -202,6 +204,7 @@
                 event.preventDefault();
                 var servicio = {
                     cuentaCorriente: $("#cuentaCorriente").val(),
+                    direccion: $("#direccion").val(),
                     fechaInicio: $("#fechaInicio").val(),
                     usuario: {
                         codigoUsuario: $("#codigoUsuario").val()

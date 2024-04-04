@@ -48,7 +48,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                                <label for="numeroManzana"> N° Manzana </label>
+                            <label for="numeroManzana"> N° Manzana </label>
                             <input class="form-control " type="text" name="numeroManzana" id="numeroManzana"
                                    autofocus="" placeholder="Ingrese n° Manzana">
                         </div>
@@ -110,14 +110,14 @@
 
                                 <div class="col-md-4">
                                     <input type="text" hidden="" name="zonaVieja" id="zonaVieja">
-                                    <label for="zona">Zona</label>
-                                    <select class="form-control" name="zona" id="zonas">
-                                        <option th:each="zona : ${zonas}" 
-                                                th:value="${zona.codigoZona}"
-                                                th:text="${zona.nombreZona}" />
-                                    </select>
+                                        <label for="zona">Zona</label>
+                                        <select class="form-control" name="zona" id="zonas">
+                                            <option th:each="zona : ${zonas}" 
+                                                    th:value="${zona.codigoZona}"
+                                                    th:text="${zona.nombreZona}" />
+                                        </select>
                                 </div>
-                               
+
 
                                 <div class="col-md-4">
                                     <label for="Sucursal">Sucursal:</label>
@@ -128,7 +128,7 @@
                                     </select>
                                 </div>
                                 <div class=" col-md-3">
-                                        <label for="numeroManzana"> N° Manzana </label>
+                                    <label for="numeroManzana"> N° Manzana </label>
                                     <input class="form-control " readonly=""  type="text" name="numeroManzana" id="manzana"
                                            placeholder="ingrese N° manzana">
                                 </div>
@@ -160,7 +160,15 @@
 
                         var datos = $('#frm-manzana').serialize();
                         var contentType = 'application/x-www-form-urlencoded';
-                        guardar(datos, url, contentType);
+                        guardar(datos, url, contentType).then((data) => {
+                            mostrarAlerta({
+                                mensaje: data,
+                                url: url,
+                                tipo: 'success',
+                                redirigir: false,
+                                recargar: true
+                            });
+                        });
                     });
 
                     //  Abrir ventans modal al precionar boton editar

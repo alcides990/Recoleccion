@@ -17,7 +17,7 @@
 	<parameter name="hasta" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[SELECT servi.cuenta_corriente,  man.`codigo_manzana`,
-fn_mes_deuda(servi.cuenta_corriente) AS mes_deuda, 
+fn_mes_deuda(servi.cuenta_corriente,1) AS mes_deuda, 
 fn_pago_hasta(servi.cuenta_corriente) AS pago_hasta,
 fn_ultimo_pago(servi.cuenta_corriente) AS ultimo_pago,
 cate.`categoria`, cate.`tarifa`,
@@ -34,8 +34,8 @@ INNER JOIN zonas AS zon
   AND zon.codigo_sucursal= man.`codigo_sucursal`
   
 INNER JOIN cobradores AS cob
-  ON cob.`codigo_cobrador`=man.`codigo_cobrador`
-  AND cob.`codigo_sucursal`=man.`codigo_sucursal`
+  ON cob.`codigo_cobrador`=zon.`codigo_cobrador`
+  AND cob.`codigo_sucursal`=zon.`codigo_sucursal`
   
 INNER JOIN categorias AS cate
   ON cate.`codigo_categoria` = servi.`codigo_categoria` 
@@ -44,8 +44,8 @@ INNER JOIN usuarios AS usu
   ON servi.codigo_usuario = usu.codigo_usuario
  WHERE cob.codigo_cobrador= $P{codigoCobrador} 
  AND zon.codigo_zona= $P{codigoZona}
- AND fn_mes_deuda(servi.cuenta_corriente)>= $P{desde} 
- AND fn_mes_deuda(servi.cuenta_corriente)  <= $P{hasta}]]>
+ AND fn_mes_deuda(servi.cuenta_corriente,1)>= $P{desde} 
+ AND fn_mes_deuda(servi.cuenta_corriente,1)  <= $P{hasta}]]>
 	</queryString>
 	<field name="cuenta_corriente" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="cuenta_corriente"/>
@@ -419,14 +419,14 @@ INNER JOIN usuarios AS usu
 				<text><![CDATA[Deuda Total :]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="2" y="15" width="167" height="20" uuid="0a059170-287b-4199-864c-1eb4b6eabae3"/>
+				<reportElement x="2" y="15" width="113" height="20" uuid="0a059170-287b-4199-864c-1eb4b6eabae3"/>
 				<textElement>
 					<font fontName="Arial" size="14" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Cantidad de Usuarios :]]></text>
+				<text><![CDATA[Total Usuarios :]]></text>
 			</staticText>
 			<textField evaluationTime="Column">
-				<reportElement x="170" y="15" width="100" height="20" uuid="37f7bb55-d217-4b1c-be1b-483a6ad13734"/>
+				<reportElement x="120" y="16" width="100" height="20" uuid="37f7bb55-d217-4b1c-be1b-483a6ad13734"/>
 				<textElement>
 					<font fontName="Arial" size="14" isBold="true"/>
 				</textElement>

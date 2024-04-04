@@ -1,132 +1,133 @@
 <!DOCTYPE html>
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{layout/layout :: heat}"> </head>
+    <head th:replace="~{layout/layout :: heat}"> </head>
 
-<body>
-    <header th:replace="~{layout/layout :: header}"> </header>
-    <aside th:replace="~{layout/layout :: aside}"> </aside>
-    <div class="container">
-        <h3 class="card-header"> Categorias</h3>
-        <a id="btnAgrerar" class="btn btn-primario btn-sm mb-3 " data-bs-toggle="modal"
-            data-bs-target="#modificarModal">
-            <i class="fa-solid fa-plus fa-lg"> </i> Agregar
-        </a>
-        <div class="mensaje-alerta" id="contenedor-alertas"></div>
-        <div class="table-responsive-sm">
-            <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-sm ">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Codigo Categoria</th>
-                        <th>Categoria</th>
-                        <th>Tarifa</th>
-                        <th>Sucursal</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="table-secondary">
-                    <tr th:each="categoria : ${categorias}">
-                        <td th:text="${categoria.codigoCategoria}">
-                        </td>
-                        <td th:text="${categoria.nombreCategoria}"> Mostrar Categoria
-                        </td>
-                        <td th:text="${#numbers.formatDecimal(categoria.tarifa, 0, 'COMMA', 0, 'POINT')}"> Mostrar
-                            Tarifa
-                        </td>
-                        <td
-                            th:text="${categoria.sucursal.nombreSucursal} +' '+ ${categoria.sucursal.ciudad.nombreCiudad}">
-                            Mostrar Sucursal
-                        </td>
-                        <td>
-                            <a id="editar" data-url="/categoria/editar/" th:data-id="${categoria.codigoCategoria}"
-                                class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modificarModal">
-                                <i class="fa-regular fa-pen-to-square"></i>
-                            </a>
-                            <a id="eliminar" data-url="/categoria/eliminar/" th:data-id="${categoria.codigoCategoria}"
-                                class="btn btn-danger eliminar btn-sm">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </a>
-                        </td>
-
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-
-    <!-- Ventana modal -->
-    <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content bg-color">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmacionModalLabel">Datos de Categoría</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="frm-categoria" method="post">
-                    <div class="modal-body">
-                        <input type="hidden" id="codigoCategoria" name="codigoCategoria" />
-                        <div class="form-group col-sm">
-                            <label class="col-form-label" for="nombreCategoria"> Nombre de Categoría</label>
-                            <input class="form-control" type="text" id="nombreCategoria" name="nombreCategoria"
-                                placeholder="Ingrese nombre de la categoría" />
-                        </div>
-                        <div class="form-group col-sm">
-                            <label class="col-form-label" for="tarifs">Tarifa</label>
-                            <input class="form-control" type="number" name="tarifa" id="tarifa"
-                                placeholder="Ingrese el monto de la tarifa" />
-                        </div>
-                        <div> </div>
-                        <div class="form-group col-sm">
-                            <label class="col-form-label" for="sucursal">Sucursal</label>
-                            <select class="form-control" name="sucursal" id="sucursal">
-                                <option th:each="sucursal : ${sucursal}" th:value="${sucursal.codigoSucursal}"
-                                    th:text="${sucursal.nombreSucursal}+' '+${sucursal.ciudad.nombreCiudad}"></option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar" />
-                    </div>
-                </form>
+    <body>
+        <header th:replace="~{layout/layout :: header}"> </header>
+        <aside th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container">
+            <h3 class="card-header"> Categorias</h3>
+            <a id="btnAgrerar" class="btn btn-primario btn-sm mb-3 " data-bs-toggle="modal"
+               data-bs-target="#modificarModal">
+                <i class="fa-solid fa-plus fa-lg"> </i> Agregar
+            </a>
+            <a id="consul" class="btn btn-primario btn-sm mb-3 "  >
+                <i class="fa-solid fa-plus fa-lg"> </i> consultar
+            </a>
+            <div class="mensaje-alerta" id="contenedor-alertas"></div>
+            <div class="table-responsive-sm">
+                <table id="tabla1" class="table table-dark table-border table-striped table-colapse table-hover table-sm ">
+                </table>
+            </div>
+            <div class="table-responsive-sm">
+                <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-sm ">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Codigo Categoria</th>
+                            <th>Categoria</th>
+                            <th>Tarifa</th>
+                            <th>Sucursal</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-secondary">
+                        <!--                        <tr th:each="categoria : ${categorias}">
+                                                    <td th:text="${categoria.codigoCategoria}">
+                                                    </td>
+                                                    <td th:text="${categoria.nombreCategoria}"> Mostrar Categoria
+                                                    </td>
+                                                    <td th:text="${#numbers.formatDecimal(categoria.tarifa, 0, 'COMMA', 0, 'POINT')}"> Mostrar
+                                                        Tarifa
+                                                    </td>
+                                                    <td
+                                                        th:text="${categoria.sucursal.nombreSucursal} +' '+ ${categoria.sucursal.ciudad.nombreCiudad}">
+                                                        Mostrar Sucursal
+                                                    </td>
+                                                    <td>
+                                                        <a id="editar" data-url="/categoria/editar/" th:data-id="${categoria.codigoCategoria}"
+                                                           class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modificarModal">
+                                                            <i class="fa-regular fa-pen-to-square"></i>
+                                                        </a>
+                                                        <a id="eliminar" data-url="/categoria/eliminar/" th:data-id="${categoria.codigoCategoria}"
+                                                           class="btn btn-danger eliminar btn-sm">
+                                                            <i class="fa-solid fa-trash-can"></i>
+                                                        </a>
+                                                    </td>
+                        
+                                                </tr>-->
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
-    <footer th:replace="~{layout/layout :: footer}"> </footer>
 
-    <script>
-        $(document).ready(function () {
-            // Lamara al metodo eliminar al hacer click en el boton eliminar
+
+        <!-- Ventana modal -->
+        <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content bg-color">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmacionModalLabel">Datos de Categoría</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="frm-categoria" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" id="codigoCategoria" name="codigoCategoria" />
+                            <div class="form-group col-sm">
+                                <label class="col-form-label" for="nombreCategoria"> Nombre de Categoría</label>
+                                <input class="form-control" type="text" id="nombreCategoria" name="nombreCategoria"
+                                       placeholder="Ingrese nombre de la categoría" />
+                            </div>
+                            <div class="form-group col-sm">
+                                <label class="col-form-label" for="tarifs">Tarifa</label>
+                                <input class="form-control" type="number" name="tarifa" id="tarifa"
+                                       placeholder="Ingrese el monto de la tarifa" />
+                            </div>
+                            <div> </div>
+                            <div class="form-group col-sm">
+                                <label class="col-form-label" for="sucursal">Sucursal</label>
+                                <select class="form-control" name="sucursal" id="sucursal">
+                                    <option th:each="sucursal : ${sucursal}" th:value="${sucursal.codigoSucursal}"
+                                            th:text="${sucursal.nombreSucursal}+' '+${sucursal.ciudad.nombreCiudad}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <footer th:replace="~{layout/layout :: footer}"> </footer>
+        <script type="module">
+            import {consultar, guardar, eliminar, tabulador, mostrarAlerta, limpiar
+            } from '/js/modulos.js';
+
             eliminar('Seguro que desea eliminar esta categoria??');
-            //  Cargar idioma español a la tabla paginado con Jquerry data
-            $('#tabla').DataTable({
-                language: {
-                    url: '/i18n/es-ES.json'
-                }
-            });
 
             $('#modificarModal').on('shown.bs.modal', function () {
                 $('#nombreCategoria').focus();
             });
+
             // definir nombres de campos para la funcion limpiar
             var nombreCategoria = "#nombreCategoria";
             var tarifa = "#tarifa";
             var campos = [nombreCategoria, tarifa];
             tabulador(nombreCategoria, tarifa);
-
             $(document).on('click', '#editar', function (event) {
                 var url = '/categoria/editar';
-                var datos = { codigoCategoria: $(this).data('id') };
+                var datos = {codigoCategoria: $(this).data('id')};
                 consultar(datos, url)
-                    .then(function (respuesta) {
-                        $("#codigoCategoria").val(respuesta.codigoCategoria);
-                        $("#nombreCategoria").val(respuesta.nombreCategoria);
-                        $("#tarifa").val(respuesta.tarifa);
-                    });
+                        .then(function (respuesta) {
+                            $("#codigoCategoria").val(respuesta.codigoCategoria);
+                            $("#nombreCategoria").val(respuesta.nombreCategoria);
+                            $("#tarifa").val(respuesta.tarifa);
+                        });
             });
 
             $("#btnAgrerar").click(function (event) {
@@ -134,7 +135,6 @@
                 limpiar(campos);
                 $("#modificarModal").modal('show');
             });
-
             $('#frm-categoria').submit(function (event) {
                 event.preventDefault();
                 var campos = [
@@ -146,7 +146,6 @@
                 var nombreCategoria = $("#nombreCategoria").val();
                 var tarifa = parseFloat($("#tarifa").val());
                 var codigoSucursal = parseInt($("#sucursal").val());
-
                 var categoria = {
                     codigoCategoria: codigoCategoria,
                     nombreCategoria: nombreCategoria,
@@ -162,14 +161,63 @@
                     mostrarAlerta({
                         mensaje: data,
                         url: url,
-                        tipo: 'success',
-                        redirigir: false,
-                        recargar: true
+                        tipo: 'success'
                     });
                 });
             });
-        });
-    </script>
-</body>
+
+            let url = '/categoria/filtrar';
+
+            let tabla = $('#tabla').DataTable({
+//                serverSide: true,
+                ajax: {
+                    url: url
+                     
+                   
+                },
+                columns: [
+                    {data: 'data.codigoCategoria'},
+                    {data: 'data.nombreCategoria'},
+                    {data: 'data.tarifa'},
+                    {data: null},
+                    {data: null}
+                ],
+                language: {
+                    url: '/i18n/es-ES.json'
+                }
+            });
+        </script>
+        <script>
+            $(document).ready(function () {
+//                let url='categoria/filtar';
+//               let categorias= consultar('',url);
+
+
+
+
+                //                $("#buscar").click(() => {
+                //                    $('#tabla').DataTable({
+                //                        "processing": true,
+                //                        "serverSide": true,
+                //                        "ajax": {
+                //                            "url": "/categoria/filtrar",
+                //                            "data": function (d) {
+                //                                d.page = d.start / d.length;
+                //                                d.size = d.length;
+                //                                d.search = d.search.value;
+                //                            }
+                //                        },
+                //                        "columns": [
+                //                            {"data": "codigoCategoria"},
+                //                            {"data": "nombreCategoria"},
+                //                            {"data": "tarifa"}
+                //
+                //                        ]
+                //                    });
+                //                });
+            }
+            );
+        </script>
+    </body>
 
 </html>

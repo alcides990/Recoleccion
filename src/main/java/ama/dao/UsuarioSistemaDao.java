@@ -22,8 +22,6 @@ public interface UsuarioSistemaDao extends JpaRepository<UsuarioSistema, Integer
 
     @Query(value = """
            SELECT u  FROM UsuarioSistema u 
-           LEFT JOIN FETCH u.detalleUsuarioSistema AS dtus
-           LEFT JOIN FETCH dtus.rol as r
            JOIN FETCH u.sucursal s
            JOIN FETCH s.empresa 
            JOIN FETCH s.ciudad

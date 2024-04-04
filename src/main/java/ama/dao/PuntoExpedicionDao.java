@@ -25,7 +25,8 @@ public interface PuntoExpedicionDao extends CrudRepository<PuntoExpedicion, Punt
                      INNER JOIN FETCH p.sucursal s
                      INNER JOIN FETCH s.ciudad
                      INNER JOIN FETCH p.estado
-                     WHERE s= ?1  ORDER BY p.puntoExpedicionPK.codigoPuntoExpedicion
+                     WHERE s= ?1 AND p.puntoExpedicionPK.codigoPuntoExpedicion >0
+              ORDER BY p.puntoExpedicionPK.codigoPuntoExpedicion
                      """)
        List<PuntoExpedicion> getAllFiandSucursal(Sucursal sucursal);
 

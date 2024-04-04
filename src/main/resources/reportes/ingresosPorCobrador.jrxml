@@ -6,6 +6,8 @@
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="266"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="729"/>
 	<parameter name="desde" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -24,10 +26,10 @@ COUNT( CASE WHEN comp.codigo_tipo_factura = 2 AND comp.codigo_estado = 1
   COUNT( CASE WHEN comp.codigo_tipo_factura = 1 AND comp.codigo_estado = 1
   THEN 1 END ) AS 'Fact. Impresa',
 
-SUM(dtc.importe) AS importe, SUM(dtc.recargo) AS recargo
+SUM(comp.total_importe) AS importe, SUM(dtc.recargo) AS recargo
 
 FROM comprobantes AS comp
-JOIN detallecomprobantes AS dtc
+JOIN detalle_comprobantes AS dtc
   ON dtc.codigo_sucursal = comp.codigo_sucursal
     AND dtc.codigo_punto_expedicion = comp.codigo_punto_expedicion
     AND dtc.numero_comprobante = comp.numero_comprobante

@@ -144,16 +144,22 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobanteP
                 JOIN FETCH c.usuario AS usu
                 JOIN FETCH c.servicio AS servi
                 JOIN FETCH c.estado AS e
-               WHERE c.comprobantePK in :comprobantePKs
+               WHERE servi.cuentaCorriente=?1
                ORDER BY  c.fechaEmision DESC
-                      """, countQuery = "SELECT COUNT(c) FROM Comprobante c WHERE c.comprobantePK in :comprobantePKs  ")
-     List<Comprobante> getComprobantesCuenta(@Param("comprobantePKs") List<ComprobantePK> comprobantePKs);
+                      """, countQuery = """
+                                        SELECT COUNT(c) FROM Comprobante c 
+                                        JOIN c.servicio AS servi 
+                                        WHERE servi.cuentaCorriente=?1
+                                        """)
+     Page<Comprobante> getComprobantesCuenta(Pageable paget, String cuentaCorriente);
 
      // Encontrar comprobante por ComprobantePK
      @Query("""
                 SELECT c FROM Comprobante AS c
                             JOIN FETCH c.comprobantePK AS cPK
                             JOIN FETCH c.detalleComprobante AS dtc
+                            JOIN FETCH dtc.detallePago AS dtp
+                            JOIN FETCH dtp.metodoPago AS mtp
                             JOIN FETCH c.puntoExpedicion AS pe
                             JOIN FETCH pe.sucursal AS s
                             JOIN FETCH s.ciudad ciud

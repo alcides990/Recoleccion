@@ -36,6 +36,7 @@ import ama.servicio.CiudadService;
 import ama.servicio.EstadoService;
 import ama.servicio.TipoDocumentoService;
 import ama.servicio.UsuarioService;
+import java.util.Arrays;
 
 @Slf4j
 @Controller
@@ -107,7 +108,7 @@ public class UsuarioController {
         var ciudades = servicioCiudad.listarCiudad();
         modelo.addAttribute("ciudad", ciudades);
 
-        var estado = servicioEstado.listar();
+        var estado = servicioEstado.findByEstadoIn(Arrays.asList("ACTIVO", "INACTIVO"));
         modelo.addAttribute("estado", estado);
 
         return "usuario/modificarUsuario";
@@ -148,7 +149,7 @@ public class UsuarioController {
         var ciudad = usuario.getSucursal().getCiudad();
         model.addAttribute("ciudad", ciudad);
 
-        var estado = servicioEstado.listar();
+        var estado =servicioEstado.findByEstadoIn(Arrays.asList("ACTIVO", "INACTIVO"));
         model.addAttribute("estado", estado);
 
         return "usuario/modificarUsuario";

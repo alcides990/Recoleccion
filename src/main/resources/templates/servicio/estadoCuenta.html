@@ -50,7 +50,7 @@
                         </div>
                         <div class="col">
                             <label for="buscarUsuario">Usuario </label>
-                            <input  type="text" disabled="true" name="buscarUsuario" id="buscarUsuario" th:value="${servicio.usuario.nombre}+' '+${servicio.usuario.nombre}"  class="form-control"  required="campo ogligatorio"/>
+                            <input  type="text" disabled="true" name="buscarUsuario" id="buscarUsuario" th:value="${servicio.usuario.nombre}+' '+${servicio.usuario.apellido}"  class="form-control"  required="campo ogligatorio"/>
                         </div>
 
 
@@ -74,7 +74,7 @@
 
                             <div class="row">
                                 <div class="col-4 my-1">
-                                    <label  for="pagoHasta">Pago Hasta:</label>
+                                    <label  for="pagoHasta">Pago desde:</label>
                                 </div>
                                 <div class="col my-1">
                                     <input  type="text" disabled="true" name="pagoHasta" id="pagoHasta" th:value="${#temporals.format(estadoCuenta.pagoHasta,'dd-MM-yyyy')}" class="form-control"  />
@@ -123,6 +123,9 @@
                             </div>
 
                         </div>
+                        <div class="col-md-5 m-3">
+                            <a class="btn-primario"> Extracto de Cuenta</a>
+                        </div>
                     </div>
                     <div class=" col-md-12 col-lg-8"> 
                         <div class="table-responsive-xxl">
@@ -136,7 +139,9 @@
                                         <th>Tarifa</th>
                                         <th>Cant.Pago</th>
                                         <th>Recargo</th>
+                                        <th>Total</th>
                                         <th>Importe</th>
+                                        <th>Saldo</th>
                                         <th>Estado</th>
                                     </tr>
                                 </thead>
@@ -144,14 +149,14 @@
                                     <tr  th:each="comprobante : ${comprobantes}"> 
                                         <td th:text="${comprobante.tipoFactura.tipoFactura}" > </td>
                                         <td th:text="${comprobante.puntoExpedicion.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
-                                        <!--<td th:text="${comprobante.servicio.cuentaCorriente}"> </td>-->
-                                        <!--<td th:text="${comprobante.usuario.nombre}+' '+ ${comprobante.usuario.apellido}" >   </td>-->
-                                        <td th:text="${#dates.format(comprobante.fechaPago,'yyyy-MM-dd')}"></td>
+                                        <td th:text="${#temporals.format(comprobante.fechaPago,'yyyy-MM-dd')}"></td>
                                         <td th:text="${comprobante.detalleComprobante.periodoPago}"></td>
                                         <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'POINT', 0, 'COMMA')}"></td>
                                         <td th:text="${comprobante.cantidadPago}"></td>
                                         <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'POINT', 0, 'COMMA')}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa * comprobante.cantidadPago + comprobante.detalleComprobante.recargo, 0, 'COMMA', 0, 'POINT')}"></td>
                                         <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.saldo, 0, 'COMMA', 0, 'POINT')}"></td>
                                         <td th:text="${estado.estado}"></td>
                                     </tr>
                                 </tbody>
@@ -165,7 +170,9 @@
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
         <script src="/js/buscarUsuario.js"></script>
         <script src="/js/estadoCuenta.js"></script>
+
         <script>
+
             $("#cantidadRegistro").change(function () {
                 var cantidadRegistro = $(this).val();
                 var url = new URL(window.location.href);
@@ -177,7 +184,6 @@
             }
             );
         </script>
-
     </body>
 
 </html>

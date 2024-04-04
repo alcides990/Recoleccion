@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="57262d1e-e812-4f4b-871d-0bbe27f42a11">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
+	<parameter name="cuentaCorriente" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="cantidadRegistro" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="codigoSucursal" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT c.`numero_comprobante`, c.`cuenta_corriente`, c.`cantidad_pago`, c.`fecha_pago`,  c.`razon_social`, c.`total_importe`,
+ s.direccion, dtc.`periodo_pago`, cate.categoria, cate.tarifa,
+ fn_pago_hasta($P{cuentaCorriente}) AS pago_hasta, fn_mes_deuda($P{cuentaCorriente}, $P{codigoSucursal}  ) AS cantidad_deuda,
+ fn_recargo($P{cuentaCorriente}, $P{codigoSucursal} ) AS recargo
+ FROM comprobantes c
+JOIN servicios AS s
+  ON s.cuenta_corriente= c.cuenta_corriente
+JOIN detalle_comprobantes AS dtc
+  ON dtc.`numero_comprobante`=c.`numero_comprobante`
+   AND dtc.`codigo_punto_expedicion`=c.`codigo_punto_expedicion`
+   AND dtc.`codigo_tipo_factura`=c.`codigo_tipo_factura`
+   AND dtc.`codigo_serie`=c.`codigo_serie`
+   AND dtc.`codigo_sucursal`=c.`codigo_sucursal` 
+ JOIN categorias cate
+   ON cate.codigo_categoria=s.codigo_categoria
+WHERE c.cuenta_corriente=$P{cuentaCorriente}
+ORDER BY c.fecha_pago DESC 
+LIMIT  $P{cantidadRegistro}]]>
+	</queryString>
+	<field name="numero_comprobante" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="numero_comprobante"/>
+		<property name="com.jaspersoft.studio.field.label" value="numero_comprobante"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="comprobantes"/>
+	</field>
+	<field name="cuenta_corriente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="cuenta_corriente"/>
+		<property name="com.jaspersoft.studio.field.label" value="cuenta_corriente"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="comprobantes"/>
+	</field>
+	<field name="cantidad_pago" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="cantidad_pago"/>
+		<property name="com.jaspersoft.studio.field.label" value="cantidad_pago"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="comprobantes"/>
+	</field>
+	<field name="fecha_pago" class="java.time.LocalDateTime">
+		<property name="com.jaspersoft.studio.field.name" value="fecha_pago"/>
+		<property name="com.jaspersoft.studio.field.label" value="fecha_pago"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="comprobantes"/>
+	</field>
+	<field name="razon_social" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="razon_social"/>
+		<property name="com.jaspersoft.studio.field.label" value="razon_social"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="comprobantes"/>
+	</field>
+	<field name="total_importe" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="total_importe"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_importe"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="comprobantes"/>
+	</field>
+	<field name="direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="direccion"/>
+		<property name="com.jaspersoft.studio.field.label" value="direccion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="servicios"/>
+	</field>
+	<field name="periodo_pago" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="periodo_pago"/>
+		<property name="com.jaspersoft.studio.field.label" value="periodo_pago"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="detalle_comprobantes"/>
+	</field>
+	<field name="categoria" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="categoria"/>
+		<property name="com.jaspersoft.studio.field.label" value="categoria"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="categorias"/>
+	</field>
+	<field name="tarifa" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="tarifa"/>
+		<property name="com.jaspersoft.studio.field.label" value="tarifa"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="categorias"/>
+	</field>
+	<field name="pago_hasta" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="pago_hasta"/>
+		<property name="com.jaspersoft.studio.field.label" value="pago_hasta"/>
+	</field>
+	<field name="cantidad_deuda" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="cantidad_deuda"/>
+		<property name="com.jaspersoft.studio.field.label" value="cantidad_deuda"/>
+	</field>
+	<field name="recargo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="recargo"/>
+		<property name="com.jaspersoft.studio.field.label" value="recargo"/>
+	</field>
+	<variable name="importe_1" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_importe}]]></variableExpression>
+	</variable>
+	<variable name="CantidadMes_1" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{cantidad_pago}]]></variableExpression>
+	</variable>
+	<variable name="totalconrecargo" class="java.lang.String" calculation="Sum"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="59" splitType="Stretch">
+			<staticText>
+				<reportElement x="8" y="9" width="169" height="20" uuid="19d82d23-465f-4826-a55b-8ea4efafa7d7"/>
+				<textElement>
+					<font fontName="SansSerif" size="14"/>
+				</textElement>
+				<text><![CDATA[CLIBA S.A]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="421" y="39" width="40" height="20" uuid="c9c66ba4-4284-4a20-b6b0-6259f4573bad"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Pagina]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="457" y="39" width="65" height="20" uuid="fa280a73-0653-485a-b0e5-84cd90943a33"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="421" y="9" width="37" height="20" uuid="48a0f7fb-e387-4775-8431-5e1c4015d0a4"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Fecha:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="8" y="39" width="108" height="20" uuid="a191bc17-389b-46b2-aa78-75ba4dff1fc9"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Extracto de Cuenta]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="58" width="555" height="1" uuid="b858a321-b78a-4d5a-87f5-7dcb7b9a4a97"/>
+			</line>
+			<textField pattern="dd-MM-yyyy">
+				<reportElement x="458" y="9" width="97" height="20" uuid="281d4889-62ca-4d66-a0bf-b911b3730ce2"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="70" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="5" width="59" height="20" uuid="7dc4e14d-0ff8-430b-9e35-e50d5ca0fb02"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Cuenta Nro.]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="59" y="5" width="100" height="20" uuid="ba8389b0-92ec-464e-9215-cb24a4c27d6d"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cuenta_corriente}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="27" width="59" height="20" uuid="cc4c0de7-433d-45f0-a651-7f592341b20e"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Usuario:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="59" y="27" width="373" height="20" uuid="93d5e59d-f982-4b08-a92b-5d4d4c21365d"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{razon_social}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="59" y="50" width="164" height="20" uuid="951b9e01-ae16-4dfa-85e4-52f3e740b5b3"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="50" width="59" height="20" uuid="09767bfd-ccf4-42e5-9123-6d9514ac299b"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Direccion:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="321" y="5" width="51" height="20" uuid="2f805fda-6ed2-4bcd-874d-f2593c633b6c"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Categoria:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="372" y="5" width="100" height="20" uuid="36177c25-0de1-4bc1-9940-982ca11f4088"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{categoria}+"-"+$F{tarifa}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="27" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="2" width="100" height="20" uuid="d2005c41-bd99-4cb5-b595-8781314feb62"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Fact. Nro.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="103" y="2" width="87" height="20" uuid="72b3d55f-ab16-417f-89bb-6fc903e99ca9"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Fecha de Pago]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="1" width="64" height="20" uuid="737cdeef-2182-4a03-9ff8-e192a5774724"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[cant. Pago]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="450" y="1" width="82" height="20" uuid="5f92ddb2-bdbf-476b-a900-4d563031cfb0"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Importe]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="22" width="555" height="1" uuid="c258860e-99dc-4c38-80dc-c1cc1f51c511"/>
+			</line>
+			<line>
+				<reportElement x="0" y="-1" width="555" height="1" uuid="bb873e9a-e839-4e02-9f2e-e7c070f8c66d"/>
+			</line>
+			<staticText>
+				<reportElement x="190" y="0" width="118" height="20" uuid="4af093ba-aeba-4b56-a9a2-922a48710b67"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Periodo Pago]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="27" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="1" width="100" height="20" uuid="5a99016d-edcd-4d4c-993d-c33af96e35bb"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero_comprobante}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;#,##0.###-">
+				<reportElement x="340" y="1" width="64" height="20" uuid="6ee00e45-44ef-4da0-b8f6-af3096d3ade4"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad_pago}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤#,##0.##;¤-#,##0.##">
+				<reportElement x="450" y="2" width="84" height="20" uuid="ac005323-88d0-4a61-8a75-9df548568a93"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_importe}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd-MM-yyyy">
+				<reportElement x="104" y="2" width="86" height="20" uuid="d46799b8-19e2-4746-95c4-dc6879b0eb3b"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy").format($F{fecha_pago})]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd-MM-yyyy">
+				<reportElement x="190" y="2" width="120" height="20" uuid="71bf3e67-4507-44bf-8eb0-a394e20ef7ff"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{periodo_pago}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="44" splitType="Stretch"/>
+	</columnFooter>
+	<summary>
+		<band height="130" splitType="Stretch">
+			<textField>
+				<reportElement x="340" y="0" width="68" height="20" uuid="5b89e571-fed9-4171-8438-dfd4dd9f22c0"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{CantidadMes_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤#,##0.##;¤-#,##0.##">
+				<reportElement x="450" y="0" width="100" height="20" uuid="82bb2fa0-0f68-4381-a74e-65190919fc9e"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{importe_1}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="0" width="555" height="1" uuid="b2d41f1c-7562-47e5-bcc6-641c3a4ef982"/>
+			</line>
+			<staticText>
+				<reportElement x="142" y="1" width="100" height="20" uuid="d12f7eed-d327-4a50-bf9e-0fe5e89c519d"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Totales]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="422" y="53" width="100" height="20" uuid="caaaafb2-91c5-469e-8058-67eef5896fb3"/>
+				<textElement textAlignment="Left">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad_deuda}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="339" y="53" width="80" height="20" uuid="14be5e2e-b632-4ee7-8aff-cc0189fdaf93"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Cantidad deuda:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="369" y="74" width="50" height="20" uuid="e1ca7471-8004-4421-9620-c0426ba26e86"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Recargo:]]></text>
+			</staticText>
+			<textField pattern="¤#,##0.##;¤-#,##0.##">
+				<reportElement x="422" y="74" width="100" height="20" uuid="3decba41-1621-4e46-bd80-1c8750fe657b"/>
+				<textElement textAlignment="Left">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{recargo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤#,##0.##;¤-#,##0.##">
+				<reportElement x="422" y="98" width="100" height="20" uuid="06d1ea47-7a14-4e27-87d7-25a4946b24a2"/>
+				<textElement textAlignment="Left">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tarifa}*$F{cantidad_deuda} ]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="327" y="98" width="92" height="20" uuid="bb67baf8-df1d-4e78-9791-6b23cf8b681e"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[Total con Recargo:]]></text>
+			</staticText>
+			<textField pattern="dd-MM-yyyy">
+				<reportElement x="422" y="33" width="94" height="20" uuid="2bf86779-7c8e-4e9f-aba1-5582af0c9ab3"/>
+				<textElement textAlignment="Left">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pago_hasta}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="343" y="34" width="76" height="20" uuid="d73a938e-fbd7-444b-b700-d88fe993014e"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<text><![CDATA[A pagar desde:]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

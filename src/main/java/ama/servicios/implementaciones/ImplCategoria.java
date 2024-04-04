@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ama.servicio.CategoriaService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class ImplCategoria implements CategoriaService {
@@ -24,6 +26,11 @@ public class ImplCategoria implements CategoriaService {
     @Override
     public List<Categoria> listar(Sucursal sucursal) {
         return (List<Categoria>) categoriaDao.listar(sucursal);
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Categoria> listar(Pageable pageable,Sucursal sucursal) {
+        return  categoriaDao.filtrar(pageable, sucursal);
     }
 
     @Transactional

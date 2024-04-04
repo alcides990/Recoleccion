@@ -2,7 +2,7 @@
 package ama.utilerias;
 
  
-class PageItem {
+public class PageItem {
     private int numero;
 	private boolean actual;
 

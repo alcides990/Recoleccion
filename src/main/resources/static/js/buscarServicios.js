@@ -28,7 +28,7 @@ $(document).ready(function () {
                             <td> ${valor.cuentaCorriente} </td>
                             <td> ${valor.usuario.nombre} ${valor.usuario.apellido}</td>
                             <td> ${valor.fechaInicio}</td>
-                            <td> ${valor.categoria.categoriaConTarifa}</td>
+                            <td> ${valor.categoria.nombreCategoria}-${valor.categoria.tarifa}</td>
                             <td> ${valor.estado.estado}</td>
                             <td>
                                  <a href='/servicio/estadoCuenta/${valor.cuentaCorriente}' 
@@ -64,17 +64,7 @@ $(document).ready(function () {
             });
         }
     });
-//esta funciona redireciona a la lagina de inicio con el cambiando la cantidad de
-// registro que con el valor seleccionado en el select 
-    $("#cantElemento").change(function () {
-        var cantElemento = $(this).val();
-        var url = new URL(window.location.href);
-        var searchParams = new URLSearchParams(url.search);
-        searchParams.set('page', 0);
-        searchParams.set('cantElemento', cantElemento);
-        url.search = searchParams.toString();
-        window.location.href = url;
-    });
+
 
 
 });

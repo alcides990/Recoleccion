@@ -1,8 +1,10 @@
 package ama.controladorMVC;
 
 import ama.DTO.ComprobanteDTO;
+import ama.DTO.DetallePagoDTO;
 import ama.dominio.*;
 import ama.servicio.*;
+import ama.utilerias.TableResponse;
 import ama.utilerias.PageRender;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -91,13 +93,14 @@ public class ComprobanteController {
     @ResponseBody
     @PostMapping("/filtrar")
     public ResponseEntity<?> filtrarComprobantes(
-            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "numeroPagina", defaultValue = "0") int page,
             @RequestParam(name = "cantidadRegistro", defaultValue = "5") int cantidadRegistro,
             @RequestParam(name = "codigoSucursal", defaultValue = "") Integer codigoSucursal,
             @RequestParam(name = "codigoPuntoExpedicion", defaultValue = "") Integer codigoPuntoExpedicion,
             @RequestParam(name = "numeroComprobante", defaultValue = "") Integer numeroComprobante,
             @RequestParam(name = "codigoSerie", defaultValue = "") Integer codigoSerie,
             Model modelo) {
+        log.info(page+" numero de pagina");
         Pageable pageable = PageRequest.of(page, cantidadRegistro);
         ComprobantePK comprobantePK = new ComprobantePK();
         PuntoExpedicionPK puntoExpedicionPK = new PuntoExpedicionPK(codigoSucursal, codigoPuntoExpedicion);
@@ -111,8 +114,8 @@ public class ComprobanteController {
             Servicio servicio = comprobante.getServicio();
             Usuario usuario = comprobante.getUsuario();
             DetalleComprobante detalleComprobante = comprobante.getDetalleComprobante();
-            comprobanteDTO.setSucursal(comprobante.getPuntoExpedicion().getSucursal());
-            comprobanteDTO.setPuntoExpedicion(comprobante.getPuntoExpedicion());
+            comprobanteDTO.setCodigoPuntoExpedicion(comprobante.getPuntoExpedicion().getPuntoExpedicionPK().getCodigoPuntoExpedicion());
+            comprobanteDTO.setPuntoExpedicion(comprobante.getPuntoExpedicion().getNombrePuntoExpedicion());
             comprobanteDTO.setTipoFactura(comprobante.getTipoFactura());
             comprobanteDTO.setSerie(comprobante.getSerie());
             comprobanteDTO.setNumeroComprobante(comprobante.getComprobantePK().getNumeroComprobante());
@@ -127,14 +130,21 @@ public class ComprobanteController {
             comprobanteDTO.setTarifa(detalleComprobante.getTarifa());
             comprobanteDTO.setRecargo(detalleComprobante.getRecargo());
             comprobanteDTO.setImporte(comprobante.getTotalImporte());
+            
             comprobantesDTOs.add(comprobanteDTO);
 
         });
-        return ResponseEntity.ok(comprobantesDTOs);
+           PageRender pageRender = new PageRender("/comprobante/filtrar", comprobantes);
+        TableResponse<ComprobanteDTO> dataTableResponse = new TableResponse<>();
+        dataTableResponse.setPage(pageRender);
+        dataTableResponse.setData(comprobantesDTOs);
+       
+        return ResponseEntity.ok(dataTableResponse);
     }
 
     @PostMapping("/listar/pagina")
-    public @ResponseBody Page<Servicio> listarServicios(@RequestBody Paginador paginador) {
+    public @ResponseBody
+    Page<Servicio> listarServicios(@RequestBody Paginador paginador) {
         Pageable pageable = PageRequest.of(paginador.getNumeroPagina(), paginador.getCatidadRegistro());
         var servicios = servicioService.buscar(pageable, paginador.getFiltro());
 
@@ -212,28 +222,6 @@ public class ComprobanteController {
         servicio.setEstadoCuenta(getEstadoCuenta(servicio));
         return ResponseEntity.ok(servicio);
 
-    }
-
-    @GetMapping("/facturar/{cuentaCorriente}")
-    public String getServiciosCuenta(Servicio servicio, Comprobante comprobante, Model modelo) {
-        modelo.addAttribute("titulo", "Comprobate");
-
-        cargarDatosComprobante(modelo);
-
-        modelo.addAttribute("tiposFactura", servicioTipoFactura.listar());
-
-        servicio = servicioService.encontrar(servicio.getCuentaCorriente());
-        modelo.addAttribute("servicio", servicio);
-
-        modelo.addAttribute("estadoCuenta", getEstadoCuenta(servicio));
-
-        modelo.addAttribute("usuario", servicio.getUsuario());
-
-        modelo.addAttribute("cobrador", servicio.getZona().getCobrador());
-
-        modelo.addAttribute("categoria", servicio.getCategoria());
-
-        return "comprobantes/facturaManual";
     }
 
     @PostMapping("/guardar")
@@ -394,8 +382,10 @@ public class ComprobanteController {
         Servicio servicio = comprobante.getServicio();
         Usuario usuario = comprobante.getUsuario();
         DetalleComprobante detalleComprobante = comprobante.getDetalleComprobante();
-        comprobanteDTO.setSucursal(comprobante.getPuntoExpedicion().getSucursal());
-        comprobanteDTO.setPuntoExpedicion(comprobante.getPuntoExpedicion());
+        comprobanteDTO.setSucursal(comprobante.getPuntoExpedicion().getSucursal().getNombreSucursal());
+        comprobanteDTO.setCodigoSucursal(comprobante.getPuntoExpedicion().getSucursal().getCodigoSucursal());
+        comprobanteDTO.setCodigoPuntoExpedicion(comprobante.getPuntoExpedicion().getPuntoExpedicionPK().getCodigoPuntoExpedicion());
+        comprobanteDTO.setPuntoExpedicion(comprobante.getPuntoExpedicion().getNombrePuntoExpedicion());
         comprobanteDTO.setTipoFactura(comprobante.getTipoFactura());
         comprobanteDTO.setCondicionVenta(comprobante.getCondicionVenta());
         comprobanteDTO.setSerie(comprobante.getSerie());
@@ -411,7 +401,14 @@ public class ComprobanteController {
         comprobanteDTO.setCobrador(comprobante.getCobrador());
         comprobanteDTO.setPeriodoPago(detalleComprobante.getPeriodoPago());
         comprobanteDTO.setCantidadPago(comprobante.getCantidadPago());
+        comprobanteDTO.setSaldo(detalleComprobante.getSaldo());
         comprobanteDTO.setRecargo(detalleComprobante.getRecargo());
+        detalleComprobante.getDetallePago().forEach(dtp -> {
+            DetallePagoDTO detallePagoDTO = new DetallePagoDTO();
+            detallePagoDTO.setMetodoPago(dtp.getMetodoPago().getMetodoPago());
+            detallePagoDTO.setImporte(dtp.getImporte());
+            comprobanteDTO.DetallePagoAdd(detallePagoDTO);
+        });
 
         comprobanteDTO.setImporte(comprobante.getTotalImporte());
         return ResponseEntity.ok(comprobanteDTO);

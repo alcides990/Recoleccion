@@ -6,8 +6,11 @@ import ama.dominio.Sucursal;
 import ama.dominio.UsuarioSistema;
 import ama.servicio.*;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,13 +38,19 @@ public class PuntoExpedicionController {
     @GetMapping("/listar")
     public String listaPuntoExpediciones(Model modelo) {
         modelo.addAttribute("titulo", "PuntoExpedicion");
-        var puntosExpediciones = servicioPuntoExpedicion.listar();
+        List<PuntoExpedicion> puntosExpediciones = new ArrayList<>();
+        if (getUserSession().getCodigoUsuarioSistema() == 0) {
+            puntosExpediciones = servicioPuntoExpedicion.listar();
+        } else {
+            puntosExpediciones = servicioPuntoExpedicion.listar(getUserSession().getSucursal());
+        }
         modelo.addAttribute("puntosExpedicion", puntosExpediciones);
         modelo.addAttribute("puntosExpedicion", puntosExpediciones);
         return "puntoExpedicion/puntoExpedicion";
     }
 
     @GetMapping("/agregar")
+    @PreAuthorize("hasAnyAuthority({'ROOT'})")
     public String agregar(PuntoExpedicionPK puntoExpedicionPK, Model modelo) {
         modelo.addAttribute("titulo", "PuntoExpedicion");
         var puntoExpedicion = new PuntoExpedicion(puntoExpedicionPK);
@@ -58,6 +67,7 @@ public class PuntoExpedicionController {
     }
 
     @PostMapping("/guardar")
+     @PreAuthorize("hasAnyAuthority({'ROOT'})")
     public String guardar(PuntoExpedicion puntoExpedicion, PuntoExpedicionPK puntoExpedicionPK, RedirectAttributes redirectAttributes) {
         Sucursal sucursal = puntoExpedicion.getSucursal();
         if (puntoExpedicionPK.getCodigoPuntoExpedicion() == null) {
@@ -73,6 +83,7 @@ public class PuntoExpedicionController {
     }
 
     @GetMapping("/editar/{codigoPuntoExpedicion}/{codigoSucursal}")
+     @PreAuthorize("hasAnyAuthority({'ROOT'})")
     public String editar(PuntoExpedicion puntoExpedicion,
             @PathVariable Integer codigoPuntoExpedicion,
             @PathVariable Integer codigoSucursal,
@@ -92,6 +103,7 @@ public class PuntoExpedicionController {
     }
 
     @GetMapping("/eliminar/{codigoPuntoExpedicion}/{codigoSucursal}")
+     @PreAuthorize("hasAnyAuthority({'ROOT'})")
     public String eliminar(PuntoExpedicionPK puntoExpedicionPK, RedirectAttributes redirectAttributes) {
         servicioPuntoExpedicion.eliminar(puntoExpedicionPK);
         redirectAttributes.addFlashAttribute("info", "PuntoExpedicion eliminada correctamente!!");

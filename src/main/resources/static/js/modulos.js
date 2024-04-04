@@ -1,6 +1,5 @@
 
-//Funcion para limppiar campos
-function limpiar(campos) {
+export function limpiar(campos) {
     if (campos.length > 0) {
         campos.forEach(campo => {
             $(campo).val("");
@@ -8,7 +7,7 @@ function limpiar(campos) {
     }
 }
 
-function tabulador(campoActual, campoDestino) {
+export function tabulador(campoActual, campoDestino) {
     $(campoActual).keydown(function (event) {
         if (event.keyCode === 13) {
             event.preventDefault();
@@ -17,11 +16,12 @@ function tabulador(campoActual, campoDestino) {
     });
 }
 
-function tabular(campoDestino) {
+export function tabular(campoDestino) {
     $(campoDestino).focus();
 }
 
-function consultar(datos, url, contentType = 'application/json') {
+export function consultar(datos, url, contentType = 'application/json') {
+    console.log();
     return new Promise(function (resolve, reject) {
         let token = $("#token").val();
         if (contentType === 'application/json') {
@@ -55,7 +55,7 @@ function consultar(datos, url, contentType = 'application/json') {
         });
     });
 }
-function guardar(datos, url, contentType) {
+export function guardar(datos, url, contentType) {
     return new Promise(function (resolve, reject) {
 
         if (contentType === 'application/json') {
@@ -90,7 +90,7 @@ function guardar(datos, url, contentType) {
     });
 }
 
-function eliminar(mensaje = 'Seguro que desea eliminar este registro??') {
+export function eliminar(mensaje = 'Seguro que desea eliminar este registro??') {
     $(document).on('click', '#eliminar', function (event) {
         confirmacioModal('Eliminacion de Registro!', mensaje);
         var url = $(this).data('url');
@@ -135,7 +135,7 @@ function eliminar(mensaje = 'Seguro que desea eliminar este registro??') {
     });
 }
 
-function getReporte(datos, url) {
+export function getReporte(datos, url) {
     let token = $("#token").val();
     $.ajax({
         headers: {
@@ -148,13 +148,12 @@ function getReporte(datos, url) {
             responseType: "blob"
         },
         success: function (response, status, xhr) {
-            var url = URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
-            window.location.href = (url);// abrir en la misma pestaña
-            //            window.open(url);
+            var url = URL.createObjectURL(new Blob([response], {type: "application/pdf"}));
+//            window.location.href = (url);// abrir en la misma pestaña
+            window.open(url);
         },
-        error: function (xhr, textStatus, error) {
+        error: function (xhr) {
             var mensajeError = 'Error al imprimir reporte ' + xhr.responseText;
-            mostrarAlerta(mensajeError, url, 'danger');
             mostrarAlerta({
                 mensaje: mensajeError,
                 url: url,
@@ -165,7 +164,7 @@ function getReporte(datos, url) {
 }
 
 
-function mostrarAlerta(opciones) {
+export function mostrarAlerta(opciones) {
     const {
         mensaje,
         url,
@@ -176,7 +175,7 @@ function mostrarAlerta(opciones) {
 
     $('#contenedor-alertas').empty();
     var alerta =
-        `<div class="alert modal-header 
+            `<div class="alert modal-header 
              alert-${tipo} alert-dismissible fade show" role="alert"> 
             ${mensaje} 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
@@ -192,7 +191,7 @@ function mostrarAlerta(opciones) {
             window.location = '/' + url.split('/')[1] + '/listar';
         });
     } else if (!redirigir && tipo != 'danger') {
-        $('#contenedor-alertas').fadeOut(3000, function () {
+        $('#contenedor-alertas').fadeOut(4000, function () {
             if (recargar) {
                 window.location.reload();
             }
@@ -200,7 +199,7 @@ function mostrarAlerta(opciones) {
     }
 }
 
-function confirmacioModal(titulo, mensaje) {
+export function confirmacioModal(titulo, mensaje) {
     $("#confirmacionModal").remove();
     var frm = `
  <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
@@ -225,6 +224,66 @@ function confirmacioModal(titulo, mensaje) {
                 </div>
             </div>`;
     $("body").append(frm);
+}
 
+export function generarPaginacion(page) {
+    let paginador = ` <ul class="pagination " ">
+        <ul class="pagination " ">
+                <li class=" ${page.first ? 'page-item disabled' : 'page-item'}" >
+                    <a class="page-link" >Primera</a>
+                </li>
+                 <li class="${!page.hasPrevious ? 'page-item disabled' : 'page-item'} " >
+                    <a class="page-link" ">&laquo;</a>
+                </li>
+                ${addPages(page)}
+                  <li class="${page.last ? 'page-item disabled' : 'page-item'}" >
+                    <a class="page-link"}>&raquo;</a>
+                </li>
 
+                <li class="${page.last ? 'page-item disabled' : 'page-item'}">
+                    <a class="page-link"> &Uacute;ltima</a>
+                </li>
+        
+                <li class="page-item"> 
+                    <select  class="page-link"  id="cantidadRegistro">
+                        <option value="10" >10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </li>
+            </ul>`;
+    $("#paginador").append(paginador);
+    $("#cantidadRegistro").val(page.cantidadRegistro);
+    $("#paginador ul a").click(function () {
+        let numeroPagina = $(this).text();
+        console.log(numeroPagina);
+        switch (numeroPagina) {
+            case 'Primera':
+                buscarComprobantes(0);
+                break;
+            case '«':
+                buscarComprobantes(page.paginaActual - 2);
+                break;
+            case '»':
+                buscarComprobantes(page.paginaActual);
+                break;
+            case 'Última':
+                buscarComprobantes(page.totalPaginas - 1);
+                break;
+            default :
+                buscarComprobantes(parseInt(numeroPagina) - 1);
+
+        }
+    });
+}
+export function addPages(page) {
+    let filtro = $("#txtBuscar").val();
+    let paginas = [];
+    page.paginas.forEach((item) => {
+        let  pagina = ` <li class="page-item ${item.actual ? 'page-item active' : 'page-item'}"">
+                         <a class="page-link" > ${item.numero} </a>
+                       </li>`;
+        paginas.push(pagina);
+    });
+    return paginas;
 }

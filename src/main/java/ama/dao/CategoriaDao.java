@@ -3,6 +3,8 @@ package ama.dao;
 import ama.dominio.Categoria;
 import ama.dominio.Sucursal;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -19,7 +21,22 @@ public interface CategoriaDao extends CrudRepository<Categoria, Integer> {
            WHERE  s= ?1    
            """)
     List<Categoria> listar(Sucursal sucursal);
-    
+
+    @Query(value = """
+           SELECT  c FROM Categoria AS c
+           JOIN FETCH c.sucursal AS s
+           JOIN FETCH s.ciudad AS ciud
+           WHERE  s= ?1    
+           """,
+            countQuery = """
+           SELECT  c FROM Categoria AS c
+           JOIN FETCH c.sucursal AS s
+           JOIN FETCH s.ciudad AS ciud
+           WHERE  s= ?1    
+           """
+    )
+    Page<Categoria> filtrar(Pageable pageable, Sucursal sucursal);
+
     @Query(value = """
            SELECT  c FROM Categoria AS c
            JOIN FETCH c.sucursal AS s

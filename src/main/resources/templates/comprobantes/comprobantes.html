@@ -85,27 +85,19 @@
                                 <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
                                 <td th:text="${comprobante.estado.estado}"></td>
                                 <td>
-                                    <a title="ver comprobante" id="ver" th:data-id="${comprobante.comprobantePK.puntoExpedicionPK.codigoSucursal}+'-'+
-                                       ${comprobante.comprobantePK.puntoExpedicionPK.codigoPuntoExpedicion}+'-'+
-                                       ${comprobante.comprobantePK.codigoTipoFactura}+'-'+
-                                       ${comprobante.comprobantePK.codigoSerie}+'-'+
-                                       ${comprobante.comprobantePK.numeroComprobante}" <i
-                                       class="fa-regular fa-eye btn-primario"></i>
+                                    <a title="ver comprobante" id="verComprobante" 
+                                       <i class="fa-regular fa-eye btn-primario"></i>
                                     </a>
-                                    <a title="Anular" id="anular" th:data-id="${comprobante.comprobantePK.puntoExpedicionPK.codigoSucursal}+'-'+
-                                       ${comprobante.comprobantePK.puntoExpedicionPK.codigoPuntoExpedicion}+'-'+
-                                       ${comprobante.comprobantePK.codigoTipoFactura}+'-'+
-                                       ${comprobante.comprobantePK.codigoSerie}+'-'+
-                                       ${comprobante.comprobantePK.numeroComprobante}" <i
-                                       class="btn-close fa-regular fa-pen-to-square"></i>
+                                    <a title="Anular" id="anular" 
+                                       <i class="btn-close fa-regular fa-pen-to-square"></i>
                                     </a>
-
-
                                 </td>
                         </tr>
                     </tbody>
                 </table>
-                <nav th:replace="~{layout/paginador :: paginador}"> </nav>
+                <nav th:replace="~{layout/paginador :: paginador}"> </nav>                        
+
+
             </div>
         </div>
 
@@ -186,9 +178,8 @@
 
                             </div>
                         </div>
-                        <div class="row m-3">
-                            <div class="col-lg-6">
-                                <h5>Detalle Pago</h5>
+                        <div class="row m-3 ">
+                            <div class="col-lg-6 "> <h5>Detalle Pago</h5>
                                 <input type="hidden" name="tarifa" id="tarifa" />
                                 <div class="row">
                                     <div class="col-4">
@@ -219,6 +210,15 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-4">
+                                        <label for="saldo">Saldo</label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" readonly="true" name="saldo" id="saldo"
+                                               class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
                                         <label for="recargoPago">Recargo:</label>
                                     </div>
                                     <div class="col">
@@ -228,12 +228,16 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-4">
-                                        <label for="totalPago">Total:</label>
+                                        <label for="totalImporte">Total Importe</label>
                                     </div>
                                     <div class="col">
-                                        <input type="text" readonly="true" name="totalPago" id="totalPago"
+                                        <input type="text" readonly="true" name="totalImporte" id="totalImporte"
                                                class="form-control" />
                                     </div>
+                                </div>
+                                <div  class=" bg-body m-3"> <h5>Metodo Pago</h5>
+                                    <div id="detalle-pago"> </div>
+
                                 </div>
                             </div>
                             <div class="motivoAnulacion form-floating col-lg-6 ">
@@ -252,20 +256,15 @@
 
 
         <footer th:replace="~{layout/layout :: footer}"> </footer>
-        <script src="/js/comprobante.js"></script>
-        <script>
-            $(document).on('change', '#serie, #puntoExpedicion', function () {
-                buscarComprobantes();
-            });
-
-            let numeroComprobante='';
+        <script type="module" >
+            import { buscarComprobantes, getComprobanteAnular} from '/js/comprobante.js';
+            let numeroComprobante = '';
             $("#txtBuscar").keypress(function (e) {
                 numeroComprobante = $("#txtBuscar").val();
-//                numeroComprobante = parseInt(numeroComprobante);
                 $("#txtBuscar").val(numeroComprobante.replace(/[^0-9]/g, '').padStart(7, 0));
             });
 
-            var time;
+            let time;
             $("#txtBuscar").keyup(function (e) {
                 clearTimeout(time);
                 time = setTimeout(() => {
@@ -279,6 +278,34 @@
                 let numeroComprobante = $(this).closest('tr').find('td:eq(2)').data('id');
                 let codigoSucursal = $('#sucursal').val();
                 let codigoSerie = $('#serie').val();
+                var datos = {
+                    puntoExpedicionPK: {
+                        codigoSucursal: codigoSucursal,
+                        codigoPuntoExpedicion: codigoPuntoExpedicion
+                    },
+                    codigoTipoFactura: codigoTipoFactura,
+                    codigoSerie: codigoSerie,
+                    numeroComprobante: numeroComprobante
+                };
+                getComprobanteAnular(datos);
+
+            });
+        </script>
+        <script>
+            $(document).on('change', '#serie, #puntoExpedicion', function () {
+                buscarComprobantes();
+            });
+
+
+
+
+            $('#tabla').on('click', 'tr td #verComprobante', function () {
+                let codigoTipoFactura = $(this).closest('tr').find('td:eq(0)').data('id');
+                let codigoPuntoExpedicion = $(this).closest('tr').find('td:eq(1)').data('id');
+                let numeroComprobante = $(this).closest('tr').find('td:eq(2)').data('id');
+                let codigoSucursal = $('#sucursal').val();
+                let codigoSerie = $('#serie').val();
+                console.log('hola');
                 var datos = {
                     puntoExpedicionPK: {
                         codigoSucursal: codigoSucursal,

@@ -6,6 +6,8 @@
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="195"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="800"/>
 	<parameter name="desde" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -24,9 +26,9 @@ COUNT( CASE WHEN comp.codigo_tipo_factura = 2 AND comp.codigo_estado = 1
   COUNT( CASE WHEN comp.codigo_tipo_factura = 1 AND comp.codigo_estado = 1
   THEN 1 END ) AS 'Fact. Impresa',
 
-SUM(dtc.importe) AS importe, SUM(dtc.recargo) AS recargo
+SUM(comp.total_importe) AS importe, SUM(dtc.recargo) AS recargo
 FROM comprobantes AS comp
-JOIN detallecomprobantes AS dtc
+JOIN detalle_comprobantes AS dtc
   ON dtc.codigo_sucursal = comp.codigo_sucursal
     AND dtc.codigo_punto_expedicion = comp.codigo_punto_expedicion
     AND dtc.numero_comprobante = comp.numero_comprobante
@@ -46,8 +48,7 @@ LEFT JOIN cobradores AS cob
   AND comp.fecha_pago >= $P{desde} 
   AND comp.fecha_pago <= $P{hasta} 
   
-GROUP BY zon.`codigo_zona`,  cob.`codigo_cobrador`
-ORDER BY zon.`codigo_zona`]]>
+GROUP BY zon.`codigo_zona`]]>
 	</queryString>
 	<field name="codigo_cobrador" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="codigo_cobrador"/>
@@ -111,22 +112,13 @@ ORDER BY zon.`codigo_zona`]]>
 		<groupHeader>
 			<band height="16">
 				<textField>
-					<reportElement x="42" y="1" width="179" height="15" uuid="0f660578-173f-4333-b080-58756fcd1660">
+					<reportElement x="0" y="1" width="186" height="15" uuid="0f660578-173f-4333-b080-58756fcd1660">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<textElement textAlignment="Left" verticalAlignment="Top">
 						<font fontName="SansSerif" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement x="0" y="0" width="42" height="15" uuid="3c1475bd-c0d8-4a24-b396-7ae8029b49e4">
-						<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					</reportElement>
-					<textElement>
-						<font fontName="SansSerif"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{codigo_zona}]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -206,48 +198,48 @@ ORDER BY zon.`codigo_zona`]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="18" y="0" width="169" height="20" uuid="d304fc9a-8915-41d5-8037-71eca321394b"/>
+			<textField>
+				<reportElement x="18" y="0" width="352" height="20" uuid="bfdecb6a-098f-432d-a7e7-6a714ee794dc"/>
 				<textElement>
 					<font fontName="SansSerif" size="14"/>
 				</textElement>
-				<text><![CDATA[CLIBA S.A]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA["CLIBA S.A"]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
 		<band height="38" splitType="Stretch">
 			<staticText>
 				<reportElement x="160" y="12" width="75" height="20" uuid="9310b598-c987-4fd1-b592-187687ea5d47"/>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Fact. Anuladas]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="250" y="12" width="70" height="20" uuid="084988a0-cc8e-40c4-a1f1-2bd274adbfd9"/>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Fact.Cobradas]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="328" y="12" width="72" height="20" uuid="399fc12d-8072-4472-bf6e-e367123d9652"/>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Fact. Manual]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="410" y="12" width="70" height="20" uuid="af235c58-8005-4667-a8d3-9ffc3788c0a4"/>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Fact. Impresas]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="483" y="12" width="61" height="20" uuid="c9fbb4c7-e7cc-4594-8c45-d38f11620d3f"/>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Monto]]></text>
@@ -259,18 +251,11 @@ ORDER BY zon.`codigo_zona`]]>
 				<reportElement x="0" y="37" width="550" height="1" uuid="424542b5-1772-4aa5-801b-b4cd3dcbfa4f"/>
 			</line>
 			<staticText>
-				<reportElement x="0" y="11" width="42" height="20" uuid="01fbb7de-009e-44ad-a391-647d33b45408"/>
-				<textElement>
+				<reportElement x="2" y="13" width="111" height="20" uuid="a99aba11-6772-42e1-9e5f-1f5af679fa7c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
-				<text><![CDATA[idZona]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="42" y="11" width="111" height="20" uuid="a99aba11-6772-42e1-9e5f-1f5af679fa7c"/>
-				<textElement>
-					<font fontName="SansSerif"/>
-				</textElement>
-				<text><![CDATA[Zona]]></text>
+				<text><![CDATA[Zona-Cobrador]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -308,7 +293,7 @@ ORDER BY zon.`codigo_zona`]]>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="410" y="0" width="67" height="16" uuid="b9214348-bbac-407e-b36e-4c4936c2cc20"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Impresa}]]></textFieldExpression>
@@ -367,7 +352,7 @@ ORDER BY zon.`codigo_zona`]]>
 				<textElement>
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Total Cobrado :]]></text>
+				<text><![CDATA[Totales:]]></text>
 			</staticText>
 		</band>
 	</summary>

@@ -6,29 +6,31 @@ import ama.dominio.UsuarioSistema;
 import ama.errores.ClaseError;
 import ama.validador.Vadidador;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.SessionAttributes;
-import ama.servicio.SucursalService;
 import ama.servicio.CategoriaService;
-import ama.servicio.CiudadService;
+import ama.utilerias.DataTableResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @Controller
-@SessionAttributes("sucursal")
 @RequestMapping("/categoria")
 public class CategoriaController {
 
@@ -36,10 +38,6 @@ public class CategoriaController {
     private Vadidador validar;
     @Autowired
     private CategoriaService servicioCategoria;
-    @Autowired
-    private SucursalService servicioSucursal;
-    @Autowired
-    private CiudadService servicioCiudad;
     @Autowired
     private HttpSession httpSession;
 
@@ -51,6 +49,26 @@ public class CategoriaController {
         List<Categoria> categorias = servicioCategoria.listar(sucursal);
         modelo.addAttribute("categorias", categorias);
         return "categoria/categoria";
+    }
+
+    @GetMapping("/filtrar")
+    @ResponseBody
+    public ResponseEntity<?> filtrarCtegoria(
+            @RequestParam(name = "draw") Integer draw,
+//            @RequestParam(name = "start") Integer inicio,
+//            @RequestParam(name = "length") Integer cantidadRegistro,
+//            @RequestParam(name = "search", required = false)  Integer filtro,
+//            @RequestParam(name = "page") Integer page,
+//            @RequestParam(name = "size") Integer size,
+            HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Categoria> categorias=servicioCategoria.listar(pageable,getUserSession().getSucursal());
+        DataTableResponse<Categoria> categoriaRespoonse=new DataTableResponse<>();
+        categoriaRespoonse.setDraw(draw);
+        categoriaRespoonse.setRecordsFiltered(categorias.getTotalElements());
+        categoriaRespoonse.setRecordsTotal(categorias.getTotalElements());
+        categoriaRespoonse.setData(categorias.getContent());
+        return ResponseEntity.ok(categoriaRespoonse);
     }
 
     @PostMapping("/guardar")

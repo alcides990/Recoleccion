@@ -4,27 +4,20 @@ import ama.dominio.*;
 import ama.errores.ClaseError;
 import ama.servicio.*;
 import ama.utilerias.PageRender;
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
+import ama.utilerias.ReportGenerator;
+import ama.utilerias.Reporte;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.util.JRLoader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -65,9 +58,9 @@ public class ServicioController {
     private UsuarioService servicioUsuario;
     @Autowired
     private ManzanaService servicioManzana;
-
     @Autowired
     private DataSource dataSource;
+    private ReportGenerator reportGenerator;
 
     @GetMapping("/listar")
     public String listarServicios(
@@ -88,7 +81,7 @@ public class ServicioController {
         List<Sucursal> sucursales = servicioSucursal.listar();
         modelo.addAttribute("sucursales", getSucursalSession());
 
-        var estado = servicioEstado.listar();
+        var estado = servicioEstado.findByEstadoIn(Arrays.asList("ACTIVO", "INACTIVO"));
         modelo.addAttribute("estado", estado);
 
         return "servicio/servicio";
@@ -122,9 +115,6 @@ public class ServicioController {
         var ciudades = servicioCiudad.listarCiudad();
         modelo.addAttribute("ciudad", ciudades);
 
-        var estado = servicioEstado.listar();
-        modelo.addAttribute("estado", estado);
-
         return "servicio/modificarServicio";
     }
 
@@ -148,9 +138,6 @@ public class ServicioController {
 
         var ciudades = servicioCiudad.listarCiudad();
         modelo.addAttribute("ciudad", ciudades);
-
-        var estado = servicioEstado.listar();
-        modelo.addAttribute("estado", estado);
 
         return "servicio/modificarServicio";
     }
@@ -256,30 +243,22 @@ public class ServicioController {
 
     }
 
-    @GetMapping("/report")
-    // @ResponseBody
-    public ResponseEntity<?> getRpt1(Map<String, Object> parameters, HttpServletResponse response,
-            HttpServletRequest request) throws JRException, IOException, SQLException {
-        Connection conexion = null;
-        try {
-            conexion = dataSource.getConnection();
-            InputStream jasperStream = new ClassPathResource("reportes/reporte_detalle_zona.jasper").getInputStream();
-            JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conexion);
-            if (jasperPrint.getPages().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("No hay pagina para mostrar!!");
-            } else {
-                response.setContentType("application/pdf");
-                response.setHeader("Content-Disposition", "inline; filename=ciudades.pdf");
-                final OutputStream outputStream = response.getOutputStream();
-                JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(ServicioController.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            conexion.close();
-        }
-        return ResponseEntity.notFound().build();
+    @GetMapping("/extractoCuenta")
+    public void getExtractoCuenta(HttpServletResponse response
+    ) {
+        Map<String, Object> parametros = new HashMap<>();
+        parametros.put("cuentaCorriente", "24-0001-02");
+        parametros.put("cantidadRegistro", 6);
+        parametros.put("codigoSucursal", 1);
+
+        Reporte reporte = Reporte.builder()
+                .ruta("reportes/extractoCuenta.jasper")
+                .nombre("ExtractoCuenta")
+                .parametros(parametros)
+                .build();
+        reportGenerator = new ReportGenerator(dataSource);
+        reportGenerator.getReporte(reporte, response);
+
     }
 
     private EstadoCuenta getEstadoCuenta(Servicio servicio) {
@@ -307,6 +286,7 @@ public class ServicioController {
     private UsuarioSistema getUserSession() {
         return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
     }
+
     private Sucursal getSucursalSession() {
         return getUserSession().getSucursal();
     }

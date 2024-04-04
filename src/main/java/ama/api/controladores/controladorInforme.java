@@ -1,5 +1,7 @@
 package ama.api.controladores;
 
+import ama.dominio.Sucursal;
+import ama.dominio.UsuarioSistema;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,29 +12,19 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.util.JRLoader;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import ama.servicio.CobradorService;
 import ama.servicio.ZonaService;
 import ama.servicio.CiudadService;
+import jakarta.servlet.http.HttpSession;
 
 @Slf4j
 @Controller
@@ -45,6 +37,8 @@ public class controladorInforme {
     private ZonaService servicioZona;
     @Autowired
     private CobradorService servicioCobrador;
+    @Autowired
+    private HttpSession httpSession;
     @Autowired
     private DataSource dataSource;
 
@@ -63,18 +57,19 @@ public class controladorInforme {
     public ResponseEntity<byte[]> getCiudadReport(
             Map<String, Object> parameters) throws SQLException {
         try (
-                 Connection conexion = dataSource.getConnection()) {
+                Connection conexion = dataSource.getConnection()) {
             InputStream jasperStream = new ClassPathResource("reportes/ciudades.jasper").getInputStream();
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conexion);
 
             HttpHeaders headers = new HttpHeaders();
-            ContentDisposition conetenDisposicion = ContentDisposition.builder("inline").filename("ciudades.pdf").build();
-            //set the PDF format
+            ContentDisposition conetenDisposicion = ContentDisposition.builder("inline").filename("ciudades.pdf")
+                    .build();
+            // set the PDF format
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDisposition(ContentDisposition.builder("inline").build());
-//            headers.setContentDispositionFormData("filename", "ciudades.pdf");
-            //create the report in PDF format
+            // headers.setContentDispositionFormData("filename", "ciudades.pdf");
+            // create the report in PDF format
             return new ResponseEntity<>(JasperExportManager.exportReportToPdf(jasperPrint), headers, HttpStatus.OK);
 
         } catch (IOException | SQLException | JRException e) {
@@ -82,13 +77,12 @@ public class controladorInforme {
         }
     }
 
-    @ResponseBody
     public ResponseEntity<?> getReporte(
             Map<String, Object> parameters,
             String rutaReporte,
-            String nombreReporte
-    ) throws JRException, IOException, SQLException {
+            String nombreReporte) throws JRException, IOException, SQLException {
         Connection conexion = null;
+        HttpHeaders header = new HttpHeaders();
         try {
             conexion = dataSource.getConnection();
             InputStream jasperStream = new ClassPathResource(rutaReporte).getInputStream();
@@ -96,17 +90,15 @@ public class controladorInforme {
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conexion);
             byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
             if (jasperPrint.getPages().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                        //                        .header("Content-Type", "application/json")
-                        .body("El reporte no tiene pagina para mostrar!!");
+                header.setContentType(MediaType.APPLICATION_JSON);
+                return new ResponseEntity("El reporte no tiene pagina para mostrar!!", header, HttpStatus.INTERNAL_SERVER_ERROR);
             } else {
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_PDF);
+                header.setContentType(MediaType.APPLICATION_PDF);
                 ContentDisposition conetenDisposicion = ContentDisposition.builder("inline")
                         .filename(nombreReporte + ".pdf").build();
-                headers.setContentDisposition(conetenDisposicion);
-                headers.setContentLength(pdfBytes.length);
-                return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+                header.setContentDisposition(conetenDisposicion);
+                header.setContentLength(pdfBytes.length);
+                return new ResponseEntity<>(pdfBytes, header, HttpStatus.OK);
             }
         } catch (SQLException ex) {
             return new ResponseEntity("Error al Generar Informe: " + ex.getMessage(), HttpStatus.CONFLICT);
@@ -120,8 +112,7 @@ public class controladorInforme {
             @RequestParam("codigoZona") Integer codigoZona,
             @RequestParam("codigoCobrador") Integer codigoCobrador,
             @RequestParam("desde") Integer desde,
-            @RequestParam("hasta") Integer hasta
-    ) throws JRException, IOException, SQLException {
+            @RequestParam("hasta") Integer hasta) throws JRException, IOException, SQLException {
         Map<String, Object> parametro = new HashMap<>();
         String rutaReporte = "reportes/detalleZona.jasper";
         String nombeReporte = "Detalle Zona";
@@ -134,18 +125,17 @@ public class controladorInforme {
 
     @PostMapping("/detalle_manzana")
     public ResponseEntity<?> reporteDetalleManzana(
-            @RequestParam("codigoManzana") Integer codigoManzana,
-            @RequestParam("codigoCobrador") Integer codigoCobrador,
+            @RequestParam("manzana") Integer manzana,
             @RequestParam("codigoZona") Integer codigoZona,
             @RequestParam("desde") Integer desde,
-            @RequestParam("hasta") Integer hasta
-    ) throws JRException, IOException, SQLException {
+            @RequestParam("hasta") Integer hasta) throws JRException, IOException, SQLException {
         Map<String, Object> parametro = new HashMap<>();
         String rutaReporte = "reportes/detalleManzana.jasper";
         String nombeReporte = "Detalle Manzana";
-        parametro.put("manzana", codigoManzana);
-        parametro.put("codigoCobrador", codigoZona);
+
+        parametro.put("codigoSucursal", getSucursalSession().getCodigoSucursal());
         parametro.put("codigoZona", codigoZona);
+        parametro.put("manzana", manzana);
         parametro.put("desde", desde);
         parametro.put("hasta", hasta);
         return getReporte(parametro, rutaReporte, nombeReporte);
@@ -155,8 +145,7 @@ public class controladorInforme {
     public ResponseEntity<?> reporteIngresosPorZona(
             @RequestParam("grupo") String grupo,
             @RequestParam("ingresos-desde") String desde,
-            @RequestParam("ingresos-hasta") String hasta
-    ) throws JRException, IOException, SQLException {
+            @RequestParam("ingresos-hasta") String hasta) throws JRException, IOException, SQLException {
         Map<String, Object> parametro = new HashMap<>();
         String nombeReporte = "Ingresos por zona";
         parametro.put("desde", desde);
@@ -171,15 +160,15 @@ public class controladorInforme {
     }
 
     @PostMapping("/prueba")
-    public String reportePrueba(){
-      
+    public String reportePrueba() {
+
         return "/reportes/visor-pdf";
     }
-    
-    
+
     @GetMapping("/imprimir")
     @ResponseBody
-    public void imorimir(Map<String, Object> parameters, HttpServletResponse response) throws JRException, IOException, SQLException {
+    public void imorimir(Map<String, Object> parameters, HttpServletResponse response)
+            throws JRException, IOException, SQLException {
         InputStream jasperStream = new ClassPathResource("reportes/ciudades.jasper").getInputStream();
         JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource.getConnection());
@@ -187,6 +176,14 @@ public class controladorInforme {
         response.setHeader("Content-Disposition", "inline; filename=ciudades.pdf");
         final OutputStream outputStream = response.getOutputStream();
         JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-//        JasperPrintManager.printReport(jasperPrint, false); 
+        // JasperPrintManager.printReport(jasperPrint, false);
+    }
+
+    private UsuarioSistema getUserSession() {
+        return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
+    }
+
+    private Sucursal getSucursalSession() {
+        return getUserSession().getSucursal();
     }
 }

@@ -18,6 +18,10 @@ public class ImplEstado implements EstadoService {
     public List<Estado> listar() {
        return (List<Estado>) EstadoDao.findAll();
     }
+    @Override
+    public List<Estado> findByEstadoIn(List<String> estados ){
+       return (List<Estado>) EstadoDao.findByEstadoIn(estados);
+    }
 
     @Override
     public void guardar(Estado estado) {

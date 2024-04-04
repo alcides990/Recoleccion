@@ -8,6 +8,10 @@
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="card-header"> <h3>Ciudades</h3> </div>
         <div class="container">
+            <div th:if="${info}" class="mensaje-alerta alert alert-success">
+                <span th:text="${info}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             <a th:href="@{/ciudad/agregar}"  class="btn-primario m-3">Crear Ciudad</a>
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
             <div th:if="${info}" class="mensaje-alerta alert alert-success">

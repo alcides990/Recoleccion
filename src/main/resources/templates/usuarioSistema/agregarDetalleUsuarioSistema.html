@@ -76,12 +76,12 @@
             <script>
                 $(document).ready(function () {
 //            Lamara al metodo eliminar al hacer click en el boton eliminar
-                        var mensaje;
-                        eliminar(mensaje);
-                   
+                    var mensaje;
+                    eliminar(mensaje);
+
                     $("#passwordReset").on('click', function () {
                         let  titulo = "Reseteo de clave";
-                         mensaje = "Seguro que desea realizar la operacion? ";
+                        mensaje = "Seguro que desea realizar la operacion? ";
                         confirmacioModal(titulo, mensaje);
                         $('#confirmacionModal').modal('show');
                         $('#confirmacionModal').on('click', '#confirmarBoton', function () {
@@ -97,9 +97,14 @@
                                 async: false,
                                 method: 'post',
                                 cache: false,
-//                     dataType: "json", //tipo de datos que espera recibir
                                 success: function (response) {
-                                    mostrarAlerta(response, url, 'success', false, false);
+                                    mostrarAlerta({
+                                        mensaje: response,
+                                        url: url,
+                                        tipo: 'success',
+                                        redirigir: false,
+                                        recargar: false
+                                    });
                                     return false;
                                 },
                                 error: function (jqXHR, textStatus, errorThrown) {
@@ -110,7 +115,13 @@
                                     if (jqXHR.status === 403) {
                                         mensajeError = "Acceso denegado, no tiene acceso a este recurso!!";
                                     }
-                                    mostrarAlerta(mensajeError, url, 'danger');
+                                    mostrarAlerta({
+                                        mensaje: mensajeError,
+                                        url: url,
+                                        tipo: 'danger',
+                                        redirigir: false,
+                                        recargar: false
+                                    });
                                 }
                             });
                         });

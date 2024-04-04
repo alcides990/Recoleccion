@@ -38,12 +38,7 @@ public class Categoria implements Serializable {
 
     public Categoria() {
     }
-
     
-    
-    @Transient
-    private String nombreEstado;
-
     public String getNombreCategoria() {
         return nombreCategoria;
     }
@@ -72,7 +67,7 @@ public class Categoria implements Serializable {
 
     @Override
     public String toString() {
-        return "Categoria{" + "codigoCategoria=" + codigoCategoria + ", nombreCategoria=" + nombreCategoria + ", tarifa=" + tarifa + ", nombreEstado=" + nombreEstado + '}';
+        return "Categoria{" + "codigoCategoria=" + codigoCategoria + ", nombreCategoria=" + nombreCategoria + ", tarifa=" + tarifa  + '}';
     }
     
     

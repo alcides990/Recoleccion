@@ -20,6 +20,7 @@ public class recolecion implements CommandLineRunner {
 
     @Autowired
     UsuarioSistemaService usuarioSistemaService;
+
     @Autowired
     ComprobanteDao comprobanteDao;
 
@@ -31,23 +32,23 @@ public class recolecion implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         Pageable pageable = PageRequest.of(0, 5);
-//        var resul = usuarioSistemaDao.findByNombre("irene");
-//       resul.forEach(c->{
-//        System.out.println("manzana esta en nulo : " + resul);
-//        System.out.println("manzana : " + resul);
-//    });
-//        var servicio=new Servicio();
-//        servicio.setCuentaCorriente("24-0001-01");
-//        var comprobante=comprobanteDao.getAllComprobantes(pageable);
-//        resul.getDetalleUsuarioSistema().forEach(dtu
-//                -> {
-//        log.info("Total: " +  dtu.getRol());
-//        log.info("Total: " +  dtu.getUsuarioSistema().getNombre()); 
-//        });
-//        comprobante.forEach(System.out::println);
+        // var resul = usuarioSistemaDao.findByNombre("irene");
+        // resul.forEach(c->{
+        // System.out.println("manzana esta en nulo : " + resul);
+        // System.out.println("manzana : " + resul);
+        // });
+        // var servicio=new Servicio();
+        // servicio.setCuentaCorriente("24-0001-01");
+        // var comprobante=comprobanteDao.getAllComprobantes(pageable);
+        // resul.getDetalleUsuarioSistema().forEach(dtu
+        // -> {
+        // log.info("Total: " + dtu.getRol());
+        // log.info("Total: " + dtu.getUsuarioSistema().getNombre());
+        // });
+        // comprobante.forEach(System.out::println);
 
-//        log.info(encoder.encode("123"));
-       
+        // log.info(encoder.encode("123"));
+
     }
 
 }

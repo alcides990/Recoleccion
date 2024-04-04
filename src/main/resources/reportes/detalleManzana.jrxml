@@ -5,20 +5,25 @@
 	<property name="ireport.x" value="164"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.report.description" value="Reporte de etado de cuentas por  zona"/>
-	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.tables">
+		<![CDATA[dXN1YXJpb3MgQVMgLDE1LDE1LGQxMjU4OWFjLWIzMmYtNDAxYi1iY2IwLTNhNTQ5YjhlYTQyYTtj
+YXRlZ29yaWFzIEFTICw5MDUsMTUsYjM2NTM5N2UtNWE1Yi00YTQwLTk3NWEtMDQ1MzgzZjI1MTYz
+O3NlcnZpY2lvcyBBUyAsMTU1LDE1LDhhNmY3NzRmLTM3NGEtNDJkYi05ZTRkLWFlYTkxN2IzMjFl
+YztzdWN1cnNhbGVzIEFTICwzMDUsMTUsZGRjODBiMmYtM2Q5NC00MGQyLWIwNmEtYTQ1YTEwMGZl
+YzAzO21hbnphbmFzIEFTICw0NTYsMTUsYTA0N2QyNmUtZTUxYi00MTg1LWI0MDItNjcwZjBlNzRh
+MDVmO3pvbmFzIEFTICw2MTUsMTUsNjVlNjdiMTQtYjY2ZS00ZDM3LWE3YjAtY2E2MWQ5ZDRkMzQ5
+O2NvYnJhZG9yZXMgQVMgLDc0MSwxNSw0NTAwZTczNi0wZDdjLTQ1ZDctYWUwZi0yY2M1MzAwNTJi
+Yjg7]]>
+	</property>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
-	<parameter name="codigoZona" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
-	</parameter>
-	<parameter name="codigoCobrador" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
-	</parameter>
+	<parameter name="codigoSucursal" class="java.lang.Integer"/>
 	<parameter name="desde" class="java.lang.Integer"/>
 	<parameter name="hasta" class="java.lang.Integer"/>
 	<parameter name="manzana" class="java.lang.Integer"/>
+	<parameter name="codigoZona" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[SELECT servi.cuenta_corriente, man.codigo_manzana,
-fn_mes_deuda(servi.cuenta_corriente) AS mes_deuda, 
+fn_mes_deuda(servi.cuenta_corriente, 1) AS mes_deuda, 
 fn_pago_hasta(servi.cuenta_corriente) AS pago_hasta,
 fn_ultimo_pago(servi.cuenta_corriente) AS ultimo_pago,
 cate.`categoria`, cate.`tarifa`,
@@ -26,28 +31,34 @@ usu.numero_documento, usu.`nombre`, usu.`apellido`, usu.`direccion`,
 cob.codigo_cobrador, CONCAT(cob.nombre, ' ', cob.apellido) AS cobrador,
 zon.codigo_zona, zon.zona
 FROM servicios AS servi
+
+JOIN sucursales AS suc
+  ON suc.codigo_sucursal=servi.codigo_sucursal
+  
 JOIN manzanas AS man
   ON man.`codigo_manzana`=servi.`codigo_manzana`
+  AND man.codigo_sucursal=suc.codigo_sucursal
   
 INNER JOIN zonas AS zon
   ON zon.codigo_zona=man.`codigo_zona`
   AND zon.codigo_sucursal= man.`codigo_sucursal`
   
 INNER JOIN cobradores AS cob
-  ON cob.`codigo_cobrador`=man.`codigo_cobrador`
-  AND cob.`codigo_sucursal`=man.`codigo_sucursal`
+  ON cob.`codigo_cobrador`=zon.`codigo_cobrador` 
+
   
 INNER JOIN categorias AS cate
   ON cate.`codigo_categoria` = servi.`codigo_categoria` 
-  AND cate.`codigo_sucursal`= servi.`codigo_sucursal`
+  AND cate.`codigo_sucursal`= suc.`codigo_sucursal`
+  
 INNER JOIN usuarios AS usu
   ON servi.codigo_usuario = usu.codigo_usuario
   
- WHERE cob.codigo_cobrador= $P{codigoCobrador} 
+ WHERE suc.codigo_sucursal= $P{codigoSucursal} 
  AND zon.codigo_zona= $P{codigoZona}
   AND man.codigo_manzana= $P{manzana}
- AND fn_mes_deuda(servi.cuenta_corriente)>= $P{desde} 
- AND fn_mes_deuda(servi.cuenta_corriente)  <= $P{hasta}]]>
+ AND fn_mes_deuda(servi.cuenta_corriente, 1)>= $P{desde} 
+ AND fn_mes_deuda(servi.cuenta_corriente, 1)  <= $P{hasta}]]>
 	</queryString>
 	<field name="cuenta_corriente" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="cuenta_corriente"/>

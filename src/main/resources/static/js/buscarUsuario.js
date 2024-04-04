@@ -83,17 +83,6 @@ $(document).ready(function () {
             });
         }
     });
-//esta funciona redireciona a la pagina de inicio con el cambiando la cantidad de
-// registro que con el valor seleccionado en el select 
-    $("#cantElemento").change(function () {
-        var cantElemento = $(this).val();
-        var url = new URL(window.location.href);
-        var searchParams = new URLSearchParams(url.search);
-        searchParams.set('page', 0);
-        searchParams.set('cantElemento', cantElemento);
-        url.search = searchParams.toString();
-        window.location.href = url;
-    });
-
+ 
 
 });

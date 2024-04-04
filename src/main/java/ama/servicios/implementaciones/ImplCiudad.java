@@ -35,11 +35,7 @@ public class ImplCiudad implements CiudadService {
 
     @Override
     public Integer getCodigoCiudad() {
-        Integer codigoCiudad = 0;
-        if (ciudadDao.getCodigoCiudad() != null) {
-            codigoCiudad = ciudadDao.getCodigoCiudad();
-        }
-        return codigoCiudad;
+        return ciudadDao.getCodigoCiudad() != null ? ciudadDao.getCodigoCiudad() : 0;
     }
 
 }
