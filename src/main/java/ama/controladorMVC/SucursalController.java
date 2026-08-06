@@ -58,6 +58,7 @@ public class SucursalController {
     }
 
     @PostMapping("/guardar")
+    @PreAuthorize("hasAnyAuthority({'ROOT'})")
     public String guardar(Sucursal sucursal, RedirectAttributes flash) {
         if (sucursal.getCodigoSucursal() == null) {
             Integer codigoSucursal = servicioSucursal.getCodigoSucursal() + 1;
@@ -72,15 +73,17 @@ public class SucursalController {
     }
 
     @GetMapping("/editar/{codigoSucursal}")
+    @PreAuthorize("hasAnyAuthority({'ROOT'})")
     public String editar(Sucursal sucursal, Model model) {
         model.addAttribute("titulo", "Editar Sucursal");
         sucursal = servicioSucursal.encontrar(sucursal);
         model.addAttribute("sucursal", sucursal);
-        model.addAttribute("ciudades", sucursal.getCiudad());
+        model.addAttribute("ciudades", servicioCiudad.listarCiudad());
         return "sucursal/modificarSucursal";
     }
 
     @GetMapping("/eliminar")
+    @PreAuthorize("hasAnyAuthority({'ROOT'})")
     public String eliminar(Sucursal sucursal, RedirectAttributes flash) {
         servicioSucursal.eliminar(sucursal);
         flash.addFlashAttribute("info", "Sucursal eliminada correctamente!!");

@@ -11,12 +11,13 @@ import org.springframework.stereotype.Controller;
 public class ControladorSifen {
     
     private final  SifenConfig config;
+//    private Factura
 
     public ControladorSifen() {
         this.config = new SifenConfig();
     }
     Sifen sifen = new Sifen();
-    DocumentoElectronico documentoElectronico=new DocumentoElectronico();
+    DocumentoElectronico DE=new DocumentoElectronico();
     
 //     RespuestaRecepcionDE response = Sifen.recepcionDE(documentoElectronico);
 }

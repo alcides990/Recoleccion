@@ -7,8 +7,8 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container "> 
-            <h3>Datos de Punto de Expedicion</h3>
-            <a th:href="@{/puntoExpedicion/listar}" class="btn-primario ">Regresar</a>
+            <div class="card-header"> <h3 class="form-title">Datos de Punto de Expedicion</h3></div>
+            <a th:href="@{/puntoExpedicion/listar}" class="btn btn-primario m-2">Regresar</a>
             <form th:action="@{/puntoExpedicion/guardar}" method="post" th:object="${puntosExpedicion}">
                 <div class="row ">
                     <div class="form-group col-sm-4">

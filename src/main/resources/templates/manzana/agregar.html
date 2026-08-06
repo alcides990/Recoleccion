@@ -11,7 +11,7 @@
             <aside th:replace="~{layout/layout :: aside}"> </aside>
             <div class="container">
                 <div class="card-title">
-                    <h3>Agregar manzana</h3>
+                    <h3 class="form-title">Agregar manzana</h3>
                 </div>
 
                 <a th:href="@{/zona/listar}" class="btn btn-primario">
@@ -54,12 +54,12 @@
                         </div>
                     </div>
                 </form>
-                <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3" />
+                <input type="submit" name="guardar" value="Guardar" class="btn btn-primario m-3" />
 
                 <div class="table-responsive-lg">
-                    <table id="tablaCobradores" class="table caption-top table-dark table-border table-striped table-colapse  ">
+                    <table id="tablaCobradores" class="table caption-top table-border table-striped table-colapse  ">
                         <caption>Manzanas de la zona </caption>
-                        <thead>
+                        <thead class="bg-color">
                             <tr>
                                 <th>Sucursal</th>
                                 <th>Zona</th>
@@ -134,7 +134,7 @@
                                 </div>
 
                             </div>
-                            <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3" />
+                            <input type="submit" name="guardar" value="Guardar" class="btn btn-primario m-3" />
                         </form>
 
                     </div>
@@ -143,45 +143,43 @@
 
 
             <footer th:replace="~{layout/layout :: footer}"> </footer>
-            <script>
-                $(document).ready(function () {
-                    eliminar("Seguro que desea eliminar cobrador  de esta manzana");
-                    //  Cargar idioma español a la tabla paginado con Jquerry data
-                    var tablaManzana = $('#tablaManzana').DataTable({
-                        language: {
-                            url: '/i18n/es-ES.json'
-                        }
-                    });
+            <script type="module">
+                import {eliminar, guardar, mostrarAlerta} from '/js/modulos.js'
+                        eliminar("Seguro que desea eliminar cobrador  de esta manzana");
+                //  Cargar idioma español a la tabla paginado con Jquerry data
+                var tablaManzana = $('#tablaManzana').DataTable({
+                    language: {
+                        url: '/i18n/es-ES.json'
+                    }
+                });
 
-                    $('#frm-manzana').submit(function (event) {
-                        event.preventDefault();
+                $('#frm-manzana').submit(function (event) {
+                    event.preventDefault();
 
-                        var url = "/manzana/guardar";
+                    var url = "/manzana/guardar";
 
-                        var datos = $('#frm-manzana').serialize();
-                        var contentType = 'application/x-www-form-urlencoded';
-                        guardar(datos, url, contentType).then((data) => {
-                            mostrarAlerta({
-                                mensaje: data,
-                                url: url,
-                                tipo: 'success',
-                                redirigir: false,
-                                recargar: true
-                            });
+                    var datos = $('#frm-manzana').serialize();
+                    var contentType = 'application/x-www-form-urlencoded';
+                    guardar(datos, url, contentType).then((data) => {
+                        mostrarAlerta({
+                            mensaje: data,
+                            url: url,
+                            tipo: 'success',
+                            recargar: false
                         });
                     });
-
-                    //  Abrir ventans modal al precionar boton editar
-                    $(document).on('click', '#editar', function (event) {
-                        let id = $(this).data('id').split('-');
-                        let numeroManzana = id[0];
-                        let codigoZona = id[1];
-                        $("#manzana").val(numeroManzana);
-                        $("#zonas").val(codigoZona);
-                        $("#zonaVieja").val(codigoZona);
-                    });
-
                 });
+
+                //  Abrir ventans modal al precionar boton editar
+                $(document).on('click', '#editar', function (event) {
+                    let id = $(this).data('id').split('-');
+                    let numeroManzana = id[0];
+                    let codigoZona = id[1];
+                    $("#manzana").val(numeroManzana);
+                    $("#zonas").val(codigoZona);
+                    $("#zonaVieja").val(codigoZona);
+                });
+
             </script>
         </body>
 

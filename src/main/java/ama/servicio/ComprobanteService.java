@@ -18,6 +18,8 @@ public interface ComprobanteService {
 
     public void anular(Comprobante comprobante);
 
+    public Optional<Comprobante> findById(ComprobantePK comprobantePK);
+    
     public Comprobante getComprobante(ComprobantePK comprobantePK);
 
     public Integer getNumeroComprobante(ComprobantePK comprobantePK);
@@ -27,6 +29,8 @@ public interface ComprobanteService {
     public Page<Comprobante> getComprobantesCuenta(Pageable page, Servicio servicio);
 
     public int getCantidadPago(String cuentaCorriente);
+    
+    public Optional<String> getPagoHsta(String cuentaCorriente);
 
     public Optional<Comprobante> getUltimoComprobanteCuentaActivo(String cuentaCorriente);
 

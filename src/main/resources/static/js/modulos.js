@@ -1,9 +1,7 @@
 
 export function limpiar(campos) {
     if (campos.length > 0) {
-        campos.forEach(campo => {
-            $(campo).val("");
-        });
+        campos.forEach(campo => $(campo).val(""));
     }
 }
 
@@ -12,16 +10,34 @@ export function tabulador(campoActual, campoDestino) {
         if (event.keyCode === 13) {
             event.preventDefault();
             $(campoDestino).focus();
+            if ($(campoDestino).attr("type") === "text") {
+                let value = $(campoDestino).val();
+                if (value !== '') {
+                    $(campoDestino)[0].setSelectionRange(value.length, value.length);
+                }
+            }
         }
     });
 }
 
 export function tabular(campoDestino) {
     $(campoDestino).focus();
+    if ($(campoDestino).attr("type") === "text") {
+        let value = $(campoDestino).val();
+        if (value !== '') {
+            $(campoDestino)[0].setSelectionRange(value.length, value.length);
+        }
+    }
 }
-
+import "/js/datepicker-es.js";
+export function datePickerInit(campo) {
+    $.datepicker.setDefaults($.datepicker.regional["es"]);
+    $(campo).datepicker({
+        changeYear: true
+    }
+    );
+}
 export function consultar(datos, url, contentType = 'application/json') {
-    console.log();
     return new Promise(function (resolve, reject) {
         let token = $("#token").val();
         if (contentType === 'application/json') {
@@ -47,9 +63,40 @@ export function consultar(datos, url, contentType = 'application/json') {
                 mostrarAlerta({
                     mensaje: mensajeError,
                     url: url,
-                    tipo: 'danger'
+                    tipo: 'danger',
+                    time: 5000
                 });
+                reject(mensajeError);
+            }
+        });
+    });
+}
+export function consulta(datos, url) {
+    return new Promise(function (resolve, reject) {
+        let token = $("#token").val();
 
+        $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': token
+            },
+            url: url,
+            data: datos,
+            type: "get",
+            dataType: "json",
+            success: function (response) {
+                resolve(response);
+            },
+            error: function (error) {
+                var mensajeError = error.responseText;
+                if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                    mensajeError = error.responseJSON.message;
+                }
+                mostrarAlerta({
+                    mensaje: mensajeError,
+                    url: url,
+                    tipo: 'danger',
+                    time: 5000
+                });
                 reject(mensajeError);
             }
         });
@@ -70,7 +117,6 @@ export function guardar(datos, url, contentType) {
             data: datos,
             type: "post",
             contentType: contentType,
-
             success: function (response) {
                 resolve(response);
             },
@@ -82,7 +128,42 @@ export function guardar(datos, url, contentType) {
                 mostrarAlerta({
                     mensaje: mensajeError,
                     url: url,
-                    tipo: 'danger'
+                    tipo: 'danger',
+                    time: 15000
+                });
+                reject(mensajeError);
+            }
+        });
+    });
+}
+export function modificar(datos, url, contentType) {
+    return new Promise(function (resolve, reject) {
+
+        if (contentType === 'application/json') {
+            datos = JSON.stringify(datos);
+        }
+        let token = $("#token").val();
+        $.ajax({
+            url: url,
+            headers: {
+                'X-CSRF-TOKEN': token
+            },
+            data: datos,
+            type: "put",
+            contentType: contentType,
+            success: function (response) {
+                resolve(response);
+            },
+            error: function (error) {
+                var mensajeError = error.responseText;
+                if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                    mensajeError = error.responseJSON.message;
+                }
+                mostrarAlerta({
+                    mensaje: mensajeError,
+                    url: url,
+                    tipo: 'danger',
+                    time: 5000
                 });
                 reject(mensajeError);
             }
@@ -90,6 +171,54 @@ export function guardar(datos, url, contentType) {
     });
 }
 
+export function eliminarRegistro (mensaje = 'Seguro que desea eliminar este registro??') {
+    $(document).on('click', '#eliminar', function (event) {
+        confirmacioModal('Eliminacion de Registro!', mensaje);
+        var url = $(this).data('url');
+        let id = $(this).data('id');
+        $('#confirmacionModal').modal('show');
+        $('#confirmacionModal').on('click', '#confirmarBoton', function () {
+            $('#confirmacionModal').modal('hide');
+            let token = $("#token").val();
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
+                url: url,
+                method: 'DELETE',
+                data: {
+                    id: id
+                },
+                cache: false,
+                success: function (response) {
+                    mostrarAlerta({
+                        mensaje: response,
+                        url: url,
+                        tipo: 'success',
+                        recargar: true
+                    });
+                    return false;
+                },
+                error: function (error) {
+                    console.log(error);
+                    var mensajeError = error.responseText;
+                    if (error.responseJSON && error.responseJSON.hasOwnProperty("message")) {
+                        mensajeError = error.responseJSON.message;
+                    }
+                    if (error.status === 403) {
+                        mensajeError = "Acceso denegado, no tiene acceso a este recurso!!";
+                    }
+                    mostrarAlerta({
+                        mensaje: mensajeError,
+                        url: url,
+                        tipo: 'danger',
+                        time: 50000
+                    });
+                }
+            });
+        });
+    });
+}
 export function eliminar(mensaje = 'Seguro que desea eliminar este registro??') {
     $(document).on('click', '#eliminar', function (event) {
         confirmacioModal('Eliminacion de Registro!', mensaje);
@@ -127,42 +256,69 @@ export function eliminar(mensaje = 'Seguro que desea eliminar este registro??') 
                     mostrarAlerta({
                         mensaje: mensajeError,
                         url: url,
-                        tipo: 'danger'
+                        tipo: 'danger',
+                        time: 50000
                     });
                 }
             });
         });
     });
 }
-
-export function getReporte(datos, url) {
-    let token = $("#token").val();
-    $.ajax({
-        headers: {
-            'X-CSRF-TOKEN': token
-        },
-        url: url,
-        data: datos,
-        type: "post",
-        xhrFields: {
-            responseType: "blob"
-        },
-        success: function (response, status, xhr) {
-            var url = URL.createObjectURL(new Blob([response], {type: "application/pdf"}));
-//            window.location.href = (url);// abrir en la misma pestaña
-            window.open(url);
-        },
-        error: function (xhr) {
-            var mensajeError = 'Error al imprimir reporte ' + xhr.responseText;
-            mostrarAlerta({
-                mensaje: mensajeError,
-                url: url,
-                tipo: 'danger'
-            });
-        }
-    });
+function objectToQueryString(obj) {
+    return Object.keys(obj).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`).join('&');
 }
 
+export function getReporte(datos, url) {
+    datos = objectToQueryString(datos);
+//    console.log(datos);
+    let token = $("#token").val();
+    fetch(url, {
+        headers: {
+            'X-CSRF-TOKEN': token,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        method: 'POST',
+        body: datos
+    }).then(response => {
+        if (response.status === 200) {
+            response.blob().then(report => {
+                let url = URL.createObjectURL(report);
+//                window.open(url);
+                window.location.href = url;
+            });
+        } else if (response.status === 409) {
+            response.json().then(data => {
+                mostrarAlerta({
+                    mensaje: data.mensaje,
+                    url: url,
+                    tipo: 'warning',
+                    time: 7000
+
+                });
+            });
+        } else if (response.status === 500) {
+            response.json().then(data => {
+                mostrarAlerta({
+                    mensaje: data.mensaje,
+                    url: url,
+                    tipo: 'danger',
+                    time: 10000
+
+                });
+            });
+        }
+
+    }).catch(error => {
+        var mensajeError = 'Error al imprimir reporte ' + error;
+        mostrarAlerta({
+            mensaje: response,
+            url: url,
+            tipo: 'danger',
+            time: 5000
+
+        });
+    });
+}
 
 export function mostrarAlerta(opciones) {
     const {
@@ -170,12 +326,12 @@ export function mostrarAlerta(opciones) {
         url,
         tipo,
         redirigir = false,
-        recargar = false
+        recargar = false,
+        time = 3000
     } = opciones;
-
     $('#contenedor-alertas').empty();
     var alerta =
-            `<div class="alert modal-header 
+            `<div class="alert modal-header
              alert-${tipo} alert-dismissible fade show" role="alert"> 
             ${mensaje} 
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
@@ -184,14 +340,13 @@ export function mostrarAlerta(opciones) {
             </div>`;
     $('#contenedor-alertas').append(alerta);
     $('#contenedor-alertas').fadeIn('slow');
-
     //alerta para registro  redirigir pagina
-    if (redirigir && tipo != 'danger') {
-        $('#contenedor-alertas').fadeOut(3000, function () {
+    if (redirigir) {
+        $('#contenedor-alertas').fadeOut(time, function () {
             window.location = '/' + url.split('/')[1] + '/listar';
         });
-    } else if (!redirigir && tipo != 'danger') {
-        $('#contenedor-alertas').fadeOut(4000, function () {
+    } else if (!redirigir) {
+        $('#contenedor-alertas').fadeOut(time, function () {
             if (recargar) {
                 window.location.reload();
             }
@@ -253,29 +408,10 @@ export function generarPaginacion(page) {
                 </li>
             </ul>`;
     $("#paginador").append(paginador);
-    $("#cantidadRegistro").val(page.cantidadRegistro);
-    $("#paginador ul a").click(function () {
-        let numeroPagina = $(this).text();
-        console.log(numeroPagina);
-        switch (numeroPagina) {
-            case 'Primera':
-                buscarComprobantes(0);
-                break;
-            case '«':
-                buscarComprobantes(page.paginaActual - 2);
-                break;
-            case '»':
-                buscarComprobantes(page.paginaActual);
-                break;
-            case 'Última':
-                buscarComprobantes(page.totalPaginas - 1);
-                break;
-            default :
-                buscarComprobantes(parseInt(numeroPagina) - 1);
 
-        }
-    });
+
 }
+
 export function addPages(page) {
     let filtro = $("#txtBuscar").val();
     let paginas = [];
@@ -286,4 +422,5 @@ export function addPages(page) {
         paginas.push(pagina);
     });
     return paginas;
+
 }

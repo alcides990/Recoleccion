@@ -8,7 +8,7 @@
         <aside th:replace="~{layout/layout :: aside}"></aside>
 
         <div class="container p-1"> 
-            <div class="card-header"> <h3>Datos de Usuario</h3> </div>
+            <div class="form-title"> <h3>Datos de Usuario</h3> </div>
             <a th:href="@{/usuario/listar}" class="btn btn-primario ms-3">Regresar</a>
             <form th:action="@{/usuario/guardar}" method="post" th:object="${usuario}">
                 <div class="row d-flex m-1">
@@ -24,35 +24,35 @@
                     </div>
                     <div class="form-group col-sm-2">
                         <label class="  form-label" for="numeroDocumento">N° Documento </label>
-                        <input type="text" name="numeroDocumento"  th:value="*{numeroDocumento}" class="form-control" placeholder="Ingrese numero de documento" required="campo ogligatorio"/>
+                        <input type="text" name="numeroDocumento" id="numeroDocumento"  th:value="*{numeroDocumento}" class="form-control" placeholder="Ingrese numero de documento" required="campo ogligatorio"/>
                     </div>
                     <div class="form-group col-sm-4">
                         <label class="  form-label" for="nombre">Nombre </label>
-                        <input type="text" name="nombre"  th:value="*{nombre}" class="form-control" placeholder="Ingrese nombre " required="campo ogligatorio"/>
+                        <input type="text" name="nombre" id="nombre" th:value="*{nombre}" class="form-control" placeholder="Ingrese nombre " required="campo ogligatorio"/>
                     </div>
                     <div class="form-group col-sm-4">
                         <label class="  form-label" for="apellido">Apellido </label>
-                        <input type="text" name="apellido"  th:value="*{apellido}" class="form-control" placeholder="Ingrese apellido" required="campo ogligatorio"/>
+                        <input type="text" name="apellido" id="apellido" th:value="*{apellido}" class="form-control" placeholder="Ingrese apellido" required="campo ogligatorio"/>
                     </div>
                     <div class="form-group col-sm-3">
                         <label class="form-label" for="celular">Celular </label>
-                        <input type="text" name="celular"  th:value="*{celular}" class="form-control" placeholder="Ingrese numero de celular" />
+                        <input type="text" name="celular" id="celular"  th:value="*{celular}" class="form-control" placeholder="Ingrese numero de celular" />
                     </div>
                     <div class="form-group col-sm-3">
                         <label  class="form-label" for="telefono">Telefono </label>
-                        <input type="text" name="telefono"  th:value="*{telefono}" class="form-control" placeholder="Ingrese numero de telefono" />
+                        <input type="text" name="telefono" id="telefono" th:value="*{telefono}" class="form-control" placeholder="Ingrese numero de telefono" />
                     </div>
                     <div class="form-group col-sm-3">
                         <label class="form-label" for="barrio">Barrio </label>
-                        <input type="text" name="barrio"  th:value="*{barrio}" class="form-control" placeholder="Ingrese nombre del barrio" />
+                        <input type="text" name="barrio" id="barrio" th:value="*{barrio}" class="form-control" placeholder="Ingrese nombre del barrio" />
                     </div>
                     <div class="form-group col-sm-5">
                         <label  class="form-label" for="direccio">Direccion </label>
-                        <input type="text" name="direccion"  th:value="*{direccion}" class="form-control" placeholder="Ingrese direccion" />
+                        <input type="text" name="direccion" id="direccion" th:value="*{direccion}" class="form-control" placeholder="Ingrese direccion" />
                     </div>
                     <div class="form-group col-sm-5">
                         <label  class="form-label" for="observacion">Observacion </label>
-                        <input type="text" name="observacion"  th:value="*{observacion}" class="form-control" placeholder="Ingrese observacion " />
+                        <input type="text" name="observacion" id="observacion" th:value="*{observacion}" class="form-control" placeholder="Ingrese observacion " />
                     </div>
                     <div class="form-group col-sm-3">
                         <label class="  form-label" for="sucursal">Sucursal</label>
@@ -72,9 +72,20 @@
                         </select>
                     </div>
                 </div>
-                <input type="submit" name="guardar" value="Guardar" class="btn-guardar m-3"/>
+                <input type="submit" name="guardar" value="Guardar" class="btn-primario m-3"/>
             </form>
         </div>
         <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script type="module">
+            import {tabulador, tabular} from '/js/modulos.js';
+            tabular('#numeroDocumento');
+            tabulador('#numeroDocumento', '#nombre');
+            tabulador('#nombre', '#apellido');
+            tabulador('#apellido', '#celular');
+            tabulador('#celular', '#telefono');
+            tabulador('#telefono', '#barrio');
+            tabulador('#barrio', '#direccion');
+            tabulador('#direccion', '#observacion');
+        </script>
     </body>
 </html>

@@ -6,34 +6,37 @@
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="card-header"> <h3>Ciudades</h3> </div>
         <div class="container">
+            <h3 class="form-title">Ciudades</h3> 
             <div th:if="${info}" class="mensaje-alerta alert alert-success">
                 <span th:text="${info}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <a th:href="@{/ciudad/agregar}"  class="btn-primario m-3">Crear Ciudad</a>
+            <a th:href="@{/ciudad/agregar}"  class="btn btn-primario m-2 ">Agregar</a>
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
             <div th:if="${info}" class="mensaje-alerta alert alert-success">
                 <span th:text="${info}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <div class="table-responsive-md m-3">
-                <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-md" >
-                    <thead>
+                <table id="tabla" class="table  table-border table-striped table-colapse table-hover table-md" >
+                    <thead class="bg-color">
                         <tr>
                             <th>Codigo Ciudad</th>
                             <th>ciudad</th>
-                            <th>Editar</th>
-                            <th>Eliminar</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="table-secondary">
                         <tr th:each="ciudad : ${ciudades}">
                             <td th:text="${ciudad.codigoCiudad}">  Mostrar Codigo Ciudad</td>
                             <td th:text="${ciudad.nombreCiudad}"> Mostrar ciudad </td>
-                            <td>  <a th:href="@{/ciudad/editar/} + ${ciudad.codigoCiudad}" th:text="Editar" class="btn btn-info "/></td>
-                            <td> <a th:href="@{/ciudad/eliminar(codigoCiudad=${ciudad.codigoCiudad})}" th:text="Eliminar" class="btn btn-danger text-l "/></td>
+                            <td>  <a th:href="@{/ciudad/editar/} + ${ciudad.codigoCiudad}"
+                                     class="btn btn-info btn-sm mx-1"/>
+                                <i class="fa-regular fa-pen-to-square"></i>
+                                <a th:href="@{/ciudad/eliminar(codigoCiudad=${ciudad.codigoCiudad})}" 
+                                   class="btn btn-danger eliminar btn-sm"  />
+                                <i class="fa-solid fa-trash-can"></i></td>
                         </tr>
                     </tbody>
                 </table>

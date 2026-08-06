@@ -1,5 +1,7 @@
 package ama.controladorMVC;
 
+import ama.dominio.Sucursal;
+import ama.dominio.UsuarioSistema;
 import ama.dominio.Zona;
 import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
@@ -61,7 +63,7 @@ public class ZonaController {
         Zona zona = new Zona();
         model.addAttribute("zona", zona);
         
-        var cobradores = cobradorService.listar();
+        var cobradores = cobradorService.listarIsEstadoActivo(getSucursalSession());
         model.addAttribute("cobradores", cobradores);
 
         var sucursales = servicioSucursal.listar();
@@ -92,7 +94,7 @@ public class ZonaController {
         }
         model.addAttribute("zona", zona);
 
-        model.addAttribute("cobradores",cobradorService.listar());
+        model.addAttribute("cobradores",cobradorService.listarIsEstadoActivo(getSucursalSession()));
         
         model.addAttribute("sucursales",zona.getSucursal());
         
@@ -113,4 +115,11 @@ public class ZonaController {
         }
     }
     
+     private UsuarioSistema getUserSession() {
+        return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
+    }
+
+    private Sucursal getSucursalSession() {
+        return getUserSession().getSucursal();
+    }
 }

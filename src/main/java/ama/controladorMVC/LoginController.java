@@ -47,10 +47,6 @@ public class LoginController {
             model.addAttribute("error", mensaje);
         }
 
-        if (logout
-                != null) {
-            model.addAttribute("info", "Ha cerrado secion con exito!!");
-        }
 
         return "login";
     }

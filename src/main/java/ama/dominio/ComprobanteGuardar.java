@@ -1,8 +1,6 @@
-
 package ama.dominio;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,19 +14,28 @@ import lombok.ToString;
 @ToString
 @Data
 public class ComprobanteGuardar {
+
     private String cuentaCorriente;
+    private String razonSocial;
+    private Integer codigoUsuario;
     private Integer codigoSerie;
     private Integer codigoTimbrado;
     private Integer numeroComprobante;
     private Integer codigoPuntoExpedicion;
-    private Integer codigoTipoFactura;
+    private Integer codigoTipoComprobante;
     private Integer codigoCobrador;
     private Integer codigoCondicionVenta;
+    private String periodoPago;
     private LocalDate pagoHasta;
     private LocalDate fechaPago;
     private Integer cantidadPago;
+    private Integer cantidadDeuda;
+    private Integer codigoCategoria;
+    private double tarifa;
     private double recargoPago;
     private double saldoAnterior;
+    private double totalImporte;
+    private String Obs;
 
     private List<DetallePago> detallePago;
     private Parametro parametro;

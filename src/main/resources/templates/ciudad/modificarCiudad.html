@@ -1,5 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns="http://www.w3.org/1999/xhtmal">
+      xmlns="http://www.w3.org/1999/xhtmal" >
     <head>
         <title>Datos de la Persona</title>
         <meta http-equiv="Content-type" content="text/html charset=UTF-8">
@@ -10,16 +10,18 @@
                 <aside  th:replace="~{layout/layout :: aside}"> </aside>
                 <div class="container">
 
-                    <h3>Datos de Ciudades</h3>
-                    <a th:href="@{/ciudad/listar}" class="btn-primario mb-5"> Regresar </a>
+                    <h3 class="form-title">Datos de Ciudad</h3>
+                    <a th:href="@{/ciudad/listar}" class="btn btn-primario m-2"> Regresar </a>
                     <div class="contenedor">
-                        <form th:action="@{/ciudad/guardar}" id="formulario" method="post" th:object="${ciudad}" >
-                            <input type="hidden" name="codigoCiudad" id="codigoCiudad" th:value="*{codigoCiudad}" />
+                        <form   th:action="@{/ciudad/guardar}" id="formulario" method="post" th:object="${ciudad}" >
+                            <div class=" row m-2">
+                                <input type="hidden" name="codigoCiudad" id="codigoCiudad" th:value="*{codigoCiudad}" />
 
-                            <label class="form-label m-2" for="ciudad">Ciudad</label>
-                            <input class="form-control col-sm-6" type="text" name="nombreCiudad" id="ciudad"  th:value="*{nombreCiudad}"   placeholder="Igrese nombre de la de la ciudad" />
+                                <label class="form-label m-2 col-md-1" for="ciudad">Ciudad:</label>
+                                <input class="form-control col" type="text" name="nombreCiudad" id="ciudad"  th:value="*{nombreCiudad}"   placeholder="Igrese nombre de la de la ciudad" />
+                            </div>
 
-                            <input type="submit" name="guardar" value="Guardar" class="btn-guardar mb-5"/>
+                            <input type="submit" name="guardar" value="Guardar" class="btn-primario m-2"/>
                         </form>
                     </div>
                 </div>

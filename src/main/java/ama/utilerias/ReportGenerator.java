@@ -1,66 +1,68 @@
 package ama.utilerias;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.extern.log4j.Log4j2;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRLoader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+@Log4j2
 public class ReportGenerator {
 
-    @Autowired
-    private DataSource dataSource;
-
-    public ReportGenerator(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public ReportGenerator() {
     }
 
-    public ResponseEntity<?> getReporte(Reporte reporte, HttpServletResponse response
+    public ResponseEntity<?> getReporte(Reporte reporte
     ) {
-        Connection conexion = null;
+        Map<String, String> mensaje = new HashMap<>();
         try {
-             HttpHeaders header = new HttpHeaders();
-            conexion = dataSource.getConnection();
+            HttpHeaders header = new HttpHeaders();
             InputStream jasperStream = new ClassPathResource(reporte.getRuta()).getInputStream();
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, reporte.getParametros(), conexion);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, reporte.getParametros(), reporte.getConexion());
             if (jasperPrint.getPages().isEmpty()) {
-                response.setContentType("application/json");
-                return ResponseEntity.internalServerError().body(" No hay pagina para mostrar!!");
+                mensaje.put("mensaje", "Reporte no tiene pagina para mostrar!!");
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(mensaje);
             } else {
-                response.setContentType("application/pdf");
-                response.setHeader("Content-Disposition", "inline; filename=" + reporte.getNombre());
-                final OutputStream outputStream = response.getOutputStream();
-                JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+                byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
+                header.setContentDisposition(ContentDisposition.inline().filename(reporte.getNombre() + ".pdf").build());
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .contentLength(pdfBytes.length)
+                        .contentType(MediaType.APPLICATION_PDF)
+                        .headers(header)
+                        .body(pdfBytes);
+
             }
-        } catch (IOException ex) {
-            return ResponseEntity.internalServerError().body(ex.getMessage());
-        } catch (SQLException ex) {
-            return ResponseEntity.internalServerError().body(ex.getMessage());
-        } catch (Exception ex) {
-            return ResponseEntity.internalServerError().body(ex.getMessage());
-        }  
-           finally {
+        } catch (IOException | JRException  ex) {
+             mensaje.put("mensaje", ex.getMessage());
+            return ResponseEntity.internalServerError().body(mensaje);
+        } finally {
             try {
-                conexion.close();
+                if( reporte.getConexion()!=null){
+                reporte.getConexion().close();
+                }
             } catch (SQLException ex) {
-                Logger.getLogger(ReportGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                 mensaje.put("mensaje", ex.getMessage());
+                return ResponseEntity.internalServerError().body(mensaje);
             }
         }
-        return ResponseEntity.notFound().build();
+
     }
 
 }

@@ -1,9 +1,7 @@
 package ama.dao;
 
-import ama.dominio.ManzanaPK;
 import ama.dominio.Servicio;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,18 +9,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface ServicioDao extends JpaRepository<Servicio, Integer> {
-        // listar servicio
+    // listar servicio
 
-        @Query(value = """
+    @Query(value = """
                         SELECT   s FROM Servicio s
                                    JOIN FETCH s.usuario u
                                    JOIN FETCH s.categoria cat
                                    JOIN FETCH s.estado est
                         """, countQuery = "SELECT COUNT(s) FROM Servicio s")
-        Page<Servicio> listar(Pageable pagina);
+    Page<Servicio> listar(Pageable pagina);
 
-        // buscar servicio
-        @Query(value = """
+    // buscar servicio
+    @Query(value = """
                          SELECT s FROM Servicio s
                                   JOIN FETCH s.usuario u
                                   JOIN FETCH s.categoria cat
@@ -33,18 +31,25 @@ public interface ServicioDao extends JpaRepository<Servicio, Integer> {
                                   JOIN FETCH suc.ciudad
                                   JOIN FETCH s.estado est
                                   WHERE s.cuentaCorriente
-                                  LIKE %?1% OR u.numeroDocumento
-                                  LIKE %?1% OR CONCAT(u.nombre,' ',u.apellido)
+                                  LIKE ?1% OR u.numeroDocumento
+                                  LIKE ?1% OR CONCAT_WS(' ',u.nombre, u.apellido)
                                   LIKE %?1%
-                        """, countQuery = "SELECT COUNT(s) FROM Servicio s   ")
-        Page<Servicio> buscar(Pageable pagina, String filtro);
+                        """, countQuery = """
+                                              SELECT COUNT(s)
+                                                  FROM Servicio s
+                                                  JOIN s.usuario u
+                                                  WHERE s.cuentaCorriente LIKE ?1%
+                                                     OR u.numeroDocumento LIKE ?1%
+                                                     OR CONCAT_WS(' ',u.nombre,u.apellido) LIKE %?1%
+                                          """)
+    Page<Servicio> buscar(Pageable pagina, String filtro);
 
-        // Page<Servicio> findByCuentaCorriente(Pageable pagina, String
-        // cuentaCorriente);
-        @Query("SELECT cuentaCorriente FROM Servicio s  JOIN s.usuario u WHERE u.codigoUsuario= ?1")
-        List<String> listaServicioCuenta(Integer codigoUsuario);
+    // Page<Servicio> findByCuentaCorriente(Pageable pagina, String
+    // cuentaCorriente);
+    @Query("SELECT cuentaCorriente FROM Servicio s  JOIN s.usuario u WHERE u.codigoUsuario= ?1")
+    List<String> listaServicioCuenta(Integer codigoUsuario);
 
-        @Query("""
+    @Query("""
                         SELECT s FROM Servicio s
                                  JOIN FETCH s.usuario u
                                  JOIN FETCH s.categoria cat
@@ -56,6 +61,6 @@ public interface ServicioDao extends JpaRepository<Servicio, Integer> {
                                  JOIN FETCH suc.ciudad
                         WHERE s.cuentaCorriente= ?1
                         """)
-        Servicio encontrar(String cuentaCorriente);
+    Servicio encontrar(String cuentaCorriente);
 
 }

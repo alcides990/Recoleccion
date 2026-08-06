@@ -1,7 +1,6 @@
 package ama.controladorMVC;
 
 import ama.dominio.*;
-import ama.errores.ClaseError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -127,7 +126,7 @@ public class ManzanaController {
         } catch (Exception e) {
 
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Error al Elimar Registro: " + ClaseError.excepcion("Error al eliminar manzana, ", e));
+                    .body("Error al eliminar manzana"+ e.getMessage());
         }
     }
 

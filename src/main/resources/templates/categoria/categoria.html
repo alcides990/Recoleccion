@@ -7,56 +7,55 @@
         <header th:replace="~{layout/layout :: header}"> </header>
         <aside th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container">
-            <h3 class="card-header"> Categorias</h3>
+            <h3 class="  form-title"> Categorias</h3>
             <a id="btnAgrerar" class="btn btn-primario btn-sm mb-3 " data-bs-toggle="modal"
                data-bs-target="#modificarModal">
                 <i class="fa-solid fa-plus fa-lg"> </i> Agregar
             </a>
-            <a id="consul" class="btn btn-primario btn-sm mb-3 "  >
-                <i class="fa-solid fa-plus fa-lg"> </i> consultar
-            </a>
+
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
             <div class="table-responsive-sm">
                 <table id="tabla1" class="table table-dark table-border table-striped table-colapse table-hover table-sm ">
                 </table>
             </div>
             <div class="table-responsive-sm">
-                <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-sm ">
-                    <thead class="thead-dark">
+                <table id="tabla" class="table table-border table-striped table-colapse table-hover table-sm ">
+                    <thead class=" bg-color">
                         <tr>
-                            <th>Codigo Categoria</th>
-                            <th>Categoria</th>
+                            <th>Codigo</th>
+                            <th>Nomrbe Categoria</th>
                             <th>Tarifa</th>
                             <th>Sucursal</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="table-secondary">
-                        <!--                        <tr th:each="categoria : ${categorias}">
-                                                    <td th:text="${categoria.codigoCategoria}">
-                                                    </td>
-                                                    <td th:text="${categoria.nombreCategoria}"> Mostrar Categoria
-                                                    </td>
-                                                    <td th:text="${#numbers.formatDecimal(categoria.tarifa, 0, 'COMMA', 0, 'POINT')}"> Mostrar
-                                                        Tarifa
-                                                    </td>
-                                                    <td
-                                                        th:text="${categoria.sucursal.nombreSucursal} +' '+ ${categoria.sucursal.ciudad.nombreCiudad}">
-                                                        Mostrar Sucursal
-                                                    </td>
-                                                    <td>
-                                                        <a id="editar" data-url="/categoria/editar/" th:data-id="${categoria.codigoCategoria}"
-                                                           class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modificarModal">
-                                                            <i class="fa-regular fa-pen-to-square"></i>
-                                                        </a>
-                                                        <a id="eliminar" data-url="/categoria/eliminar/" th:data-id="${categoria.codigoCategoria}"
-                                                           class="btn btn-danger eliminar btn-sm">
-                                                            <i class="fa-solid fa-trash-can"></i>
-                                                        </a>
-                                                    </td>
-                        
-                                                </tr>-->
+                        <tr th:each="categoria : ${categorias}">
+                            <td th:text="${categoria.codigoCategoria}">
+                            </td>
+                            <td th:text="${categoria.nombreCategoria}"> Mostrar Categoria
+                            </td>
+                            <td th:text="${#numbers.formatDecimal(categoria.tarifa, 0, 'COMMA', 0, 'POINT')}"> Mostrar
+                                Tarifa
+                            </td>
+                            <td
+                                th:text="${categoria.sucursal.nombreSucursal} +' '+ ${categoria.sucursal.ciudad.nombreCiudad}">
+                                Mostrar Sucursal
+                            </td>
+                            <td>
+                                <a id="editar" data-url="/categoria/editar/" th:data-id="${categoria.codigoCategoria}"
+                                   class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modificarModal">
+                                    <i class="fa-regular fa-pen-to-square"></i>
+                                </a>
+                                <a id="eliminar" data-url="/categoria/eliminar/" th:data-id="${categoria.codigoCategoria}"
+                                   class="btn btn-danger  btn-sm">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </td>
+
+                        </tr>
                     </tbody>
+
                 </table>
             </div>
         </div>
@@ -97,7 +96,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar" />
+                            <input type="submit" name="guardar" value="Guardar" class="btn btn-primario" />
                         </div>
                     </form>
                 </div>
@@ -105,15 +104,14 @@
         </div>
         <footer th:replace="~{layout/layout :: footer}"> </footer>
         <script type="module">
-            import {consultar, guardar, eliminar, tabulador, mostrarAlerta, limpiar
-            } from '/js/modulos.js';
-
+            import {
+            consultar, guardar, eliminar, tabulador, mostrarAlerta, limpiar
+            }
+            from '/js/modulos.js';
             eliminar('Seguro que desea eliminar esta categoria??');
-
             $('#modificarModal').on('shown.bs.modal', function () {
                 $('#nombreCategoria').focus();
             });
-
             // definir nombres de campos para la funcion limpiar
             var nombreCategoria = "#nombreCategoria";
             var tarifa = "#tarifa";
@@ -129,7 +127,6 @@
                             $("#tarifa").val(respuesta.tarifa);
                         });
             });
-
             $("#btnAgrerar").click(function (event) {
                 event.preventDefault();
                 limpiar(campos);
@@ -141,12 +138,12 @@
                     '#nombreCategoria',
                     '#tarifa'
                 ];
-                var url = "/categoria/guardar";
-                var codigoCategoria = parseInt($("#codigoCategoria").val());
-                var nombreCategoria = $("#nombreCategoria").val();
-                var tarifa = parseFloat($("#tarifa").val());
-                var codigoSucursal = parseInt($("#sucursal").val());
-                var categoria = {
+                let url = "/categoria/guardar";
+                let codigoCategoria = parseInt($("#codigoCategoria").val());
+                let nombreCategoria = $("#nombreCategoria").val();
+                let tarifa = parseFloat($("#tarifa").val());
+                let codigoSucursal = parseInt($("#sucursal").val());
+                let categoria = {
                     codigoCategoria: codigoCategoria,
                     nombreCategoria: nombreCategoria,
                     tarifa: tarifa,
@@ -156,68 +153,26 @@
                 };
                 var contentType = 'application/json';
                 guardar(categoria, url, contentType).then((data) => {
+                    
                     $('#frm-categoria').trigger('reset');
                     $("#modificarModal").modal('hide');
                     mostrarAlerta({
                         mensaje: data,
                         url: url,
+                        recargar: true,
                         tipo: 'success'
                     });
                 });
             });
 
-            let url = '/categoria/filtrar';
-
-            let tabla = $('#tabla').DataTable({
-//                serverSide: true,
-                ajax: {
-                    url: url
-                     
-                   
-                },
-                columns: [
-                    {data: 'data.codigoCategoria'},
-                    {data: 'data.nombreCategoria'},
-                    {data: 'data.tarifa'},
-                    {data: null},
-                    {data: null}
-                ],
+            $("#tabla").DataTable({
                 language: {
                     url: '/i18n/es-ES.json'
                 }
             });
+
         </script>
-        <script>
-            $(document).ready(function () {
-//                let url='categoria/filtar';
-//               let categorias= consultar('',url);
 
-
-
-
-                //                $("#buscar").click(() => {
-                //                    $('#tabla').DataTable({
-                //                        "processing": true,
-                //                        "serverSide": true,
-                //                        "ajax": {
-                //                            "url": "/categoria/filtrar",
-                //                            "data": function (d) {
-                //                                d.page = d.start / d.length;
-                //                                d.size = d.length;
-                //                                d.search = d.search.value;
-                //                            }
-                //                        },
-                //                        "columns": [
-                //                            {"data": "codigoCategoria"},
-                //                            {"data": "nombreCategoria"},
-                //                            {"data": "tarifa"}
-                //
-                //                        ]
-                //                    });
-                //                });
-            }
-            );
-        </script>
     </body>
 
 </html>

@@ -6,41 +6,34 @@ $(document).ready(function () {
         $("#cuentaCorriente").prop('readonly', true);
         $("#fechaInicio").prop('readonly', true);
     }
-    if (pathname === '/comprobante/facturaElectronica') {
-        $("#fechaPago").prop('disabled', true);
-
-    }
-
-
-    $.datepicker.setDefaults($.datepicker.regional["es"]);
-    $("#fechaInicio").datepicker({
-        changeYear: true
-    }
-    );
-
 });
 
-function formaterarCuentaCorriente() {
-    var cuentaCorriente = $("#cuentaCorriente").val();
-    var longitudCuentaCorriente = cuentaCorriente.length;
 
-    switch (longitudCuentaCorriente) {
-        case 2:
-            $("#cuentaCorriente").val(cuentaCorriente + '-');
 
-            break;
-        case 7:
-            $("#cuentaCorriente").val(cuentaCorriente + '-');
+function formatearCuentaCorriente(e) {
+    if (e.key != 'Backspace') {
+        var cuentaCorriente = $("#cuentaCorriente").val();
+        var longitudCuentaCorriente = cuentaCorriente.length;
 
-            break;
-        case 11:
-            $("#cuentaCorriente").val(cuentaCorriente.substring(0, cuentaCorriente.length - 1) + '/' + cuentaCorriente.substring(cuentaCorriente.length - 1));
+        switch (longitudCuentaCorriente) {
+            case 2:
+                $("#cuentaCorriente").val(cuentaCorriente + '-');
 
-            break;
+                break;
+            case 7:
+                $("#cuentaCorriente").val(cuentaCorriente + '-');
 
-        default:
+                break;
+            case 11:
+                if (e.key != '/') {
+                    $("#cuentaCorriente").val(cuentaCorriente.substring(0, cuentaCorriente.length - 1) + '/' + cuentaCorriente.substring(cuentaCorriente.length - 1));
+                }
+                break;
 
-            break;
+            default:
+
+                break;
+        }
     }
 }
 

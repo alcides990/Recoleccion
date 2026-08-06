@@ -7,7 +7,8 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside th:replace="~{layout/layout :: aside}">  </aside>
         <div class="container-fluid"> 
-            <div class="card-header"> <h3>Estado Cuenta</h3></div>
+            <h3 class="form-title">Estado Cuenta</h3> 
+            <div class="mensaje-alerta" id="contenedor-alertas"> </div>
             <form name=" frm-servicio" id="frm-servicio" th:action="@{/servicio/guardar}" method="post" th:object="${servicio}">
                 <a th:href="@{/servicio/listar}" class="btn btn-primario">Regresar</a>
                 <div class="form-group">
@@ -123,18 +124,19 @@
                             </div>
 
                         </div>
-                        <div class="col-md-5 m-3">
-                            <a class="btn-primario"> Extracto de Cuenta</a>
+                        <div class="m-3">
+                            <button  id="extracto-cuenta"class="btn-primario"> Extracto de Cuenta</button>
                         </div>
                     </div>
                     <div class=" col-md-12 col-lg-8"> 
-                        <div class="table-responsive-xxl">
-                            <table id="tabla" class="table table-responsive-xxl table-dark table-border table-striped  table-hover small" >
-                                <thead class="sticky-top">
+                        <div class="table-responsive">
+                            <table id="tabla" class="table  table-border table-striped  table-hover small" >
+                                <thead class="sticky-top bg-color">
                                     <tr>
                                         <th>Tipo</th>
-                                        <th>Nro.Factura</th>
+                                        <th>Nro.Comprobante</th>
                                         <th>FechaPago</th>
+                                        <th>PagoHasta</th>
                                         <th>PeriodoPago</th>
                                         <th>Tarifa</th>
                                         <th>Cant.Pago</th>
@@ -147,17 +149,18 @@
                                 </thead>
                                 <tbody class="table-secondary"  >
                                     <tr  th:each="comprobante : ${comprobantes}"> 
-                                        <td th:text="${comprobante.tipoFactura.tipoFactura}" > </td>
+                                        <td th:text="${comprobante.tipoComprobante.nombreTipoComprobante}" > </td>
                                         <td th:text="${comprobante.puntoExpedicion.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
                                         <td th:text="${#temporals.format(comprobante.fechaPago,'yyyy-MM-dd')}"></td>
-                                        <td th:text="${comprobante.detalleComprobante.periodoPago}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'POINT', 0, 'COMMA')}"></td>
+                                        <td th:text="${#temporals.format(comprobante.pagoHasta,'yyyy-MM-dd')}"></td>
+                                        <td th:text="${comprobante.periodoPago}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'POINT', 0, 'COMMA')}"></td>
                                         <td th:text="${comprobante.cantidadPago}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'POINT', 0, 'COMMA')}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa * comprobante.cantidadPago + comprobante.detalleComprobante.recargo, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.recargo, 0, 'POINT', 0, 'COMMA')}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.tarifa * comprobante.cantidadPago + comprobante.recargo, 0, 'COMMA', 0, 'POINT')}"></td>
                                         <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.saldo, 0, 'COMMA', 0, 'POINT')}"></td>
-                                        <td th:text="${estado.estado}"></td>
+                                        <td th:text="${#numbers.formatDecimal(comprobante.saldo, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td th:text="${comprobante.estado.estado}"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -171,8 +174,16 @@
         <script src="/js/buscarUsuario.js"></script>
         <script src="/js/estadoCuenta.js"></script>
 
-        <script>
-
+        <script type="module">
+            import {getReporte} from '/js/modulos.js';
+            $("#extracto-cuenta").click(e => {
+                let url = '/servicio/extractoCuenta';
+                let cuentaCorriente = $("#cuentaCorriente").val();
+                let cantidadRegistro = $("#cantidadRegistro").val();
+                let data = {cuentaCorriente: cuentaCorriente,
+                    cantidadRegistro: cantidadRegistro};
+                getReporte(data, url);
+            });
             $("#cantidadRegistro").change(function () {
                 var cantidadRegistro = $(this).val();
                 var url = new URL(window.location.href);

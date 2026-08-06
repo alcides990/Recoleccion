@@ -1,20 +1,18 @@
 package ama.controladorMVC;
 
 import ama.dominio.*;
-import ama.errores.ClaseError;
 import ama.servicio.*;
 import ama.utilerias.PageRender;
 import ama.utilerias.ReportGenerator;
 import ama.utilerias.Reporte;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -65,7 +64,7 @@ public class ServicioController {
     @GetMapping("/listar")
     public String listarServicios(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "cantElemento", defaultValue = "10") int cantElemento,
+            @RequestParam(name = "cantidadRegistro", defaultValue = "10") int cantElemento,
             Model modelo) {
         modelo.addAttribute("titulo", "Cuenta");
         Pageable pageable = PageRequest.of(page, cantElemento);
@@ -91,7 +90,7 @@ public class ServicioController {
     public @ResponseBody
     Page<Servicio> listarServicios(@RequestBody Paginador paginador) {
         Pageable pageable = PageRequest.of(paginador.getNumeroPagina(), paginador.getCatidadRegistro());
-        var servicios = servicioServicio.buscar(pageable, paginador.getFiltro());
+        Page<Servicio> servicios = servicioServicio.buscar(pageable, paginador.getFiltro());
         return servicios;
     }
 
@@ -123,7 +122,7 @@ public class ServicioController {
         modelo.addAttribute("accion", "Agregar");
 
         modelo.addAttribute("titulo", "Cuenta");
-        var servicio = new Servicio();
+        Servicio servicio = new Servicio();
         servicio.setFechaInicio(LocalDate.now());
         modelo.addAttribute("servicio", servicio);
 
@@ -142,13 +141,14 @@ public class ServicioController {
         return "servicio/modificarServicio";
     }
 
-    @GetMapping("/estadoCuenta/{cuentaCorriente}")
+    @GetMapping("/estadoCuenta")
     public String getServiciosCuenta(@RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "cantidadRegistro", defaultValue = "5") int cantidadRegistro,
             @RequestParam(name = "filtro", defaultValue = "") String filtro,
-            Servicio servicio, Model modelo) {
+            @RequestParam String cuentaCorriente,
+            Model modelo) {
         modelo.addAttribute("titulo", "EstadoCuenta");
-        servicio = servicioServicio.encontrar(servicio.getCuentaCorriente());
+        Servicio servicio = servicioServicio.encontrar(cuentaCorriente);
         modelo.addAttribute("servicio", servicio);
 
         modelo.addAttribute("usuario", servicio.getUsuario());
@@ -165,7 +165,7 @@ public class ServicioController {
 
         Pageable pageable = PageRequest.of(page, cantidadRegistro);
         Page<Comprobante> comprobantes = comprobanteService.getComprobantesCuenta(pageable, servicio);
-        PageRender pageRender = new PageRender("/servicio/estadoCuenta/" + servicio.getCuentaCorriente(), comprobantes);
+        PageRender pageRender = new PageRender("/servicio/estadoCuenta?cuentaCorriente=" + servicio.getCuentaCorriente(), comprobantes);
         modelo.addAttribute("page", pageRender);
         modelo.addAttribute("cantElemento", cantidadRegistro);
 
@@ -206,18 +206,17 @@ public class ServicioController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(mensaje);
         }
         servicio.setManzana(manzana);
-        servicio.setZona(manzana.getZona());
         try {
             servicioServicio.guardar(servicio);
             return ResponseEntity.ok("" + mensaje);
         } catch (DataAccessException e) {
             mensaje = "Ocurrio un error";
-            ResponseEntity.status(HttpStatus.CONFLICT).body(mensaje + " " + e.getMostSpecificCause().getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(mensaje + " " + e.getMostSpecificCause().getMessage());
         }
-        return null;
     }
 
     @PostMapping("/editar")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMIN')")
     public ResponseEntity<?> editar(@RequestBody Servicio servicio) {
         var servicioEncontrado = servicioServicio.encontrar(servicio.getCuentaCorriente());
         if (servicioEncontrado == null) {
@@ -226,50 +225,54 @@ public class ServicioController {
         return ResponseEntity.ok(servicioEncontrado);
     }
 
-    @PostMapping("/eliminar/{cuentaCorriente}")
-    public ResponseEntity<?> modal(Servicio servicio) {
+    @DeleteMapping("/eliminar")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR')")
+    public ResponseEntity<?> eliminar(@RequestParam("id") String cuentaCorriente) {
         try {
-            var respuesta = servicioServicio.encontrar(servicio.getCuentaCorriente());
+            var respuesta = servicioServicio.encontrar(cuentaCorriente);
             if (respuesta == null) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Registro no encontrado!!");
             }
-            servicioServicio.eliminar(servicio);
+            servicioServicio.eliminar(respuesta);
             return ResponseEntity.ok("Registro eliminado correctamente ");
         } catch (Exception e) {
-
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ClaseError.excepcion("Error al eliminar Cuenta: " + servicio.getCuentaCorriente(), e));
+                    .body("Error al eliminar Cuenta: " + cuentaCorriente +" "+  e.getMessage());
         }
 
     }
 
-    @GetMapping("/extractoCuenta")
-    public void getExtractoCuenta(HttpServletResponse response
-    ) {
+    @PostMapping("/extractoCuenta")
+    public ResponseEntity<?> getExtractoCuenta(
+            @RequestParam String cuentaCorriente,
+            @RequestParam int cantidadRegistro
+    ) throws SQLException {
         Map<String, Object> parametros = new HashMap<>();
-        parametros.put("cuentaCorriente", "24-0001-02");
-        parametros.put("cantidadRegistro", 6);
+        parametros.put("cuentaCorriente", cuentaCorriente);
+        parametros.put("cantidadRegistro", cantidadRegistro);
         parametros.put("codigoSucursal", 1);
 
         Reporte reporte = Reporte.builder()
+                .conexion(dataSource.getConnection())
                 .ruta("reportes/extractoCuenta.jasper")
                 .nombre("ExtractoCuenta")
                 .parametros(parametros)
                 .build();
-        reportGenerator = new ReportGenerator(dataSource);
-        reportGenerator.getReporte(reporte, response);
+        return new ReportGenerator().getReporte(reporte);
 
     }
 
     private EstadoCuenta getEstadoCuenta(Servicio servicio) {
-        Optional<Comprobante> ultimoComprobante = comprobanteService.getUltimoComprobanteCuentaActivo(servicio.getCuentaCorriente());
-        LocalDate pagoHasta;
-        double saldo = 0;
-        if (ultimoComprobante.isEmpty()) {
+        List<Object[]> datos = comprobanteService.getPagoHastaAndSaldo(servicio.getCuentaCorriente());
+        LocalDate pagoHasta = null;
+        Double saldo = 0.0;
+        if (datos.isEmpty()) {
             pagoHasta = servicio.getFechaInicio();
         } else {
-            pagoHasta = ultimoComprobante.get().getDetalleComprobante().getPagoHasta();
-            saldo = ultimoComprobante.get().getDetalleComprobante().getSaldo();
+            for (Object[] resul : datos) {
+                pagoHasta = ((java.sql.Date) resul[0]).toLocalDate();
+                saldo = (Double) resul[1];
+            }
         }
         EstadoCuenta estadoCuenta = new EstadoCuenta(
                 servicio.getCategoria().getTarifa(),

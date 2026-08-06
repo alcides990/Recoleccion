@@ -4,7 +4,7 @@
 
     </head>
     <body>
-        <nav id="paginador" th:fragment="paginador" class="sticky-start">
+        <nav id="paginador" th:fragment="paginador" class="">
             <ul class="pagination " th:object="${page}">
                 <li class="page-item" th:class="${page.first? 'page-item disabled': 'page-item'}">
                     <span class="page-link" th:if="${page.first}">Primera</span>
@@ -37,11 +37,12 @@
                         <option th:value="${10}" th:text="10" th:selected="*{cantidadRegistro == 10}"></option>
                         <option th:value="${20}"  th:text="20" th:selected="*{cantidadRegistro == 20}"></option>
                         <option th:value="${50}"  th:text="50" th:selected="*{cantidadRegistro == 50}"></option>
+                        <option th:value="${100}"  th:text="100" th:selected="*{cantidadRegistro == 100}"></option>
                     </select>
                 </li>
             </ul>
 
-          
+
         </nav>
 
     </body>

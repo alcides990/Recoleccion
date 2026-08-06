@@ -16,7 +16,8 @@
                     <input type="hidden" name="codigoSucursal" th:value="*{codigoSucursal}" />
                     <label for="nombreSucursal">Sucursal </label>
                     <input type="text" name="nombreSucursal" id="sucursal" th:value="*{nombreSucursal}"
-                        class="form-control" />
+                           class="form-control" placeholder="Ejemplo: 001"
+                           th:disabled="${#authorization.expression('hasRole(''ROOT'')')}" />
                 </div>
                 <div class="col-3">
                     <label for="celular">Celular </label>
@@ -45,9 +46,9 @@
     <script>
         $(document).ready(function () {
             var endpoint = window.location.pathname.replace(/[0-9]/g, '');
-            if (endpoint == "/sucursal/editar/") {
-                $("#sucursal").prop("readonly", true);
-            }
+//            if (endpoint == "/sucursal/editar/") {
+//                $("#sucursal").prop("readonly", true);
+//            }
         })
     </script>
 </body>

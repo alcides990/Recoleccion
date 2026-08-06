@@ -13,7 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 @Slf4j
-public class recolecion implements CommandLineRunner {
+ public class recolecion implements CommandLineRunner {
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -34,6 +34,29 @@ public class recolecion implements CommandLineRunner {
         Pageable pageable = PageRequest.of(0, 5);
         // var resul = usuarioSistemaDao.findByNombre("irene");
         // resul.forEach(c->{
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         // System.out.println("manzana esta en nulo : " + resul);
         // System.out.println("manzana : " + resul);
         // });
@@ -48,7 +71,9 @@ public class recolecion implements CommandLineRunner {
         // comprobante.forEach(System.out::println);
 
         // log.info(encoder.encode("123"));
+        
 
-    }
+ 
 
+}
 }

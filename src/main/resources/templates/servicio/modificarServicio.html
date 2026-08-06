@@ -7,7 +7,7 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container"> 
-            <div class="card-header"> <h3>Datos de Cuenta</h3></div>
+            <div class="form-title"> <h3>Datos de Cuenta</h3></div>
             <a th:href="@{/servicio/listar}" class="btn btn-primario">Regresar</a>
             <form name="frm-servicio" id="frm-servicio" th:action="@{/servicio/guardar}" method="post" th:object="${servicio}">
                 <input type="text" hidden="true" name="accion" th:value="${accion}">

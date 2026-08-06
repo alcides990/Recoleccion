@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container">
+            <div class="card-header"><h3 class="form-title">TipoComprobante</h3></div> 
+            <div class="mensaje-alerta" id="contenedor-alertas"></div>
+            <div th:if="${info}" class="mensaje-alerta alert alert-success">
+                <span th:text="${info}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <a th:href="@{/tipoComprobante/agregar}" 
+               class="btn btn-primario btn-sm mb-2 ">
+                <i class="fa-solid fa-plus fa-sm "> </i> TipoComprobante
+            </a>
+            <div class="mensaje-alerta"id="contenedor-alertas" ></div>
+            <div th:if="${mensaje}" class="mensaje-alerta alert alert-success">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="table-responsive-md">
+                <table id="tabla" class="table  table-border table-striped table-colapse table-hover table-md " >
+                    <thead class="bg-color">
+                        <tr>
+                            <th>ID</th>
+                            <th>TipoComprobante</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-secondary">
+                        <tr th:each="tipoComprobante : ${tipoComprobantes}">
+                            <td th:text="${tipoComprobante.codigoTipoComprobante}">   </td>
+                            <td th:text="${tipoComprobante.nombreTipoComprobante}">   </td>
+                            <td>
+
+                                <a th:href="@{/tipoComprobante/editar/} + ${tipoComprobante.codigoTipoComprobante}"
+                                   class="btn btn-info btn-sm"
+                                   title="Editar TipoComprobante">
+                                    <i class="fa-regular fa-pen-to-square"></i> 
+                                </a>
+                                <a id="eliminar" data-url="/tipoComprobante/eliminar/" th:data-id="${tipoComprobante.codigoTipoComprobante}" 
+                                   class="btn btn-danger eliminar btn-sm"
+                                   title="Eliminar TipoComprobante">
+                                    <i class="fa-solid fa-trash-can"></i> 
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+
+        <script type="module">
+            import {eliminar} from '/js/modulos.js'
+                    eliminar('Seguro que desea eliminar la tipoComprobante');
+//                Cargar idioma español a la tabla paginado con Jquerry data
+            $('#tabla').DataTable({
+                language: {
+                    url: '/i18n/es-ES.json'
+                }
+            });
+        </script>
+    </body>
+
+</html>

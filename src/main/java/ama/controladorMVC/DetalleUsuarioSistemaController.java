@@ -4,7 +4,6 @@ import ama.dominio.DetalleUsuarioSistema;
 import ama.dominio.DetalleUsuarioSistemaPK;
 import ama.dominio.Rol;
 import ama.dominio.UsuarioSistema;
-import ama.errores.ClaseError;
 import ama.servicio.RolService;
 import ama.servicio.UsuarioSistemaService;
 import ama.validador.Mayuscula;
@@ -89,7 +88,7 @@ public class DetalleUsuarioSistemaController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ClaseError.excepcion("Error al eliminar rol ", e));
+                    .body("Error al eliminar rol " +e.getMessage());
         }
 
     }

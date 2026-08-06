@@ -15,18 +15,12 @@
 	<parameter name="codigoSucursal" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[SELECT c.`numero_comprobante`, c.`cuenta_corriente`, c.`cantidad_pago`, c.`fecha_pago`,  c.`razon_social`, c.`total_importe`,
- s.direccion, dtc.`periodo_pago`, cate.categoria, cate.tarifa,
+ s.direccion, c.`periodo_pago`, cate.categoria, cate.tarifa,
  fn_pago_hasta($P{cuentaCorriente}) AS pago_hasta, fn_mes_deuda($P{cuentaCorriente}, $P{codigoSucursal}  ) AS cantidad_deuda,
  fn_recargo($P{cuentaCorriente}, $P{codigoSucursal} ) AS recargo
  FROM comprobantes c
 JOIN servicios AS s
   ON s.cuenta_corriente= c.cuenta_corriente
-JOIN detalle_comprobantes AS dtc
-  ON dtc.`numero_comprobante`=c.`numero_comprobante`
-   AND dtc.`codigo_punto_expedicion`=c.`codigo_punto_expedicion`
-   AND dtc.`codigo_tipo_factura`=c.`codigo_tipo_factura`
-   AND dtc.`codigo_serie`=c.`codigo_serie`
-   AND dtc.`codigo_sucursal`=c.`codigo_sucursal` 
  JOIN categorias cate
    ON cate.codigo_categoria=s.codigo_categoria
 WHERE c.cuenta_corriente=$P{cuentaCorriente}
@@ -196,14 +190,14 @@ LIMIT  $P{cantidadRegistro}]]>
 				<text><![CDATA[Direccion:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="321" y="5" width="51" height="20" uuid="2f805fda-6ed2-4bcd-874d-f2593c633b6c"/>
+				<reportElement x="168" y="5" width="51" height="20" uuid="2f805fda-6ed2-4bcd-874d-f2593c633b6c"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Categoria:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="372" y="5" width="100" height="20" uuid="36177c25-0de1-4bc1-9940-982ca11f4088"/>
+				<reportElement x="219" y="5" width="336" height="20" uuid="36177c25-0de1-4bc1-9940-982ca11f4088"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -332,15 +326,15 @@ LIMIT  $P{cantidadRegistro}]]>
 				<textFieldExpression><![CDATA[$F{cantidad_deuda}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="339" y="53" width="80" height="20" uuid="14be5e2e-b632-4ee7-8aff-cc0189fdaf93"/>
-				<textElement>
+				<reportElement x="321" y="53" width="98" height="20" uuid="14be5e2e-b632-4ee7-8aff-cc0189fdaf93"/>
+				<textElement textAlignment="Right">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Cantidad deuda:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="369" y="74" width="50" height="20" uuid="e1ca7471-8004-4421-9620-c0426ba26e86"/>
-				<textElement>
+				<reportElement x="340" y="74" width="79" height="20" uuid="e1ca7471-8004-4421-9620-c0426ba26e86"/>
+				<textElement textAlignment="Right">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Recargo:]]></text>
@@ -357,11 +351,11 @@ LIMIT  $P{cantidadRegistro}]]>
 				<textElement textAlignment="Left">
 					<font fontName="SansSerif"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{tarifa}*$F{cantidad_deuda} ]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{tarifa}*$F{cantidad_deuda}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="327" y="98" width="92" height="20" uuid="bb67baf8-df1d-4e78-9791-6b23cf8b681e"/>
-				<textElement>
+				<reportElement x="323" y="98" width="96" height="20" uuid="bb67baf8-df1d-4e78-9791-6b23cf8b681e"/>
+				<textElement textAlignment="Right">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Total con Recargo:]]></text>
@@ -374,8 +368,8 @@ LIMIT  $P{cantidadRegistro}]]>
 				<textFieldExpression><![CDATA[$F{pago_hasta}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="343" y="34" width="76" height="20" uuid="d73a938e-fbd7-444b-b700-d88fe993014e"/>
-				<textElement>
+				<reportElement x="330" y="34" width="89" height="20" uuid="d73a938e-fbd7-444b-b700-d88fe993014e"/>
+				<textElement textAlignment="Right">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[A pagar desde:]]></text>

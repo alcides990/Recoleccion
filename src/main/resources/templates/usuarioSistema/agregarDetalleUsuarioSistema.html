@@ -11,7 +11,7 @@
             <aside th:replace="~{layout/layout :: aside}"> </aside>
             <div class="container">
                 <div class="card-title">
-                    <h3>Mantenimiento Usuario </h3>
+                    <div class="card-header"><h3 class="form-title">Mantenimiento Usuario </h3></div>
                 </div>
 
                 <a th:href="@{/usuarioSistema/listar}" class="btn btn-primario">
@@ -40,14 +40,14 @@
                         </div>
 
                     </div>
-                    <input type="submit" name="guardar" value="Asignar Rol" class="btn btn-guardar m-3" />
+                    <input type="submit" name="guardar" value="Asignar Rol" class="btn btn-primario m-3" />
                     <a title="Resetear a Clave por defecto" type="button" id="passwordReset"  class="btn btn-primario m-3">Clave Reset</a>
                 </form>
 
                 <div class="table-responsive-lg">
-                    <table id="tabla" class="table caption-top table-dark table-border table-striped table-colapse  ">
+                    <table id="tabla" class="table caption-top table-border table-striped table-colapse  ">
                         <caption>Roles Asignados </caption>
-                        <thead>
+                        <thead class="bg-color">
                             <tr>
                                 <th>Usuario</th>
                                 <th>Rol</th>
@@ -73,7 +73,8 @@
                 <div id="contenedor-confirmacion"></div>
             </div>
             <footer  th:replace="~{layout/layout :: footer}"> </footer>
-            <script>
+            <script type="module">
+                import {eliminar, confirmacioModal, mostrarAlerta} from '/js/modulos.js';
                 $(document).ready(function () {
 //            Lamara al metodo eliminar al hacer click en el boton eliminar
                     var mensaje;
@@ -102,8 +103,7 @@
                                         mensaje: response,
                                         url: url,
                                         tipo: 'success',
-                                        redirigir: false,
-                                        recargar: false
+                                        time:10000
                                     });
                                     return false;
                                 },
@@ -113,7 +113,7 @@
                                         mensajeError = jqXHR.responseJSON.message;
                                     }
                                     if (jqXHR.status === 403) {
-                                        mensajeError = "Acceso denegado, no tiene acceso a este recurso!!";
+                                        mensajeError = "Acceso denegado, no tiene permiso para realizar esta operacion!!";
                                     }
                                     mostrarAlerta({
                                         mensaje: mensajeError,

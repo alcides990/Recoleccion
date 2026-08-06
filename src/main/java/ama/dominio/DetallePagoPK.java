@@ -26,8 +26,8 @@ public class DetallePagoPK implements Serializable {
     private Integer numeroComprobante;
 
     @Basic(optional = false)
-    @Column(name = "codigo_tipo_factura")
-    private Integer codigoTioFactura;
+    @Column(name = "codigo_tipo_comprobante")
+    private Integer codigoTiopoComprobante;
 
     @Basic(optional = false)
     @Column(name = "codigo_serie")

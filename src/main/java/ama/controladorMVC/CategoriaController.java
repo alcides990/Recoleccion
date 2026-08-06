@@ -3,7 +3,6 @@ package ama.controladorMVC;
 import ama.dominio.Categoria;
 import ama.dominio.Sucursal;
 import ama.dominio.UsuarioSistema;
-import ama.errores.ClaseError;
 import ama.validador.Vadidador;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -55,12 +54,13 @@ public class CategoriaController {
     @ResponseBody
     public ResponseEntity<?> filtrarCtegoria(
             @RequestParam(name = "draw") Integer draw,
-//            @RequestParam(name = "start") Integer inicio,
-//            @RequestParam(name = "length") Integer cantidadRegistro,
-//            @RequestParam(name = "search", required = false)  Integer filtro,
-//            @RequestParam(name = "page") Integer page,
-//            @RequestParam(name = "size") Integer size,
+            @RequestParam(name = "start") Integer inicio,
+            @RequestParam(name = "length") Integer cantidadRegistro,
+            @RequestParam(name = "search", required = false)  Integer filtro,
+            @RequestParam(name = "page") Integer page,
+            @RequestParam(name = "size") Integer size,
             HttpServletRequest request) {
+        log.info(request.getQueryString());
         Pageable pageable = PageRequest.of(0, 10);
         Page<Categoria> categorias=servicioCategoria.listar(pageable,getUserSession().getSucursal());
         DataTableResponse<Categoria> categoriaRespoonse=new DataTableResponse<>();
@@ -114,7 +114,7 @@ public class CategoriaController {
             return ResponseEntity.ok().body("Categoria Eliminda Correctamente ");
         } catch (DataIntegrityViolationException e) {
 
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ClaseError.excepcion("Error al Eliminar Categoria ", e));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al Eliminar Categoria "+ e.getMessage());
         }
     }
 

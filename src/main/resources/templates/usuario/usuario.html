@@ -6,7 +6,9 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container-fluid">
-            <div class="card-header" ><h3 >Usuarios</h3></div>
+            <div class="card-header" >
+                <h3 class="form-title">Usuarios</h3>
+            </div>
             <div class="d-md-flex bg-opacity-100">
                 <div class="col-sm-2">
                     <a th:href="@{/usuario/agregar}" 
@@ -14,17 +16,17 @@
                         <i class="fa-solid fa-plus fa-lg "> </i> Usuario
                     </a>
                 </div >
-                <div class="input-group m-2">
+                <div class="input-group m-2 ">
                     <input name="txtBuscar" id="txtBuscar" type="search" 
-                           class="col"
+                           class="col p-2"
                            autofocus="true" placeholder="Buscar por ruc/ci o nombres" 
                            aria-label="Buscar" aria-describedby="search-addon" />
                 </div> 
             </div>
             <div class="mensaje-alerta"id="contenedor-alertas" ></div>
             <div class="table-responsive-xl">
-                <table class="table table-dark table-border table-striped table-colapse table-hover table-xl" >
-                    <thead  class="thead-dark">
+                <table class="table table-border table-striped table-colapse table-hover table-xl" >
+                    <thead  class="bg-color">
                         <tr>
                             <th>Codigo</th>
                             <th>Ruc/Ci</th>
@@ -48,11 +50,11 @@
                             <td th:text="${usuario.direccion}"></td>
                             <td th:text= "${usuario.sucursal.nombreSucursal}+' '+${usuario.sucursal.ciudad.nombreCiudad}"></td>
                             <td>
-                                <a sec:authorize="hasAnyAuthority('ROOT','ADMIN')" th:href="@{/usuario/editar/} + ${usuario.codigoUsuario}"
+                                <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')" th:href="@{/usuario/editar/} + ${usuario.codigoUsuario}"
                                    class="btn btn-info btn-sm">
                                     <i class="fa-regular fa-pen-to-square"></i> 
                                 </a>
-                                <a sec:authorize="hasAnyAuthority('ROOT','ADMIN')" id="eliminar" data-url="/usuario/eliminar/" 
+                                <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')" id="eliminar" data-url="/usuario/eliminar/" 
                                    th:data-id="${usuario.codigoUsuario}" 
                                    class="btn btn-danger btn-sm" > 
                                     <i class="fa-solid fa-trash-can "></i> 
@@ -68,11 +70,9 @@
         </div>
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
         <script src="/js/buscarUsuario.js"></script>
-        <script>
-//           Lamara al metodo eliminar al hacer click en el boton eliminar
-            $(document).ready(function () {
+        <script type="module">
+            import {eliminar} from  '/js/modulos.js';
                 eliminar('Seguro que desea eliminar el usuario');
-            });
         </script>
 
     </body>

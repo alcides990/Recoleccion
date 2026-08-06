@@ -2,11 +2,14 @@
 package ama.servicio;
  
 import ama.dominio.Cobrador;
+import ama.dominio.Sucursal;
 import java.util.List;
 
 public interface CobradorService {
     
-    public List<Cobrador> listar();
+    public List<Cobrador> listar(Sucursal sucursal);
+    
+    public List<Cobrador> listarIsEstadoActivo(Sucursal sucursal);
     
     public void guardar(Cobrador cobrador);
     

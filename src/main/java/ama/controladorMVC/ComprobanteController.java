@@ -6,31 +6,22 @@ import ama.dominio.*;
 import ama.servicio.*;
 import ama.utilerias.TableResponse;
 import ama.utilerias.PageRender;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.util.JRLoader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -57,7 +48,7 @@ public class ComprobanteController {
     private ComprobanteService comprobanteService;
 
     @Autowired
-    private ServicioTipoFactura servicioTipoFactura;
+    private TipoComprobanteService servicioTipoFactura;
     @Autowired
     private PuntoExpedicionService servicioPuntoExpedicion;
     @Autowired
@@ -67,7 +58,11 @@ public class ComprobanteController {
     @Autowired
     private SerieService serieService;
     @Autowired
-    private DataSource dataSource;
+    private CobradorService cobradorService;
+    @Autowired
+    private EstadoService estadoService;
+    @Autowired
+    private TipoComprobanteService tipoComprobanteService;
     @Autowired
     private HttpSession httpSession;
 
@@ -76,11 +71,16 @@ public class ComprobanteController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "cantidadRegistro", defaultValue = "10") int cantidadRegistro,
             Model modelo) {
+        if (cantidadRegistro > 100) {
+            throw new RuntimeException(cantidadRegistro + " registros excede lo permitido!!");
+        }
         modelo.addAttribute("titulo", "Comprobates");
         Sucursal sucursal = getSucursalSession();
         modelo.addAttribute("sucursal", sucursal);
         modelo.addAttribute("puntosExpedicion", servicioPuntoExpedicion.listar(sucursal));
         modelo.addAttribute("series", serieService.listar());
+        modelo.addAttribute("cobradores", cobradorService.listarIsEstadoActivo(sucursal));
+        modelo.addAttribute("estados", estadoService.findByEstadoIn(Arrays.asList("ACTIVO", "ANULADO")));
         Pageable pageable = PageRequest.of(page, cantidadRegistro);
         Page<Comprobante> comprobantes = comprobanteService.listar(pageable);
         modelo.addAttribute("comprobantes", comprobantes);
@@ -94,51 +94,55 @@ public class ComprobanteController {
     @PostMapping("/filtrar")
     public ResponseEntity<?> filtrarComprobantes(
             @RequestParam(name = "numeroPagina", defaultValue = "0") int page,
-            @RequestParam(name = "cantidadRegistro", defaultValue = "5") int cantidadRegistro,
+            @RequestParam(name = "cantidadRegistro", defaultValue = "10") int cantidadRegistro,
             @RequestParam(name = "codigoSucursal", defaultValue = "") Integer codigoSucursal,
             @RequestParam(name = "codigoPuntoExpedicion", defaultValue = "") Integer codigoPuntoExpedicion,
             @RequestParam(name = "numeroComprobante", defaultValue = "") Integer numeroComprobante,
             @RequestParam(name = "codigoSerie", defaultValue = "") Integer codigoSerie,
             Model modelo) {
-        log.info(page+" numero de pagina");
         Pageable pageable = PageRequest.of(page, cantidadRegistro);
         ComprobantePK comprobantePK = new ComprobantePK();
         PuntoExpedicionPK puntoExpedicionPK = new PuntoExpedicionPK(codigoSucursal, codigoPuntoExpedicion);
         comprobantePK.setPuntoExpedicionPK(puntoExpedicionPK);
-        comprobantePK.setNumeroComprobante(numeroComprobante);
         comprobantePK.setCodigoSerie(codigoSerie);
+        if (cantidadRegistro > 100) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cantidad de registro excede lo permitido!!");
+        }
+        if (numeroComprobante != null) {
+            comprobantePK.setNumeroComprobante(numeroComprobante);
+        }
         Page<Comprobante> comprobantes = comprobanteService.filtrar(pageable, comprobantePK);
-        List<ComprobanteDTO> comprobantesDTOs = new ArrayList<>();
-        comprobantes.forEach(comprobante -> {
-            ComprobanteDTO comprobanteDTO = new ComprobanteDTO();
-            Servicio servicio = comprobante.getServicio();
-            Usuario usuario = comprobante.getUsuario();
-            DetalleComprobante detalleComprobante = comprobante.getDetalleComprobante();
-            comprobanteDTO.setCodigoPuntoExpedicion(comprobante.getPuntoExpedicion().getPuntoExpedicionPK().getCodigoPuntoExpedicion());
-            comprobanteDTO.setPuntoExpedicion(comprobante.getPuntoExpedicion().getNombrePuntoExpedicion());
-            comprobanteDTO.setTipoFactura(comprobante.getTipoFactura());
-            comprobanteDTO.setSerie(comprobante.getSerie());
-            comprobanteDTO.setNumeroComprobante(comprobante.getComprobantePK().getNumeroComprobante());
-            comprobanteDTO.setFechaPago(comprobante.getFechaPago());
-            comprobanteDTO.setCantidadPago(comprobante.getCantidadPago());
-            comprobanteDTO.setEstado(comprobante.getEstado().getEstado());
-            comprobanteDTO.setCuentaCorriente(servicio.getCuentaCorriente());
-            comprobanteDTO.setNumeroDocumento(usuario.getNumeroDocumento());
-            String nombreUsuario = servicio.getUsuario().getNombre() + " " + servicio.getUsuario().getApellido();
-            comprobanteDTO.setNombreUsuario(nombreUsuario);
-            comprobanteDTO.setPeriodoPago(detalleComprobante.getPeriodoPago());
-            comprobanteDTO.setTarifa(detalleComprobante.getTarifa());
-            comprobanteDTO.setRecargo(detalleComprobante.getRecargo());
-            comprobanteDTO.setImporte(comprobante.getTotalImporte());
-            
-            comprobantesDTOs.add(comprobanteDTO);
-
-        });
-           PageRender pageRender = new PageRender("/comprobante/filtrar", comprobantes);
         TableResponse<ComprobanteDTO> dataTableResponse = new TableResponse<>();
-        dataTableResponse.setPage(pageRender);
-        dataTableResponse.setData(comprobantesDTOs);
-       
+        if (comprobantes != null) {
+            List<ComprobanteDTO> comprobantesDTOs = new ArrayList<>();
+            comprobantes.forEach(comprobante -> {
+                ComprobanteDTO comprobanteDTO = new ComprobanteDTO();
+                Servicio servicio = comprobante.getServicio();
+                Usuario usuario = comprobante.getUsuario();
+                comprobanteDTO.setCodigoPuntoExpedicion(comprobante.getPuntoExpedicion().getPuntoExpedicionPK().getCodigoPuntoExpedicion());
+                comprobanteDTO.setPuntoExpedicion(comprobante.getPuntoExpedicion().getNombrePuntoExpedicion());
+                comprobanteDTO.setTipoComprobante(comprobante.getTipoComprobante());
+                comprobanteDTO.setSerie(comprobante.getSerie());
+                comprobanteDTO.setNumeroComprobante(comprobante.getComprobantePK().getNumeroComprobante());
+                comprobanteDTO.setFechaPago(comprobante.getFechaPago());
+                comprobanteDTO.setCantidadPago(comprobante.getCantidadPago());
+                comprobanteDTO.setEstado(comprobante.getEstado());
+                comprobanteDTO.setCuentaCorriente(servicio.getCuentaCorriente());
+                comprobanteDTO.setNumeroDocumento(usuario.getNumeroDocumento());
+                String nombreUsuario = servicio.getUsuario().getNombre() + " " + servicio.getUsuario().getApellido();
+                comprobanteDTO.setNombreUsuario(nombreUsuario);
+                comprobanteDTO.setPeriodoPago(comprobante.getPeriodoPago());
+                comprobanteDTO.setTarifa(comprobante.getTarifa());
+                comprobanteDTO.setRecargo(comprobante.getRecargo());
+                comprobanteDTO.setImporte(comprobante.getTotalImporte());
+                comprobantesDTOs.add(comprobanteDTO);
+
+            });
+            PageRender pageRender = new PageRender("/comprobante/filtrar", comprobantes);
+
+            dataTableResponse.setPage(pageRender);
+            dataTableResponse.setData(comprobantesDTOs);
+        }
         return ResponseEntity.ok(dataTableResponse);
     }
 
@@ -153,10 +157,7 @@ public class ComprobanteController {
 
     @GetMapping("/facturaManual")
     public String facturaManual(Model modelo) {
-        List<TipoFactura> tiposFactura = new ArrayList<>();
-        tiposFactura.add(new TipoFactura(2, "MANUAL"));
-        modelo.addAttribute("tiposFactura", tiposFactura);
-
+        modelo.addAttribute("tiposComprobante", tipoComprobanteService.listar());
         cargarDatosComprobante(modelo);
 
         return "comprobantes/facturaManual";
@@ -164,9 +165,7 @@ public class ComprobanteController {
 
     @GetMapping("/facturaElectronica")
     public String facturaElectronica(Model modelo) {
-        List<TipoFactura> tiposFactura = new ArrayList<>();
-        tiposFactura.add(new TipoFactura(1, "ELECTRONICA"));
-        modelo.addAttribute("tiposFactura", tiposFactura);
+        modelo.addAttribute("tiposComprobante", tipoComprobanteService.listar());
 
         cargarDatosComprobante(modelo);
         return "comprobantes/facturaManual";
@@ -174,25 +173,18 @@ public class ComprobanteController {
 
     private void cargarDatosComprobante(Model modelo) {
         modelo.addAttribute("titulo", "Comprobate");
+        modelo.addAttribute("condicionesVenta", servicioCondicionVenta.listar());
+        modelo.addAttribute("servicio", new Servicio());
 
-        var servicio = new Servicio();
-        modelo.addAttribute("servicio", servicio);
+        modelo.addAttribute("cobrador", cobradorService.listarIsEstadoActivo(getSucursalSession()));
 
-        var cobrador = new Cobrador();
-        modelo.addAttribute("cobrador", cobrador);
+        modelo.addAttribute("categoria", new Categoria());
 
-        var categoria = new Categoria();
-        modelo.addAttribute("categoria", categoria);
+        modelo.addAttribute("comprobante", new Comprobante());
 
-        var comprobante = new Comprobante();
-        modelo.addAttribute("comprobante", comprobante);
+        modelo.addAttribute("usuario", new Usuario());
 
-        var usuario = new Usuario();
-        modelo.addAttribute("usuario", usuario);
-
-        EstadoCuenta estadoCuenta = new EstadoCuenta();
-
-        modelo.addAttribute("estadoCuenta", estadoCuenta);
+        modelo.addAttribute("estadoCuenta", new EstadoCuenta());
 
         modelo.addAttribute("metodosPago", metodoPagoService.listar());
 
@@ -219,7 +211,7 @@ public class ComprobanteController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Registro no encontrado!!");
         }
         servicio = servicioRecuperada;
-        servicio.setEstadoCuenta(getEstadoCuenta(servicio));
+        servicio.setEstadoCuenta(getEstadoCuenta(servicio.getCuentaCorriente()));
         return ResponseEntity.ok(servicio);
 
     }
@@ -234,83 +226,79 @@ public class ComprobanteController {
                 .build();
         ComprobantePK comprobantePK = ComprobantePK.builder()
                 .numeroComprobante(comprobanteRequest.getNumeroComprobante())
-                .codigoTipoFactura(comprobanteRequest.getCodigoTipoFactura())
+                .codigoTipoComprobante(comprobanteRequest.getCodigoTipoComprobante())
                 .puntoExpedicionPK(puntoExpedicionPK)
                 .codigoSerie(comprobanteRequest.getCodigoSerie())
                 .build();
-        Comprobante comprobanteRecuperado = comprobanteService.getComprobante(comprobantePK);
-        if (comprobanteRecuperado != null) {
-            if (comprobantePK.equals(comprobanteRecuperado.getComprobantePK())) {
-                Servicio servicio = comprobanteRecuperado.getServicio();
+        Optional<Comprobante> comprobanteOP = comprobanteService.findById(comprobantePK);
+        if (comprobanteOP.isPresent()) {
+            Comprobante comprobante = comprobanteOP.get();
+            if (comprobantePK.equals(comprobante.getComprobantePK())) {
+                Servicio servicio = comprobante.getServicio();
                 String nombreUsuario = servicio.getUsuario().getNombre() + " " + servicio.getUsuario().getApellido();
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body("Este comprobante ya fue registrado en Fecha: " + comprobanteRecuperado.getFechaPago()
+                        .body("Este comprobante ya fue registrado en Fecha: " + comprobante.getFechaPago()
                                 + " con la Cuentacorriente: " + servicio.getCuentaCorriente()
                                 + " a nombre de " + nombreUsuario);
             }
         }
-        Servicio servicio = servicioService.encontrar(comprobanteRequest.getCuentaCorriente());
-        double totalImporte = 0;
-        for (DetallePago detallePago : comprobanteRequest.getDetallePago()) {
-            totalImporte += detallePago.getImporte();
-            DetallePagoPK detallePagoPK = DetallePagoPK.builder()
-                    .codigoMetodoPago(detallePago.getDetallePagoPK().getCodigoMetodoPago())
-                    .puntoExpedicionPK(puntoExpedicionPK)
-                    .numeroComprobante(comprobantePK.getNumeroComprobante())
-                    .codigoTioFactura(comprobantePK.getCodigoTipoFactura())
-                    .codigoSerie(comprobantePK.getCodigoSerie())
-                    .build();
-            detallePago.setDetallePagoPK(detallePagoPK);
-        }
-        comprobanteRequest.setServicio(servicio);
+        double totalImporte = comprobanteRequest.getDetallePago()
+                .stream()
+                .mapToDouble(DetallePago::getImporte)
+                .sum();
+
+        comprobanteRequest.setDetallePago(
+                comprobanteRequest.getDetallePago()
+                        .stream()
+                        .map(detallePago -> {
+                            DetallePagoPK detallePagoPK = DetallePagoPK.builder()
+                                    .codigoMetodoPago(detallePago.getDetallePagoPK().getCodigoMetodoPago())
+                                    .puntoExpedicionPK(puntoExpedicionPK)
+                                    .numeroComprobante(comprobantePK.getNumeroComprobante())
+                                    .codigoTiopoComprobante(comprobantePK.getCodigoTipoComprobante())
+                                    .codigoSerie(comprobantePK.getCodigoSerie())
+                                    .build();
+
+                            detallePago.setDetallePagoPK(detallePagoPK);
+                            return detallePago;
+                        })
+                        .toList()
+        );
         comprobanteRequest.setParametro(getParametro());
+        getEstadoCuenta(comprobanteRequest.getCuentaCorriente());
         CalcularPago datosPagopago = new CalcularPago(comprobanteRequest);
         datosPagopago.setTotalImporte(totalImporte);
-        if (totalImporte < datosPagopago.getTotalPagar()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al guardar comprobante: Total Importe no puede ser menor que Total a Pagar");
-        }
 
-        DetalleComprobantePK detalleComprobantePK = DetalleComprobantePK.builder()
-                .puntoExpedicionPK(puntoExpedicionPK)
-                .numeroComprobante(comprobantePK.getNumeroComprobante())
-                .codigoTioFactura(comprobantePK.getCodigoTipoFactura())
-                .codigoSerie(comprobantePK.getCodigoSerie())
-                .build();
-
-        DetalleComprobante detalleComprobante = DetalleComprobante.builder()
-                .detalleComprobantePK(detalleComprobantePK)
-                .categoria(servicio.getCategoria())
-                .tarifa(datosPagopago.getTarifa())
-                .cantidadDeuda(datosPagopago.getCantidadDeuda())
-                .recargo(comprobanteRequest.getRecargoPago())
-                .pagoHasta(datosPagopago.getPagoHasta())
-                .periodoPago(datosPagopago.getPeriodoPago())
-                .saldo(datosPagopago.getSaldo())
-                .comision(datosPagopago.getParametro().getComision())
-                .detallePago(comprobanteRequest.getDetallePago())
-                .build();
         Comprobante comprobante = Comprobante.builder()
                 .comprobantePK(comprobantePK)
-                .razonSocial(servicio.getUsuario().getNombre().concat(" ").concat(servicio.getUsuario().getApellido()))
+                .razonSocial(comprobanteRequest.getRazonSocial())
                 .cobrador(new Cobrador(comprobanteRequest.getCodigoCobrador()))
                 .condicionVenta(new CondicionVenta(comprobanteRequest.getCodigoCondicionVenta()))
+                .categoria(new Categoria(comprobanteRequest.getCodigoCategoria()))
+                .tarifa(comprobanteRequest.getTarifa())
+                .cantidadDeuda(comprobanteRequest.getCantidadDeuda())
                 .cantidadPago(comprobanteRequest.getCantidadPago())
+                .recargo(comprobanteRequest.getRecargoPago())
+                .saldo(datosPagopago.getSaldo())
                 .totalImporte(datosPagopago.getTotalImporte())
                 .fechaPago(comprobanteRequest.getFechaPago())
-                .servicio(servicio)
-                .usuario(servicio.getUsuario())
-                .estado(new Estado(1))
-                .timbrado(new Timbrado(comprobanteRequest.getCodigoTimbrado())) // Dato provisorio
+                .periodoPago(datosPagopago.getPeriodoPago())
+                .pagoHasta(datosPagopago.getPagoHasta())
+                .servicio(new Servicio(comprobanteRequest.getCuentaCorriente()))
+                .usuario(new Usuario(comprobanteRequest.getCodigoUsuario()))
+                .estado(
+                        comprobanteRequest.getCantidadPago() == 0 ? new Estado(3) : new Estado(1)
+                )
+                .timbrado(new Timbrado(comprobanteRequest.getCodigoTimbrado()))
                 .usuarioSistema(getUserSession())
-                .detalleComprobante(detalleComprobante)
+                .detallePago(comprobanteRequest.getDetallePago())
                 .build();
         if (validarComprobate(comprobante).getStatusCode() != HttpStatus.OK) {
             return validarComprobate(comprobante);
         }
         try {
             comprobanteService.guardar(comprobante);
-            return ResponseEntity.ok("Factura Guardada Correctamente !!!");
+            return ResponseEntity.ok("Comprobante Guardada Correctamente !!!");
         } catch (org.springframework.transaction.UnexpectedRollbackException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al guardar factura: " + e.getMostSpecificCause().getMessage());
@@ -324,7 +312,6 @@ public class ComprobanteController {
         Validator validador = Validation.buildDefaultValidatorFactory().getValidator();
         violaciones.addAll(validador.validate(comprobante));
 
-        violaciones.addAll(validador.validate(comprobante.getDetalleComprobante()));
         if (!violaciones.isEmpty()) {
             Map<String, String> mensajesError = new HashMap<>();
             violaciones.forEach(violacion -> {
@@ -335,28 +322,35 @@ public class ComprobanteController {
         return ResponseEntity.ok("valido");
     }
 
-    @PostMapping("/anular")
-    public ResponseEntity<?> editar(
-            @RequestParam Integer codigoSerie,
-            @RequestParam Integer codigoTimbrado,
-            @RequestParam Integer numeroComprobante,
-            @RequestParam Integer codigoPuntoExpedicion,
-            @RequestParam Integer codigoTipoFactura,
-            @RequestParam String motivoAnulacion) {
-        PuntoExpedicionPK puntoExpedicionPK = PuntoExpedicionPK.builder()
-                .codigoSucursal(getSucursalSession().getCodigoSucursal())
-                .codigoPuntoExpedicion(codigoPuntoExpedicion)
-                .build();
-        ComprobantePK comprobantePK = ComprobantePK.builder()
-                .numeroComprobante(numeroComprobante)
-                .codigoTipoFactura(codigoTipoFactura)
-                .puntoExpedicionPK(puntoExpedicionPK)
-                .codigoSerie(codigoSerie)
-                .build();
+    @PutMapping("/guardar")
+    public ResponseEntity<?> moficicarComprobante(@RequestBody Comprobante comprobanteReques) {
+        Comprobante comprobante = comprobanteService.getComprobante(comprobanteReques.getComprobantePK());
+        comprobante.setCobrador(comprobanteReques.getCobrador());
+        comprobante.setFechaPago(comprobanteReques.getFechaPago());
+        comprobante.setEstado(comprobanteReques.getEstado());
+        comprobante.setObs(comprobanteReques.getObs());
+        comprobanteService.guardar(comprobante);
+        return ResponseEntity.ok("Comprobante modificada correctamente!!");
+    }
 
-        Comprobante comprobante = comprobanteService.getComprobante(comprobantePK);
+    @PutMapping("/anular")
+    public ResponseEntity<?> anulalComprobante(@RequestBody Comprobante comprobanteRequest) {
+        Comprobante comprobante = comprobanteService.getComprobante(comprobanteRequest.getComprobantePK());
+        if (comprobante.getEstado().getCodigoEstado() == 3) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Comprobante ya se encuentra anulada");
+        }
+        Optional<Comprobante> ultimoComprobanteCuentaActivo = comprobanteService
+                .getUltimoComprobanteCuentaActivo(comprobante.getServicio().getCuentaCorriente());
+
+        if (!(comprobante.getComprobantePK().getNumeroComprobante() == ultimoComprobanteCuentaActivo.get()
+                .getComprobantePK().getNumeroComprobante())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    "Solo se puede anular el ultimo comprobante activo de la cuenta corriente");
+        }
+
         comprobante.setEstado(new Estado(3));
-        comprobante.getDetalleComprobante().setObs(motivoAnulacion);
+        comprobante.setObs(comprobanteRequest.getObs());
 
         comprobanteService.anular(comprobante);
         return ResponseEntity.ok("Comprobante anulada correctamente!!");
@@ -365,45 +359,36 @@ public class ComprobanteController {
     @ResponseBody
     @PostMapping("/getComprobante")
     public ResponseEntity<?> getComprobante(@RequestBody ComprobantePK comprobantePK) {
+        log.info(comprobantePK.toString());
         Comprobante comprobante = comprobanteService.getComprobante(comprobantePK);
-        if (comprobante.getEstado().getCodigoEstado() == 3) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Comprobante ya se encuentra anulada");
-        }
-        Optional<Comprobante> ultimoComprobanteCuentaActivo = comprobanteService
-                .getUltimoComprobanteCuentaActivo(comprobante.getServicio().getCuentaCorriente());
-
-        if (comprobante.getComprobantePK().getNumeroComprobante() != ultimoComprobanteCuentaActivo.get()
-                .getComprobantePK().getNumeroComprobante()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                    "Solo se puede anular el ultimo comprobante activo de la cuenta corriente");
-        }
         ComprobanteDTO comprobanteDTO = new ComprobanteDTO();
         Servicio servicio = comprobante.getServicio();
         Usuario usuario = comprobante.getUsuario();
-        DetalleComprobante detalleComprobante = comprobante.getDetalleComprobante();
-        comprobanteDTO.setSucursal(comprobante.getPuntoExpedicion().getSucursal().getNombreSucursal());
+        String sucursal = comprobante.getPuntoExpedicion().getSucursal().getNombreSucursal() + " " + comprobante.getPuntoExpedicion().getSucursal().getCiudad().getNombreCiudad();
+        comprobanteDTO.setSucursal(sucursal);
         comprobanteDTO.setCodigoSucursal(comprobante.getPuntoExpedicion().getSucursal().getCodigoSucursal());
         comprobanteDTO.setCodigoPuntoExpedicion(comprobante.getPuntoExpedicion().getPuntoExpedicionPK().getCodigoPuntoExpedicion());
         comprobanteDTO.setPuntoExpedicion(comprobante.getPuntoExpedicion().getNombrePuntoExpedicion());
-        comprobanteDTO.setTipoFactura(comprobante.getTipoFactura());
+        comprobanteDTO.setTipoComprobante(comprobante.getTipoComprobante());
         comprobanteDTO.setCondicionVenta(comprobante.getCondicionVenta());
         comprobanteDTO.setSerie(comprobante.getSerie());
         comprobanteDTO.setNumeroComprobante(comprobante.getComprobantePK().getNumeroComprobante());
         comprobanteDTO.setFechaPago(comprobante.getFechaPago());
-        comprobanteDTO.setTarifa(detalleComprobante.getTarifa());
-        comprobanteDTO.setEstado(comprobante.getEstado().getEstado());
+        comprobanteDTO.setTarifa(comprobante.getTarifa());
+        comprobanteDTO.setEstado(comprobante.getEstado());
         comprobanteDTO.setCuentaCorriente(servicio.getCuentaCorriente());
         comprobanteDTO.setNumeroDocumento(usuario.getNumeroDocumento());
         String nombreUsuario = comprobante.getRazonSocial();
         comprobanteDTO.setNombreUsuario(nombreUsuario);
         comprobanteDTO.setCategoria(servicio.getCategoria());
         comprobanteDTO.setCobrador(comprobante.getCobrador());
-        comprobanteDTO.setPeriodoPago(detalleComprobante.getPeriodoPago());
+        comprobanteDTO.setPeriodoPago(comprobante.getPeriodoPago());
         comprobanteDTO.setCantidadPago(comprobante.getCantidadPago());
-        comprobanteDTO.setSaldo(detalleComprobante.getSaldo());
-        comprobanteDTO.setRecargo(detalleComprobante.getRecargo());
-        detalleComprobante.getDetallePago().forEach(dtp -> {
+        comprobanteDTO.setSaldo(comprobante.getSaldo());
+        comprobanteDTO.setRecargo(comprobante.getRecargo());
+        comprobanteDTO.setMotivoAnulacion(comprobante.getObs());
+
+        comprobante.getDetallePago().forEach(dtp -> {
             DetallePagoDTO detallePagoDTO = new DetallePagoDTO();
             detallePagoDTO.setMetodoPago(dtp.getMetodoPago().getMetodoPago());
             detallePagoDTO.setImporte(dtp.getImporte());
@@ -413,20 +398,6 @@ public class ComprobanteController {
         comprobanteDTO.setImporte(comprobante.getTotalImporte());
         return ResponseEntity.ok(comprobanteDTO);
 
-    }
-
-    @GetMapping("/report1")
-    @ResponseBody
-    public void getRpt1(Map<String, Object> parameters,
-            HttpServletResponse response,
-            HttpServletRequest request) throws JRException, IOException, SQLException {
-        InputStream jasperStream = new ClassPathResource("reportes/ciudades.jasper").getInputStream();
-        JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
-        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource.getConnection());
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "inline; filename=ciudades.pdf");
-        final OutputStream outputStream = response.getOutputStream();
-        JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
     }
 
     @PostMapping("/numComprobante")
@@ -445,15 +416,17 @@ public class ComprobanteController {
         return getUserSession().getSucursal();
     }
 
-    private EstadoCuenta getEstadoCuenta(Servicio servicio) {
-        List<Object[]> datos = comprobanteService.getPagoHastaAndSaldo(servicio.getCuentaCorriente());
+    private EstadoCuenta getEstadoCuenta(String cuentaCorriente) {
+
+        Servicio servicio = servicioService.encontrar(cuentaCorriente);
+        List<Object[]> datos = comprobanteService.getPagoHastaAndSaldo(cuentaCorriente);
         LocalDate pagoHasta = null;
         Double saldo = 0.0;
         if (datos.isEmpty()) {
             pagoHasta = servicio.getFechaInicio();
         } else {
             for (Object[] resul : datos) {
-                pagoHasta = (LocalDate) resul[0];
+                pagoHasta = ((java.sql.Date) resul[0]).toLocalDate();
                 saldo = (Double) resul[1];
 
             }

@@ -6,7 +6,7 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container ">
-            <h3 class="card-header">Cobradores</h3>
+            <h3 class="form-title">Cobradores</h3>
             <a th:href="@{/cobrador/agregar}" class="btn btn-primario btn-sm mb-3">
                 <i class="fa-solid fa-plus fa-xl"></i>
                 Agregar </a>
@@ -16,8 +16,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <div class="table-responsive-md ">
-                <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-md" >
-                    <thead>
+                <table id="tabla" class="table table-border table-striped table-colapse table-hover table-md" >
+                    <thead class="bg-color">
                         <tr>
                             <th>Codigo</th>
                             <th>Nombre</th>
@@ -52,17 +52,13 @@
 
         </div>
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
-        <script>
-            //Lamara al metodo eliminar al hacer click en el boton eliminar
-            $(document).ready(function () {
-//                Llamar al metodo eliminar al cargar documento 
-                eliminar('Seguro que desea eliminar este cobrador');
-//                Cargar idioma español a la tabla paginado con Jquerry data
-                $('#tabla').DataTable({
-                    language: {
-                        url: '/i18n/es-ES.json'
-                    }
-                });
+        <script type="module">
+            import {eliminar} from '/js/modulos.js'
+                    eliminar('Seguro que desea eliminar este cobrador');
+            $('#tabla').DataTable({
+                language: {
+                    url: '/i18n/es-ES.json'
+                }
             });
         </script>
     </body>

@@ -1,9 +1,9 @@
 package ama.controladorMVC;
 
 import ama.dominio.Cobrador;
-import ama.errores.ClaseError;
+import ama.dominio.Sucursal;
+import ama.dominio.UsuarioSistema;
 import ama.validador.Mayuscula;
-import ama.validador.Vadidador;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +25,15 @@ import ama.servicio.CobradorService;
 import ama.servicio.SucursalService;
 import ama.servicio.CiudadService;
 import ama.servicio.EstadoService;
+import jakarta.servlet.http.HttpSession;
 import java.util.Arrays;
 
 @Slf4j
 @Controller
-@SessionAttributes(names = { "sucursal", "ciudad", "estado" })
+@SessionAttributes(names = {"sucursal", "ciudad", "estado"})
 @RequestMapping("/cobrador")
 public class CobradorController {
-
-    @Autowired
-    private Vadidador validar;
-
+ 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(String.class, new Mayuscula());
@@ -50,10 +48,12 @@ public class CobradorController {
     private CobradorService servicioCobrador;
     @Autowired
     private EstadoService servicioEstado;
+    @Autowired
+    private HttpSession httpSession;
 
     @GetMapping("/listar")
     public String listaCobradores(Model modelo) {
-        var cobradores = servicioCobrador.listar();
+        var cobradores = servicioCobrador.listar(getSucursalSession());
         modelo.addAttribute("cobradores", cobradores);
         modelo.addAttribute("titulo", "Cobrador");
 
@@ -123,7 +123,15 @@ public class CobradorController {
             return ResponseEntity.ok("Cobrador Eliminado Correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ClaseError.excepcion("Error al Eliminar Cobrador", e));
+                    .body("Error al Eliminar Cobrador"+e.getMessage());
         }
+    }
+
+    private UsuarioSistema getUserSession() {
+        return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
+    }
+
+    private Sucursal getSucursalSession() {
+        return getUserSession().getSucursal();
     }
 }

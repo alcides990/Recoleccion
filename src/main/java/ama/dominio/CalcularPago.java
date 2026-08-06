@@ -16,11 +16,12 @@ public class CalcularPago extends EstadoCuenta implements Serializable {
 
     public CalcularPago(ComprobanteGuardar comprobante) {
         super.setParametro(comprobante.getParametro());
-        this.setTarifa(comprobante.getServicio().getCategoria().getTarifa());
+        this.setTarifa(comprobante.getTarifa());
         this.setPagoHasta(comprobante.getPagoHasta());
         this.recargoPago = comprobante.getRecargoPago();
         this.cantidadPago = comprobante.getCantidadPago();
         this.setSaldoAnterior(comprobante.getSaldoAnterior());
+        this.setTotalImporte(comprobante.getTotalImporte());
 
     }
 
@@ -58,9 +59,10 @@ public class CalcularPago extends EstadoCuenta implements Serializable {
         this.totalImporte = totalImporte;
     }
 
-    public double getSaldo() {
-        return getTotalImporte() - getTotalPagar();
-    }
+   public double getSaldo() {
+    double saldo = getTotalImporte() - getTotalPagar();
+    return saldo < 0 ? 0 : saldo;
+}
 
     public String getPeriodoPago() {
         this.periodoPago = super.getPagoHasta() + "/" + super.getPagoHasta().plusMonths(cantidadPago);
@@ -71,6 +73,8 @@ public class CalcularPago extends EstadoCuenta implements Serializable {
     public LocalDate getPagoHasta() {
         return super.getPagoHasta().plusMonths(getCantidadPago()); 
     }
+
+     
 
 
 }

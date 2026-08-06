@@ -1,209 +1,221 @@
 <!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:th="http://www.thymeleaf.org">
-    <head  th:replace="~{layout/layout :: heat}"> </head>
-    <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container">
-            <div class="card-header" ><h3>REPORTES</h3> </div>
-            <div class=" row">
-                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
-                    <button 
-                        class="btn btn-primario btn-sm mb-3 " 
-                        data-bs-toggle="modal" data-bs-target="#modificarModal"
-                        data-bs-placement="top" title="Ver reporte ingresos diario">
-                        <i class="fa-solid fa-money-bill-trend-up"></i> 
-                        Ingreso Diario
-                    </button>
-                </div>
-                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
-                    <button  
-                        class="btn btn-primario btn-sm mb-3 " 
-                        data-bs-toggle="modal" data-bs-target="#ingresos-modal"
-                        data-bs-placement="top" title="Ver reporte de cobranza">
-                        <i class="fa-solid fa-money-bill-trend-up"></i> Cobranza
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
-                    </button>
-                </div>
-                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
-                    <button   id="saldos"  
-                              class="btn btn-primario btn-sm mb-3 " 
-                              data-bs-toggle="modal" data-bs-target="#detalle-zona-modal"
-                              data-bs-placement="top" title="Ver reporte saldo por zona y manzana">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Saldos
-                    </button>
-                </div>
+<head th:replace="~{layout/layout :: heat}"> </head>
 
-            </div>
+<body>
+    <header th:replace="~{layout/layout :: header}"> </header>
+    <aside th:replace="~{layout/layout :: aside}"> </aside>
+    <div class="container">
+        <div class="card-header">
+            <h3 class="form-title">REPORTES</h3>
         </div>
+        <div class=" row">
+            <div class="container-btn-reporte ">
+                <button class="btn btn-primario btn-sm mb-3 " data-bs-toggle="modal" data-bs-target="#modificarModal"
+                    data-bs-placement="top" title="Ver reporte ingresos diario">
+                    <i class="fa-solid fa-money-bill-trend-up"></i>
+                    Ingreso Diario
+                </button>
+            </div>
+            <div class="container-btn-reporte ">
+                <button class="btn btn-primario btn-sm mb-3 " data-bs-toggle="modal" data-bs-target="#ingresos-modal"
+                    data-bs-placement="top" title="Ver reporte de cobranza">
+                    <i class="fa-solid fa-money-bill-trend-up"></i> Cobranza
 
-        <!-- Ventana modal repoerte detalle zona-->
-        <div class="modal fade" id="detalle-zona-modal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
-              data-bs-backdrop="static" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content bg-color">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmacionModalLabel">Reporte detalle zona</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <div class="mensaje-alerta" id="contenedor-alertas"></div>
-                    </div>
-                    <form class="mb-3" id="frm-detalle-zona" th:action="@{/reporte/detalle_zona}" method="post" >
-                        <div class="modal-body ">
+                </button>
+            </div>
+            <div class="container-btn-reporte ">
+                <button id="saldos" class="btn btn-primario btn-sm mb-3 " data-bs-toggle="modal"
+                    data-bs-target="#detalle-zona-modal" data-bs-placement="top"
+                    title="Ver reporte saldo por zona y manzana">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Saldos
+                </button>
+            </div>
 
-                            <div class="form-check form-switch">
-                                <input class="form-check-input"  type="checkbox" role="switch" 
-                                       name="chmanzana" id="chmanzana" value="true"
-                                       data-bs-toggle="form-check-input" data-bs-target="#chmanzana">
+        </div>
+    </div>
 
-                                    <label class="form-check-label" for="chmanzana">
-                                        Por manzana
-                                    </label>
-                            </div>
-                            <label class="form-label font-weight-bold"> Usuarios que adeudan </label>
-                            <div class="row mb-3">
-                                <input class="form-control-sm col-sm-4 m-1 "  type="text" id="desde" name="desde"  placeholder="Desde"/>
-                                <input class="form-control-sm col-sm-4 m-1"  type="text" id="hasta" name="hasta"  placeholder="Hasta"/>
-                                <input class="form-control-sm col-sm-3 m-1"  type="text" id="manzana" name="manzana"   style="display: none;" placeholder="N° manzana"/>
-                            </div>
-                            <div class="form-group row " id="cobrador-div">
-                                <div class="col-sm-2">
-                                    <label class="col-form-label col-sm-3 font-weight-bold" for="cobrador">Cobrador:</label>
-                                </div>
-                                <div class="col-sm-10" >
-                                    <select class="form-select " name="codigoCobrador" id="cobrador">
-                                        <option th:each="cobrador : ${cobradores}" 
-                                                th:value="${cobrador.codigoCobrador}" 
-                                                th:text="${cobrador.nombreCompleto}"></option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-sm-2">
-                                    <label class="col-form-label mb-1 font-weight-bold" for="zona">Zona</label>
-                                </div>
-                                <div calss="col-sm-10"> 
-                                    <select class="form-select"  name="codigoZona" id="zona">
-                                        <option th:each="zona : ${zonas}" 
-                                                th:value="${zona.codigoZona}" 
-                                                th:text="${zona.nombreZona}">
+    <!-- Ventana modal repoerte detalle zona-->
+    <div class="modal fade" id="detalle-zona-modal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
+        data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-color">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmacionModalLabel">Reporte detalle zona</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="mensaje-alerta" id="contenedor-alertas"></div>
+                </div>
+                <form class="mb-3" id="frm-detalle-zona" th:action="@{/reporte/detalle_zona}" method="post">
+                    <div class="modal-body ">
 
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="form-check form-switch">
+                            <input onclick="cargarZonasCobrador()" class="form-check-input" type="checkbox"
+                                role="switch" name="manzana" id="chmanzana" value="true"
+                                data-bs-toggle="form-check-input" data-bs-target="#chmanzana">
+                            <label class="form-check-label" for="manzana"> </label>
                         </div>
-
-                        <button type="submit"  class="btn btn-guardar offset-9" > 
-                            <i class="fa-regular fa-eye"></i> Ver
-                        </button>
-                    </form>
-
-                </div>
-            </div>
-        </div>
-        <!-- Ventana modal repoerte ingreesos -->
-        <div class="modal fade" id="ingresos-modal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
-              data-bs-backdrop="static" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content bg-color">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmacionModalLabel">Reporte Ingresos</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <div class="mensaje-alerta" id="contenedor-alertas"></div>
-                    </div>
-                    <form class="mb-3" id="frm-detalle-zona" th:action="@{/reporte/ingresos}" method="post" >
-                        <div class="modal-body ">
-
-                            <div class="row">
-                                <div class="col-6 form-floating">
-                                    <input class="form-control"  type="text" id="ingresos-desde" name="ingresos-desde"  placeholder="Desde" autocomplete="off"/>
-                                    <label>Desde</label>
-                                </div>
-                                <div class="col-6 form-floating">
-                                    <input class="form-control"  type="text" id="ingresos-hasta" name="ingresos-hasta"  placeholder="Hasta" autocomplete="off"/>
-                                    <label for="ingresos-desde">Hasta</label>
-                                </div>
+                        <label class="form-label font-weight-bold"> Usuarios que adeudan </label>
+                        <div class="row mb-3">
+                            <input class="form-control-sm col-sm-4 m-1 " type="text" id="desde" name="desde"
+                                placeholder="Desde" />
+                            <input class="form-control-sm col-sm-4 m-1" type="text" id="hasta" name="hasta"
+                                placeholder="Hasta" />
+                            <input class="form-control-sm col-sm-3 m-1" type="text" id="manzana" name="manzana"
+                                style="display: none;" placeholder="N° manzana" />
+                        </div>
+                        <div class="form-group row " id="cobrador-div">
+                            <div class="col-sm-2">
+                                <label class="col-form-label col-sm-3 font-weight-bold" for="cobrador">Cobrador:</label>
                             </div>
-                            <div class="form-group">
-                                <label class="col-form-label mb-1 font-weight-bold" for="grupo">Reporte Por:</label>
-                                <select class="form-select"  name="grupo" id="zona">
-                                    <option value="cob"> COBRADOR</option>
-                                    <option value="zona"> ZONA</option>
+                            <div class="col-sm-10">
+                                <select onchange="cargarZonasCobrador()" class="form-select " name="cobrador"
+                                    id="cobrador">
+                                    <option th:each="cobrador : ${cobradores}" th:value="${cobrador.codigoCobrador}"
+                                        th:text="${cobrador.nombreCompleto}"></option>
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <div class="col-sm-2">
+                                <label class="col-form-label mb-1 font-weight-bold" for="zona">Zona</label>
+                            </div>
+                            <div calss="col-sm-10">
+                                <select class="form-select" name="zona" id="zona">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-                        <button type="submit"  class="btn btn-guardar offset-9" > 
-                            <i class="fa-regular fa-eye"></i> Ver
-                        </button>
-                    </form>
+                    <button type="submit" class="btn btn-primario offset-9">
+                        <i class="fa-regular fa-eye"></i> Ver
+                    </button>
+                </form>
 
-                </div>
             </div>
         </div>
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
-        <script src="js/validarFormulario.js"></script>
-         <script src="/js/datepicker-es.js"></script>
-        <script>
-            $(document).ready(function () {
-                //posicionar focus al abrir modal detalle saldo
-                $('#detalle-zona-modal').on('shown.bs.modal', function () {
-                    tabular('#desde');
-                });
-                //posicionar focus al abrir ingresos modal
-                $('#ingresos-modal').on('shown.bs.modal', function () {
-                    $('#ingresos-desde').datepicker();
-                    $('#ingresos-hasta').datepicker();
-                    let fecha = new Date();
-                    let año = fecha.getFullYear().toString().padStart(4, '0');
-                    let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-                    let dia = fecha.getDate().toString().padStart(2, '0');
-                    let fechaFormateada = año + '-' + mes + '-' + dia;
-                    $('#ingresos-desde').val(fechaFormateada);
-                    $('#ingresos-hasta').val(fechaFormateada);
-                });
-                
-                 $('#detalle-zona-modal').on('shown.bs.modal', function () {
-                      $('#chmanzana').prop('checked', false);
-                       $('#manzana').hide();
-                        $("#cobrador-div").show();
-                 });
-                $('#chmanzana').click(function () {
-                    $('#manzana').fadeToggle(100, function () {
-                        tabular('#manzana');
-                        tabulador("#hasta", "#manzana"); 
-                        $("#cobrador-div").fadeToggle();
-                    });
-                });
-                tabulador("#desde", "#hasta"); 
-                //Recuperar los datos al enviar formulario
-                $("#frm-detalle-zona").submit(function (event) {
-                    event.preventDefault();
-                    var desde = $("#desde").val();
-                    var hasta = $("#hasta").val();
-                    var codigoCobrador = $("#cobrador").val();
-                    var codigoZona = $("#zona").val();
-                    var manzana = $("#manzana").val();
-                    var url = "/reporte/detalle_zona";
-                    if ($("#chmanzana").prop('checked')) {
-                        var url = "/reporte/detalle_manzana";
-                    }
-                    var datos = {
-                        codigoCobrador: codigoCobrador,
-                        codigoZona: codigoZona,
-                        desde: desde,
-                        hasta: hasta,
-                        manzana : manzana
-                    };
-                    getReporte(datos, url);
+    </div>
+    <!-- Ventana modal repoerte ingreesos -->
+    <div class="modal fade" id="ingresos-modal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
+        data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-color">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmacionModalLabel">Reporte Ingresos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="mensaje-alerta" id="contenedor-alertas"></div>
+                </div>
+                <form class="mb-3" id="frm-detalle-zona" th:action="@{/reporte/ingresos}" method="post">
+                    <div class="modal-body ">
 
-                });
+                        <div class="row">
+                            <div class="col-6 form-floating">
+                                <input class="form-control" type="text" id="ingresos-desde" name="ingresos-desde"
+                                    placeholder="Desde" autocomplete="off" />
+                                <label>Desde</label>
+                            </div>
+                            <div class="col-6 form-floating">
+                                <input class="form-control" type="text" id="ingresos-hasta" name="ingresos-hasta"
+                                    placeholder="Hasta" autocomplete="off" />
+                                <label for="ingresos-desde">Hasta</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label mb-1 font-weight-bold" for="grupo">Reporte Por:</label>
+                            <select class="form-select" name="grupo" id="zona">
+                                <option value="cob"> COBRADOR</option>
+                                <option value="zona"> ZONA</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primario offset-9">
+                        <i class="fa-regular fa-eye"></i> Ver
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <footer th:replace="~{layout/layout :: footer}"> </footer>
+    <script src="js/validarFormulario.js"></script>
+    <script type="module">
+        import { tabulador, tabular, getReporte, datePickerInit } from '/js/modulos.js';
+
+        datePickerInit('#ingresos-desde');
+        datePickerInit('#ingresos-hasta');
+        setDateIngresos();
+        function setDateIngresos(){
+             let fecha = new Date();
+            let año = fecha.getFullYear().toString().padStart(4, '0');
+            let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+            let dia = fecha.getDate().toString().padStart(2, '0');
+            let fechaFormateada = año + '-' + mes + '-' + dia;
+            $('#ingresos-desde').val(fechaFormateada);
+            $('#ingresos-hasta').val(fechaFormateada);
+        }
+
+        $('#detalle-zona-modal').on('shown.bs.modal', ()=> {
+            $('#chmanzana').prop('checked', false);
+            $('#manzana').hide();
+            $("#cobrador-div").show();
+            cargarZonasCobrador();
+            tabular('#desde');
+        });
+        $('#chmanzana').click(()=> {
+            $('#manzana').fadeToggle(100, ()=> {
+                tabular('#manzana');
+                tabulador("#hasta", "#manzana");
+                $("#cobrador-div").fadeToggle();
             });
-        </script>
-    </body>
+        });
+        tabulador("#desde", "#hasta");
+        //Recuperar los datos al enviar formulario
+        $("#frm-detalle-zona").submit( (event)=> {
+            event.preventDefault();
+            let desde = $("#desde").val();
+            let hasta = $("#hasta").val();
+            let codigoCobrador = $("#cobrador").val();
+            let codigoZona = $("#zona").val();
+            let manzana = $("#manzana").val();
+            let url = "/reporte/detalle_zona";
+            if ($("#chmanzana").prop('checked')) {
+                url = "/reporte/detalle_manzana";
+            }
+            let datos = {
+                codigoCobrador: codigoCobrador,
+                codigoZona: codigoZona,
+                desde: desde,
+                hasta: hasta,
+                manzana: manzana
+            };
+            getReporte(datos, url);
+
+        });
+    </script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var zonas = /*[[${zonas}]]*/[];
+        /*]]>*/
+        cargarZonasCobrador();
+        function cargarZonasCobrador() {
+            let codigoCobrador = $("#cobrador").val();
+            let manzaneChecked = $("#chmanzana").prop('checked');
+            $("#zona").empty();
+            zonas.forEach(zona => {
+                if (zona.cobrador.codigoCobrador == codigoCobrador) {
+                    $("#zona").append('<option value="' + zona.codigoZona + '">' + zona.nombreZona + '</option>');
+                } else if (manzaneChecked) {
+                    $("#zona").append('<option value="' + zona.codigoZona + '">' + zona.nombreZona + '</option>');
+                }
+            });
+        }
+    </script>
+
+</body>
+
 </html>

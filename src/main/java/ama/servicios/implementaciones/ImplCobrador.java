@@ -2,6 +2,7 @@ package ama.servicios.implementaciones;
 
 import ama.dao.CobradorDao;
 import ama.dominio.Cobrador;
+import ama.dominio.Sucursal;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,13 @@ public class ImplCobrador implements CobradorService {
     CobradorDao cobradorDao;
 
     @Override
-    public List<Cobrador> listar() {
-        return cobradorDao.listar();
+    public List<Cobrador> listar(Sucursal sucursal) {
+        return cobradorDao.listar(sucursal);
+    }
+
+    @Override
+    public List<Cobrador> listarIsEstadoActivo(Sucursal sucursal) {
+        return cobradorDao.listarIsEstdoActivo(sucursal) ;
     }
 
     @Override

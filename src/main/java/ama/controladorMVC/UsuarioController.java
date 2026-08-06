@@ -3,17 +3,14 @@ package ama.controladorMVC;
 import ama.DTO.UsuarioDTO;
 import ama.dominio.Paginador;
 import ama.dominio.Usuario;
-import ama.errores.ClaseError;
 import ama.utilerias.PageRender;
 import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -155,18 +152,6 @@ public class UsuarioController {
         return "usuario/modificarUsuario";
     }
 
-    @GetMapping("/eliminar/{codigoUsuario}")
-    public String eliminar(Usuario usuario, Model model) {
-        try {
-            servicioUsuario.eliminar(usuario);
-        } catch (DataAccessException e) {
-            List<String> errores = new ArrayList<>();
-            errores.add("Error al eliminar el usuario " + e.getMostSpecificCause().getMessage());
-            model.addAttribute("errores", errores);
-            return "errores/error";
-        }
-        return "redirect:/usuario/listar";
-    }
 
     @PostMapping("/eliminar/{codigoUsuario}")
     public ResponseEntity<?> modal(Usuario usuario) {
@@ -177,12 +162,12 @@ public class UsuarioController {
             return ResponseEntity.ok("Usuario eliminado correctamente !!");
            }else{
                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ClaseError.excepcion("Usuario no exixte en la base de datos..! " , null));
+                    .body("Usuario no encontrado..! ");
            }
         } catch (Exception e) {
  String nombreUsuario=usuarioRecuperado.getNombre()+" "+usuarioRecuperado.getApellido();
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ClaseError.excepcion("Error al eliminar usuario " + nombreUsuario, e));
+                    .body("Error al eliminar usuario " + nombreUsuario+" "+ e.getMessage());
         }
 
     }

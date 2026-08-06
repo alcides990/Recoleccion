@@ -4,7 +4,6 @@ import ama.dao.DetalleUsuarioSistemaDao;
 import ama.dominio.Estado;
 import ama.dominio.Rol;
 import ama.dominio.UsuarioSistema;
-import ama.errores.ClaseError;
 import ama.servicio.RolService;
 import ama.servicio.UsuarioSistemaService;
 import ama.utilerias.PageRender;
@@ -61,7 +60,7 @@ public class UsuarioSistemaController {
     }
 
     @GetMapping("/listar")
-    @PreAuthorize("hasAnyAuthority({'ADMIN','ROOT'})")
+    @PreAuthorize("hasAnyAuthority({'ADMINISTRADOR','ROOT'})")
     public String listaUsuario(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "cantElemento", defaultValue = "10") int cantElemento,
@@ -76,9 +75,8 @@ public class UsuarioSistemaController {
         return "usuarioSistema/usuarioSistema";
     }
 
-    
     @GetMapping("/agregar")
-     @PreAuthorize("hasAnyAuthority({'ADMIN','ROOT'})")
+    @PreAuthorize("hasAnyAuthority({'ADMINISTRADOR','ROOT'})")
     public String agregar(Model modelo) {
         modelo.addAttribute("titulo", "Usuario");
         UsuarioSistema usuarioSistema = new UsuarioSistema();
@@ -88,7 +86,7 @@ public class UsuarioSistemaController {
     }
 
     @PostMapping("/guardar")
-      @PreAuthorize("hasAnyAuthority({'ADMIN','ROOT'})")
+    @PreAuthorize("hasAnyAuthority({'ADMINISTRADOR','ROOT'})")
     public String guardar(UsuarioSistema usuarioSistema, RedirectAttributes flash) {
         String mensaje = "Usuario modificado correctamente!!";
         UsuarioSistema userSession = (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
@@ -98,15 +96,15 @@ public class UsuarioSistemaController {
             Integer codigoUsuario = usuarioSistemaService.getCodigoUsuarioSistema() + 1;
             usuarioSistema.setCodigoUsuarioSistema(codigoUsuario);
             mensaje = "Usuario agregado correctamente";
-        }
         String clave = encoder.encode(usuarioSistema.getClave());
         usuarioSistema.setClave(clave);
+        }
         usuarioSistemaService.save(usuarioSistema);
         flash.addFlashAttribute("mensaje", mensaje);
         return "redirect:/usuarioSistema/listar";
     }
 
-       @PreAuthorize("hasAnyAuthority({'ROOT'})")
+    @PreAuthorize("hasAnyAuthority({'ROOT','ADMINISTRADOR'})")
     @GetMapping("/roles/{codigoUsuarioSistema}")
     public String asignarRol(UsuarioSistema usuarioSistema, Model model) {
         usuarioSistema = usuarioSistemaService.findById(usuarioSistema.getCodigoUsuarioSistema()).orElse(null);
@@ -119,12 +117,10 @@ public class UsuarioSistemaController {
     }
 
     @GetMapping("/editar/{codigoUsuarioSistema}")
-    public String editar(UsuarioSistema usuarioSistema, Model model) {
+    public String editar(UsuarioSistema usuarioSistemaRequest, Model model) {
         model.addAttribute("titulo", "Usuario");
-        usuarioSistema = usuarioSistemaService.findById(usuarioSistema.getCodigoUsuarioSistema()).orElse(null);
-        if (usuarioSistema == null) {
-            throw new Error("Usuario no encontrado !!");
-        }
+        UsuarioSistema usuarioSistema = usuarioSistemaService.findById(usuarioSistemaRequest.getCodigoUsuarioSistema())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado !!"));
         model.addAttribute("usuarioSistema", usuarioSistema);
 
         return "usuarioSistema/modificarUsuarioSistema";
@@ -133,10 +129,8 @@ public class UsuarioSistemaController {
     @GetMapping("/editarClave/{codigoUsuarioSistema}")
     public String editarClave(UsuarioSistema usuarioSistema, Model model) {
         model.addAttribute("titulo", "Usuario");
-        usuarioSistema = usuarioSistemaService.findById(usuarioSistema.getCodigoUsuarioSistema()).orElse(null);
-        if (usuarioSistema == null) {
-            throw new Error("Usuario no encontrado !!");
-        }
+        usuarioSistema = usuarioSistemaService.findById(usuarioSistema.getCodigoUsuarioSistema())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado !!"));
         model.addAttribute("usuarioSistema", usuarioSistema);
 
         return "usuarioSistema/editarClave";
@@ -144,15 +138,13 @@ public class UsuarioSistemaController {
 
     @PostMapping("/editarClave")
     public String modifgicarContraseña(UsuarioSistema usuario, RedirectAttributes flash, HttpServletRequest request, HttpServletResponse response) {
-        UsuarioSistema usuarioSistema = usuarioSistemaService.findById(usuario.getCodigoUsuarioSistema()).orElse(null);
-        if (usuarioSistema == null) {
-            throw new Error("Usuario no encontrado !!");
-        }
+        UsuarioSistema usuarioSistema = usuarioSistemaService.findById(usuario.getCodigoUsuarioSistema())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado !!"));
         String clave = encoder.encode(usuario.getClave());
         usuarioSistema.setClave(clave);
         usuarioSistemaService.save(usuarioSistema);
-         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
-   
+        new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+
         flash.addFlashAttribute("info", "Contraseña modificada corectamente!!");
         return "redirect:/login";
 
@@ -166,11 +158,11 @@ public class UsuarioSistemaController {
             usuarioSistema.setClave(clave);
             usuarioSistema = usuarioSistemaService.save(usuarioSistema);
 
-            return ResponseEntity.ok("Clave reseteado al 1234, inicie secion y mofifique su clave!!");
+            return ResponseEntity.ok("Clave reseteada al 1234, inicie sesion y modifique su clave!!");
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ClaseError.excepcion("Error al realizar reseteo de Clave ", e));
+                    .body("Error al realizar reseteo de Clave "+ e);
         }
 
     }
@@ -187,8 +179,8 @@ public class UsuarioSistemaController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ClaseError.excepcion("Error al eliminar usuario ", e));
-        } 
+                    .body("Error al eliminar usuario "+ e.getMessage());
+        }
 
     }
 }

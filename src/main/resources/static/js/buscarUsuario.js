@@ -57,19 +57,19 @@ $(document).ready(function () {
                     $("tbody").empty();
                     $.each(data.content, function (llave, valor) {
                         var cargaTabla =
-                                " <tr> " +
-                                " <td> " + valor.codigoUsuario +
-                                "</td><td>" + valor.numeroDocumento +
-                                " </td><td>" + valor.nombre + ' ' + valor.apellido +
-                                "</td><td>" + valor.celular +
-                                " </td><td>" + valor.telefono +
-                                "</td><td>" + valor.barrio +
-                                " </td><td>" + valor.direccion +
-                                " </td><td>" + valor.nombreSucursal +
-                                "</td> <td> <a href='/usuario/editar/" + valor.codigoUsuario + " '  class='btn btn-info btn-md' /> <i class='fa-regular fa-pen-to-square'> </i>  \n\
-                     <a href='/usuario/eliminar/" + valor.codigoUsuario + " '  class='btn btn-danger btn-md'>  <i class='fa-solid fa-trash-can'></i> </a> \n\
-                    </td>" +
-                                " </tr>";
+                                ` <tr> 
+                                 <td> ${valor.codigoUsuario}
+                                </td><td>  ${valor.numeroDocumento} 
+                                 </td><td>  ${valor.nombre} ${valor.apellido??''}
+                                </td><td>  ${valor.celular} 
+                                 </td><td>  ${valor.telefono??''} 
+                                </td><td>  ${valor.barrio} 
+                                 </td><td>  ${valor.direccion} 
+                                 </td><td>  ${valor.nombreSucursal} 
+                                </td> <td> <a href='/usuario/editar/${valor.codigoUsuario}'   class='btn btn-info btn-md' /> <i class='fa-regular fa-pen-to-square'> </i> 
+                     <a id='eliminar' data-url='/usuario/eliminar/' data-id=${valor.codigoUsuario}  class='btn btn-danger btn-md'>  <i class='fa-solid fa-trash-can'></i> </a> 
+                    </td> 
+                                 </tr>`;
 
                         $("#tbody").append(cargaTabla);
                     });
@@ -83,6 +83,6 @@ $(document).ready(function () {
             });
         }
     });
- 
+
 
 });

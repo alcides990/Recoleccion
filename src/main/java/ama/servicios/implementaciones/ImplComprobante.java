@@ -4,7 +4,6 @@ import ama.dao.ComprobanteDao;
 import ama.dominio.Comprobante;
 import ama.dominio.ComprobantePK;
 import ama.dominio.PuntoExpedicion;
-import ama.dominio.Serie;
 import ama.dominio.Servicio;
 import ama.dominio.Sucursal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,34 +33,41 @@ public class ImplComprobante implements ComprobanteService {
     @Override
     public Page<Comprobante> filtrar(Pageable pageable, ComprobantePK comprobantePK) {
         Page<Comprobante> comprobantes = null;
-        if (comprobantePK.getNumeroComprobante() != null
-                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() != 0) {
-            comprobantes = comprobanteDao.filterByPuntoExpedicionAndNumeroComprobante(pageable,
+        Sucursal sucursal = new Sucursal(comprobantePK.getPuntoExpedicionPK().getCodigoSucursal());
+        if (comprobantePK.getNumeroComprobante() == null
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() == 0
+                && comprobantePK.getCodigoSerie() == 0) {
+            comprobantes = comprobanteDao.findBySucursal(pageable, sucursal);
+            return comprobantes;
+        } else if (comprobantePK.getNumeroComprobante() != null
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() != 0
+                && comprobantePK.getCodigoSerie() != 0) {
+            comprobantes = comprobanteDao.filterByPuntoExpedicionAndSerieAndNumeroComprobante(pageable,
                     new PuntoExpedicion(comprobantePK.getPuntoExpedicionPK()),
-                    new Serie(comprobantePK.getCodigoSerie()),
+                    comprobantePK.getCodigoSerie(),
                     comprobantePK.getNumeroComprobante());
             return comprobantes;
         } else if (comprobantePK.getNumeroComprobante() != null
-                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() == 0) {
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() == 0
+                && comprobantePK.getCodigoSerie() == 0) {
             comprobantes = comprobanteDao.filterBySucursalAndNumeroComprobante(pageable,
-                    new Sucursal(comprobantePK.getPuntoExpedicionPK().getCodigoSucursal()),
-                    new Serie(comprobantePK.getCodigoSerie()),
+                    sucursal, comprobantePK.getNumeroComprobante());
+            return comprobantes;
+        } else if (comprobantePK.getNumeroComprobante() != null
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() != 0
+                && comprobantePK.getCodigoSerie() == 0) {
+            comprobantes = comprobanteDao.filterByPuntoExpedicionAndNumeroComprobante(pageable,
+                    new PuntoExpedicion(comprobantePK.getPuntoExpedicionPK()),
                     comprobantePK.getNumeroComprobante());
             return comprobantes;
         } else if (comprobantePK.getNumeroComprobante() == null
-                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() != 0) {
+                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() != 0
+                && comprobantePK.getCodigoSerie() == 0) {
             comprobantes = comprobanteDao.findByPuntoExpedicion(pageable,
-                    new PuntoExpedicion(comprobantePK.getPuntoExpedicionPK()),
-                    new Serie(comprobantePK.getCodigoSerie()));
-            return comprobantes;
-        } else if (comprobantePK.getNumeroComprobante() == null
-                && comprobantePK.getPuntoExpedicionPK().getCodigoPuntoExpedicion() == 0) {
-            comprobantes = comprobanteDao.findBySucursal(pageable,
-                    new Sucursal(comprobantePK.getPuntoExpedicionPK().getCodigoSucursal()),
-                    new Serie(comprobantePK.getCodigoSerie()));
+                    new PuntoExpedicion(comprobantePK.getPuntoExpedicionPK()));
             return comprobantes;
         }
-        return comprobantes;
+        return null;
     }
 
     @Transactional
@@ -84,6 +90,12 @@ public class ImplComprobante implements ComprobanteService {
 
     @Transactional(readOnly = true)
     @Override
+    public Optional<Comprobante> findById(ComprobantePK comprobantePK) {
+        return comprobanteDao.findById(comprobantePK);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public int getCantidadComprobante(String cuentaCorriente) {
         return comprobanteDao.getCantidadComprobante(cuentaCorriente);
     }
@@ -98,7 +110,7 @@ public class ImplComprobante implements ComprobanteService {
     public Integer getNumeroComprobante(ComprobantePK comprobantePK) {
         Integer numeroComprobante = numeroComprobante = comprobanteDao.getNumeroComprobante(
                 comprobantePK.getPuntoExpedicionPK(),
-                comprobantePK.getCodigoTipoFactura(),
+                comprobantePK.getCodigoTipoComprobante(),
                 comprobantePK.getCodigoSerie());
         return numeroComprobante == null ? 1 : numeroComprobante + 1;
     }
@@ -107,6 +119,11 @@ public class ImplComprobante implements ComprobanteService {
     public int getCantidadPago(String cuentaCorriente) {
         Integer cantidadPago = comprobanteDao.getCantidadPago(cuentaCorriente);
         return cantidadPago != null ? cantidadPago : 0;
+    }
+
+    @Override
+    public Optional<String> getPagoHsta(String cuentaCorriente) {
+        return comprobanteDao.getPagoHasta(cuentaCorriente);
     }
 
     @Override

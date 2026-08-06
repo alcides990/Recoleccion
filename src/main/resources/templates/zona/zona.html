@@ -7,7 +7,7 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container">
-            <div class="card-header"><h3>Zona</h3></div> 
+            <div class="card-header"><h3 class="form-title">Zona</h3></div> 
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
             <a th:href="@{/zona/agregar}" 
                class="btn btn-primario btn-sm mb-2 ">
@@ -19,8 +19,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <div class="table-responsive-md">
-                <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-md " >
-                    <thead class="thead-dark">
+                <table id="tabla" class="table  table-border table-striped table-colapse table-hover table-md " >
+                    <thead class="bg-color">
                         <tr>
                             <th>Sucursal</th>
                             <th>Zona</th>
@@ -58,9 +58,8 @@
         </div>
         <footer  th:replace="~{layout/layout :: footer}"> </footer>
 
-        <script>
-            $(document).ready(function () {
-//            Lamara al metodo eliminar al hacer click en el boton eliminar
+        <script type="module">
+            import {eliminar} from '/js/modulos.js'
                 eliminar('Seguro que desea eliminar la zona');
 //                Cargar idioma español a la tabla paginado con Jquerry data
                 $('#tabla').DataTable({
@@ -68,7 +67,6 @@
                         url: '/i18n/es-ES.json'
                     }
                 });
-            });
         </script>
     </body>
 

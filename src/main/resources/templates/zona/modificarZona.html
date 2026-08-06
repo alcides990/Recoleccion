@@ -7,7 +7,7 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container "> 
-            <div class="card-header">  <h3>Datos Zona</h3></div>
+            <h3 class="form-title">Datos Zona</h3> 
             <a th:href="@{/zona/listar}" class="btn btn-primario">Regresar</a>
             <form th:action="@{/zona/guardar}" method="post" th:object="${zona}">
                 <div class="row d-flex m-3">
@@ -34,7 +34,7 @@
                         </select>
                     </div>
                 </div>
-                <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3"/>
+                <input type="submit" name="guardar" value="Guardar" class="btn btn-primario m-3"/>
             </form>
         </div>
         </div>

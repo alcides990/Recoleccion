@@ -35,10 +35,10 @@ public class EstadoCuenta implements Serializable {
     }
 
     public int getCantidadDeuda() {
-        LocalDate crrrePeriodo = parametro != null ? parametro.getCierrePeriodo() : null;
+        LocalDate cierrePeriodo = parametro != null ? LocalDate.now() : null;
         if (pagoHasta != null) {
-            int anos = Period.between(pagoHasta, crrrePeriodo).getYears();
-            int meses = Period.between(pagoHasta, crrrePeriodo).getMonths();
+            int anos = Period.between(pagoHasta, cierrePeriodo).getYears();
+            int meses = Period.between(pagoHasta, cierrePeriodo).getMonths();
             this.cantidadDeuda = (anos * 12) + meses;
         }
 

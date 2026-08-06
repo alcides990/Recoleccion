@@ -9,7 +9,7 @@
         <aside th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container-fluid">
             <div class="card-header">
-                <h3>Comprobantes</h3>
+                <h3 class="form-title">Comprobantes</h3>
             </div>
 
             <div class=" comprobante-filter">
@@ -45,48 +45,49 @@
             </div>
 
 
-            <div class="table-responsive-xl ">
-                <table id="tabla" class="table table-dark table-border table-striped  table-hover small">
-                    <thead class="sticky-top ">
+            <div class="table-responsive-xl sticky-top m-2">
+                <table id="tabla" class="table  table-border table-striped  table-hover small h-25">
+                    <thead class="sticky-top bg-color ">
                         <tr>
                             <th>Tipo</th>
                             <th>PuntoExp.</th>
-                            <th>Nro. Fact</th>
-                            <th>Cuentacorriente</th>
+                            <th class="sticky-start">N°.Comprobante</th>
+                            <th >Cuentacorriente</th>
                             <th>Usuario</th>
                             <th>FechaPago</th>
-                            <th>PeriodoPago</th>
                             <th>Tarifa</th>
                             <th>Cant.Pago</th>
                             <th>Recargo</th>
                             <th>Importe</th>
+                            <th>saldo</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="table-secondary ">
                         <tr th:each="comprobante : ${comprobantes}">
-                            <td th:text="${comprobante.tipoFactura.tipoFactura}"
-                                th:data-id="${comprobante.comprobantePK.codigoTipoFactura}"> </td>
+                            <td th:text="${comprobante.tipoComprobante.nombreTipoComprobante}"
+                                th:data-id="${comprobante.comprobantePK.codigoTipoComprobante}">
+                            </td>
                             <td th:text="${comprobante.puntoExpedicion.nombrePuntoExpedicion}"
                                 th:data-id="${comprobante.comprobantePK.puntoExpedicionPK.codigoPuntoExpedicion}">
                             </td>
-                            <td th:text="${#numbers.formatInteger(comprobante.comprobantePK.numeroComprobante,7)}" th:data-id="${comprobante.comprobantePK.numeroComprobante}"> </td>
+                            <td  class="sticky-start" th:text="${#numbers.formatInteger(comprobante.comprobantePK.numeroComprobante,7)}" th:data-id="${comprobante.comprobantePK.numeroComprobante}"> </td>
+                            <td hidden="" th:data-id="${comprobante.comprobantePK.codigoSerie}" > </td>
                             <td th:text="${comprobante.servicio.cuentaCorriente}"> </td>
                             <td th:text="${comprobante.razonSocial}"> </td>
                             <td th:text="${comprobante.fechaPago}"></td>
-                            <td th:text="${comprobante.detalleComprobante.periodoPago}"></td>
-                            <td
-                                th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.tarifa, 0, 'COMMA', 0, 'POINT')}">
-                                <td th:text="${comprobante.cantidadPago}"></td>
-                                <td
-                                    th:text="${#numbers.formatDecimal(comprobante.detalleComprobante.recargo, 0, 'COMMA', 0, 'POINT')}">
+                            <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'COMMA', 0, 'POINT')}">
+                                <td class="text-center" th:text="${comprobante.cantidadPago}"></td>
+                                <td class="text-center"
+                                    th:text="${#numbers.formatDecimal(comprobante.recargo, 0, 'COMMA', 0, 'POINT')}">
                                 </td>
                                 <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td th:text="${#numbers.formatDecimal(comprobante.saldo, 0, 'COMMA', 0, 'POINT')}"></td>
                                 <td th:text="${comprobante.estado.estado}"></td>
                                 <td>
-                                    <a title="ver comprobante" id="verComprobante" 
-                                       <i class="fa-regular fa-eye btn-primario"></i>
+                                    <a title="Editar comprobante" id="editar"  
+                                       <i class="fa-regular fa-pen-to-square btn-primario p-1"></i>
                                     </a>
                                     <a title="Anular" id="anular" 
                                        <i class="btn-close fa-regular fa-pen-to-square"></i>
@@ -101,155 +102,176 @@
             </div>
         </div>
 
-        <!-- Ventana modal anular comprobante -->
-        <div class="modal fade" id="anularModal" tabindex="-1" aria-labelledby="titulo" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+        <!-- Ventana modal  comprobante -->
+        <div class="modal fade" id="comprobanteModal" tabindex="-1" aria-labelledby="titulo" aria-hidden="true"
+             data-bs-backdrop="static">
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content bg-color">
                     <div class="modal-header">
-                        <h3 class="modal-title" id="titulo">Anular Comprobante</h3>
+                        <h3 class="form-title" id="titulo">Datos Comprobante</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
-                    <form id="frm-comprobante-anular" th:action="@{/comprobante/anular}" method="post">
-                        <div class="row d-flex m-1">
-                            <div class="col-sm-3">
-                                <label for="cuentaCorriente">Cuentacorriente </label>
-                                <input class="form-control" readonly="true" type="search" name="cuentaCorriente"
-                                       id="cuentaCorriente" />
-                            </div>
-
-                            <input type="text" class="d-none" name="codigoUsuario" id="codigoUsuario">
-                                <div class="col-sm-3">
-                                    <label for="numeroDocumento">RUC/CI </label>
-                                    <input class="form-control" type="text" id="numeroDocumento" name="numeroDocumento"
-                                           readonly="true" />
-                                </div>
-                                <div class="col-sm-6">
-                                    <label for="buscarUsuario">Razon Social </label>
-                                    <input class="form-control" type="text" id="razonSocial" />
-                                </div>
-                                <div class="form-group col-sm-6">
-                                    <label for="categoria">Categoria</label>
-                                    <select class="form-control" id="categoria">
-                                        <option>Categoria</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-sm-2">
-                                    <label for="sucursalAnular">Sucursal</label>
-                                    <select class="form-control" name="sucursalAnular" id="sucursalAnular">
-                                        <option>Sucursal</option>
-                                    </select>
-                                </div>
-                                <div class="col-sm-2">
-                                    <label for="puntoExpedicionaAnular">PuntoExpedicion</label>
-                                    <select class="form-control" name="puntoExpedicionaAnular" id="puntoExpedicionAnular">
-                                        <option />Punto Expedicion
-                                    </select>
-                                    </select>
-                                </div>
-                        </div>
-                        <div class="row d-flex m-1">
-                            <div class="col-sm-3">
-                                <label for="N°Factura">N°Factura </label>
-                                <input class="form-control" readonly="true" type="text" autofocus="true"
-                                       name="numeroComprobante" id="numeroComprobante" />
-                            </div>
-
-                            <div class="col-sm-3">
-                                <label for="tipoFactura">TipoFactura</label>
-                                <select class="form-control" name="tipoFactura" id="tipoFactura">
-                                    <option> Tipo Fctura</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-3">
-                                <label for="condicionVenta">CondicionVenta</label>
-                                <select class="form-control" name="condicionVenta" id="condicionVenta">
-                                    <option>Condicion Venta</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="cobrador">Cobrador</label>
-                                <select class="form-control" id="cobrador" name="cobrador">
-                                    <option>Cobrador</option>
-                                </select>
-
-                            </div>
-                        </div>
-                        <div class="row m-3 ">
-                            <div class="col-lg-6 "> <h5>Detalle Pago</h5>
-                                <input type="hidden" name="tarifa" id="tarifa" />
-                                <div class="row">
-                                    <div class="col-4">
-                                        <label for="periodoPago">Period Pago:</label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" readonly="true" name="periodoPago" id="periodoPago"
-                                               class="form-control" />
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4">
-                                        <label for="cantidadPago">Cant.Pago:</label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" readonly="true" name="cantidadPago" id="cantidadPago"
-                                               class="form-control" />
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4">
-                                        <label for="subTotal">SubTotal:</label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" readonly="true" name="subTotal" id="subTotal"
-                                               class="form-control" />
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4">
-                                        <label for="saldo">Saldo</label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" readonly="true" name="saldo" id="saldo"
-                                               class="form-control" />
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4">
-                                        <label for="recargoPago">Recargo:</label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" readonly="true" name="recargoPago" id="recargoPago"
-                                               class="form-control" />
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-4">
-                                        <label for="totalImporte">Total Importe</label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="text" readonly="true" name="totalImporte" id="totalImporte"
-                                               class="form-control" />
-                                    </div>
-                                </div>
-                                <div  class=" bg-body m-3"> <h5>Metodo Pago</h5>
-                                    <div id="detalle-pago"> </div>
-
-                                </div>
-                            </div>
-                            <div class="motivoAnulacion form-floating col-lg-6 ">
-                                <textarea class="form-control text-area" placeholder="Ingrese motivo de anulacion"
-                                          id="motivoAnulacion"></textarea>
-                                <label for="obs">Motivo de anulacion </label>
-                            </div>
+                    <div class="row d-flex m-1">
+                        <div class="col-sm-3">
+                            <label for="cuentaCorriente">Cuentacorriente </label>
+                            <input class="form-control" readonly="true" type="search" name="cuentaCorriente"
+                                   id="cuentaCorriente" />
                         </div>
 
-                        <input type="submit" name="guardar" value="Anular" class="btn-guardar my-3 offset-10" />
+                        <input type="text" class="d-none" name="codigoUsuario" id="codigoUsuario">
+                            <div class="col-sm-3">
+                                <label for="numeroDocumento">RUC/CI </label>
+                                <input class="form-control" type="text" id="numeroDocumento" name="numeroDocumento"
+                                       readonly="true" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="buscarUsuario">Razon Social </label>
+                                <input class="form-control" type="text" id="razonSocial" />
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="categoria">Categoria</label>
+                                <select class="form-control" id="categoria">
+                                    <option>Categoria</option>
+                                </select>
+                            </div>
 
-                    </form>
+                            <div class="col-md-2">
+                                <label for="sucursalModal">Sucursal</label>
+                                <select class="form-control"  id="sucursalModal">
+                                    <option>Sucursal</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="puntoExpedicionaModal">PuntoExpedicion</label>
+                                <select class="form-control" id="puntoExpedicionModal">
+                                    <option />Punto Expedicion
+                                </select>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="serieModal">Serie</label>
+                                <select class="form-control" name="serieModal" id="serieModal">
+                                    <option />Serie
+                                </select>
+                                </select>
+                            </div>
+                    </div>
+                    <div class="row d-flex m-1">
+                        <div class="col-md-3">
+                            <label for="numeroComprobante">N°Comprobante </label>
+                            <input class="form-control" readonly="true" type="text" autofocus="true"
+                                   name="numeroComprobante" id="numeroComprobante" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="tipoComprobante">TipoComprobante</label>
+                            <select class="form-control" name="tipoFactura" id="tipoComprobante">
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="condicionVenta">CondicionVenta</label>
+                            <select class="form-control" name="condicionVenta" id="condicionVenta">
+                                <option>Condicion Venta</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="estado">Estado</label>
+                            <select class="form-control" id="estado" >
+                                <option th:each="estado : ${estados}"
+                                        th:value="${estado.codigoEstado}"
+                                        th:text="${estado.estado}">
+                                </option>
+                            </select>
+
+                        </div>
+                        <div class="col-md-6">
+                            <label for="cobrador">Cobrador</label>
+                            <select  class="form-control" id="cobrador" name="cobrador">
+                                <option th:each ="cobrador: ${cobradores}"
+                                        th:value=${cobrador.codigoCobrador}
+                                        th:text="${cobrador.nombre}+' '+ ${cobrador.apellido}"/>
+                            </select>
+
+                        </div>
+                        <div class="col-md-3" >
+                            <label for="fechaPago">Fecha Pago </label>
+                            <input  class="form-control"   name="fechaPago" id="fechaPago" />
+                        </div>
+                    </div>
+                    <div class="row m-3">
+                        <div class="col-lg-6 "> <h5>Detalle Pago</h5>
+                            <input type="hidden" name="tarifa" id="tarifa" />
+                            <div class="row">
+                                <div class="col-4">
+                                    <label for="periodoPago">Period Pago:</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" readonly="true" name="periodoPago" id="periodoPago"
+                                           class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <label for="cantidadPago">Cant.Pago:</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" readonly="true" name="cantidadPago" id="cantidadPago"
+                                           class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <label for="subTotal">SubTotal:</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" readonly="true" name="subTotal" id="subTotal"
+                                           class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <label for="saldo">Saldo</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" readonly="true" name="saldo" id="saldo"
+                                           class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <label for="recargoPago">Recargo:</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" readonly="true" name="recargoPago" id="recargoPago"
+                                           class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <label for="totalImporte">Total Importe</label>
+                                </div>
+                                <div class="col">
+                                    <input type="text" readonly="true" name="totalImporte" id="totalImporte"
+                                           class="form-control" />
+                                </div>
+                            </div>
+                            <div  class=" "> <h5>Metodo Pago</h5>
+                                <div id="detalle-pago"> </div>
+
+                            </div>
+                        </div>
+                        <div class=" form-floating col-lg-6 d-none" id="motivoAnulacionContainer">
+                            <textarea class="form-control" placeholder="Ingrese motivo de anulacion"
+                                      id="motivoAnulacion"></textarea>
+                            <label for="obs">Motivo de anulacion </label>
+                        </div>
+                    </div>
+
+                    <button  id="guardar"  class="btn-primario me-4 mb-3 offset-9" >Guardar</button>
+
                 </div>
             </div>
         </div>
@@ -257,67 +279,82 @@
 
         <footer th:replace="~{layout/layout :: footer}"> </footer>
         <script type="module" >
-            import { buscarComprobantes, getComprobanteAnular} from '/js/comprobante.js';
-            let numeroComprobante = '';
-            $("#txtBuscar").keypress(function (e) {
-                numeroComprobante = $("#txtBuscar").val();
-                $("#txtBuscar").val(numeroComprobante.replace(/[^0-9]/g, '').padStart(7, 0));
-            });
+            import { buscarComprobantes, cargarDatosComprobanteModal, modificarComprobante} from '/js/comprobante.js';
+            import {datePickerInit, modificar, mostrarAlerta} from '/js/modulos.js';
 
-            let time;
-            $("#txtBuscar").keyup(function (e) {
-                clearTimeout(time);
-                time = setTimeout(() => {
-                    buscarComprobantes();
-                }, 300);
-            });
+            datePickerInit('#fechaPago');
+            $("#txtBuscar").focus();
 
-            $('#tabla').on('click', 'tr td #anular', function () {
-                let codigoTipoFactura = $(this).closest('tr').find('td:eq(0)').data('id');
-                let codigoPuntoExpedicion = $(this).closest('tr').find('td:eq(1)').data('id');
-                let numeroComprobante = $(this).closest('tr').find('td:eq(2)').data('id');
-                let codigoSucursal = $('#sucursal').val();
-                let codigoSerie = $('#serie').val();
-                var datos = {
-                    puntoExpedicionPK: {
-                        codigoSucursal: codigoSucursal,
-                        codigoPuntoExpedicion: codigoPuntoExpedicion
-                    },
-                    codigoTipoFactura: codigoTipoFactura,
-                    codigoSerie: codigoSerie,
-                    numeroComprobante: numeroComprobante
-                };
-                getComprobanteAnular(datos);
-
-            });
-        </script>
-        <script>
             $(document).on('change', '#serie, #puntoExpedicion', function () {
                 buscarComprobantes();
             });
 
 
+            let time;
+            $("#txtBuscar").keyup(function (e) {
+                let numeroComprobante = '';
+                numeroComprobante = $("#txtBuscar").val();
+//                    $("#txtBuscar").val(numeroComprobante.replace(/[^0-9]/g, '').padStart(7, 0));
+                    clearTimeout(time);
+                    time = setTimeout(() => {
+                        buscarComprobantes();
+                    }, 400);
+                
 
-
-            $('#tabla').on('click', 'tr td #verComprobante', function () {
-                let codigoTipoFactura = $(this).closest('tr').find('td:eq(0)').data('id');
+            });
+            var url;
+            $('#tabla').on('click', 'tr td #anular', function () {
+                $('#motivoAnulacionContainer').removeClass('d-none');
+                $('#fechaPago').prop('disabled', true);
+                url = '/comprobante/anular';
+                let codigoTipoComprobante = $(this).closest('tr').find('td:eq(0)').data('id');
                 let codigoPuntoExpedicion = $(this).closest('tr').find('td:eq(1)').data('id');
                 let numeroComprobante = $(this).closest('tr').find('td:eq(2)').data('id');
+                let codigoSerie = $(this).closest('tr').find('td:eq(3)').data('id');
                 let codigoSucursal = $('#sucursal').val();
-                let codigoSerie = $('#serie').val();
-                console.log('hola');
                 var datos = {
                     puntoExpedicionPK: {
                         codigoSucursal: codigoSucursal,
                         codigoPuntoExpedicion: codigoPuntoExpedicion
                     },
-                    codigoTipoFactura: codigoTipoFactura,
+                    codigoTipoComprobante: codigoTipoComprobante,
                     codigoSerie: codigoSerie,
                     numeroComprobante: numeroComprobante
                 };
-                getComprobanteAnular(datos);
+                cargarDatosComprobanteModal(datos);
 
             });
+
+            $('#tabla').on('click', 'tr td #editar', function () {
+                url = '/comprobante/guardar';
+                $('#motivoAnulacionContainer').addClass('d-none');
+                $('#fechaPago').prop('disabled', false);
+                let codigoTipoComprobante = $(this).closest('tr').find('td:eq(0)').data('id');
+                let codigoPuntoExpedicion = $(this).closest('tr').find('td:eq(1)').data('id');
+                let numeroComprobante = $(this).closest('tr').find('td:eq(2)').data('id');
+                let codigoSerie = $(this).closest('tr').find('td:eq(3)').data('id');
+                let codigoSucursal = $('#sucursal').val();
+                $('#fechaPago').prop('readonly', false);
+
+                let datos = {
+                    puntoExpedicionPK: {
+                        codigoSucursal: codigoSucursal,
+                        codigoPuntoExpedicion: codigoPuntoExpedicion
+                    },
+                    codigoTipoComprobante: codigoTipoComprobante,
+                    codigoSerie: codigoSerie,
+                    numeroComprobante: numeroComprobante
+                };
+                cargarDatosComprobanteModal(datos, 'editar');
+
+
+            });
+
+            $('#guardar').on('click', function () {
+                modificarComprobante(url);
+            });
+
+
 
         </script>
     </body>

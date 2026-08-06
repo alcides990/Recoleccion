@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -31,8 +30,8 @@ public class ComprobantePK implements Serializable {
     private PuntoExpedicionPK puntoExpedicionPK;
 
     @Basic(optional = false)
-    @Column(name = "codigo_tipo_factura", nullable = false)
-    private Integer codigoTipoFactura;
+    @Column(name = "codigo_tipo_comprobante", nullable = false)
+    private Integer codigoTipoComprobante;
 
     @Basic(optional = false)
     @Column(name = "codigo_serie", nullable = false)

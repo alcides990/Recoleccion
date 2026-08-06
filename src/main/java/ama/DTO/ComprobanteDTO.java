@@ -3,9 +3,11 @@ package ama.DTO;
 import ama.dominio.Categoria;
 import ama.dominio.Cobrador;
 import ama.dominio.CondicionVenta;
+import ama.dominio.Estado;
 import ama.dominio.Serie;
-import ama.dominio.TipoFactura;
+import ama.dominio.TipoComprobante;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,7 +21,8 @@ public class ComprobanteDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private TipoFactura tipoFactura;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private TipoComprobante tipoComprobante;
     private CondicionVenta condicionVenta;
     @ToString.Exclude
     List<DetallePagoDTO> detallePago;
@@ -41,7 +44,8 @@ public class ComprobanteDTO implements Serializable {
     private double recargo;
     private double saldo;
     private double importe;
-    private String estado;
+    private Estado estado;
+    private String motivoAnulacion;
 
     public ComprobanteDTO() {
         this.detallePago = new ArrayList<>();

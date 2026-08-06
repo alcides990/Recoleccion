@@ -37,6 +37,10 @@ public class Categoria implements Serializable {
     private Sucursal sucursal;
 
     public Categoria() {
+        
+    }
+    public Categoria(Integer  codigoCategoria) {
+        this.codigoCategoria=codigoCategoria;
     }
     
     public String getNombreCategoria() {

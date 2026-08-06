@@ -1,59 +1,63 @@
 <!DOCTYPE html>
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{layout/layout :: heat}"> </head>
-
-<body>
-    <header th:replace="~{layout/layout :: header}"> </header>
-    <aside th:replace="~{layout/layout :: aside}"> </aside>
-
-    </head>
+    <head th:replace="~{layout/layout :: heat}"> </head>
 
     <body>
-        <div class="container card ">
-            <div class="card">
-                <h1>Sucursales</h1>
-            </div>
-            <div th:if="${info}" class="mensaje-alerta alert alert-success">
-                <span th:text="${info}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <a th:href="@{/sucursal/agregar}" class="btn btn-primary btn-sm mb-3 col-sm-2">Crear Sucursal</a>
-            <div class="table-responsive-sm">
-                <table class="table table-border table-striped table-colapse table-hover table-lg ">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Codigo sucursal</th>
-                            <th>Sucursal</th>
-                            <th>Ciudad</th>
-                            <th>Celular</th>
-                            <th>Telefono</th>
-                            <th>Direccion</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-secondary">
-                        <tr th:each="sucursal : ${sucursales}">
-                            <td th:text="${sucursal.codigoSucursal}"> </td>
-                            <td th:text="${sucursal.nombreSucursal}"> Mostrar Sucursal </td>
-                            <td th:text="${sucursal.ciudad.nombreCiudad}"> Mostrar Ciudad </td>
-                            <td th:text="${sucursal.celular}"> Mostrar Ciudad </td>
-                            <td th:text="${sucursal.telefono}"> Mostrar Ciudad </td>
-                            <td th:text="${sucursal.direccion}"> Mostrar Ciudad </td>
-                            <td>
-                                <a th:href="@{/sucursal/editar/} + ${sucursal.codigoSucursal}"
-                                    class="btn btn-info btn-sm" th:text="Editar" />
-                                <a th:href="@{/sucursal/eliminar(codigoSucursal=${sucursal.codigoSucursal})}"
-                                    class="btn btn-danger btn-sm " th:text="Eliminar" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <header th:replace="~{layout/layout :: header}"> </header>
+        <aside th:replace="~{layout/layout :: aside}"> </aside>
+
+        </head>
+
+        <body>
+            <div class="container">
+                <div class="form-title">
+                    <h3>Sucursales</h3>
+                </div>
+                <div th:if="${info}" class="mensaje-alerta alert alert-success">
+                    <span th:text="${info}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <a th:href="@{/sucursal/agregar}" class="btn btn-primario m-2">Agregar</a>
+                <div class="table-responsive-sm">
+                    <table class="table table-border table-striped table-colapse table-hover table-lg ">
+                        <thead class="bg-color">
+                            <tr>
+                                <th>Codigo sucursal</th>
+                                <th>Sucursal</th>
+                                <th>Ciudad</th>
+                                <th>Celular</th>
+                                <th>Telefono</th>
+                                <th>Direccion</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-secondary">
+                            <tr th:each="sucursal : ${sucursales}">
+                                <td th:text="${sucursal.codigoSucursal}"> </td>
+                                <td th:text="${sucursal.nombreSucursal}"> Mostrar Sucursal </td>
+                                <td th:text="${sucursal.ciudad.nombreCiudad}"> Mostrar Ciudad </td>
+                                <td th:text="${sucursal.celular}"> Mostrar Ciudad </td>
+                                <td th:text="${sucursal.telefono}"> Mostrar Ciudad </td>
+                                <td th:text="${sucursal.direccion}"> </td>
+                                <td>
+                                    <a th:href="@{/sucursal/editar/} + ${sucursal.codigoSucursal}"
+                                       class="btn btn-info btn-sm"  >
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                    </a>
+                                    <a th:href="@{/sucursal/eliminar(codigoSucursal=${sucursal.codigoSucursal})}"
+                                       class="btn btn-danger btn-sm "  >
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
 
-        </div>
-        <footer th:replace="~{layout/layout :: footer}"> </footer>
-    </body>
+            </div>
+            <footer th:replace="~{layout/layout :: footer}"> </footer>
+        </body>
 
 </html>

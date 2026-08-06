@@ -1,15 +1,16 @@
 package ama.dominio;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "servicios")
 public class Servicio implements Serializable {
@@ -60,10 +61,13 @@ public class Servicio implements Serializable {
     @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Manzana manzana;
 
-    @JsonIgnore
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "codigo_zona", referencedColumnName = "codigo_zona")
-    private Zona zona;
+//    @JsonIgnore
+//    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+//    @JoinColumn(name = "codigo_zona", referencedColumnName = "codigo_zona")
+//    private Zona zona;
+    public Servicio(String cuentaCorriente) {
+        this.cuentaCorriente = cuentaCorriente;
+    }
 
     private String observacion;
 
