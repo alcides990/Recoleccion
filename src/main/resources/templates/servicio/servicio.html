@@ -3,13 +3,20 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
     <head th:replace="~{layout/layout :: heat}"> </head>
+    <link th:if="${versionDos}" rel="stylesheet" href="/css/serviciov2/estilo.css">
 
     <body>
         <header th:replace="~{layout/layout :: header}"> </header>
         <aside th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container-fluid">
 
-            <h3 class="form-title">Cuentas</h3>
+            <header class="form-view-header">
+                <div>
+                    <h3>Cuentas</h3>
+                    <p>Administre los servicios, titulares, categorías y estados de cuenta.</p>
+                </div>
+                <span class="form-view-icon"><i class="fa-solid fa-address-card"></i></span>
+            </header>
             <div class="d-md-flex py-2">
                 <div class="col-sm-2">
                     <a class="btn btn-primario btn-sm mb-2 " name="btnAgrerar" id="btnAgrerar" data-toggle="modal"
@@ -17,7 +24,7 @@
                         <i class="fa-solid fa-plus fa-lg"></i> Agregar
                     </a>
                 </div>
-                <div class="input-group my-1">
+                <div class="input-group my-1" th:if="${versionDos != true}">
                     <input name="txtBuscar" id="txtBuscarServicio" type="search" class="col p-2" autofocus="true"
                            placeholder="Buscar por cta. corriente/ nombre/ ruc" aria-label="Buscar"
                            aria-describedby="search-addon" />
@@ -25,11 +32,12 @@
             </div>
             <div class="mensaje-alerta" id="contenedor-alertas"> </div>
             <div class="table-responsive-xl">
-                <table id="tabla-servicio" class="table table-border table-striped table-colapse table-hover">
+                <table id="tabla-servicio" class="table table-border table-striped table-colapse table-hover"
+                       th:data-server-side="${versionDos}">
 
                     <thead class="bg-color">
                         <tr>
-                            <th class="sticky-start ">Cuentacorriente</th>
+                            <th>Cuentacorriente</th>
                             <th>Usuario</th>
                             <th>Fecha Inicio</th>
                             <th>Cagtegoria</th>
@@ -38,14 +46,16 @@
                         </tr>
                     </thead>
                     <tbody id="tbody" class="table-secondary  ">
-                        <tr th:each="servicio : ${servicios}">
-                            <td class="sticky-start" th:text="${servicio.cuentaCorriente}"> </td>
+                        <tr th:if="${versionDos != true}" th:each="servicio : ${servicios}">
+                            <td th:text="${servicio.cuentaCorriente}"> </td>
                             <td th:text="${servicio.usuario.nombre} +' '+${servicio.usuario.apellido ?: ''}"> </td>
                             <td th:text="${servicio.fechaInicio}"></td>
                             <td th:text="${servicio.categoria.tarifa}+'-'+${servicio.categoria.nombreCategoria}"></td>
                             <td th:text="${servicio.estado.estado}"></td>
-                            <td class="text-center"><a th:href="@{/servicio/estadoCuenta(cuentaCorriente=${servicio.cuentaCorriente})}"
-                                                       class="btn btn-primario btn-sm" th:text="EstadoCuenta" />  
+                            <td class="text-center"><button type="button" class="btn btn-primario btn-sm estado-cuenta"
+                                                       th:data-id="${servicio.cuentaCorriente}">
+                                    Estado Cuenta
+                                </button>
                                 <a sec:authorize="hasAnyAuthority('ADMIN','ROOT')" id="editar"
                                    th:data-id="${servicio.cuentaCorriente}" class="btn btn-info btn-sm"
                                    data-bs-toggle="modal" data-bs-target="#servicioModal">
@@ -59,78 +69,118 @@
                         </tr>
                     </tbody>
                 </table>
-                <nav th:replace="~{layout/paginador :: paginador}"> </nav>
+                <div th:if="${versionDos != true}">
+                    <nav th:replace="~{layout/paginador :: paginador}"> </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="estadoCuentaModal" tabindex="-1" aria-labelledby="estadoCuentaModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-color">
+                        <h5 class="modal-title" id="estadoCuentaModalLabel">Estado de Cuenta</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="estadoCuentaError" class="alert alert-danger d-none"></div>
+                        <div id="estadoCuentaContenido">
+                            <div class="row mb-3">
+                                <div class="col-md-4"><strong>Cuenta corriente:</strong><br><span id="resumenCuenta"></span></div>
+                                <div class="col-md-8"><strong>Usuario:</strong><br><span id="resumenUsuario"></span></div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Último pago</label><input id="resumenUltimoPago" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Pago desde</label><input id="resumenPagoDesde" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Cantidad de períodos</label><input id="resumenCantidadPeriodos" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Tarifa</label><input id="resumenTarifa" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Subtotal</label><input id="resumenSubtotal" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Saldo</label><input id="resumenSaldo" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Recargo</label><input id="resumenRecargo" class="form-control" readonly></div>
+                                <div class="col-md-4 ms-auto"><label class="form-label fw-bold">Total</label><input id="resumenTotal" class="form-control fw-bold" readonly></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a id="verEstadoCuentaCompleto" class="btn btn-primario">Ver estado completo</a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Ventana modal -->
         <div class="modal fade" id="servicioModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content bg-color">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmacionModalLabel">Datos de Servicio</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+             aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                <div class="modal-content servicio-v2-modal">
+                    <div class="modal-header servicio-v2-header">
+                        <div>
+                            <span class="servicio-v2-kicker">Gestión de cuentas</span>
+                            <h5 class="modal-title" id="confirmacionModalLabel">Datos del servicio</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form name="frm-servicio" id="frm-servicio" action="/servicio/guardar" method="post">
-                        <div class="container-md row d-md-flex align-content-center justify-content-start">
-                            <input type="text" hidden="true" name="accion" id="accion">
-                                <div class="form-label col-md-3">
-                                    <label class="form-label" for="cuentaCorriente">Cuentacorriente </label>
-                                    <input type="text" id="cuentaCorriente"
-                                           onkeyup="formatearCuentaCorriente(event)" 
-                                           name="cuentaCorriente" class="form-control " />
+                        <div class="modal-body servicio-v2-body">
+                            <input type="hidden" name="accion" id="accion">
+                            <input type="hidden" id="codigoUsuario" name="codigoUsuario">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label" for="cuentaCorriente">Cuenta corriente</label>
+                                    <input type="text" id="cuentaCorriente" onkeyup="formatearCuentaCorriente(event)"
+                                           name="cuentaCorriente" class="form-control" required>
                                 </div>
-
-                                <input type="text" hidden="true" id="codigoUsuario" name="codigoUsuario" />
-                                <div class="form-group col-md-3">
-                                    <label class="form-label" for="numeroDocumento">NumeroDocumento </label>
-                                    <input type="text" id="numeroDocumento" name="numeroDocumento" readonly=""
-                                           class="form-control" required="campo ogligatorio" />
+                                <div class="col-md-3">
+                                    <label class="form-label" for="numeroDocumento">RUC / CI</label>
+                                    <input type="text" id="numeroDocumento" name="numeroDocumento"
+                                           class="form-control" readonly required>
                                 </div>
-                                <div class=" form-group col-md-6">
-                                    <div>
-                                        <label class="form-label" for="buscarUsuario">Usuario </label>
-                                        <input class="form-control" type="text" name="buscarUsuario" id="buscarUsuario"
-                                               placeholder="Busca por: ruc/ci o nombres" required="true" />
-                                    </div>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="buscarUsuario">Usuario</label>
+                                    <input class="form-control" type="text" name="buscarUsuario" id="buscarUsuario"
+                                           placeholder="Buscar por RUC, CI o nombre" required>
                                 </div>
-
-                                <div class="form-group col-md-3">
-                                    <label class="form-label" for="fechaInicio">Fecha Inicio </label>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="fechaInicio">Fecha de inicio</label>
                                     <input type="text" name="fechaInicio" id="fechaInicio" th:value="${fechaInicio}"
-                                           autocomplete="off" class="form-control" required="campo ogligatorio" />
+                                           autocomplete="off" class="form-control" required>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <label for="categoria">Categoria</label>
-                                    <select th:object="${categoria}" class="form-control" id="categoria" name="categoria">
+                                <div class="col-md-8">
+                                    <label class="form-label" for="categoria">Categoría</label>
+                                    <select th:object="${categoria}" class="form-select" id="categoria" name="categoria">
                                         <option th:each="categoria : ${categorias}" th:value="${categoria.codigoCategoria}"
-                                                th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} " />
+                                                th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa}" />
                                     </select>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <label for="direccion">Direccion</label>
-                                    <input type="text" name="direccion" id="direccion"  class="form-control" />
+                                <div class="col-12">
+                                    <label class="form-label" for="direccion">Dirección</label>
+                                    <input type="text" name="direccion" id="direccion" class="form-control"
+                                           placeholder="Dirección del servicio">
                                 </div>
-
-                                <div class="form-group col-md-4">
+                                <div class="col-md-8">
                                     <label class="form-label" for="sucursal">Sucursal</label>
-                                    <select th:object="${sucursal}" class="form-control" name="sucursal" id="sucursal">
+                                    <select th:object="${sucursal}" class="form-select" name="sucursal" id="sucursal">
                                         <option th:each="sucursal : ${sucursales}" th:value="${sucursal.codigoSucursal}"
-                                                th:text="${sucursal.nombreSucursal} +'-' +${sucursal.ciudad.nombreCiudad }" />
+                                                th:text="${sucursal.nombreSucursal} +'-' +${sucursal.ciudad.nombreCiudad}" />
                                     </select>
                                 </div>
-                                <div class="form-group col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label" for="estado">Estado</label>
-                                    <select th:object="${estado}" class="form-control" name="estado" id="estado">
-                                        <option th:each="estado : ${estado} " th:value="${estado.codigoEstado}"
+                                    <select th:object="${estado}" class="form-select" name="estado" id="estado">
+                                        <option th:each="estado : ${estado}" th:value="${estado.codigoEstado}"
                                                 th:text="${estado.estado}" />
                                     </select>
                                 </div>
+                            </div>
                         </div>
-                        <input type="submit" name="guardar" value="Guardar" class="btn-primario  m-3" />
+                        <div class="modal-footer servicio-v2-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" name="guardar" class="btn btn-primario">
+                                <i class="fa-solid fa-floppy-disk"></i> Guardar servicio
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -143,10 +193,12 @@
         <script src="/js/validarFormulario.js" async="true"></script>
         <script type="module">
             
-           import {}
-           from  '/js/buscarServicios.js';
            import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador, tabular, datePickerInit}
            from  '/js/modulos.js';
+
+          if (document.getElementById('tabla-servicio').dataset.serverSide !== 'true') {
+              import('/js/buscarServicios.js');
+          }
 
           eliminarRegistro('Seguro que desea eliminar el cuenta de usuario');
           tabulador('#cuentaCorriente', '#buscarUsuario');
@@ -162,6 +214,43 @@
           var accion = "";
           var campos = ["#cuentaCorriente", "#fechaInicio", "#buscarUsuario", "#numeroDocumento"];
 
+          const formatoNumero = new Intl.NumberFormat('es-PY', {maximumFractionDigits: 0});
+          const formatoFecha = fecha => {
+              if (!fecha) return 'Sin pagos';
+              const [anio, mes, dia] = fecha.split('-');
+              return `${dia}-${mes}-${anio}`;
+          };
+
+          $(document).on('click', '.estado-cuenta', async function () {
+              const cuentaCorriente = $(this).data('id');
+              const modal = new bootstrap.Modal(document.getElementById('estadoCuentaModal'));
+              $('#estadoCuentaError').addClass('d-none').text('');
+              $('#estadoCuentaContenido').addClass('d-none');
+              $('#verEstadoCuentaCompleto').attr('href', '/servicio/estadoCuenta?cuentaCorriente=' + encodeURIComponent(cuentaCorriente));
+              modal.show();
+
+              try {
+                  const respuesta = await fetch('/servicio/estadoCuenta/resumen?cuentaCorriente=' + encodeURIComponent(cuentaCorriente));
+                  if (!respuesta.ok) {
+                      throw new Error(await respuesta.text() || 'No se pudo consultar el estado de cuenta');
+                  }
+                  const resumen = await respuesta.json();
+                  $('#resumenCuenta').text(resumen.cuentaCorriente);
+                  $('#resumenUsuario').text(resumen.usuario);
+                  $('#resumenUltimoPago').val(formatoFecha(resumen.ultimoPago));
+                  $('#resumenPagoDesde').val(resumen.pagoDesde || '');
+                  $('#resumenCantidadPeriodos').val(resumen.cantidadPeriodos);
+                  $('#resumenTarifa').val(formatoNumero.format(resumen.tarifa));
+                  $('#resumenSubtotal').val(formatoNumero.format(resumen.subTotal));
+                  $('#resumenSaldo').val(formatoNumero.format(resumen.saldoAnterior));
+                  $('#resumenRecargo').val(formatoNumero.format(resumen.recargo));
+                  $('#resumenTotal').val(formatoNumero.format(resumen.totalDeuda));
+                  $('#estadoCuentaContenido').removeClass('d-none');
+              } catch (error) {
+                  $('#estadoCuentaError').removeClass('d-none').text(error.message);
+              }
+          });
+
           $("#servicioModal").on('shown.bs.modal', function () {
               tabular("#cuentaCorriente");
           });
@@ -169,11 +258,15 @@
           $("#btnAgrerar").click(function (event) {
               event.preventDefault();
               limpiar(campos);
+              $("#confirmacionModalLabel").text("Nuevo servicio");
+              $("#cuentaCorriente").prop("readonly", false);
+              $("#fechaInicio").prop("disabled", false);
               $("#accion").val("agregar");
               $("#servicioModal").modal('show');
           });
 
           $(document).on('click', '#editar', function (event) {
+              $("#confirmacionModalLabel").text("Editar servicio");
               $("#cuentaCorriente").prop("readonly", true);
               let roles = $("#roles").text();
               if (!(roles.includes('ROOT') || roles.includes('ADMINISTRADOR'))) {
@@ -232,6 +325,7 @@
 
                                                });
         </script>
+        <script th:if="${versionDos}" src="/js/serviciov2/tabla.js"></script>
     </body>
 
 </html>

@@ -1,0 +1,368 @@
+#formularioReportes {
+    max-width: 72rem;
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+}
+
+#formularioReportes .reportes-intro {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: .95rem;
+    padding: 1.15rem 1.25rem;
+    border: 1px solid var(--borde-suave);
+    border-radius: .72rem;
+    background: var(--superficie-color);
+    box-shadow: var(--sombra-suave);
+}
+
+#formularioReportes .reportes-intro h4 {
+    margin: 0;
+    color: #343a40;
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+#formularioReportes .reportes-intro p {
+    margin: .28rem 0 0;
+    color: #68727a;
+    font-size: .9rem;
+}
+
+#formularioReportes .reportes-intro-icon {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    flex: 0 0 2.65rem;
+    place-items: center;
+    border-radius: .6rem;
+    background: var(--btn-color);
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+#formularioReportes .reportes-opciones {
+    margin-top: .15rem;
+}
+
+#formularioReportes .reportes-resumen {
+    margin-top: .15rem;
+}
+
+#formularioReportes .reporte-metrica {
+    display: flex;
+    min-height: 7.15rem;
+    align-items: center;
+    gap: .9rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--borde-suave);
+    border-radius: .72rem;
+    background: var(--superficie-color);
+    box-shadow: var(--sombra-suave);
+}
+
+#formularioReportes .reporte-metrica-icon {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    place-items: center;
+    border-radius: .58rem;
+    background: var(--btn-color);
+    color: #fff;
+    font-size: 1.12rem;
+}
+
+#formularioReportes .reporte-metrica-titulo,
+#formularioReportes .reporte-metrica small {
+    display: block;
+}
+
+#formularioReportes .reporte-metrica-titulo {
+    color: #555e66;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+#formularioReportes .reporte-metrica strong {
+    display: block;
+    margin: .08rem 0;
+    color: #343a40;
+    font-size: 1.6rem;
+    line-height: 1.1;
+}
+
+#formularioReportes .reporte-metrica small {
+    color: #69727a;
+    font-size: .78rem;
+}
+
+#formularioReportes .reporte-opcion {
+    display: flex;
+    width: 100%;
+    min-height: 8.2rem;
+    align-items: center;
+    gap: .9rem;
+    padding: 1.05rem;
+    border: 1px solid var(--borde-suave);
+    border-radius: .72rem;
+    background: var(--superficie-color);
+    color: #343a40;
+    box-shadow: var(--sombra-suave);
+    text-align: left;
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+#formularioReportes .reporte-opcion:hover,
+#formularioReportes .reporte-opcion:focus {
+    border-color: var(--btn-color);
+    box-shadow: 0 .7rem 1.35rem rgba(33, 37, 41, .18);
+    transform: translateY(-2px);
+}
+
+#formularioReportes .reporte-opcion-icon {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    place-items: center;
+    border-radius: .58rem;
+    background: var(--btn-color);
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+#formularioReportes .reporte-opcion-contenido {
+    display: grid;
+    gap: .2rem;
+    min-width: 0;
+}
+
+#formularioReportes .reporte-opcion-contenido strong {
+    color: #343a40;
+    font-size: 1rem;
+}
+
+#formularioReportes .reporte-opcion-contenido small {
+    color: #69727a;
+    font-size: .83rem;
+    line-height: 1.45;
+}
+
+#formularioReportes .reporte-opcion-flecha {
+    margin-left: auto;
+    color: #7a848c;
+    font-size: .85rem;
+}
+
+/* Los botones abren filtros en un modal; los enlaces navegan a un reporte completo. */
+#formularioReportes button.reporte-opcion {
+    border-color: rgba(73, 80, 87, .22);
+    border-left: .25rem solid transparent;
+    background: #f1f3f5;
+}
+
+#formularioReportes button.reporte-opcion .reporte-opcion-icon {
+    background: #7a848c;
+}
+
+#formularioReportes button.reporte-opcion:hover,
+#formularioReportes button.reporte-opcion:focus {
+    border-color: #7a848c;
+    border-left-color: var(--btn-color);
+    background: #e9ecef;
+}
+
+#formularioReportes a.reporte-opcion {
+    border-left: .25rem solid var(--btn-color);
+}
+
+
+.reporte-modal {
+    overflow: hidden;
+    border: 0;
+    border-radius: .75rem;
+    background: #fff;
+    box-shadow: 0 .8rem 2.2rem rgba(33, 37, 41, .26);
+}
+
+.reporte-modal .modal-header {
+    align-items: center;
+    padding: .85rem 1rem 0;
+    border: 0;
+}
+
+.reporte-modal .modal-header .form-title {
+    flex: 1;
+    margin-bottom: .85rem;
+    font-size: 1rem;
+}
+
+.reporte-modal .modal-header .btn-close {
+    margin: 0 0 .85rem .8rem;
+}
+
+.reporte-modal .mensaje-alerta {
+    position: static;
+    margin: 0 1rem;
+}
+
+.reporte-modal .mensaje-alerta .alert {
+    align-items: center;
+    margin: 0 0 .75rem;
+    padding: .72rem 2.8rem .72rem .85rem;
+    border-width: 1px;
+    border-radius: .5rem;
+    opacity: 1;
+    color: #fff;
+    font-size: .86rem;
+    font-weight: 700;
+    line-height: 1.4;
+    box-shadow: 0 .3rem .8rem rgba(33, 37, 41, .2);
+}
+
+.reporte-modal .mensaje-alerta .alert-danger {
+    border-color: #842029;
+    background-color: #b02a37;
+}
+
+.reporte-modal .mensaje-alerta .alert-warning {
+    border-color: #664d03;
+    background-color: #997404;
+}
+
+.reporte-modal .mensaje-alerta .alert-success {
+    border-color: #0f5132;
+    background-color: #198754;
+}
+
+.reporte-modal .mensaje-alerta .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: .9;
+}
+
+.reporte-modal-body {
+    padding: .4rem 1.35rem 1.25rem;
+}
+
+.reporte-modal-descripcion {
+    margin: 0 0 1.1rem;
+    color: #68727a;
+    font-size: .88rem;
+}
+
+.reporte-modal .form-label {
+    margin-bottom: .33rem;
+    color: #4d555c;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.reporte-modal .form-control,
+.reporte-modal .form-select {
+    min-height: 2.45rem;
+    border-color: rgba(108, 117, 125, .36);
+    border-radius: .48rem;
+}
+
+.reporte-modal .form-control:focus,
+.reporte-modal .form-select:focus {
+    border-color: var(--btn-color);
+    box-shadow: 0 0 0 .15rem rgba(108, 117, 125, .18);
+}
+
+.reporte-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-bottom: 1.1rem;
+    padding: .75rem .85rem;
+    border: 1px solid rgba(108, 117, 125, .2);
+    border-radius: .55rem;
+    background: rgba(108, 117, 125, .06);
+}
+
+.reporte-switch strong,
+.reporte-switch span {
+    display: block;
+}
+
+.reporte-switch strong {
+    color: #434b52;
+    font-size: .86rem;
+}
+
+.reporte-switch span {
+    margin-top: .12rem;
+    color: #737c84;
+    font-size: .76rem;
+}
+
+.reporte-switch .form-check-input {
+    width: 2.25rem;
+    height: 1.2rem;
+    margin: 0;
+    cursor: pointer;
+}
+
+.reporte-switch .form-check-input:checked {
+    border-color: var(--btn-color);
+    background-color: var(--btn-color);
+}
+
+.reporte-modal-footer {
+    gap: .6rem;
+    padding: .85rem 1.35rem 1.2rem;
+    border: 0;
+}
+
+.reporte-modal-footer .btn {
+    min-height: 2.45rem;
+    padding: .46rem .85rem;
+    border-radius: .48rem;
+    font-weight: 700;
+}
+
+.reporte-btn-secundario {
+    border: 1px solid rgba(108, 117, 125, .36);
+    background: #fff;
+    color: #4d555c;
+}
+
+.reporte-btn-secundario:hover,
+.reporte-btn-secundario:focus {
+    background: #f1f3f5;
+    color: #343a40;
+}
+
+.reporte-btn-primario {
+    border: 1px solid var(--btn-color);
+    background: var(--btn-color);
+    color: #fff;
+}
+
+.reporte-btn-primario:hover,
+.reporte-btn-primario:focus {
+    border-color: #565f67;
+    background: #565f67;
+    color: #fff;
+}
+
+@media (max-width: 575.98px) {
+    #formularioReportes .reportes-intro {
+        padding: 1rem;
+    }
+
+    #formularioReportes .reporte-opcion {
+        min-height: 6.8rem;
+        padding: .9rem;
+    }
+
+    .reporte-modal-body,
+    .reporte-modal-footer {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+}

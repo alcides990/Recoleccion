@@ -8,7 +8,7 @@
         <header th:replace="~{layout/layout :: header}"> </header>
         <aside th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container">
-            <h3 class="form-title">Datos Timbrado</h3>
+            <header class="form-view-header"><div><h3>Datos del timbrado</h3><p>Configure número, vigencia y estado del timbrado.</p></div><span class="form-view-icon"><i class="fa-solid fa-stamp"></i></span></header>
             <a th:href="@{/timbrado/listar}" class="btn btn-primary">Regresar</a>
             <form th:action="@{/timbrado/guardar}" method="post" th:object="${timbrado}">
                 <div class=" row d-flex m-5">

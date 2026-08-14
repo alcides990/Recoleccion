@@ -11,6 +11,7 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.util.JRLoader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ContentDisposition;
@@ -31,7 +32,9 @@ public class ReportGenerator {
         try {
             HttpHeaders header = new HttpHeaders();
             InputStream jasperStream = new ClassPathResource(reporte.getRuta()).getInputStream();
-            JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
+            JasperReport jasperReport = reporte.getRuta().endsWith(".jrxml")
+                    ? JasperCompileManager.compileReport(jasperStream)
+                    : (JasperReport) JRLoader.loadObject(jasperStream);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, reporte.getParametros(), reporte.getConexion());
             if (jasperPrint.getPages().isEmpty()) {
                 mensaje.put("mensaje", "Reporte no tiene pagina para mostrar!!");
@@ -50,6 +53,7 @@ public class ReportGenerator {
 
             }
         } catch (IOException | JRException  ex) {
+            log.error("Error al generar el reporte {}", reporte.getNombre(), ex);
              mensaje.put("mensaje", ex.getMessage());
             return ResponseEntity.internalServerError().body(mensaje);
         } finally {

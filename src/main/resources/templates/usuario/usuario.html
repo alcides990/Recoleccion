@@ -1,80 +1,58 @@
 <!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:th="http://www.thymeleaf.org">
-    <head  th:replace="~{layout/layout :: heat}"> </head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" href="/css/usuario/formulario.css">
     <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container-fluid">
-            <div class="card-header" >
-                <h3 class="form-title">Usuarios</h3>
-            </div>
-            <div class="d-md-flex bg-opacity-100">
-                <div class="col-sm-2">
-                    <a th:href="@{/usuario/agregar}" 
-                       class="btn btn-primario btn-sm m-2 ">
-                        <i class="fa-solid fa-plus fa-lg "> </i> Usuario
-                    </a>
-                </div >
-                <div class="input-group m-2 ">
-                    <input name="txtBuscar" id="txtBuscar" type="search" 
-                           class="col p-2"
-                           autofocus="true" placeholder="Buscar por ruc/ci o nombres" 
-                           aria-label="Buscar" aria-describedby="search-addon" />
-                </div> 
-            </div>
-            <div class="mensaje-alerta"id="contenedor-alertas" ></div>
-            <div class="table-responsive-xl">
-                <table class="table table-border table-striped table-colapse table-hover table-xl" >
-                    <thead  class="bg-color">
-                        <tr>
-                            <th>Codigo</th>
-                            <th>Ruc/Ci</th>
-                            <th class="sticky-start">Nombre</th>
-                            <th>Celular</th>
-                            <th>Telefono</th>
-                            <th>Barrio</th>
-                            <th>Direccion</th>
-                            <th>Sucursal</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody  id="tbody" class="table-secondary"  >
-                        <tr  th:each="usuario : ${usuarios}" > 
-                            <td th:text="${usuario.codigoUsuario}"> </td>
-                            <td th:text="${usuario.numeroDocumento}">  </td>
-                            <td class="sticky-start" th:text="${usuario.nombre} +' '+${usuario.apellido}"> </td>
-                            <td th:text="${usuario.celular}"></td>
-                            <td th:text="${usuario.telefono}"></td>
-                            <td th:text="${usuario.barrio}"></td>
-                            <td th:text="${usuario.direccion}"></td>
-                            <td th:text= "${usuario.sucursal.nombreSucursal}+' '+${usuario.sucursal.ciudad.nombreCiudad}"></td>
-                            <td>
-                                <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')" th:href="@{/usuario/editar/} + ${usuario.codigoUsuario}"
-                                   class="btn btn-info btn-sm">
-                                    <i class="fa-regular fa-pen-to-square"></i> 
-                                </a>
-                                <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')" id="eliminar" data-url="/usuario/eliminar/" 
-                                   th:data-id="${usuario.codigoUsuario}" 
-                                   class="btn btn-danger btn-sm" > 
-                                    <i class="fa-solid fa-trash-can "></i> 
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <nav  th:replace="~{layout/paginador :: paginador}"> </nav>
-            </div>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
 
+        <main id="listaUsuarios" class="container-fluid py-3">
+            <section class="usuario-list-header">
+                <div>
+                    <span class="usuario-list-kicker">Clientes y contribuyentes</span>
+                    <h3>Usuarios</h3>
+                    <p>Administre los usuarios registrados en su sucursal.</p>
+                </div>
+                <a th:href="@{/usuario/agregar}" class="btn usuario-list-agregar">
+                    <i class="fa-solid fa-user-plus"></i> Agregar usuario
+                </a>
+            </section>
 
-        </div>
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
-        <script src="/js/buscarUsuario.js"></script>
+            <div id="contenedor-alertas" class="mensaje-alerta mt-3" aria-live="polite"></div>
+
+            <section class="usuario-list-card">
+                <div class="usuario-list-summary">
+                    <div>
+                        <h4>Usuarios registrados</h4>
+                        <p>Puede buscar por documento, nombre, teléfono, barrio o dirección.</p>
+                    </div>
+                    <span id="usuarioTotal" class="badge usuario-list-count">0</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="tablaUsuarios" class="table table-striped table-hover align-middle w-100">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>RUC / CI</th>
+                                <th>Usuario</th>
+                                <th>Contacto</th>
+                                <th>Ubicación</th>
+                                <th>Sucursal - Ciudad</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="/js/usuario/tabla.js"></script>
         <script type="module">
-            import {eliminar} from  '/js/modulos.js';
-                eliminar('Seguro que desea eliminar el usuario');
+            import {eliminar} from '/js/modulos.js';
+            eliminar('¿Seguro que desea eliminar este usuario?');
         </script>
-
     </body>
-
 </html>

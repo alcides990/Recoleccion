@@ -11,6 +11,12 @@ public interface ServicioService {
 
     public Page<Servicio> buscar(Pageable pageable, String filtro);
 
+    public Page<Servicio> listarPorSucursal(Pageable pageable, Integer codigoSucursal);
+
+    public Page<Servicio> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro);
+
+    public long contarPorSucursal(Integer codigoSucursal);
+
 
     public List<String> listaServicioCuenta(Servicio servicio);
 

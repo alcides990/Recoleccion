@@ -8,7 +8,7 @@
         <aside th:replace="~{layout/layout :: aside}"></aside>
 
         <div class="container p-1"> 
-            <div class="card-header"> <h3>Datos del Parametro</h3> </div>
+            <header class="form-view-header"><div><h3>Parámetros del sistema</h3><p>Configure el cierre del período, comisión y recargo de la sucursal.</p></div><span class="form-view-icon"><i class="fa-solid fa-sliders"></i></span></header>
             <div th:if="${mensaje}" class="mensaje-alerta alert alert-success">
                 <span th:text="${mensaje}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

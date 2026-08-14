@@ -1,37 +1,100 @@
 <!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-    <head  th:replace="~{layout/layout :: heat}"> </head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" href="/css/usuarioSistema/formulario.css">
     <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container "> 
-            <div class="card-header">  <h3 class="form-title">Datos Usuario de Sistema</h3></div>
-            <a th:href="@{/usuarioSistema/listar}" class="btn btn-primario">Regresar</a>
-            <form th:action="@{/usuarioSistema/guardar}" method="post" th:object="${usuarioSistema}">
-                <div class="row d-flex m-3">
-                    <div class="col-md-6 ">
-                        <input type="hidden" name="codigoUsuarioSistema"  th:value="*{codigoUsuarioSistema}" />
-                        <label class="form-label" for="usuarioSistema">Usuario </label>
-                        <input class="form-control" type="text" name="nombre"  th:value="*{nombre}" autofocus=""  placeholder="Ingrese nombre de usuario" required=""/>
-                        <label class="form-label" for="clave">Clave </label>
-                        <input class="form-control" type="password" id="clave" name="clave"  th:value="*{clave}" autofocus=""  placeholder="Ingrese su clave" required=""/>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
 
+        <main class="container usuario-sistema-page py-3">
+            <div class="usuario-sistema-card">
+                <header class="usuario-sistema-header form-view-header">
+                    <div>
+                        <span class="usuario-sistema-kicker">Seguridad y acceso</span>
+                        <h3 th:text="${usuarioSistema.codigoUsuarioSistema == null ? 'Agregar usuario del sistema' : 'Editar usuario del sistema'}">
+                            Agregar usuario del sistema
+                        </h3>
+                        <p>Configure las credenciales utilizadas para ingresar al sistema.</p>
                     </div>
-                </div>
-                <input type="submit" name="guardar" value="Guardar" class="btn btn-primario m-3"/>
-               
-            </form>
-        </div>
-        </div>
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+                    <span class="usuario-sistema-icon"><i class="fa-solid fa-user-shield"></i></span>
+                </header>
+
+                <form th:action="@{/usuarioSistema/guardar}" method="post" th:object="${usuarioSistema}">
+                    <input type="hidden" name="codigoUsuarioSistema" th:value="*{codigoUsuarioSistema}">
+                    <div class="usuario-sistema-body">
+                        <section class="usuario-sistema-section">
+                            <h4><i class="fa-solid fa-key"></i> Datos de acceso</h4>
+                            <div class="row g-3">
+                                <div class="col-md-7">
+                                    <label class="form-label" for="nombreUsuarioSistema">Nombre de usuario</label>
+                                    <div class="usuario-sistema-input">
+                                        <i class="fa-regular fa-user"></i>
+                                        <input class="form-control" type="text" id="nombreUsuarioSistema" name="nombre"
+                                               th:value="*{nombre}" autocomplete="username"
+                                               placeholder="Ingrese el nombre de usuario" autofocus required>
+                                    </div>
+                                    <small class="form-text">Este nombre se utilizará para iniciar sesión.</small>
+                                </div>
+
+                                <div class="col-md-5" th:if="${usuarioSistema.codigoUsuarioSistema == null}">
+                                    <label class="form-label" for="clave">Contraseña inicial</label>
+                                    <div class="usuario-sistema-input">
+                                        <i class="fa-solid fa-lock"></i>
+                                        <input class="form-control" type="password" id="clave" name="clave"
+                                               autocomplete="new-password" minlength="4"
+                                               placeholder="Mínimo 4 caracteres" required>
+                                        <button id="mostrarClave" class="usuario-sistema-password-toggle" type="button"
+                                                title="Mostrar contraseña" aria-label="Mostrar contraseña">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <small class="form-text">El usuario podrá cambiarla después de ingresar.</small>
+                                </div>
+
+                                <div class="col-md-5" th:if="${usuarioSistema.codigoUsuarioSistema != null}">
+                                    <div class="usuario-sistema-password-info">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                        <div>
+                                            <strong>Contraseña protegida</strong>
+                                            <span>La edición conserva la contraseña actual.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <div class="usuario-sistema-nota">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <div>
+                                <strong>Sucursal asignada automáticamente</strong>
+                                <span>El nuevo usuario pertenecerá a la misma sucursal del usuario que realiza el registro. Los roles se asignan después de guardar.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="usuario-sistema-footer">
+                        <a th:href="@{/usuarioSistema/listar}" class="btn btn-light">
+                            <i class="fa-solid fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" name="guardar" class="btn btn-primario">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span th:text="${usuarioSistema.codigoUsuarioSistema == null ? 'Guardar usuario' : 'Guardar cambios'}">Guardar usuario</span>
+                        </button>
+                    </footer>
+                </form>
+            </div>
+        </main>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
         <script>
-            $(document).ready(function () {
-                let clave = $("#clave").val();
-                if (clave !== '') {
-                    $("#clave").prop('disabled', true);
-                }
+            $(function () {
+                $('#mostrarClave').on('click', function () {
+                    const campo = $('#clave');
+                    const mostrar = campo.attr('type') === 'password';
+                    campo.attr('type', mostrar ? 'text' : 'password');
+                    $(this).find('i').toggleClass('fa-eye', !mostrar).toggleClass('fa-eye-slash', mostrar);
+                    $(this).attr('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+                });
             });
         </script>
     </body>

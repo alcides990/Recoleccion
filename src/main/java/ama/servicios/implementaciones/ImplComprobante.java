@@ -122,8 +122,8 @@ public class ImplComprobante implements ComprobanteService {
     }
 
     @Override
-    public Optional<String> getPagoHsta(String cuentaCorriente) {
-        return comprobanteDao.getPagoHasta(cuentaCorriente);
+    public Optional<String> getPagoDesde(String cuentaCorriente) {
+        return comprobanteDao.getPagoDesde(cuentaCorriente);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class ImplComprobante implements ComprobanteService {
     }
 
     @Override
-    public List<Object[]> getPagoHastaAndSaldo(String cuentaCorriente) {
-        return comprobanteDao.getPagoHastaAndSaldo(cuentaCorriente);
+    public List<Object[]> getPagoDesdeAndSaldo(String cuentaCorriente) {
+        return comprobanteDao.getPagoDesdeAndSaldo(cuentaCorriente);
     }
 }

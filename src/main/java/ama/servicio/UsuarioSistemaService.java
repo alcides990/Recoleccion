@@ -53,6 +53,14 @@ public class UsuarioSistemaService implements UserDetailsService {
         return UsuarioSistemaDao.listar(pageable);
     }
 
+    public Page<UsuarioSistema> buscar(Pageable pageable, String filtro) {
+        return UsuarioSistemaDao.buscar(pageable, filtro);
+    }
+
+    public long contar() {
+        return UsuarioSistemaDao.contarUsuariosSistema();
+    }
+
     public <S extends UsuarioSistema> S save(S entity) {
         return UsuarioSistemaDao.save(entity);
     }

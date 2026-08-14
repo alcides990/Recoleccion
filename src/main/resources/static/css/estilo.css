@@ -230,17 +230,6 @@ aside div {
 
 }
 
-#tabla-servicio th:nth-child(1),
-#tabla-servicio td:nth-child(1) {
-    position: sticky;
-    left: 1px;
-    z-index: 1;
-}
-
-/*  th:nth-child(2), td:nth-child(2) {
-    position: sticky;
-    left: 90px;
-} */
 /*
 .form-control {
     margin: 0.1em;
@@ -452,11 +441,6 @@ textarea.form-control {
 
     #menu-toggle.active~#menu {
         display: block;
-    }
-
-    .sticky-start {
-        position: sticky;
-        left: 0px;
     }
 
     .comprobante-filter {

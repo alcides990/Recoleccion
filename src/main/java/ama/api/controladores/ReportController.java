@@ -1,6 +1,10 @@
 package ama.api.controladores;
 
 import ama.DTO.ZonaDTO;
+import ama.dao.ComprobanteDao;
+import ama.dao.ServicioDao;
+import ama.dominio.Cobrador;
+import ama.dominio.Comision;
 import ama.dominio.Sucursal;
 import ama.dominio.UsuarioSistema;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 import ama.servicio.CobradorService;
 import ama.servicio.ZonaService;
 import ama.servicio.CiudadService;
+import ama.servicio.SerieService;
+import ama.servicio.ComisionService;
 import ama.utilerias.ReportGenerator;
 import ama.utilerias.Reporte;
 import jakarta.servlet.http.HttpSession;
@@ -45,11 +51,25 @@ public class ReportController {
     private HttpSession httpSession;
     @Autowired
     private DataSource dataSource;
+    @Autowired
+    private ComprobanteDao comprobanteDao;
+    @Autowired
+    private ServicioDao servicioDao;
+    @Autowired
+    private SerieService serieService;
+    @Autowired
+    private ComisionService comisionService;
 
     @GetMapping
     public String getReporte(Model model) {
-        var cobrador = servicioCobrador.listarIsEstadoActivo(getSucursalSession());
+        Sucursal sucursal = getSucursalSession();
+        var cobrador = servicioCobrador.listarIsEstadoActivo(sucursal);
         model.addAttribute("cobradores", cobrador);
+        model.addAttribute("totalFacturas", comprobanteDao.contarPorSucursal(sucursal.getCodigoSucursal()));
+        model.addAttribute("facturasAnuladas", comprobanteDao.contarAnuladosPorSucursal(sucursal.getCodigoSucursal()));
+        model.addAttribute("totalServicios", servicioDao.contarServiciosPorSucursal(sucursal.getCodigoSucursal()));
+        model.addAttribute("series", serieService.listar());
+        model.addAttribute("comisiones", comisionService.listar());
 
      List<ZonaDTO> zona = servicioZona.listar()
         .stream()
@@ -63,6 +83,21 @@ public class ReportController {
         model.addAttribute("zonas", zona);
 
         return "reportes/reporte";
+    }
+
+    @GetMapping("/comisiones")
+    @ResponseBody
+    public ResponseEntity<?> listarComisionesReporte() {
+        if (getUserSession() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(comisionService.listar().stream().map(comision -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("codigoComision", comision.getCodigoComision());
+            item.put("nombreComision", comision.getNombreComision() == null ? "" : comision.getNombreComision());
+            item.put("comision", comision.getComision() == null ? "" : comision.getComision());
+            return item;
+        }).toList());
     }
 
     @PostMapping("/ciudad")
@@ -139,6 +174,35 @@ public class ReportController {
         return new ReportGenerator().getReporte(reporte);
     }
 
+    @PostMapping("/facturas_omitidas")
+    public ResponseEntity<?> reporteFacturasOmitidas(
+            @RequestParam("codigoSerie") Integer codigoSerie,
+            @RequestParam("desde") Integer desde,
+            @RequestParam("hasta") Integer hasta) throws SQLException {
+        if (desde == null || hasta == null || desde < 0 || hasta < desde) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("mensaje", "El rango de comprobantes no es válido."));
+        }
+        if ((long) hasta - desde > 99999) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("mensaje", "El rango no puede superar 100.000 comprobantes."));
+        }
+
+        Map<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoSucursal", getSucursalSession().getCodigoSucursal());
+        parametros.put("codigoSerie", codigoSerie);
+        parametros.put("desde", desde);
+        parametros.put("hasta", hasta);
+
+        Reporte reporte = Reporte.builder()
+                .conexion(dataSource.getConnection())
+                .nombre("Facturas omitidas")
+                .ruta("reportes/facturasOmitidas.jasper")
+                .parametros(parametros)
+                .build();
+        return new ReportGenerator().getReporte(reporte);
+    }
+
     @PostMapping("/detalle_manzana")
     public ResponseEntity<?> reporteDetalleManzana(
             @RequestParam("manzana") Integer manzana,
@@ -164,20 +228,51 @@ public class ReportController {
     public ResponseEntity<?> reporteIngresosPorZona(
             @RequestParam("grupo") String grupo,
             @RequestParam("ingresos-desde") String desde,
-            @RequestParam("ingresos-hasta") String hasta) throws JRException, IOException, SQLException {
+            @RequestParam("ingresos-hasta") String hasta,
+            @RequestParam(name = "codigoCobrador", required = false, defaultValue = "0") Integer codigoCobrador,
+            @RequestParam(name = "codigoSerie", required = false, defaultValue = "0") Integer codigoSerie,
+            @RequestParam(name = "codigoComision", required = false, defaultValue = "0") Integer codigoComision)
+            throws JRException, IOException, SQLException {
         Map<String, Object> parametro = new HashMap<>();
-        String nombe = "Ingresos por zona";
+        String nombre = "Ingresos por zona";
         parametro.put("desde", desde);
         parametro.put("hasta", hasta);
         String ruta = "";
         if (grupo.equals("zona")) {
-            ruta = "reportes/ingresosPorZona.jasper";
+            ruta = "reportes/ingresosPorZona.jrxml";
         } else if (grupo.equals("cob")) {
+            nombre = "Ingresos por cobrador";
             ruta = "reportes/ingresosPorCobrador.jasper";
+        } else if (grupo.equals("comision")) {
+            Comision comision = comisionService.encontrar(new Comision(codigoComision));
+            if (comision == null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("mensaje", "Seleccione una comision valida."));
+            }
+            nombre = "Comisiones - " + comision.getNombreComision();
+            ruta = "reportes/comisionesPorCobrador.jrxml";
+            parametro.put("codigoSucursal", getSucursalSession().getCodigoSucursal());
+            parametro.put("codigoComision", codigoComision);
+            parametro.put("comisionSeleccionada", comision.getNombreComision());
+        } else if (grupo.equals("seguimiento")) {
+            Cobrador cobrador = servicioCobrador.encontrar(new Cobrador(codigoCobrador));
+            if (cobrador == null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("mensaje", "Seleccione un cobrador válido."));
+            }
+            nombre = "Seguimiento de cobranza - " + cobrador.getNombreCompleto();
+            ruta = "reportes/seguimientoCobrador.jasper";
+            parametro.put("codigoSucursal", getSucursalSession().getCodigoSucursal());
+            parametro.put("codigoCobrador", codigoCobrador);
+            parametro.put("codigoSerie", codigoSerie);
+            parametro.put("cobrador", cobrador.getNombreCompleto());
+        } else {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("mensaje", "Tipo de reporte no válido."));
         }
         Reporte reporte = Reporte.builder()
                 .conexion(dataSource.getConnection())
-                .nombre(nombe)
+                .nombre(nombre)
                 .ruta(ruta)
                 .parametros(parametro)
                 .build();

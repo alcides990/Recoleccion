@@ -18,7 +18,7 @@
 	<queryString>
 		<![CDATA[SELECT servi.cuenta_corriente,  man.codigo_manzana,
 fn_mes_deuda(servi.cuenta_corriente,1) AS mes_deuda, 
-fn_pago_hasta(servi.cuenta_corriente) AS pago_hasta,
+fn_pagar_desde(servi.cuenta_corriente) AS pago_desde,
 fn_ultimo_pago(servi.cuenta_corriente) AS ultimo_pago,
 cate.categoria, cate.tarifa,
 usu.numero_documento, usu.nombre, usu.apellido, usu.direccion,
@@ -45,7 +45,8 @@ INNER JOIN usuarios AS usu
  WHERE cob.codigo_cobrador= $P{codigoCobrador} 
  AND zon.codigo_zona= $P{codigoZona}
  AND fn_mes_deuda(servi.cuenta_corriente,1)  BETWEEN  $P{desde}  AND   $P{hasta}
- 	GROUP BY servi.cuenta_corriente]]>
+ GROUP BY servi.cuenta_corriente
+ ORDER BY man.codigo_manzana, servi.cuenta_corriente]]>
 	</queryString>
 	<field name="cuenta_corriente" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="cuenta_corriente"/>
@@ -61,9 +62,9 @@ INNER JOIN usuarios AS usu
 		<property name="com.jaspersoft.studio.field.name" value="mes_deuda"/>
 		<property name="com.jaspersoft.studio.field.label" value="mes_deuda"/>
 	</field>
-	<field name="pago_hasta" class="java.sql.Date">
-		<property name="com.jaspersoft.studio.field.name" value="pago_hasta"/>
-		<property name="com.jaspersoft.studio.field.label" value="pago_hasta"/>
+	<field name="pago_desde" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pago_desde"/>
+		<property name="com.jaspersoft.studio.field.label" value="pago_desde"/>
 	</field>
 	<field name="ultimo_pago" class="java.sql.Date">
 		<property name="com.jaspersoft.studio.field.name" value="ultimo_pago"/>
@@ -123,16 +124,16 @@ INNER JOIN usuarios AS usu
 		<variableExpression><![CDATA[$F{mes_deuda} >0 ? $F{mes_deuda}*$F{tarifa} : 0]]></variableExpression>
 	</variable>
 	<variable name="total_deuda" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$V{deuda}]]></variableExpression>
+		<variableExpression><![CDATA[$F{mes_deuda} != null && $F{mes_deuda} > 0 && $F{tarifa} != null ? $F{mes_deuda} * $F{tarifa} : 0.0]]></variableExpression>
 	</variable>
 	<variable name="totaUsuario" class="java.lang.Integer" calculation="Count">
-		<variableExpression><![CDATA[$V{REPORT_COUNT}]]></variableExpression>
+		<variableExpression><![CDATA[$F{cuenta_corriente}]]></variableExpression>
 	</variable>
 	<variable name="totalDeudaManzana" class="java.lang.Double" resetType="Group" resetGroup="manzana" calculation="Sum">
-		<variableExpression><![CDATA[$V{deuda}]]></variableExpression>
+		<variableExpression><![CDATA[$F{mes_deuda} != null && $F{mes_deuda} > 0 && $F{tarifa} != null ? $F{mes_deuda} * $F{tarifa} : 0.0]]></variableExpression>
 	</variable>
 	<variable name="totaUsuarioManzana" class="java.lang.Integer" resetType="Group" resetGroup="manzana" calculation="Count">
-		<variableExpression><![CDATA[$V{REPORT_COUNT}]]></variableExpression>
+		<variableExpression><![CDATA[$F{cuenta_corriente}]]></variableExpression>
 	</variable>
 	<group name="manzana" keepTogether="true">
 		<groupExpression><![CDATA[$F{codigo_manzana}]]></groupExpression>
@@ -225,23 +226,23 @@ INNER JOIN usuarios AS usu
 					<textElement textAlignment="Left">
 						<font fontName="SansSerif"/>
 					</textElement>
-					<text><![CDATA[ Pago Hasta]]></text>
+					<text><![CDATA[ Pagar desde]]></text>
 				</staticText>
 			</band>
 		</groupHeader>
 		<groupFooter>
 			<band height="35">
 				<staticText>
-					<reportElement x="2" y="7" width="167" height="20" uuid="86a8ba77-d822-4df2-bef8-415239c7362e"/>
+					<reportElement x="2" y="7" width="128" height="20" uuid="86a8ba77-d822-4df2-bef8-415239c7362e"/>
 					<textElement>
-						<font fontName="SansSerif" size="14" isBold="true"/>
+						<font fontName="SansSerif" size="12" isBold="false"/>
 					</textElement>
 					<text><![CDATA[Cantidad de Usuarios :]]></text>
 				</staticText>
-				<textField evaluationTime="Column">
-					<reportElement x="170" y="7" width="100" height="20" uuid="58d5f0d0-a251-4f84-a8cc-24b9344dde78"/>
+				<textField evaluationTime="Group" evaluationGroup="manzana">
+					<reportElement x="130" y="8" width="150" height="20" uuid="58d5f0d0-a251-4f84-a8cc-24b9344dde78"/>
 					<textElement>
-						<font fontName="SansSerif" size="14" isBold="true"/>
+						<font fontName="SansSerif" size="12" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$V{totaUsuarioManzana}]]></textFieldExpression>
 				</textField>
@@ -251,14 +252,14 @@ INNER JOIN usuarios AS usu
 				<staticText>
 					<reportElement x="747" y="7" width="88" height="20" uuid="4e63ddfa-f8b9-4d44-a33d-dcef15a078a5"/>
 					<textElement>
-						<font fontName="SansSerif" size="14" isBold="true"/>
+						<font fontName="SansSerif" size="12" isBold="false"/>
 					</textElement>
 					<text><![CDATA[Deuda Total :]]></text>
 				</staticText>
 				<textField pattern="#,##0">
 					<reportElement x="834" y="7" width="115" height="20" uuid="578802ef-e3fe-4c34-9e9d-2eb3d925315c"/>
 					<textElement>
-						<font fontName="SansSerif" size="14" isBold="true"/>
+						<font fontName="SansSerif" size="12" isBold="false"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$V{totalDeudaManzana}]]></textFieldExpression>
 				</textField>
@@ -379,7 +380,7 @@ INNER JOIN usuarios AS usu
 				</textElement>
 				<textFieldExpression><![CDATA[$V{deuda}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="MM/dd/yyyy">
 				<reportElement x="567" y="1" width="73" height="14" uuid="a9ff0f61-eb43-4c17-86ab-1636a7c0ccae"/>
 				<textElement>
 					<font fontName="SansSerif"/>
@@ -393,12 +394,12 @@ INNER JOIN usuarios AS usu
 				</textElement>
 				<textFieldExpression><![CDATA[$F{numero_documento}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="MM/yyyy">
 				<reportElement x="500" y="1" width="65" height="14" uuid="04bcf319-5ea7-49de-bbd6-2980ee98f8a5"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{pago_hasta}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pago_desde}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -439,28 +440,28 @@ INNER JOIN usuarios AS usu
 			<staticText>
 				<reportElement x="747" y="15" width="88" height="20" uuid="b9047697-315d-43c4-8751-83d36ae34668"/>
 				<textElement>
-					<font fontName="SansSerif" size="14" isBold="true"/>
+					<font fontName="SansSerif" size="12" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Deuda Total :]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="2" y="15" width="113" height="20" uuid="0a059170-287b-4199-864c-1eb4b6eabae3"/>
 				<textElement>
-					<font fontName="SansSerif" size="14" isBold="true"/>
+					<font fontName="SansSerif" size="12" isBold="false"/>
 				</textElement>
 				<text><![CDATA[Total Usuarios :]]></text>
 			</staticText>
-			<textField evaluationTime="Column">
+			<textField evaluationTime="Report">
 				<reportElement x="120" y="16" width="100" height="20" uuid="37f7bb55-d217-4b1c-be1b-483a6ad13734"/>
 				<textElement>
-					<font fontName="SansSerif" size="14" isBold="true"/>
+					<font fontName="SansSerif" size="12" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{totaUsuario}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0">
 				<reportElement x="834" y="15" width="115" height="20" uuid="e7994e4c-6fb7-42c4-9d12-7d127f53a1a2"/>
 				<textElement>
-					<font fontName="SansSerif" size="14" isBold="true"/>
+					<font fontName="SansSerif" size="12" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{total_deuda}]]></textFieldExpression>
 			</textField>

@@ -14,6 +14,10 @@ public interface CategoriaService {
     public List<Categoria> listar(Sucursal sucursal);
     
     public Page<Categoria> listar(Pageable pageable, Sucursal sucursal);
+
+    public Page<Categoria> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro);
+
+    public long contarPorSucursal(Integer codigoSucursal);
     
     public Categoria guardar(Categoria categoria);
     

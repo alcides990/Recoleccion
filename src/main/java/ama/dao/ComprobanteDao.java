@@ -19,6 +19,19 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobanteP
      @Query("SELECT COUNT(*) FROM Comprobante c  WHERE c.servicio.cuentaCorriente= ?1")
      int getCantidadComprobante(String cuentaCorriente);
 
+     @Query("""
+            SELECT COUNT(c) FROM Comprobante c
+            WHERE c.servicio.sucursal.codigoSucursal = :codigoSucursal
+            """)
+     long contarPorSucursal(@Param("codigoSucursal") Integer codigoSucursal);
+
+     @Query("""
+            SELECT COUNT(c) FROM Comprobante c
+            WHERE c.servicio.sucursal.codigoSucursal = :codigoSucursal
+              AND c.estado.codigoEstado = 3
+            """)
+     long contarAnuladosPorSucursal(@Param("codigoSucursal") Integer codigoSucursal);
+
      // recuperar comprobantes paginados
      @Query(value = """
                SELECT c FROM Comprobante AS c 
@@ -197,23 +210,38 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobanteP
                + "WHERE c.servicio.cuentaCorriente= ?1 ")
      Integer getCantidadPago(String cuentaCorriente);
 
-     @Query("""
-                 SELECT c  FROM Comprobante c
-                    WHERE c.fechaEmision = (SELECT MAX(c2.fechaEmision) FROM Comprobante c2 WHERE c2.servicio.cuentaCorriente = ?1 AND c2.estado.codigoEstado ='1')
-                    AND c.servicio.cuentaCorriente = ?1
-               """)
+     @Query(value = """
+                 SELECT c.*
+                   FROM comprobantes c
+                  WHERE c.cuenta_corriente = ?1
+                    AND c.codigo_estado = 1
+                  ORDER BY c.fecha_emision DESC,
+                           c.numero_comprobante DESC,
+                           c.codigo_sucursal DESC,
+                           c.codigo_punto_expedicion DESC,
+                           c.codigo_serie DESC,
+                           c.codigo_tipo_comprobante DESC
+                  LIMIT 1
+               """, nativeQuery = true)
      Optional<Comprobante> getUltimoComprobanteCuentaActivo(String cuentaCorriente);
      
-     @Query(value = "SELECT fn_pago_hasta(?1)", 
+     @Query(value = "SELECT fn_pagar_desde(?1)", 
              nativeQuery = true)
-     Optional<String> getPagoHasta(String cuentaCorriente);
+     Optional<String> getPagoDesde(String cuentaCorriente);
 
-     @Query("""
-                 SELECT fn_pago_hasta(?1), c.saldo  FROM Comprobante c
-                    WHERE c.fechaEmision = (SELECT MAX(c2.fechaEmision) FROM Comprobante c2 WHERE c2.servicio.cuentaCorriente = ?1 AND c2.estado.codigoEstado ='1')
-                    AND c.servicio.cuentaCorriente = ?1
-
-               """)
-     List<Object[]> getPagoHastaAndSaldo(String cuentaCorriente);
+     @Query(value = """
+                 SELECT fn_pagar_desde(?1), c.saldo
+                   FROM comprobantes c
+                  WHERE c.cuenta_corriente = ?1
+                    AND c.codigo_estado = 1
+                  ORDER BY c.fecha_emision DESC,
+                           c.numero_comprobante DESC,
+                           c.codigo_sucursal DESC,
+                           c.codigo_punto_expedicion DESC,
+                           c.codigo_serie DESC,
+                           c.codigo_tipo_comprobante DESC
+                  LIMIT 1
+               """, nativeQuery = true)
+     List<Object[]> getPagoDesdeAndSaldo(String cuentaCorriente);
 
 }

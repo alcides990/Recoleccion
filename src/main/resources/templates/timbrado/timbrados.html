@@ -1,23 +1,30 @@
 <!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
     <head th:replace="~{layout/layout :: heat}"> </head>
+    <link rel="stylesheet" href="/css/timbrado/timbrados.css">
 
     <body>
         <header th:replace="~{layout/layout :: header}"> </header>
         <aside th:replace="~{layout/layout :: aside}"> </aside>
 
-        </head>
-
-        <body>
-            <div class="container">
+            <main class="container timbrado-page py-3">
                 <h3 class="form-title">Timbrados</h3>
                 <div class="mensaje-alerta" id="contenedor-alertas"></div>
                 <div th:if="${info}" class="mensaje-alerta alert alert-success">
                     <span th:text="${info}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <a id="btn-agregar"  class="btn btn-primario m-2" data-bs-toggle="modal" data-bs-target="#frm-modal">Agregar</a>
+                <div class="d-flex flex-wrap gap-2 m-2">
+                    <a id="btn-agregar" class="btn btn-primario" data-bs-toggle="modal" data-bs-target="#frm-modal">
+                        <i class="fa-solid fa-plus"></i> Agregar
+                    </a>
+                    <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')" th:href="@{/detalleTimbrado/listar}"
+                       class="btn btn-secondary">
+                        <i class="fa-solid fa-gears"></i> Configurar puntos y series
+                    </a>
+                </div>
                 <div class="table-responsive-sm">
                     <table class="table table-border table-striped table-colapse table-hover table-lg ">
                         <thead class="bg-color">
@@ -25,6 +32,7 @@
                                 <th>CodigoTimbrado</th>
                                 <th>NumeroTimbrado</th>
                                 <th>VigenciaDesde</th>
+                                <th>VigenciaHasta</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -34,6 +42,7 @@
                                 <td th:text="${timbrado.codigoTimbrado}"> </td>
                                 <td th:text="${timbrado.numeroTimbrado}">  </td>
                                 <td th:text="${timbrado.fechaInicio}"> </td>
+                                <td th:text="${timbrado.fechaFin}"> </td>
                                 <td th:text="${timbrado.estado.estado}"></td>
                                 <td>
                                     <a id="editar" th:data-id="${timbrado.codigoTimbrado}" 
@@ -51,43 +60,64 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </main>
             <!-- Ventana modal -->
             <div class="modal fade" id="frm-modal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
                  aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content bg-color">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="confirmacionModalLabel">Datos de Timbrado</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <form id="frm-timbrado"th:action="@{/timbrado/guardar}" method="post" th:object="${timbrado}">
-                            <div class=" row d-flex m-5">
-                                <div class="col-6">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+                    <form id="frm-timbrado" class="modal-content timbrado-modal"
+                          th:action="@{/timbrado/guardar}" method="post" th:object="${timbrado}">
+                        <header class="modal-header timbrado-modal-header">
+                            <div class="timbrado-modal-heading">
+                                <span class="timbrado-modal-icon"><i class="fa-solid fa-stamp"></i></span>
+                                <div>
+                                    <span class="timbrado-modal-kicker">Facturación</span>
+                                    <h5 class="modal-title" id="confirmacionModalLabel">Agregar timbrado</h5>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </header>
+                        <div class="modal-body timbrado-modal-body">
+                            <p class="timbrado-modal-description">Complete el número, la vigencia y el estado del timbrado.</p>
+                            <section class="timbrado-modal-section">
+                                <h6><i class="fa-regular fa-calendar-check"></i> Datos y vigencia</h6>
+                                <div class="row g-3">
+                                <div class="col-12 col-md-6">
                                     <input type="hidden" name="codigoTimbrado" id="codigoTimbrado" th:value="*{codigoTimbrado}" />
-                                    <label for="numeroTimbrado">NumeroTimbrado </label>
+                                    <label class="form-label" for="numeroTimbrado">Número de timbrado</label>
                                     <input type="text" name="numeroTimbrado" id="numeroTimbrado" th:value="*{numeroTimbrado}"
-                                           class="form-control" />
+                                           class="form-control" inputmode="numeric" autocomplete="off" required />
                                 </div>
-                                <div class="col-6">
-                                    <label for="fechaIicio">FechaIicio </label>
-                                    <input type="text" name="fechaIicio" id="inicioVigencia" th:value="${fechaIicio}" class="form-control" />
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label" for="inicioVigencia">Inicio de vigencia</label>
+                                    <input type="text" name="fechaIicio" id="inicioVigencia" th:value="${fechaIicio}"
+                                           class="form-control" autocomplete="off" required />
                                 </div>
-
-                                <div class="col-6">
-                                    <label for="estado">Estado</label>
-                                    <select th:object="${estado}" class="form-control" name="estado" id="estado">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label" for="finVigencia">Fin de vigencia</label>
+                                    <input type="text" name="fechaFin" id="finVigencia" class="form-control"
+                                           autocomplete="off" required />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label" for="estado">Estado</label>
+                                    <select th:object="${estado}" class="form-select" name="estado" id="estado" required>
                                         <option th:each="estado : ${estado}"
                                                 th:value="${estado.codigoEstado}"
                                                 th:text="${estado.estado}" />
                                     </select>
                                 </div>
-                            </div>
-                            <input type="submit" name="guardar" value="Guardar" class="btn btn-primario m-2 " />
-                        </form>
-                    </div>
+                                </div>
+                            </section>
+                        </div>
+                        <footer class="modal-footer timbrado-modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                <i class="fa-solid fa-xmark"></i> Cancelar
+                            </button>
+                            <button type="submit" name="guardar" class="btn btn-primario">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                        </footer>
+                    </form>
                 </div>
             </div>
 
@@ -98,6 +128,7 @@
                 }
                 from '/js/modulos.js';
                 datePickerInit('#inicioVigencia');
+                datePickerInit('#finVigencia');
                 $("#frm-modal").on('shown.bs.modal', () => {
                     tabular('#numeroTimbrado');
                 });
@@ -110,6 +141,7 @@
                         codigoTimbrado: $('#codigoTimbrado').val(),
                         numeroTimbrado: $('#numeroTimbrado').val(),
                         fechaInicio: $('#inicioVigencia').val(),
+                        fechaFin: $('#finVigencia').val(),
                         estado: {
                             codigoEstado: $('#estado').val()
                         }
@@ -127,6 +159,7 @@
                 });
 
                 $(document).on('click', '#editar', function (event) {
+                    $('#confirmacionModalLabel').text('Editar timbrado');
                     let id = $(this).data('id');
                     let url = '/timbrado/editar';
                     let datos = {
@@ -137,8 +170,14 @@
                         $('#codigoTimbrado').val(data.codigoTimbrado);
                         $('#numeroTimbrado').val(data.numeroTimbrado);
                         $('#inicioVigencia').val(data.fechaInicio);
+                        $('#finVigencia').val(data.fechaFin);
                         $('#estado').val(data.estado.codigoEstado);
                     });
+                });
+                $('#btn-agregar').on('click', function () {
+                    $('#confirmacionModalLabel').text('Agregar timbrado');
+                    $('#frm-timbrado').trigger('reset');
+                    $('#codigoTimbrado').val('');
                 });
             </script>
 

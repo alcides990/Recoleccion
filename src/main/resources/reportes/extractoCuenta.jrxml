@@ -16,7 +16,7 @@
 	<queryString>
 		<![CDATA[SELECT c.`numero_comprobante`, c.`cuenta_corriente`, c.`cantidad_pago`, c.`fecha_pago`,  c.`razon_social`, c.`total_importe`,
  s.direccion, c.`periodo_pago`, cate.categoria, cate.tarifa,
- fn_pago_hasta($P{cuentaCorriente}) AS pago_hasta, fn_mes_deuda($P{cuentaCorriente}, $P{codigoSucursal}  ) AS cantidad_deuda,
+ fn_pagar_desde($P{cuentaCorriente}) AS pago_desde, fn_mes_deuda($P{cuentaCorriente}, $P{codigoSucursal}  ) AS cantidad_deuda,
  fn_recargo($P{cuentaCorriente}, $P{codigoSucursal} ) AS recargo
  FROM comprobantes c
 JOIN servicios AS s
@@ -77,9 +77,9 @@ LIMIT  $P{cantidadRegistro}]]>
 		<property name="com.jaspersoft.studio.field.label" value="tarifa"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="categorias"/>
 	</field>
-	<field name="pago_hasta" class="java.sql.Date">
-		<property name="com.jaspersoft.studio.field.name" value="pago_hasta"/>
-		<property name="com.jaspersoft.studio.field.label" value="pago_hasta"/>
+	<field name="pago_desde" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pago_desde"/>
+		<property name="com.jaspersoft.studio.field.label" value="pago_desde"/>
 	</field>
 	<field name="cantidad_deuda" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="cantidad_deuda"/>
@@ -365,7 +365,7 @@ LIMIT  $P{cantidadRegistro}]]>
 				<textElement textAlignment="Left">
 					<font fontName="SansSerif"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{pago_hasta}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pago_desde}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="330" y="34" width="89" height="20" uuid="d73a938e-fbd7-444b-b700-d88fe993014e"/>

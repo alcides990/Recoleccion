@@ -1,0 +1,41 @@
+#listaCategorias { padding-right: 1.25rem; padding-left: 1.25rem; }
+.categoria-list-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.35rem; border-radius: .75rem .75rem 0 0; background: var(--btn-color); color: #fff; }
+.categoria-kicker { display: block; margin-bottom: .12rem; font-size: .7rem; font-weight: 700; letter-spacing: .08em; opacity: .8; text-transform: uppercase; }
+.categoria-list-header h3, .categoria-list-header p { margin: 0; }
+.categoria-list-header h3 { font-size: 1.4rem; font-weight: 700; }
+.categoria-list-header p { margin-top: .25rem; opacity: .82; }
+.categoria-list-agregar { flex: 0 0 auto; padding: .62rem 1rem; border: 1px solid rgba(255,255,255,.45); background: #fff; color: #394047; font-weight: 700; }
+.categoria-list-card { padding: 1.1rem; border: 1px solid rgba(108,117,125,.18); border-top: 0; border-radius: 0 0 .75rem .75rem; background: #fff; box-shadow: 0 .6rem 1.6rem rgba(26,35,44,.08); }
+.categoria-list-summary { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding: .85rem 1rem; border: 1px solid rgba(108,117,125,.15); border-radius: .55rem; background: #f7f8fa; }
+.categoria-list-summary h4, .categoria-list-summary p { margin: 0; }
+.categoria-list-summary h4 { color: #394047; font-size: 1rem; font-weight: 700; }
+.categoria-list-summary p { margin-top: .15rem; color: #737b82; font-size: .84rem; }
+.categoria-list-count { min-width: 2.1rem; border-radius: 1rem; background: var(--btn-color); color: #fff; }
+#tablaCategorias thead th { border-bottom: 0; background: rgba(108,117,125,.1); color: #4f575e; font-size: .73rem; letter-spacing: .035em; text-transform: uppercase; }
+#tablaCategorias tbody td { padding-top: .72rem; padding-bottom: .72rem; vertical-align: middle; }
+.categoria-nombre { font-weight: 700; color: #374047; }
+.categoria-tarifa { display: inline-block; padding: .3rem .7rem; border-radius: 1rem; background: rgba(25,135,84,.1); color: #157347; font-weight: 700; }
+.categoria-sucursal, #tablaCategorias td small { display: block; }
+#tablaCategorias td small { color: #737b82; font-size: .78rem; }
+#listaCategorias .dataTables_filter input, #listaCategorias .dataTables_length select { border: 1px solid rgba(108,117,125,.35); border-radius: .4rem; background: #fff; }
+.categoria-modal { overflow: hidden; border: 0; border-radius: .8rem; box-shadow: 0 1.2rem 3rem rgba(26,35,44,.22); }
+.categoria-modal-header { background: var(--btn-color); color: #fff; }
+.categoria-modal-header .btn-close { filter: brightness(0) invert(1); }
+.categoria-modal-body { padding: 1.25rem; background: #f7f8fa; }
+.categoria-modal .form-label { color: #555d64; font-size: .73rem; font-weight: 700; letter-spacing: .025em; text-transform: uppercase; }
+.categoria-modal .form-control { min-height: 2.7rem; border-color: rgba(108,117,125,.32); border-radius: .5rem; box-shadow: none; }
+.categoria-modal .form-control:focus { border-color: var(--btn-color); box-shadow: 0 0 0 .18rem rgba(108,117,125,.16); }
+.categoria-sucursal-info { display: flex; align-items: center; gap: .7rem; margin-bottom: 1rem; padding: .8rem; border-radius: .5rem; background: #fff; border: 1px solid rgba(108,117,125,.16); }
+.categoria-sucursal-info > i { color: var(--btn-color); font-size: 1.1rem; }
+.categoria-sucursal-info small, .categoria-sucursal-info strong { display: block; }
+.categoria-sucursal-info small { color: #737b82; font-size: .7rem; text-transform: uppercase; }
+.categoria-tarifa-input { position: relative; }
+.categoria-tarifa-input > span { position: absolute; top: 50%; left: .8rem; z-index: 1; color: #657078; font-weight: 700; transform: translateY(-50%); }
+.categoria-tarifa-input .form-control { padding-left: 3rem; }
+.categoria-modal-footer { background: #fff; }
+@media (max-width: 767.98px) {
+    #listaCategorias { padding-right: .65rem; padding-left: .65rem; }
+    .categoria-list-header { align-items: stretch; flex-direction: column; }
+    .categoria-list-agregar { width: 100%; }
+    .categoria-list-card { overflow-x: auto; }
+}

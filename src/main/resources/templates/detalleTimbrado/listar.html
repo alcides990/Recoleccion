@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/layout :: heat}"></head>
+<body>
+<header th:replace="~{layout/layout :: header}"></header>
+<aside th:replace="~{layout/layout :: aside}"></aside>
+<div class="container">
+    <div class="card-header"><h3 class="form-title">Detalle de timbrados</h3></div>
+    <div th:if="${info}" class="mensaje-alerta alert alert-success alert-dismissible fade show">
+        <span th:text="${info}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="mensaje-alerta alert alert-danger alert-dismissible fade show">
+        <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <a th:href="@{/detalleTimbrado/agregar}" class="btn btn-primario btn-sm mb-3"><i class="fas fa-plus"></i> Agregar</a>
+    <div class="table-responsive-sm">
+        <table class="table table-border table-striped table-hover table-lg">
+            <thead class="bg-color"><tr><th>Timbrado</th><th>Punto de expedición</th><th>Sucursal</th><th>Serie</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody class="table-secondary">
+                <tr th:each="d : ${detalles}">
+                    <td th:text="${d.timbrado.numeroTimbrado}"></td>
+                    <td th:text="${d.puntoExpedicion.nombrePuntoExpedicion}"></td>
+                    <td th:text="${d.puntoExpedicion.sucursal.nombreSucursal + ' - ' + d.puntoExpedicion.sucursal.ciudad.nombreCiudad}"></td>
+                    <td th:text="${d.serie.serie}"></td>
+                    <td><span class="badge" th:classappend="${d.estado.codigoEstado == 1 ? ' bg-success' : ' bg-secondary'}" th:text="${d.estado.estado}"></span></td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a class="btn btn-info btn-sm" title="Editar" th:href="@{/detalleTimbrado/editar/{t}/{p}/{s}(t=${d.detalleTimbradoPK.codigoTimbrado},p=${d.detalleTimbradoPK.codigoPuntoExpedicion},s=${d.detalleTimbradoPK.codigoSucursal})}"><i class="fa-regular fa-pen-to-square"></i></a>
+                            <form sec:authorize="hasAuthority('ROOT')" method="post"
+                                  th:action="@{/detalleTimbrado/eliminar/{t}/{p}/{s}(t=${d.detalleTimbradoPK.codigoTimbrado},p=${d.detalleTimbradoPK.codigoPuntoExpedicion},s=${d.detalleTimbradoPK.codigoSucursal})}"
+                                  onsubmit="return confirm('¿Desea eliminar esta asociación de timbrado?');">
+                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(detalles)}"><td colspan="6" class="text-center">No hay detalles de timbrado registrados.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<footer th:replace="~{layout/layout :: footer}"></footer>
+</body>
+</html>

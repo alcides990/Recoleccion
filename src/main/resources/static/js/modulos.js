@@ -177,7 +177,8 @@ export function eliminarRegistro (mensaje = 'Seguro que desea eliminar este regi
         var url = $(this).data('url');
         let id = $(this).data('id');
         $('#confirmacionModal').modal('show');
-        $('#confirmacionModal').on('click', '#confirmarBoton', function () {
+        $('#confirmacionModal').off('click.confirmacion', '#confirmarBoton')
+                .one('click.confirmacion', '#confirmarBoton', function () {
             $('#confirmacionModal').modal('hide');
             let token = $("#token").val();
             $.ajax({
@@ -225,7 +226,8 @@ export function eliminar(mensaje = 'Seguro que desea eliminar este registro??') 
         var url = $(this).data('url');
         var id = $(this).data('id');
         $('#confirmacionModal').modal('show');
-        $('#confirmacionModal').on('click', '#confirmarBoton', function () {
+        $('#confirmacionModal').off('click.confirmacion', '#confirmarBoton')
+                .one('click.confirmacion', '#confirmarBoton', function () {
             $('#confirmacionModal').modal('hide');
             let token = $("#token").val();
             $.ajax({
@@ -268,7 +270,7 @@ function objectToQueryString(obj) {
     return Object.keys(obj).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`).join('&');
 }
 
-export function getReporte(datos, url) {
+export function getReporte(datos, url, contenedorAlertas = '#contenedor-alertas') {
     datos = objectToQueryString(datos);
 //    console.log(datos);
     let token = $("#token").val();
@@ -292,6 +294,7 @@ export function getReporte(datos, url) {
                     mensaje: data.mensaje,
                     url: url,
                     tipo: 'warning',
+                    contenedor: contenedorAlertas,
                     time: 7000
 
                 });
@@ -302,6 +305,7 @@ export function getReporte(datos, url) {
                     mensaje: data.mensaje,
                     url: url,
                     tipo: 'danger',
+                    contenedor: contenedorAlertas,
                     time: 10000
 
                 });
@@ -311,9 +315,10 @@ export function getReporte(datos, url) {
     }).catch(error => {
         var mensajeError = 'Error al imprimir reporte ' + error;
         mostrarAlerta({
-            mensaje: response,
+            mensaje: mensajeError,
             url: url,
             tipo: 'danger',
+            contenedor: contenedorAlertas,
             time: 5000
 
         });
@@ -325,11 +330,12 @@ export function mostrarAlerta(opciones) {
         mensaje,
         url,
         tipo,
+        contenedor = '#contenedor-alertas',
         redirigir = false,
         recargar = false,
         time = 3000
     } = opciones;
-    $('#contenedor-alertas').empty();
+    $(contenedor).empty();
     var alerta =
             `<div class="alert modal-header
              alert-${tipo} alert-dismissible fade show" role="alert"> 
@@ -338,15 +344,15 @@ export function mostrarAlerta(opciones) {
             <span aria-hidden="true"> &times; </span>
             </button>
             </div>`;
-    $('#contenedor-alertas').append(alerta);
-    $('#contenedor-alertas').fadeIn('slow');
+    $(contenedor).append(alerta);
+    $(contenedor).fadeIn('slow');
     //alerta para registro  redirigir pagina
     if (redirigir) {
-        $('#contenedor-alertas').fadeOut(time, function () {
+        $(contenedor).fadeOut(time, function () {
             window.location = '/' + url.split('/')[1] + '/listar';
         });
     } else if (!redirigir) {
-        $('#contenedor-alertas').fadeOut(time, function () {
+        $(contenedor).fadeOut(time, function () {
             if (recargar) {
                 window.location.reload();
             }
@@ -357,27 +363,32 @@ export function mostrarAlerta(opciones) {
 export function confirmacioModal(titulo, mensaje) {
     $("#confirmacionModal").remove();
     var frm = `
- <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog ">
-                    <div class="modal-content bg-color ">
-                        <div class="modal-header">
-                            <h5 class="modal-title text-center" id="confirmacionModalLabel"> ${titulo}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-
-                        </div>
-                        <div class="alert modal-body alert-dismissible fade show " role="alert">
-                            ${mensaje}
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="button" class="btn btn-primario" id="confirmarBoton">Aceptar</button>
-                        </div>
+        <div class="modal fade confirmacion-modal" id="confirmacionModal" tabindex="-1"
+             aria-labelledby="confirmacionModalLabel" aria-describedby="confirmacionModalMensaje"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content confirmacion-modal-content">
+                    <div class="confirmacion-modal-icon" aria-hidden="true">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="modal-body confirmacion-modal-body">
+                        <span class="confirmacion-modal-kicker">Confirmación requerida</span>
+                        <h5 class="modal-title" id="confirmacionModalLabel">${titulo}</h5>
+                        <p id="confirmacionModalMensaje">${mensaje}</p>
+                    </div>
+                    <button type="button" class="btn-close confirmacion-modal-close"
+                            data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <div class="modal-footer confirmacion-modal-footer">
+                        <button type="button" class="btn btn-light confirmacion-cancelar" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-xmark"></i> No, cancelar
+                        </button>
+                        <button type="button" class="btn btn-primario confirmacion-aceptar" id="confirmarBoton">
+                            <i class="fa-solid fa-check"></i> Sí, continuar
+                        </button>
                     </div>
                 </div>
-            </div>`;
+            </div>
+        </div>`;
     $("body").append(frm);
 }
 

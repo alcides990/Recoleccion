@@ -8,15 +8,14 @@
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="195"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="800"/>
-	<parameter name="desde" class="java.util.Date">
+	<parameter name="desde" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
-	<parameter name="hasta" class="java.util.Date">
+	<parameter name="hasta" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT cob.codigo_cobrador, CONCAT(cob.nombre, '  ',cob.apellido) AS cobrador,
-zon.zona, zon.codigo_zona,
+		<![CDATA[SELECT zon.zona, zon.codigo_zona,
 
 COUNT( CASE WHEN  comp.codigo_estado = 3 THEN 1 END ) AS 'Fact. Anulada',
 
@@ -37,22 +36,10 @@ LEFT JOIN manzanas AS man
   AND man.codigo_sucursal=comp.codigo_sucursal
 LEFT JOIN zonas AS zon
   ON zon.codigo_zona=man.codigo_zona
-LEFT JOIN cobradores AS cob 
-  ON cob.codigo_cobrador = comp.codigo_cobrador
-
  WHERE comp.fecha_pago BETWEEN  $P{desde}  AND   $P{hasta} 
   
-GROUP BY zon.codigo_zona]]>
+GROUP BY zon.codigo_zona, zon.zona]]>
 	</queryString>
-	<field name="codigo_cobrador" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="codigo_cobrador"/>
-		<property name="com.jaspersoft.studio.field.label" value="codigo_cobrador"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="cobradores"/>
-	</field>
-	<field name="cobrador" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="cobrador"/>
-		<property name="com.jaspersoft.studio.field.label" value="cobrador"/>
-	</field>
 	<field name="zona" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="zona"/>
 		<property name="com.jaspersoft.studio.field.label" value="zona"/>

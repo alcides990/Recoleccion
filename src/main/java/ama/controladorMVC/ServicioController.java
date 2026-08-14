@@ -5,12 +5,16 @@ import ama.servicio.*;
 import ama.utilerias.PageRender;
 import ama.utilerias.ReportGenerator;
 import ama.utilerias.Reporte;
+import ama.modulos.comprobantesv2.DataTableResponseV2;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -20,6 +24,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -67,6 +72,7 @@ public class ServicioController {
             @RequestParam(name = "cantidadRegistro", defaultValue = "10") int cantElemento,
             Model modelo) {
         modelo.addAttribute("titulo", "Cuenta");
+        modelo.addAttribute("versionDos", false);
         Pageable pageable = PageRequest.of(page, cantElemento);
         var servicios = servicioServicio.listar(pageable);
         PageRender pageRender = new PageRender("/servicio/listar", servicios);
@@ -84,6 +90,59 @@ public class ServicioController {
         modelo.addAttribute("estado", estado);
 
         return "servicio/servicio";
+    }
+
+    @GetMapping("/listar-v2")
+    public String listarServiciosV2(Model modelo) {
+        modelo.addAttribute("titulo", "Cuentas - V2");
+        modelo.addAttribute("versionDos", true);
+        modelo.addAttribute("servicios", Page.empty());
+        modelo.addAttribute("categorias", servicioCategoria.listar(getSucursalSession()));
+        modelo.addAttribute("sucursales", getSucursalSession());
+        modelo.addAttribute("estado", servicioEstado.findByEstadoIn(Arrays.asList("ACTIVO", "INACTIVO")));
+        return "servicio/servicio";
+    }
+
+    @PostMapping("/tabla-v2")
+    @ResponseBody
+    public DataTableResponseV2<Map<String, Object>> listarServiciosV2(
+            @RequestParam int draw,
+            @RequestParam(defaultValue = "0") int start,
+            @RequestParam(defaultValue = "10") int length,
+            @RequestParam(name = "search[value]", required = false) String busqueda,
+            @RequestParam(name = "order[0][column]", defaultValue = "0") int columna,
+            @RequestParam(name = "order[0][dir]", defaultValue = "asc") String direccion) {
+        int limite = Math.min(Math.max(length, 1), 100);
+        Sort.Direction sentido = "desc".equalsIgnoreCase(direccion) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(Math.max(start, 0) / limite, limite,
+                Sort.by(sentido, getOrdenServicio(columna)));
+        String filtro = busqueda == null ? "" : busqueda.trim();
+        Integer codigoSucursal = getSucursalSession().getCodigoSucursal();
+        Page<Servicio> pagina = filtro.isBlank()
+                ? servicioServicio.listarPorSucursal(pageable, codigoSucursal)
+                : servicioServicio.buscarPorSucursal(pageable, codigoSucursal, filtro);
+        long total = servicioServicio.contarPorSucursal(codigoSucursal);
+        List<Map<String, Object>> filas = pagina.getContent().stream().map(servicio -> {
+            Map<String, Object> fila = new LinkedHashMap<>();
+            fila.put("cuentaCorriente", servicio.getCuentaCorriente());
+            fila.put("usuario", servicio.getUsuario().getNombre() + " "
+                    + (servicio.getUsuario().getApellido() == null ? "" : servicio.getUsuario().getApellido()));
+            fila.put("fechaInicio", servicio.getFechaInicio());
+            fila.put("categoria", servicio.getCategoria().getTarifa() + "-" + servicio.getCategoria().getNombreCategoria());
+            fila.put("estado", servicio.getEstado().getEstado());
+            return fila;
+        }).toList();
+        return new DataTableResponseV2<>(draw, total, pagina.getTotalElements(), filas);
+    }
+
+    private String getOrdenServicio(int columna) {
+        return switch (columna) {
+            case 1 -> "usuario.nombre";
+            case 2 -> "fechaInicio";
+            case 3 -> "categoria.nombreCategoria";
+            case 4 -> "estado.estado";
+            default -> "cuentaCorriente";
+        };
     }
 
     @PostMapping("/buscar")
@@ -183,6 +242,36 @@ public class ServicioController {
         return "servicio/estadoCuenta";
     }
 
+    @GetMapping("/estadoCuenta/resumen")
+    public ResponseEntity<?> getResumenEstadoCuenta(@RequestParam String cuentaCorriente) {
+        Servicio servicio = servicioServicio.encontrar(cuentaCorriente);
+        if (servicio == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta no encontrada");
+        }
+
+        EstadoCuenta estadoCuenta = getEstadoCuenta(servicio);
+        int cantidadPeriodos = estadoCuenta.getCantidadDeuda();
+        LocalDate ultimoPago = comprobanteService
+                .getUltimoComprobanteCuentaActivo(cuentaCorriente)
+                .map(Comprobante::getFechaPago)
+                .orElse(null);
+        Map<String, Object> resumen = new LinkedHashMap<>();
+        resumen.put("cuentaCorriente", servicio.getCuentaCorriente());
+        resumen.put("usuario", servicio.getUsuario().getNombre() + " "
+                + (servicio.getUsuario().getApellido() == null ? "" : servicio.getUsuario().getApellido()));
+        resumen.put("ultimoPago", ultimoPago);
+        resumen.put("pagoDesde", estadoCuenta.getPagoHasta() == null
+                ? ""
+                : estadoCuenta.getPagoHasta().format(DateTimeFormatter.ofPattern("MM-yyyy")));
+        resumen.put("cantidadPeriodos", cantidadPeriodos);
+        resumen.put("tarifa", estadoCuenta.getTarifa());
+        resumen.put("subTotal", estadoCuenta.getSubTotal());
+        resumen.put("saldoAnterior", estadoCuenta.getSaldoAnterior());
+        resumen.put("recargo", estadoCuenta.getRecargo());
+        resumen.put("totalDeuda", estadoCuenta.getTotalDeuda());
+        return ResponseEntity.ok(resumen);
+    }
+
     @PostMapping("/guardar/{accion}")
     public ResponseEntity<?> guardar(@RequestBody Servicio servicio, @PathVariable String accion) {
         // TimeZone.setDefault(TimeZone.getTimeZone("America/Asuncion"));
@@ -263,14 +352,16 @@ public class ServicioController {
     }
 
     private EstadoCuenta getEstadoCuenta(Servicio servicio) {
-        List<Object[]> datos = comprobanteService.getPagoHastaAndSaldo(servicio.getCuentaCorriente());
+        List<Object[]> datos = comprobanteService.getPagoDesdeAndSaldo(servicio.getCuentaCorriente());
         LocalDate pagoHasta = null;
         Double saldo = 0.0;
         if (datos.isEmpty()) {
             pagoHasta = servicio.getFechaInicio();
         } else {
             for (Object[] resul : datos) {
-                pagoHasta = ((java.sql.Date) resul[0]).toLocalDate();
+                pagoHasta = YearMonth.parse(
+                        (String) resul[0], DateTimeFormatter.ofPattern("MM-yyyy"))
+                        .atDay(1);
                 saldo = (Double) resul[1];
             }
         }

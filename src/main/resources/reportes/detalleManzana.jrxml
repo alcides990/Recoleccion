@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="detalleZona" language="groovy" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0b749f85-bf21-4a8b-9aa1-f4a6340eeda3">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="detalleManzana" language="groovy" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0b749f85-bf21-4a8b-9aa1-f4a6340eeda3">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="164"/>
 	<property name="ireport.y" value="0"/>
@@ -15,7 +15,7 @@
 	<queryString>
 		<![CDATA[SELECT servi.cuenta_corriente, man.codigo_manzana,
 fn_mes_deuda(servi.cuenta_corriente, 1) AS mes_deuda, 
-fn_pago_hasta(servi.cuenta_corriente) AS pago_hasta,
+fn_pagar_desde(servi.cuenta_corriente) AS pago_desde,
 fn_ultimo_pago(servi.cuenta_corriente) AS ultimo_pago,
 cate.`categoria`, cate.`tarifa`,
 usu.numero_documento, usu.`nombre`, usu.`apellido`, usu.`direccion`,
@@ -65,9 +65,9 @@ INNER JOIN usuarios AS usu
 		<property name="com.jaspersoft.studio.field.name" value="mes_deuda"/>
 		<property name="com.jaspersoft.studio.field.label" value="mes_deuda"/>
 	</field>
-	<field name="pago_hasta" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="pago_hasta"/>
-		<property name="com.jaspersoft.studio.field.label" value="pago_hasta"/>
+	<field name="pago_desde" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="pago_desde"/>
+		<property name="com.jaspersoft.studio.field.label" value="pago_desde"/>
 	</field>
 	<field name="ultimo_pago" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="ultimo_pago"/>
@@ -127,16 +127,16 @@ INNER JOIN usuarios AS usu
 		<variableExpression><![CDATA[$F{mes_deuda} >0 ? $F{mes_deuda}*$F{tarifa} : 0]]></variableExpression>
 	</variable>
 	<variable name="total_deuda" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$V{deuda}]]></variableExpression>
+		<variableExpression><![CDATA[$F{mes_deuda} != null && $F{mes_deuda} > 0 && $F{tarifa} != null ? $F{mes_deuda} * $F{tarifa} : 0.0]]></variableExpression>
 	</variable>
 	<variable name="totaUsuario" class="java.lang.Integer" calculation="Count">
-		<variableExpression><![CDATA[$V{REPORT_COUNT}]]></variableExpression>
+		<variableExpression><![CDATA[$F{cuenta_corriente}]]></variableExpression>
 	</variable>
 	<variable name="totalDeudaManzana" class="java.lang.Double" resetType="Group" resetGroup="manzana" calculation="Sum">
-		<variableExpression><![CDATA[$V{deuda}]]></variableExpression>
+		<variableExpression><![CDATA[$F{mes_deuda} != null && $F{mes_deuda} > 0 && $F{tarifa} != null ? $F{mes_deuda} * $F{tarifa} : 0.0]]></variableExpression>
 	</variable>
 	<variable name="totaUsuarioManzana" class="java.lang.Integer" resetType="Group" resetGroup="manzana" calculation="Count">
-		<variableExpression><![CDATA[$V{REPORT_COUNT}]]></variableExpression>
+		<variableExpression><![CDATA[$F{cuenta_corriente}]]></variableExpression>
 	</variable>
 	<group name="manzana" keepTogether="true">
 		<groupExpression><![CDATA[$F{codigo_manzana}]]></groupExpression>
@@ -237,7 +237,7 @@ INNER JOIN usuarios AS usu
 					<textElement textAlignment="Center">
 						<font fontName="SansSerif"/>
 					</textElement>
-					<text><![CDATA[ Pago Hasta]]></text>
+					<text><![CDATA[ Pago desde]]></text>
 				</staticText>
 			</band>
 		</groupHeader>
@@ -360,7 +360,7 @@ INNER JOIN usuarios AS usu
 				</textElement>
 				<textFieldExpression><![CDATA[$V{deuda}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="MM/dd/yyyy">
 				<reportElement x="567" y="1" width="73" height="14" uuid="a9ff0f61-eb43-4c17-86ab-1636a7c0ccae"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
@@ -374,12 +374,12 @@ INNER JOIN usuarios AS usu
 				</textElement>
 				<textFieldExpression><![CDATA[$F{numero_documento}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="MM/yyyy">
 				<reportElement x="500" y="1" width="65" height="14" uuid="04bcf319-5ea7-49de-bbd6-2980ee98f8a5"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{pago_hasta}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pago_desde}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

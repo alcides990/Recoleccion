@@ -10,6 +10,12 @@ public interface UsuarioService {
     public List<Usuario> listar();
     
     public Page<Usuario> listar(Pageable pageable, String filtro);
+
+    public Page<Usuario> listarPorSucursal(Pageable pageable, Integer codigoSucursal);
+
+    public Page<Usuario> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro);
+
+    public long contarPorSucursal(Integer codigoSucursal);
     
     public List<Usuario> Buscar(String filtro);
     

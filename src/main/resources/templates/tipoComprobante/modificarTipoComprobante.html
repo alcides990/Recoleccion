@@ -7,7 +7,7 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container "> 
-            <h3 class="form-title">Datos TipoComprobante</h3> 
+            <header class="form-view-header"><div><h3>Datos del tipo de comprobante</h3><p>Registre o actualice la denominación del comprobante.</p></div><span class="form-view-icon"><i class="fa-solid fa-file-circle-check"></i></span></header>
             <a th:href="@{/tipoComprobante/listar}" class="btn btn-primario">Regresar</a>
             <form th:action="@{/tipoComprobante/guardar}" method="post" th:object="${tipoComprobante}">
                 <div class="row d-flex m-3">

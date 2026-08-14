@@ -1,186 +1,190 @@
 <!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" href="/css/manzana/formulario.css">
+    <body>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+        <main class="container manzana-page py-3">
+            <section class="manzana-card">
+                <header class="manzana-header form-view-header">
+                    <div>
+                        <span class="manzana-kicker">Organización territorial</span>
+                        <h3>Agregar manzana</h3>
+                        <p>Registre una nueva manzana dentro de la zona seleccionada.</p>
+                    </div>
+                    <span class="manzana-header-icon"><i class="fa-solid fa-map-location-dot"></i></span>
+                </header>
 
-    <head>
-
-        <head th:replace="~{layout/layout :: heat}"> </head>
-
-        <body>
-            <header th:replace="~{layout/layout :: header}"> </header>
-            <aside th:replace="~{layout/layout :: aside}"> </aside>
-            <div class="container">
-                <div class="card-title">
-                    <h3 class="form-title">Agregar manzana</h3>
-                </div>
-
-                <a th:href="@{/zona/listar}" class="btn btn-primario">
-                    <i class="fa-solid fa-arrow-left "></i>
-                    Regresar</a>
-                <div class="mensaje-alerta" id="contenedor-alertas"></div>
-                <div th:if="${mensaje}" class="mensaje-alerta alert alert-success">
+                <div id="contenedor-alertas" class="mensaje-alerta m-3 mb-0" aria-live="polite"></div>
+                <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show m-3 mb-0" role="alert">
                     <span th:text="${mensaje}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                 </div>
-                <form id="frm-manzana" th:action="@{/manzana/guardar}" method="post" th:object="${manzana}">
-                    <div class="row m-2">
-                        <div class="form-group col-sm-4">
-                            <label class="form-label " for="zona">Zona</label>
-                            <select th:field="*{zona}" class="form-control" name="zona">
-                                <option th:each="zona : ${zona}" 
-                                        th:value="${zona.codigoZona}"
-                                        th:text="${zona.nombreZona}" />
-                            </select>
+
+                <div class="manzana-body">
+                    <section class="manzana-contexto row g-3">
+                        <div class="col-md-4">
+                            <small>Zona</small>
+                            <strong th:text="${zona.nombreZona}">Zona</strong>
                         </div>
-                        <div class="col-sm-6">
-                            <label for="cobrador">Cobrador</label>
-                            <select class="form-control" name="cobrador">
-                                <option th:each="cobrador : ${cobrador}" 
-                                        th:value="${cobrador.codigoCobrador}"
-                                        th:text="${cobrador.nombre}+' '+${cobrador.apellido}" />
-                            </select>
+                        <div class="col-md-4">
+                            <small>Cobrador</small>
+                            <strong th:text="|${zona.cobrador.nombre} ${zona.cobrador.apellido ?: ''}|">Cobrador</strong>
                         </div>
-                        <div class="col-sm-4">
-                            <label for="sucursal">Sucursal:</label>
-                            <select th:field="*{sucursal}" class="form-control" name="sucursal">
-                                <option th:each="sucursal : ${sucursal}" th:value="${sucursal.codigoSucursal}"
-                                        th:text="${sucursal.nombreSucursal}+' '+ ${sucursal.ciudad.nombreCiudad}" />
-                            </select>
+                        <div class="col-md-4">
+                            <small>Sucursal - Ciudad</small>
+                            <strong th:text="|${sucursal.nombreSucursal} - ${sucursal.ciudad.nombreCiudad}|">Sucursal</strong>
                         </div>
-                        <div class="col-md-3">
-                            <label for="numeroManzana"> N° Manzana </label>
-                            <input class="form-control " type="text" name="numeroManzana" id="numeroManzana"
-                                   autofocus="" placeholder="Ingrese n° Manzana">
-                        </div>
-                    </div>
-                </form>
-                <input type="submit" name="guardar" value="Guardar" class="btn btn-primario m-3" />
+                    </section>
 
-                <div class="table-responsive-lg">
-                    <table id="tablaCobradores" class="table caption-top table-border table-striped table-colapse  ">
-                        <caption>Manzanas de la zona </caption>
-                        <thead class="bg-color">
-                            <tr>
-                                <th>Sucursal</th>
-                                <th>Zona</th>
-                                <th>manzana</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-secondary table-hover">
-                            <tr th:each="manzana : ${manzanas}">
-                                <td th:text="${manzana.sucursal.nombreSucursal}+' '+${manzana.sucursal.ciudad.nombreCiudad}"> </td>
-                                <td th:text="${manzana.zona.nombreZona}"> </td>
-                                <td
-                                    th:text="${manzana.manzanaPK.numeroManzana}">
-                                </td>
-                                <td>
-
-                                    <a id="editar"
-                                       th:data-id="${manzana.manzanaPK.numeroManzana}+'-'+${manzana.zona.codigoZona}"
-                                       class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modificarModal">
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </a>
-                                    <a id="eliminar" data-url="/manzana/eliminar/" 
-                                       th:data-id="${manzana.manzanaPK.numeroManzana}+'/'
-                                       +${manzana.manzanaPK.codigoSucursal}"
-                                       class="btn btn-danger eliminar btn-sm" title="Eliminar">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Ventana modal cambiar Zona -->
-            <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="confirmacionModalLabel "  data-bs-backdrop="static"
-                 aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content bg-color">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="confirmacionModalLabel">Cambiar Zona </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <form id="frm-manzanaEditar" th:action="@{/manzana/modificar}" method="post">
-                            <div class="row m-3 p-3">
-
-                                <div class="col-md-4">
-                                    <input type="text" hidden="" name="zonaVieja" id="zonaVieja">
-                                        <label for="zona">Zona</label>
-                                        <select class="form-control" name="zona" id="zonas">
-                                            <option th:each="zona : ${zonas}" 
-                                                    th:value="${zona.codigoZona}"
-                                                    th:text="${zona.nombreZona}" />
-                                        </select>
-                                </div>
-
-
-                                <div class="col-md-4">
-                                    <label for="Sucursal">Sucursal:</label>
-                                    <select class="form-control" name="sucursal" id="sucursal">
-                                        <option th:each="sucursal : ${sucursal}" 
-                                                th:value="${sucursal.codigoSucursal}"
-                                                th:text="${sucursal.nombreSucursal}+' '+ ${sucursal.ciudad.nombreCiudad}" />
-                                    </select>
-                                </div>
-                                <div class=" col-md-3">
-                                    <label for="numeroManzana"> N° Manzana </label>
-                                    <input class="form-control " readonly=""  type="text" name="numeroManzana" id="manzana"
-                                           placeholder="ingrese N° manzana">
-                                </div>
-
+                    <form id="frm-manzana" th:action="@{/manzana/guardar}" method="post" class="manzana-form">
+                        <input type="hidden" name="zona" th:value="${zona.codigoZona}">
+                        <input type="hidden" name="sucursal" th:value="${sucursal.codigoSucursal}">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label" for="numeroManzana">Número de manzana</label>
+                                <input class="form-control" type="number" name="numeroManzana" id="numeroManzana"
+                                       min="1" step="1" inputmode="numeric" autofocus
+                                       placeholder="Ingrese un número mayor a cero" required>
+                                <small class="form-text">El número debe ser único dentro de la sucursal.</small>
                             </div>
-                            <input type="submit" name="guardar" value="Guardar" class="btn btn-primario m-3" />
-                        </form>
+                            <div class="col-md-4 d-grid">
+                                <button id="guardarManzana" type="submit" class="btn btn-primario manzana-guardar">
+                                    <i class="fa-solid fa-floppy-disk"></i> Guardar manzana
+                                </button>
+                            </div>
+                        </div>
+                    </form>
 
-                    </div>
+                    <section class="manzana-tabla-card">
+                        <div class="manzana-tabla-header">
+                            <div>
+                                <h4>Manzanas de la zona</h4>
+                                <p>Registros pertenecientes a <strong th:text="${zona.nombreZona}">la zona</strong>.</p>
+                            </div>
+                            <span class="badge manzana-contador" th:text="${#lists.size(manzanas)}">0</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="tablaManzana" class="table table-striped table-hover align-middle w-100 mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Sucursal - Ciudad</th>
+                                        <th>Zona</th>
+                                        <th>Manzana</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${manzanas}">
+                                        <td th:text="|${item.sucursal.nombreSucursal} - ${item.sucursal.ciudad.nombreCiudad}|">Sucursal</td>
+                                        <td th:text="${item.zona.nombreZona}">Zona</td>
+                                        <td><span class="manzana-numero" th:text="${item.manzanaPK.numeroManzana}">1</span></td>
+                                        <td class="text-center text-nowrap">
+                                            <button type="button" class="btn btn-info btn-sm editar-manzana"
+                                                    th:data-numero="${item.manzanaPK.numeroManzana}"
+                                                    th:data-zona="${item.zona.codigoZona}"
+                                                    data-bs-toggle="modal" data-bs-target="#modificarModal"
+                                                    title="Cambiar zona" aria-label="Cambiar zona">
+                                                <i class="fa-regular fa-pen-to-square"></i>
+                                            </button>
+                                            <button type="button" id="eliminar" data-url="/manzana/eliminar/"
+                                                    th:data-id="|${item.manzanaPK.numeroManzana}/${item.manzanaPK.codigoSucursal}|"
+                                                    class="btn btn-danger btn-sm" title="Eliminar" aria-label="Eliminar">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
                 </div>
+
+                <footer class="manzana-footer">
+                    <a th:href="@{/zona/listar}" class="btn btn-light">
+                        <i class="fa-solid fa-arrow-left"></i> Volver a zonas
+                    </a>
+                </footer>
+            </section>
+        </main>
+
+        <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="tituloModificarManzana"
+             aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form id="frm-manzanaEditar" class="modal-content manzana-modal"
+                      th:action="@{/manzana/modificar}" method="post">
+                    <header class="modal-header manzana-modal-header">
+                        <div>
+                            <span class="manzana-kicker">Modificar ubicación</span>
+                            <h5 class="modal-title" id="tituloModificarManzana">Cambiar zona</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </header>
+                    <div class="modal-body manzana-modal-body">
+                        <input type="hidden" name="zonaVieja" id="zonaVieja" th:value="${zona.codigoZona}">
+                        <input type="hidden" name="sucursal" th:value="${sucursal.codigoSucursal}">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label" for="zonas">Nueva zona</label>
+                                <select class="form-select" name="zona" id="zonas" required>
+                                    <option th:each="item : ${zonas}"
+                                            th:value="${item.codigoZona}"
+                                            th:text="${item.nombreZona}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="manzana">Manzana</label>
+                                <input class="form-control" readonly type="number" name="numeroManzana" id="manzana">
+                            </div>
+                        </div>
+                        <div class="manzana-modal-nota">
+                            <i class="fa-solid fa-circle-info"></i>
+                            Solo puede mover la manzana entre zonas de su sucursal.
+                        </div>
+                    </div>
+                    <footer class="modal-footer manzana-modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primario">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar cambio
+                        </button>
+                    </footer>
+                </form>
             </div>
+        </div>
 
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script type="module">
+            import {eliminar, guardar, mostrarAlerta} from '/js/modulos.js';
 
-            <footer th:replace="~{layout/layout :: footer}"> </footer>
-            <script type="module">
-                import {eliminar, guardar, mostrarAlerta} from '/js/modulos.js'
-                        eliminar("Seguro que desea eliminar cobrador  de esta manzana");
-                //  Cargar idioma español a la tabla paginado con Jquerry data
-                var tablaManzana = $('#tablaManzana').DataTable({
-                    language: {
-                        url: '/i18n/es-ES.json'
-                    }
-                });
+            eliminar('¿Seguro que desea eliminar esta manzana?');
 
-                $('#frm-manzana').submit(function (event) {
-                    event.preventDefault();
+            $('#tablaManzana').DataTable({
+                pageLength: 10,
+                order: [ [2, 'asc'] ],
+                language: {url: '/i18n/es-ES.json'}
+            });
 
-                    var url = "/manzana/guardar";
+            $('#frm-manzana').on('submit', function (event) {
+                event.preventDefault();
+                const formulario = this;
+                if (!formulario.checkValidity()) {
+                    formulario.reportValidity();
+                    return;
+                }
+                const boton = $('#guardarManzana').prop('disabled', true);
+                guardar($(formulario).serialize(), '/manzana/guardar', 'application/x-www-form-urlencoded')
+                        .then(function (mensaje) {
+                            mostrarAlerta({mensaje: mensaje, url: '', tipo: 'success', recargar: true, time: 900});
+                        })
+                        .catch(function () { boton.prop('disabled', false); });
+            });
 
-                    var datos = $('#frm-manzana').serialize();
-                    var contentType = 'application/x-www-form-urlencoded';
-                    guardar(datos, url, contentType).then((data) => {
-                        mostrarAlerta({
-                            mensaje: data,
-                            url: url,
-                            tipo: 'success',
-                            recargar: false
-                        });
-                    });
-                });
-
-                //  Abrir ventans modal al precionar boton editar
-                $(document).on('click', '#editar', function (event) {
-                    let id = $(this).data('id').split('-');
-                    let numeroManzana = id[0];
-                    let codigoZona = id[1];
-                    $("#manzana").val(numeroManzana);
-                    $("#zonas").val(codigoZona);
-                    $("#zonaVieja").val(codigoZona);
-                });
-
-            </script>
-        </body>
-
+            $(document).on('click', '.editar-manzana', function () {
+                $('#manzana').val($(this).data('numero'));
+                $('#zonas').val($(this).data('zona'));
+            });
+        </script>
+    </body>
 </html>

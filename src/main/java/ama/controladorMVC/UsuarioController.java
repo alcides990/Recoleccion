@@ -1,6 +1,7 @@
 package ama.controladorMVC;
 
 import ama.DTO.UsuarioDTO;
+import ama.modulos.comprobantesv2.DataTableResponseV2;
 import ama.dominio.Paginador;
 import ama.dominio.Usuario;
 import ama.utilerias.PageRender;
@@ -34,6 +35,11 @@ import ama.servicio.EstadoService;
 import ama.servicio.TipoDocumentoService;
 import ama.servicio.UsuarioService;
 import java.util.Arrays;
+import ama.dominio.UsuarioSistema;
+import jakarta.servlet.http.HttpSession;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.springframework.data.domain.Sort;
 
 @Slf4j
 @Controller
@@ -62,6 +68,9 @@ public class UsuarioController {
     @Autowired
     private Vadidador validar;
 
+    @Autowired
+    private HttpSession httpSession;
+
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(String.class, new Mayuscula());
@@ -73,13 +82,59 @@ public class UsuarioController {
             @RequestParam(name = "cantElemento", defaultValue = "10") int cantElemento,
             @RequestParam(name = "filtro", defaultValue = "") String filtro, Model modelo) {
         modelo.addAttribute("titulo", "Usuario");
-        Pageable pageable = PageRequest.of(page, cantElemento);
-        Page<Usuario> usuarios = servicioUsuario.listar(pageable, filtro);
-        PageRender pageRender = new PageRender("/usuario/listar", usuarios);
-        modelo.addAttribute("page", pageRender);
-        modelo.addAttribute("usuarios", usuarios);
-
         return "usuario/usuario";
+    }
+
+    @PostMapping("/tabla")
+    @ResponseBody
+    public DataTableResponseV2<Map<String, Object>> tabla(
+            @RequestParam int draw,
+            @RequestParam(defaultValue = "0") int start,
+            @RequestParam(defaultValue = "10") int length,
+            @RequestParam(name = "search[value]", required = false) String busqueda,
+            @RequestParam(name = "order[0][column]", defaultValue = "2") int columna,
+            @RequestParam(name = "order[0][dir]", defaultValue = "asc") String direccion) {
+        int limite = Math.min(Math.max(length, 1), 100);
+        Integer codigoSucursal = getUserSession().getSucursal().getCodigoSucursal();
+        Sort.Direction sentido = "desc".equalsIgnoreCase(direccion) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(Math.max(start, 0) / limite, limite,
+                Sort.by(sentido, ordenUsuario(columna)));
+        String filtro = busqueda == null ? "" : busqueda.trim();
+        Page<Usuario> pagina = filtro.isBlank()
+                ? servicioUsuario.listarPorSucursal(pageable, codigoSucursal)
+                : servicioUsuario.buscarPorSucursal(pageable, codigoSucursal, filtro);
+        List<Map<String, Object>> filas = pagina.getContent().stream().map(usuario -> {
+            Map<String, Object> fila = new LinkedHashMap<>();
+            fila.put("codigo", usuario.getCodigoUsuario());
+            fila.put("documento", usuario.getNumeroDocumento());
+            fila.put("nombre", usuario.getNombre() + " " + (usuario.getApellido() == null ? "" : usuario.getApellido()));
+            fila.put("celular", usuario.getCelular());
+            fila.put("telefono", usuario.getTelefono());
+            fila.put("barrio", usuario.getBarrio());
+            fila.put("direccion", usuario.getDireccion());
+            fila.put("sucursal", usuario.getSucursal().getNombreSucursal());
+            fila.put("ciudad", usuario.getSucursal().getCiudad().getNombreCiudad());
+            fila.put("estado", usuario.getEstado().getEstado());
+            return fila;
+        }).toList();
+        return new DataTableResponseV2<>(draw, servicioUsuario.contarPorSucursal(codigoSucursal),
+                pagina.getTotalElements(), filas);
+    }
+
+    private String ordenUsuario(int columna) {
+        return switch (columna) {
+            case 0 -> "codigoUsuario";
+            case 1 -> "numeroDocumento";
+            case 3 -> "celular";
+            case 4 -> "barrio";
+            case 5 -> "sucursal.nombreSucursal";
+            case 6 -> "estado.estado";
+            default -> "nombre";
+        };
+    }
+
+    private UsuarioSistema getUserSession() {
+        return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
     }
 
     @PostMapping("/listar/pagina")

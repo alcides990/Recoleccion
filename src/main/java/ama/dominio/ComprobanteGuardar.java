@@ -24,6 +24,7 @@ public class ComprobanteGuardar {
     private Integer codigoPuntoExpedicion;
     private Integer codigoTipoComprobante;
     private Integer codigoCobrador;
+    private Integer codigoComision;
     private Integer codigoCondicionVenta;
     private String periodoPago;
     private LocalDate pagoHasta;

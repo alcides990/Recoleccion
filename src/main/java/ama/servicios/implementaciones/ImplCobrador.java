@@ -7,6 +7,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ama.servicio.CobradorService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ImplCobrador implements CobradorService {
@@ -17,6 +20,24 @@ public class ImplCobrador implements CobradorService {
     @Override
     public List<Cobrador> listar(Sucursal sucursal) {
         return cobradorDao.listar(sucursal);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Cobrador> listarPorSucursal(Pageable pageable, Integer codigoSucursal) {
+        return cobradorDao.listarPorSucursal(pageable, codigoSucursal);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Cobrador> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro) {
+        return cobradorDao.buscarPorSucursal(pageable, codigoSucursal, filtro);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public long contarPorSucursal(Integer codigoSucursal) {
+        return cobradorDao.contarPorSucursal(codigoSucursal);
     }
 
     @Override

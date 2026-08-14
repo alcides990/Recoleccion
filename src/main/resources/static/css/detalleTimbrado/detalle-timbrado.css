@@ -1,0 +1,26 @@
+.detalle-timbrado-page { max-width: 980px; }
+.detalle-timbrado-card { overflow: hidden; border: 1px solid rgba(108,117,125,.18); border-radius: .85rem; background: #fff; box-shadow: 0 .7rem 2rem rgba(26,35,44,.1); }
+.detalle-timbrado-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.3rem 1.5rem; background: var(--btn-color); color: #fff; }
+.detalle-timbrado-kicker { display: block; margin-bottom: .15rem; font-size: .7rem; font-weight: 700; letter-spacing: .08em; opacity: .8; text-transform: uppercase; }
+.detalle-timbrado-header h3 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+.detalle-timbrado-header p { margin: .3rem 0 0; opacity: .82; }
+.detalle-timbrado-icon { display: grid; width: 3.5rem; height: 3.5rem; flex: 0 0 3.5rem; place-items: center; border: 1px solid rgba(255,255,255,.25); border-radius: 50%; background: rgba(255,255,255,.12); font-size: 1.55rem; }
+.detalle-timbrado-body { padding: 1.4rem; background: #f7f8fa; }
+.detalle-timbrado-section { padding: 1.2rem; border: 1px solid rgba(108,117,125,.16); border-radius: .65rem; background: #fff; }
+.detalle-timbrado-section h4 { margin: 0 0 1rem; color: #394047; font-size: .95rem; font-weight: 700; }
+.detalle-timbrado-section h4 i { width: 1.4rem; color: var(--btn-color); }
+.detalle-timbrado-section .form-label { margin: 0 0 .35rem .08rem; color: #555d64; font-size: .73rem; font-weight: 700; letter-spacing: .025em; text-transform: uppercase; }
+.detalle-timbrado-section .form-select { min-height: 2.75rem; border-color: rgba(108,117,125,.32); border-radius: .5rem; box-shadow: none; }
+.detalle-timbrado-section .form-select:focus { border-color: var(--btn-color); box-shadow: 0 0 0 .18rem rgba(108,117,125,.16); }
+.detalle-timbrado-footer { display: flex; justify-content: flex-end; gap: .7rem; padding: 1rem 1.4rem; border-top: 1px solid rgba(108,117,125,.18); }
+.detalle-timbrado-footer .btn { min-width: 10rem; padding: .6rem 1rem; border-radius: .45rem; font-weight: 600; }
+
+@media (max-width: 767.98px) {
+    .detalle-timbrado-page { padding-right: .65rem; padding-left: .65rem; }
+    .detalle-timbrado-header, .detalle-timbrado-body { padding: 1rem; }
+    .detalle-timbrado-header p, .detalle-timbrado-icon { display: none; }
+    .detalle-timbrado-header h3 { font-size: 1.15rem; }
+    .detalle-timbrado-section { padding: 1rem; }
+    .detalle-timbrado-footer { flex-direction: column-reverse; }
+    .detalle-timbrado-footer .btn { width: 100%; }
+}

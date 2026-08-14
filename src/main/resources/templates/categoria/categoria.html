@@ -1,178 +1,143 @@
 <!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-
-    <head th:replace="~{layout/layout :: heat}"> </head>
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" href="/css/categoria/formulario.css">
     <body>
-        <header th:replace="~{layout/layout :: header}"> </header>
-        <aside th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container">
-            <h3 class="  form-title"> Categorias</h3>
-            <a id="btnAgrerar" class="btn btn-primario btn-sm mb-3 " data-bs-toggle="modal"
-               data-bs-target="#modificarModal">
-                <i class="fa-solid fa-plus fa-lg"> </i> Agregar
-            </a>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
 
-            <div class="mensaje-alerta" id="contenedor-alertas"></div>
-            <div class="table-responsive-sm">
-                <table id="tabla1" class="table table-dark table-border table-striped table-colapse table-hover table-sm ">
-                </table>
-            </div>
-            <div class="table-responsive-sm">
-                <table id="tabla" class="table table-border table-striped table-colapse table-hover table-sm ">
-                    <thead class=" bg-color">
-                        <tr>
-                            <th>Codigo</th>
-                            <th>Nomrbe Categoria</th>
-                            <th>Tarifa</th>
-                            <th>Sucursal</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-secondary">
-                        <tr th:each="categoria : ${categorias}">
-                            <td th:text="${categoria.codigoCategoria}">
-                            </td>
-                            <td th:text="${categoria.nombreCategoria}"> Mostrar Categoria
-                            </td>
-                            <td th:text="${#numbers.formatDecimal(categoria.tarifa, 0, 'COMMA', 0, 'POINT')}"> Mostrar
-                                Tarifa
-                            </td>
-                            <td
-                                th:text="${categoria.sucursal.nombreSucursal} +' '+ ${categoria.sucursal.ciudad.nombreCiudad}">
-                                Mostrar Sucursal
-                            </td>
-                            <td>
-                                <a id="editar" data-url="/categoria/editar/" th:data-id="${categoria.codigoCategoria}"
-                                   class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modificarModal">
-                                    <i class="fa-regular fa-pen-to-square"></i>
-                                </a>
-                                <a id="eliminar" data-url="/categoria/eliminar/" th:data-id="${categoria.codigoCategoria}"
-                                   class="btn btn-danger  btn-sm">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </a>
-                            </td>
-
-                        </tr>
-                    </tbody>
-
-                </table>
-            </div>
-        </div>
-
-
-        <!-- Ventana modal -->
-        <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content bg-color">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmacionModalLabel">Datos de Categoría</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form id="frm-categoria" method="post">
-                        <div class="modal-body">
-                            <input type="hidden" id="codigoCategoria" name="codigoCategoria" />
-                            <div class="form-group col-sm">
-                                <label class="col-form-label" for="nombreCategoria"> Nombre de Categoría</label>
-                                <input class="form-control" type="text" id="nombreCategoria" name="nombreCategoria"
-                                       placeholder="Ingrese nombre de la categoría" />
-                            </div>
-                            <div class="form-group col-sm">
-                                <label class="col-form-label" for="tarifs">Tarifa</label>
-                                <input class="form-control" type="number" name="tarifa" id="tarifa"
-                                       placeholder="Ingrese el monto de la tarifa" />
-                            </div>
-                            <div> </div>
-                            <div class="form-group col-sm">
-                                <label class="col-form-label" for="sucursal">Sucursal</label>
-                                <select class="form-control" name="sucursal" id="sucursal">
-                                    <option th:each="sucursal : ${sucursal}" th:value="${sucursal.codigoSucursal}"
-                                            th:text="${sucursal.nombreSucursal}+' '+${sucursal.ciudad.nombreCiudad}"></option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <input type="submit" name="guardar" value="Guardar" class="btn btn-primario" />
-                        </div>
-                    </form>
+        <main id="listaCategorias" class="container-fluid py-3">
+            <section class="categoria-list-header">
+                <div>
+                    <span class="categoria-kicker">Tarifas de servicio</span>
+                    <h3>Categorías</h3>
+                    <p>Administre las categorías y tarifas de su sucursal.</p>
                 </div>
+                <button id="btnAgregarCategoria" type="button" class="btn categoria-list-agregar"
+                        data-bs-toggle="modal" data-bs-target="#modificarModal">
+                    <i class="fa-solid fa-plus"></i> Agregar categoría
+                </button>
+            </section>
+
+            <div id="contenedor-alertas" class="mensaje-alerta mt-3" aria-live="polite"></div>
+
+            <section class="categoria-list-card">
+                <div class="categoria-list-summary">
+                    <div>
+                        <h4>Categorías registradas</h4>
+                        <p>Busque por nombre, sucursal o ciudad.</p>
+                    </div>
+                    <span id="categoriaTotal" class="badge categoria-list-count">0</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="tablaCategorias" class="table table-striped table-hover align-middle w-100">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Categoría</th>
+                                <th>Tarifa</th>
+                                <th>Sucursal - Ciudad</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="tituloCategoriaModal"
+             aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form id="frm-categoria" class="modal-content categoria-modal">
+                    <header class="modal-header categoria-modal-header">
+                        <div>
+                            <span class="categoria-kicker">Tarifa de recolección</span>
+                            <h5 id="tituloCategoriaModal" class="modal-title">Nueva categoría</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </header>
+                    <div class="modal-body categoria-modal-body">
+                        <input type="hidden" id="codigoCategoria" name="codigoCategoria">
+                        <input type="hidden" id="codigoSucursalCategoria" th:value="${sucursal.codigoSucursal}">
+                        <div class="categoria-sucursal-info">
+                            <i class="fa-solid fa-building"></i>
+                            <div>
+                                <small>Sucursal asignada</small>
+                                <strong th:text="${sucursal.nombreSucursal + ' - ' + sucursal.ciudad.nombreCiudad}">Sucursal</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="nombreCategoria">Nombre de la categoría</label>
+                            <input class="form-control" type="text" id="nombreCategoria" name="nombreCategoria"
+                                   maxlength="100" placeholder="Ej.: Residencial" autocomplete="off" required>
+                        </div>
+                        <div>
+                            <label class="form-label" for="tarifa">Tarifa</label>
+                            <div class="categoria-tarifa-input">
+                                <span>Gs.</span>
+                                <input class="form-control" type="number" name="tarifa" id="tarifa"
+                                       min="1" step="1" inputmode="numeric"
+                                       placeholder="Ingrese un monto mayor a cero" required>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="modal-footer categoria-modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="guardarCategoria" type="submit" class="btn btn-primario">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar categoría
+                        </button>
+                    </footer>
+                </form>
             </div>
         </div>
-        <footer th:replace="~{layout/layout :: footer}"> </footer>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="/js/categoria/tabla.js"></script>
         <script type="module">
-            import {
-            consultar, guardar, eliminar, tabulador, mostrarAlerta, limpiar
-            }
-            from '/js/modulos.js';
-            eliminar('Seguro que desea eliminar esta categoria??');
-            $('#modificarModal').on('shown.bs.modal', function () {
-                $('#nombreCategoria').focus();
+            import {consultar, guardar, eliminar, mostrarAlerta} from '/js/modulos.js';
+
+            eliminar('¿Seguro que desea eliminar esta categoría?');
+
+            $('#btnAgregarCategoria').on('click', function () {
+                $('#tituloCategoriaModal').text('Nueva categoría');
+                $('#frm-categoria').trigger('reset');
+                $('#codigoCategoria').val('');
             });
-            // definir nombres de campos para la funcion limpiar
-            var nombreCategoria = "#nombreCategoria";
-            var tarifa = "#tarifa";
-            var campos = [nombreCategoria, tarifa];
-            tabulador(nombreCategoria, tarifa);
-            $(document).on('click', '#editar', function (event) {
-                var url = '/categoria/editar';
-                var datos = {codigoCategoria: $(this).data('id')};
-                consultar(datos, url)
+
+            $(document).on('click', '.editar-categoria', function () {
+                $('#tituloCategoriaModal').text('Editar categoría');
+                consultar({codigoCategoria: $(this).data('id')}, '/categoria/editar')
                         .then(function (respuesta) {
-                            $("#codigoCategoria").val(respuesta.codigoCategoria);
-                            $("#nombreCategoria").val(respuesta.nombreCategoria);
-                            $("#tarifa").val(respuesta.tarifa);
+                            $('#codigoCategoria').val(respuesta.codigoCategoria);
+                            $('#nombreCategoria').val(respuesta.nombreCategoria);
+                            $('#tarifa').val(respuesta.tarifa);
                         });
             });
-            $("#btnAgrerar").click(function (event) {
-                event.preventDefault();
-                limpiar(campos);
-                $("#modificarModal").modal('show');
-            });
-            $('#frm-categoria').submit(function (event) {
-                event.preventDefault();
-                var campos = [
-                    '#nombreCategoria',
-                    '#tarifa'
-                ];
-                let url = "/categoria/guardar";
-                let codigoCategoria = parseInt($("#codigoCategoria").val());
-                let nombreCategoria = $("#nombreCategoria").val();
-                let tarifa = parseFloat($("#tarifa").val());
-                let codigoSucursal = parseInt($("#sucursal").val());
-                let categoria = {
-                    codigoCategoria: codigoCategoria,
-                    nombreCategoria: nombreCategoria,
-                    tarifa: tarifa,
-                    sucursal: {
-                        codigoSucursal: codigoSucursal
-                    }
-                };
-                var contentType = 'application/json';
-                guardar(categoria, url, contentType).then((data) => {
-                    
-                    $('#frm-categoria').trigger('reset');
-                    $("#modificarModal").modal('hide');
-                    mostrarAlerta({
-                        mensaje: data,
-                        url: url,
-                        recargar: true,
-                        tipo: 'success'
-                    });
-                });
-            });
 
-            $("#tabla").DataTable({
-                language: {
-                    url: '/i18n/es-ES.json'
+            $('#modificarModal').on('shown.bs.modal', function () { $('#nombreCategoria').trigger('focus'); });
+
+            $('#frm-categoria').on('submit', function (event) {
+                event.preventDefault();
+                if (!this.checkValidity()) {
+                    this.reportValidity();
+                    return;
                 }
+                const boton = $('#guardarCategoria').prop('disabled', true);
+                const codigo = $('#codigoCategoria').val();
+                const categoria = {
+                    codigoCategoria: codigo ? Number(codigo) : null,
+                    nombreCategoria: $('#nombreCategoria').val().trim(),
+                    tarifa: Number($('#tarifa').val()),
+                    sucursal: {codigoSucursal: Number($('#codigoSucursalCategoria').val())}
+                };
+                guardar(categoria, '/categoria/guardar', 'application/json')
+                        .then(function (mensaje) {
+                            bootstrap.Modal.getOrCreateInstance(document.getElementById('modificarModal')).hide();
+                            mostrarAlerta({mensaje: mensaje, url: '', tipo: 'success', recargar: false});
+                            $('#tablaCategorias').DataTable().ajax.reload(null, false);
+                        })
+                        .finally(function () { boton.prop('disabled', false); });
             });
-
         </script>
-
     </body>
-
 </html>

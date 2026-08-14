@@ -7,7 +7,7 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container "> 
-            <div class="card-header"> <h3 class="form-title">Datos de Punto de Expedicion</h3></div>
+            <header class="form-view-header"><div><h3>Datos del punto de expedición</h3><p>Configure el punto, sucursal y estado para la emisión.</p></div><span class="form-view-icon"><i class="fa-solid fa-cash-register"></i></span></header>
             <a th:href="@{/puntoExpedicion/listar}" class="btn btn-primario m-2">Regresar</a>
             <form th:action="@{/puntoExpedicion/guardar}" method="post" th:object="${puntosExpedicion}">
                 <div class="row ">

@@ -3,6 +3,7 @@ package ama.controladorMVC;
 import ama.DTO.ComprobanteDTO;
 import ama.DTO.DetallePagoDTO;
 import ama.dominio.*;
+import ama.dao.DetalleTimbradoDao;
 import ama.servicio.*;
 import ama.utilerias.TableResponse;
 import ama.utilerias.PageRender;
@@ -12,11 +13,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -60,11 +65,15 @@ public class ComprobanteController {
     @Autowired
     private CobradorService cobradorService;
     @Autowired
+    private ComisionService comisionService;
+    @Autowired
     private EstadoService estadoService;
     @Autowired
     private TipoComprobanteService tipoComprobanteService;
     @Autowired
     private HttpSession httpSession;
+    @Autowired
+    private DetalleTimbradoDao detalleTimbradoDao;
 
     @GetMapping("/listar")
     public String listar(
@@ -187,6 +196,7 @@ public class ComprobanteController {
         modelo.addAttribute("estadoCuenta", new EstadoCuenta());
 
         modelo.addAttribute("metodosPago", metodoPagoService.listar());
+        modelo.addAttribute("comisiones", comisionService.listar());
 
         modelo.addAttribute("sucursal", getSucursalSession());
 
@@ -220,10 +230,41 @@ public class ComprobanteController {
     @Transactional
     @ResponseBody
     public ResponseEntity<?> guardarComprobante(@RequestBody ComprobanteGuardar comprobanteRequest) {
+        if (comprobanteRequest.getCodigoComision() == null) {
+            return ResponseEntity.badRequest().body("Seleccione una comision.");
+        }
+        Comision comision = comisionService.encontrar(new Comision(comprobanteRequest.getCodigoComision()));
+        if (comision == null) {
+            return ResponseEntity.badRequest().body("La comision seleccionada no es valida.");
+        }
         PuntoExpedicionPK puntoExpedicionPK = PuntoExpedicionPK.builder()
                 .codigoSucursal(getSucursalSession().getCodigoSucursal())
                 .codigoPuntoExpedicion(comprobanteRequest.getCodigoPuntoExpedicion())
                 .build();
+        if (comprobanteRequest.getCodigoTimbrado() == null || comprobanteRequest.getCodigoSerie() == null) {
+            return ResponseEntity.badRequest().body("Seleccione un timbrado y serie para el punto de expedición.");
+        }
+        DetalleTimbradoPK detalleTimbradoPK = new DetalleTimbradoPK(
+                comprobanteRequest.getCodigoTimbrado(), comprobanteRequest.getCodigoPuntoExpedicion(),
+                getSucursalSession().getCodigoSucursal());
+        DetalleTimbrado detalleTimbrado = detalleTimbradoDao.findById(detalleTimbradoPK).orElse(null);
+        if (detalleTimbrado == null
+                || detalleTimbrado.getEstado() == null || detalleTimbrado.getEstado().getCodigoEstado() != 1
+                || detalleTimbrado.getSerie() == null
+                || !detalleTimbrado.getSerie().getCodigoSerie().equals(comprobanteRequest.getCodigoSerie())) {
+            return ResponseEntity.badRequest().body("El timbrado y la serie no están habilitados para el punto de expedición.");
+        }
+        Timbrado timbradoVigente = detalleTimbrado.getTimbrado();
+        LocalDate hoy = LocalDate.now();
+        LocalDate inicioVigencia = timbradoVigente.getFechaInicio() == null ? null
+                : java.time.Instant.ofEpochMilli(timbradoVigente.getFechaInicio().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate finVigencia = timbradoVigente.getFechaFin() == null ? null
+                : java.time.Instant.ofEpochMilli(timbradoVigente.getFechaFin().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+        if (timbradoVigente.getEstado() == null || timbradoVigente.getEstado().getCodigoEstado() != 1
+                || inicioVigencia == null || finVigencia == null
+                || hoy.isBefore(inicioVigencia) || hoy.isAfter(finVigencia)) {
+            return ResponseEntity.badRequest().body("El timbrado seleccionado no está activo o está fuera de vigencia.");
+        }
         ComprobantePK comprobantePK = ComprobantePK.builder()
                 .numeroComprobante(comprobanteRequest.getNumeroComprobante())
                 .codigoTipoComprobante(comprobanteRequest.getCodigoTipoComprobante())
@@ -242,6 +283,25 @@ public class ComprobanteController {
                                 + " a nombre de " + nombreUsuario);
             }
         }
+        if (comprobanteRequest.getDetallePago() == null || comprobanteRequest.getDetallePago().isEmpty()) {
+            return ResponseEntity.badRequest().body("Agregue al menos un medio de pago.");
+        }
+        Map<Integer, DetallePago> pagosConsolidados = new LinkedHashMap<>();
+        for (DetallePago pago : comprobanteRequest.getDetallePago()) {
+            if (pago.getDetallePagoPK() == null || pago.getDetallePagoPK().getCodigoMetodoPago() == null
+                    || pago.getImporte() == null || pago.getImporte() <= 0) {
+                return ResponseEntity.badRequest().body("Existe un medio de pago incompleto o inválido.");
+            }
+            Integer codigoMetodo = pago.getDetallePagoPK().getCodigoMetodoPago();
+            DetallePago existente = pagosConsolidados.get(codigoMetodo);
+            if (existente == null) {
+                pagosConsolidados.put(codigoMetodo, pago);
+            } else {
+                existente.setImporte(existente.getImporte() + pago.getImporte());
+            }
+        }
+        comprobanteRequest.setDetallePago(new ArrayList<>(pagosConsolidados.values()));
+
         double totalImporte = comprobanteRequest.getDetallePago()
                 .stream()
                 .mapToDouble(DetallePago::getImporte)
@@ -273,6 +333,7 @@ public class ComprobanteController {
                 .comprobantePK(comprobantePK)
                 .razonSocial(comprobanteRequest.getRazonSocial())
                 .cobrador(new Cobrador(comprobanteRequest.getCodigoCobrador()))
+                .comision(comision)
                 .condicionVenta(new CondicionVenta(comprobanteRequest.getCodigoCondicionVenta()))
                 .categoria(new Categoria(comprobanteRequest.getCodigoCategoria()))
                 .tarifa(comprobanteRequest.getTarifa())
@@ -419,14 +480,16 @@ public class ComprobanteController {
     private EstadoCuenta getEstadoCuenta(String cuentaCorriente) {
 
         Servicio servicio = servicioService.encontrar(cuentaCorriente);
-        List<Object[]> datos = comprobanteService.getPagoHastaAndSaldo(cuentaCorriente);
+        List<Object[]> datos = comprobanteService.getPagoDesdeAndSaldo(cuentaCorriente);
         LocalDate pagoHasta = null;
         Double saldo = 0.0;
         if (datos.isEmpty()) {
             pagoHasta = servicio.getFechaInicio();
         } else {
             for (Object[] resul : datos) {
-                pagoHasta = ((java.sql.Date) resul[0]).toLocalDate();
+                pagoHasta = YearMonth.parse(
+                        (String) resul[0], DateTimeFormatter.ofPattern("MM-yyyy"))
+                        .atDay(1);
                 saldo = (Double) resul[1];
 
             }

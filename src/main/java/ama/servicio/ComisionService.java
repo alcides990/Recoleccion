@@ -12,5 +12,5 @@ public interface ComisionService {
     
     public void eliminar(Comision comision);
     
-    public void encontrar(Comision comision);
+    public Comision encontrar(Comision comision);
 }

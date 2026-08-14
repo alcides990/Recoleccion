@@ -54,6 +54,10 @@ public class TimbradoController {
     @ResponseBody
     public ResponseEntity<String> guardar(@RequestBody Timbrado timbrado
     ) {
+        if (timbrado.getFechaInicio() == null || timbrado.getFechaFin() == null
+                || timbrado.getFechaFin().before(timbrado.getFechaInicio())) {
+            return ResponseEntity.badRequest().body("La fecha fin de vigencia debe ser igual o posterior a la fecha de inicio.");
+        }
         Empresa empresa = getUserSession().getSucursal().getEmpresa();
         timbrado.setEmpresa(empresa);
 

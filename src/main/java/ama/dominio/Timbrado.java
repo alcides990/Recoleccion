@@ -24,6 +24,11 @@ public class Timbrado implements Serializable {
     @Column(name = "fecha_inicio")
     @Temporal(TemporalType.DATE)
     private Date fechaInicio;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "fecha_fin")
+    @Temporal(TemporalType.DATE)
+    private Date fechaFin;
     
     @JoinColumn(name = "codigo_estado", referencedColumnName = "codigo_estado")
     @ManyToOne(optional = false)

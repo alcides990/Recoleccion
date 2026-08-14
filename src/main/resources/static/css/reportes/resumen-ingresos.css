@@ -1,0 +1,15 @@
+#resumenIngresos { padding-top: 1rem; padding-bottom: 2rem; }
+#resumenIngresos .resumen-filtros { padding: 1rem; border: 1px solid rgba(108,117,125,.22); border-radius: .65rem; background: #fff; }
+#resumenIngresos .resumen-filtros label { margin-bottom: .3rem; color: #4d555c; font-size: .8rem; font-weight: 700; }
+#resumenIngresos .resumen-consultar { min-height: 2.45rem; background: var(--btn-color); color: #fff; font-weight: 700; }
+#resumenIngresos .resumen-metrica { padding: 1rem; border-left: .25rem solid var(--btn-color); border-radius: .6rem; background: #fff; box-shadow: 0 .2rem .7rem rgba(33,37,41,.09); }
+#resumenIngresos .resumen-metrica span, #resumenIngresos .resumen-metrica strong { display: block; }
+#resumenIngresos .resumen-metrica span { color: #737c84; font-size: .75rem; font-weight: 700; text-transform: uppercase; }
+#resumenIngresos .resumen-metrica strong { margin-top: .25rem; color: #343a40; font-size: 1.35rem; }
+#resumenIngresos .resumen-tabla-card { overflow: hidden; border: 1px solid rgba(108,117,125,.2); border-radius: .65rem; background: #fff; }
+#resumenIngresos .resumen-tabla-card h4 { margin: 0; padding: .85rem 1rem; color: #3f474e; font-size: .95rem; font-weight: 800; }
+#resumenIngresos .resumen-tabla-card thead th { border: 0; background: var(--btn-color); color: #fff; font-size: .76rem; text-transform: uppercase; }
+#resumenIngresos .resumen-tabla-card td { font-size: .86rem; }
+#resumenIngresos .resumen-grupo-cobrador td { background: #e9ecef; color: #343a40; font-weight: 800; }
+#resumenIngresos .resumen-subtotal-cobrador td { border-top: 2px solid rgba(108,117,125,.3); background: #f8f9fa; font-weight: 800; }
+#resumenIngresos .resumen-total-general td { border-top: .2rem solid var(--btn-color); background: #e9ecef; color: #343a40; font-weight: 800; }

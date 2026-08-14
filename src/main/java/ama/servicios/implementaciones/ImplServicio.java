@@ -33,6 +33,24 @@ public class ImplServicio implements ServicioService {
         return servicioDao.buscar(pageable, filtro);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Servicio> listarPorSucursal(Pageable pageable, Integer codigoSucursal) {
+        return servicioDao.listarPorSucursal(pageable, codigoSucursal);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Servicio> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro) {
+        return servicioDao.buscarPorSucursal(pageable, codigoSucursal, filtro);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public long contarPorSucursal(Integer codigoSucursal) {
+        return servicioDao.contarServiciosPorSucursal(codigoSucursal);
+    }
+
     @Transactional
     @Override
     public void guardar(Servicio servicio) {

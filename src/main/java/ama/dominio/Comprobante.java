@@ -78,6 +78,11 @@ public class Comprobante implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private Cobrador cobrador;
 
+    @JsonIgnore
+    @JoinColumn(name = "codigo_comision", referencedColumnName = "codigo_comision")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Comision comision;
+
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @JoinColumn(name = "codigo_condicion_venta", referencedColumnName = "codigo_condicion_venta", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)

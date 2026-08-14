@@ -78,7 +78,7 @@
                                     <label  for="pagoHasta">Pago desde:</label>
                                 </div>
                                 <div class="col my-1">
-                                    <input  type="text" disabled="true" name="pagoHasta" id="pagoHasta" th:value="${#temporals.format(estadoCuenta.pagoHasta,'dd-MM-yyyy')}" class="form-control"  />
+                                    <input  type="text" disabled="true" name="pagoHasta" id="pagoHasta" th:value="${#temporals.format(estadoCuenta.pagoHasta,'MM-yyyy')}" class="form-control"  />
                                 </div>
                             </div>
                             <div class="row">
@@ -152,7 +152,7 @@
                                         <td th:text="${comprobante.tipoComprobante.nombreTipoComprobante}" > </td>
                                         <td th:text="${comprobante.puntoExpedicion.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
                                         <td th:text="${#temporals.format(comprobante.fechaPago,'yyyy-MM-dd')}"></td>
-                                        <td th:text="${#temporals.format(comprobante.pagoHasta,'yyyy-MM-dd')}"></td>
+                                        <td th:text="${comprobante.pagoHasta == null ? '' : #temporals.format(comprobante.pagoHasta,'MM-yyyy')}"></td>
                                         <td th:text="${comprobante.periodoPago}"></td>
                                         <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'POINT', 0, 'COMMA')}"></td>
                                         <td th:text="${comprobante.cantidadPago}"></td>

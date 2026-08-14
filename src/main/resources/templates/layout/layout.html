@@ -13,6 +13,7 @@
         <!-- Agrega esta línea para cargar los recursos de los iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
         <link rel="stylesheet" href="/css/jquery.dataTables.min.css" />
+        <link rel="stylesheet" href="/css/diseno-global.css" />
     </head>
 
     <body>
@@ -29,59 +30,59 @@
 
         <aside id="menu_aside" th:fragment="aside" class="menu_aside">
             <ul>
-                <li><a href="/"> <i class="fa-solid fa-house fa-xl"></i> INICIO </a>
+                <li><a href="/"> <i class="fa-solid fa-house-chimney"></i> INICIO </a>
                 </li>
                 <hr />
-                <ul> <i class="fas fa-donate fa-xl"></i> COBRANZA
-                    <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-signature "></i> Factura
+                <ul><span class="menu-seccion"><i class="fa-solid fa-hand-holding-dollar"></i> COBRANZA</span>
+                    <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-circle-plus"></i> Factura
                             Manual </a></li>
                     <!--                <li id="factura-electronica"><a th:href="@{/comprobante/facturaElectronica}">
                                             <i class="fa-solid fa-file-lines"></i> Factura Electronica</a></li>-->
-                    <li id="facturas" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SECRETARIO')"><a
-                            th:href="@{/comprobante/listar}"> <i class="fa-solid fa-folder-open"></i>
+                    <li id="facturas" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"><a
+                            th:href="@{/comprobantes-v2}"> <i class="fa-solid fa-receipt"></i>
                             Comprobantes</a></li>
                 </ul>
 
                 <hr />
-                <ul><i class="fa-solid fa-file-alt fa-xl"></i> DATOS BASICOS
-                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/usuarioSistema/listar}"><i
-                                class="fas fa-users-cog fa-lg"></i> </i>Usuario Sistema</a></li>
-                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"> <a th:href="@{/parametro/listar}"><i
-                                class="fa-solid fa-sliders-h fa-lg"></i> Parametros</a></li>
-                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"> <a th:href="@{/timbrado/listar}"><i
-                                class="fa-solid fa-newspaper fa-lg"></i> Timbrados</a></li>
+                <ul><span class="menu-seccion"><i class="fa-solid fa-database"></i> DATOS BÁSICOS</span>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')"><a th:href="@{/usuarioSistema/listar}"><i
+                                class="fa-solid fa-user-shield"></i> Usuario Sistema</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR', 'SUPERVISOR')"> <a th:href="@{/parametro/listar}"><i
+                                class="fa-solid fa-sliders"></i> Parámetros</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR', 'SUPERVISOR')"> <a th:href="@{/timbrado/listar}"><i
+                                class="fa-solid fa-stamp"></i> Timbrados</a></li>
                     <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/puntoExpedicion/listar}"><i
-                                class="fa-solid fa-cash-register fa-lg"></i> Puntos Expdiciones</a></li>
-                    <li sec:authorize="hasAnyAuthority('ROOT')"><a th:href="@{/tipoComprobante/listar}"><i
-                                class="fa-solid fa-file-alt fa-lg"></i> Tipos Comprobantes</a></li>
+                                class="fa-solid fa-cash-register"></i> Puntos de expedición</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/tipoComprobante/listar}"><i
+                                class="fa-solid fa-file-circle-check"></i> Tipos de comprobante</a></li>
                     <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/sucursal/listar}"><i
-                                class="fa-solid fa-solid fa-map-location-dot fa-lg"></i> Sucursales</a></li>
+                                class="fa-solid fa-building"></i> Sucursales</a></li>
                     <li sec:authorize="hasAnyAuthority('ROOT')"><a th:href="@{/ciudad/listar}"><i
-                                class="fa-solid fa-solid fa-location-dot fa-lg"></i> Ciudades</a></li>
+                                class="fa-solid fa-city"></i> Ciudades</a></li>
                 </ul>
                 <hr />
-                <li> <a th:href="@{/servicio/listar}"><i class="fa-solid fa-users fa-xl"></i> CUENTAS</a></li>
+                <li> <a th:href="@{/servicio/listar-v2}"><i class="fa-solid fa-address-card"></i> CUENTAS</a></li>
                 <hr />
-                <li><a th:href="@{/usuario/listar}"> <i class="fa-solid fa-users-gear fa-xl"></i> USUARIOS</a></li>
+                <li><a th:href="@{/usuario/listar}"> <i class="fa-solid fa-user-group"></i> USUARIOS</a></li>
                 <hr />
-                <li> <a th:href="@{/cobrador/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SECRETARIO')"> <i
-                            class="fa-solid fa-people-group fa-xl"></i> COBRADORES</a></li>
+                <li> <a th:href="@{/cobrador/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SECRETARIO','SUPERVISOR')"> <i
+                            class="fa-solid fa-money-bill-transfer"></i> COBRADORES</a></li>
                 <hr />
-                <li><a th:href="@{/categoria/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SECRETARIO')"> <i
-                            class="fa-solid fa-list-alt fa-xl"></i> CATEGORIAS</a></li>
+                <li><a th:href="@{/categoria/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"> <i
+                            class="fa-solid fa-tags"></i> CATEGORÍAS</a></li>
                 <hr />
-                <li> <a th:href="@{/zona/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SECRETARIO')"><i <i
-                                                                                                                  class="fa-solid fa-route fa-xl"></i> ZONAS</a></li>
+                <li> <a th:href="@{/zona/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"><i
+                   class="fa-solid fa-map"></i> ZONAS</a></li>
                 <hr />
                 <li>
-                    <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SECRETARIO')" th:href="@{/reporte}">
-                        <i class="fa-solid fa-chart-pie fa-xl"></i> REPORTES
+                    <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')" th:href="@{/reporte}">
+                        <i class="fa-solid fa-chart-column"></i> REPORTES
                     </a>
                 </li>
                 <hr />
             </ul>
             <button id="btn-user" class="user-session">
-                <i class="fas fa-user-circle"></i>
+                <i class="fa-solid fa-circle-user"></i>
 
             </button>
             <div id="user-session">

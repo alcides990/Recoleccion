@@ -10,7 +10,7 @@
                 <aside  th:replace="~{layout/layout :: aside}"> </aside>
                 <div class="container">
 
-                    <h3 class="form-title">Datos de Ciudad</h3>
+                    <header class="form-view-header"><div><h3>Datos de la ciudad</h3><p>Registre o actualice la ciudad utilizada por las sucursales.</p></div><span class="form-view-icon"><i class="fa-solid fa-city"></i></span></header>
                     <a th:href="@{/ciudad/listar}" class="btn btn-primario m-2"> Regresar </a>
                     <div class="contenedor">
                         <form   th:action="@{/ciudad/guardar}" id="formulario" method="post" th:object="${ciudad}" >

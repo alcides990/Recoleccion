@@ -30,10 +30,10 @@ public interface ComprobanteService {
 
     public int getCantidadPago(String cuentaCorriente);
     
-    public Optional<String> getPagoHsta(String cuentaCorriente);
+    public Optional<String> getPagoDesde(String cuentaCorriente);
 
     public Optional<Comprobante> getUltimoComprobanteCuentaActivo(String cuentaCorriente);
 
-    public List<Object[]> getPagoHastaAndSaldo(String cuentaCorriente);
+    public List<Object[]> getPagoDesdeAndSaldo(String cuentaCorriente);
 
 }

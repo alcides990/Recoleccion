@@ -28,6 +28,24 @@ public class ImplUsuario implements UsuarioService {
         return usuarioDao.getUsuarios(pageable, filtro);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Usuario> listarPorSucursal(Pageable pageable, Integer codigoSucursal) {
+        return usuarioDao.listarPorSucursal(pageable, codigoSucursal);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Usuario> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro) {
+        return usuarioDao.buscarPorSucursal(pageable, codigoSucursal, filtro);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public long contarPorSucursal(Integer codigoSucursal) {
+        return usuarioDao.contarPorSucursal(codigoSucursal);
+    }
+
     @Transactional
     @Override
     public void guardar(Usuario usuario) {

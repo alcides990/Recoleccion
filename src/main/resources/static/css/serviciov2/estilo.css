@@ -1,0 +1,100 @@
+#servicioModal .servicio-v2-modal {
+    overflow: hidden;
+    border: 0;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 1.25rem 3rem rgba(26, 35, 44, .22);
+}
+
+#servicioModal .servicio-v2-header {
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid rgba(108, 117, 125, .18);
+    background: var(--btn-color);
+    color: #fff;
+}
+
+#servicioModal .servicio-v2-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+#servicioModal .servicio-v2-kicker {
+    display: block;
+    margin-bottom: .12rem;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    opacity: .8;
+    text-transform: uppercase;
+}
+
+#servicioModal .servicio-v2-header .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+#servicioModal .servicio-v2-body {
+    padding: 1.4rem;
+    background: #f7f8fa;
+}
+
+#servicioModal .form-label {
+    margin: 0 0 .35rem .1rem;
+    color: #4d555c;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .025em;
+    text-transform: uppercase;
+}
+
+#servicioModal .form-control,
+#servicioModal .form-select {
+    min-height: 2.65rem;
+    border-color: rgba(108, 117, 125, .32);
+    border-radius: .5rem;
+    background-color: #fff;
+    box-shadow: none;
+}
+
+#servicioModal .form-control:focus,
+#servicioModal .form-select:focus {
+    border-color: var(--btn-color);
+    box-shadow: 0 0 0 .18rem rgba(108, 117, 125, .16);
+}
+
+#servicioModal .form-control[readonly] {
+    background: #eceff2;
+    color: #596168;
+}
+
+#servicioModal .servicio-v2-footer {
+    padding: .9rem 1.4rem;
+    border-top: 1px solid rgba(108, 117, 125, .18);
+    background: #fff;
+}
+
+#servicioModal .servicio-v2-footer .btn {
+    min-width: 8.5rem;
+    padding: .58rem 1rem;
+    border-radius: .45rem;
+    font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+    #servicioModal .modal-dialog {
+        margin: .65rem;
+    }
+
+    #servicioModal .servicio-v2-body {
+        max-height: calc(100vh - 11rem);
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    #servicioModal .servicio-v2-footer {
+        flex-direction: column-reverse;
+    }
+
+    #servicioModal .servicio-v2-footer .btn {
+        width: 100%;
+    }
+}

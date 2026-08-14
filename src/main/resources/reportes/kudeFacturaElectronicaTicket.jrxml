@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- JasperReports Library 6.20.6. Ticket termico de 80 mm; imprimir sin ajuste de escala. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kudeFacturaElectronicaTicket" pageWidth="226" pageHeight="540" columnWidth="206" leftMargin="10" rightMargin="10" topMargin="8" bottomMargin="8" uuid="9f182d99-9d16-49ed-97e6-2a77f349eb9d">
+    <parameter name="emisorRazonSocial" class="java.lang.String"><defaultValueExpression><![CDATA["EMISOR"]]></defaultValueExpression></parameter>
+    <parameter name="emisorRuc" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="emisorDireccion" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="emisorTelefono" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="timbrado" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="vigenciaTimbrado" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="numeroDocumento" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="fechaEmision" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="receptorNombre" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="receptorDocumento" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="condicionVenta" class="java.lang.String"><defaultValueExpression><![CDATA["CONTADO"]]></defaultValueExpression></parameter>
+    <parameter name="descripcion" class="java.lang.String"><defaultValueExpression><![CDATA["Servicio de recoleccion"]]></defaultValueExpression></parameter>
+    <parameter name="periodo" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="cantidad" class="java.lang.String"><defaultValueExpression><![CDATA["1"]]></defaultValueExpression></parameter>
+    <parameter name="precioUnitario" class="java.lang.String"><defaultValueExpression><![CDATA["0"]]></defaultValueExpression></parameter>
+    <parameter name="gravada10" class="java.lang.String"><defaultValueExpression><![CDATA["0"]]></defaultValueExpression></parameter>
+    <parameter name="iva10" class="java.lang.String"><defaultValueExpression><![CDATA["0"]]></defaultValueExpression></parameter>
+    <parameter name="total" class="java.lang.String"><defaultValueExpression><![CDATA["0"]]></defaultValueExpression></parameter>
+    <parameter name="cdc" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="estadoSifen" class="java.lang.String"><defaultValueExpression><![CDATA["PENDIENTE DE ENVIO A SIFEN"]]></defaultValueExpression></parameter>
+    <parameter name="qrImage" class="java.awt.Image" isForPrompting="false"/>
+    <title>
+        <band height="520" splitType="Stretch">
+            <textField isStretchWithOverflow="true"><reportElement x="0" y="0" width="206" height="18" uuid="cb50bb8b-53a3-4930-ad26-102d3b93b5de"/><textElement textAlignment="Center"><font fontName="SansSerif" size="10" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{emisorRazonSocial}]]></textFieldExpression></textField>
+            <textField><reportElement x="0" y="19" width="206" height="12" uuid="480f3329-4f9d-4a49-a17c-4d4e7542d85f"/><textElement textAlignment="Center"><font fontName="SansSerif" size="7"/></textElement><textFieldExpression><![CDATA["RUC: " + $P{emisorRuc}]]></textFieldExpression></textField>
+            <textField isStretchWithOverflow="true"><reportElement x="0" y="31" width="206" height="20" uuid="e4dd3a14-3015-4742-9f76-49142476c6cf"/><textElement textAlignment="Center"><font fontName="SansSerif" size="7"/></textElement><textFieldExpression><![CDATA[$P{emisorDireccion} + " - Tel. " + $P{emisorTelefono}]]></textFieldExpression></textField>
+            <line><reportElement x="0" y="55" width="206" height="1" uuid="8db8cecc-61df-4720-8ac8-2691fe49004b"/></line>
+            <staticText><reportElement x="0" y="61" width="206" height="13" uuid="24e3c825-5e5f-4d26-b943-5834a1c4e13e"/><textElement textAlignment="Center"><font fontName="SansSerif" size="9" isBold="true"/></textElement><text><![CDATA[FACTURA ELECTRONICA - KUDE]]></text></staticText>
+            <textField><reportElement x="0" y="78" width="206" height="12" uuid="858bc8e1-899a-48f2-982e-5012a7d16e33"/><textElement textAlignment="Center"><font fontName="SansSerif" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{numeroDocumento}]]></textFieldExpression></textField>
+            <textField><reportElement x="0" y="93" width="206" height="11" uuid="afbeab46-74f6-48a7-a84d-777f92cb01d7"/><textElement textAlignment="Center"><font fontName="SansSerif" size="7"/></textElement><textFieldExpression><![CDATA["Fecha: " + $P{fechaEmision}]]></textFieldExpression></textField>
+            <line><reportElement x="0" y="108" width="206" height="1" uuid="1f0153a6-2c3a-4d75-b67d-726028076c3a"/></line>
+            <textField isStretchWithOverflow="true"><reportElement x="0" y="114" width="206" height="16" uuid="62f281bf-d42e-4fac-9740-8b4e14f93397"/><textElement><font fontName="SansSerif" size="7" isBold="true"/></textElement><textFieldExpression><![CDATA["Cliente: " + $P{receptorNombre}]]></textFieldExpression></textField>
+            <textField><reportElement x="0" y="132" width="206" height="11" uuid="7ac1467f-36cb-4830-9d92-f0a4e3b9a506"/><textElement><font fontName="SansSerif" size="7"/></textElement><textFieldExpression><![CDATA["RUC/CI: " + $P{receptorDocumento}]]></textFieldExpression></textField>
+            <textField><reportElement x="0" y="145" width="206" height="11" uuid="ec2745de-7a79-4b2f-858c-2b31312bf60e"/><textElement><font fontName="SansSerif" size="7"/></textElement><textFieldExpression><![CDATA["Condicion: " + $P{condicionVenta}]]></textFieldExpression></textField>
+            <line><reportElement x="0" y="160" width="206" height="1" uuid="60b6aab9-fafe-4436-ae31-44dfa46f7bc1"/></line>
+            <staticText><reportElement x="0" y="165" width="116" height="11" uuid="65086080-d5ee-447a-9be0-4ec4ee5903b4"/><textElement><font fontName="SansSerif" size="7" isBold="true"/></textElement><text><![CDATA[DESCRIPCION]]></text></staticText>
+            <staticText><reportElement x="116" y="165" width="25" height="11" uuid="a105e106-b183-4cad-ba65-4525552088ea"/><textElement textAlignment="Center"><font fontName="SansSerif" size="7" isBold="true"/></textElement><text><![CDATA[CANT]]></text></staticText>
+            <staticText><reportElement x="141" y="165" width="65" height="11" uuid="8a07bf91-2ecc-4b78-908d-9ca94d7e7e5d"/><textElement textAlignment="Right"><font fontName="SansSerif" size="7" isBold="true"/></textElement><text><![CDATA[IMPORTE]]></text></staticText>
+            <textField isStretchWithOverflow="true"><reportElement x="0" y="180" width="116" height="35" uuid="bca1e909-6a22-46cb-b3a0-b84b20bc7575"/><textElement><font fontName="SansSerif" size="7"/></textElement><textFieldExpression><![CDATA[$P{descripcion} + ($P{periodo}.isEmpty() ? "" : " - " + $P{periodo})]]></textFieldExpression></textField>
+            <textField><reportElement x="116" y="180" width="25" height="11" uuid="65d0b058-6aa5-4d77-b78f-bfa3c467bdcf"/><textElement textAlignment="Center"><font fontName="SansSerif" size="7"/></textElement><textFieldExpression><![CDATA[$P{cantidad}]]></textFieldExpression></textField>
+            <textField><reportElement x="141" y="180" width="65" height="11" uuid="7bbfa07d-5887-47b9-a1dc-10e95cf5dd9e"/><textElement textAlignment="Right"><font fontName="SansSerif" size="7"/></textElement><textFieldExpression><![CDATA[$P{total}]]></textFieldExpression></textField>
+            <line><reportElement x="0" y="220" width="206" height="1" uuid="b2a96066-e905-4b1d-9bd2-8a1b0bd0d441"/></line>
+            <textField><reportElement x="94" y="226" width="112" height="12" uuid="f4c6c10e-7d4f-4e5d-833e-1a8a0d28a3ae"/><textElement textAlignment="Right"><font fontName="SansSerif" size="8"/></textElement><textFieldExpression><![CDATA["IVA 10%: " + $P{iva10}]]></textFieldExpression></textField>
+            <textField><reportElement x="74" y="241" width="132" height="15" uuid="7fd51f5e-317f-4f98-83da-8935b6cc1d84"/><textElement textAlignment="Right"><font fontName="SansSerif" size="10" isBold="true"/></textElement><textFieldExpression><![CDATA["TOTAL: " + $P{total}]]></textFieldExpression></textField>
+            <line><reportElement x="0" y="263" width="206" height="1" uuid="d9b8eb98-ff64-4e7f-84df-b0a13b431877"/></line>
+            <staticText><reportElement x="53" y="271" width="100" height="100" uuid="fc0eee3c-0d6f-46e3-b0d6-9d156c53b48f"/><box><pen lineWidth="0.5" lineColor="#777777"/></box><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement><text><![CDATA[QR SIFEN]]></text></staticText>
+            <image scaleImage="RetainShape" onErrorType="Blank"><reportElement x="53" y="271" width="100" height="100" uuid="a957fd1f-0b83-4115-a6ea-c828f9aa59cc"/><imageExpression><![CDATA[$P{qrImage}]]></imageExpression></image>
+            <staticText><reportElement x="0" y="380" width="206" height="11" uuid="e9844fd3-bdec-4262-b0b3-fc7e3a5aaefc"/><textElement textAlignment="Center"><font fontName="SansSerif" size="7" isBold="true"/></textElement><text><![CDATA[CDC]]></text></staticText>
+            <textField isStretchWithOverflow="true"><reportElement x="0" y="394" width="206" height="30" uuid="f9c9ffcb-4b8b-41f5-8aef-3101512ec73a"/><textElement textAlignment="Center"><font fontName="Monospaced" size="6"/></textElement><textFieldExpression><![CDATA[$P{cdc}]]></textFieldExpression></textField>
+            <textField isStretchWithOverflow="true"><reportElement x="0" y="432" width="206" height="18" uuid="0b916e58-1fb5-468c-a019-129457527d6d"/><textElement textAlignment="Center"><font fontName="SansSerif" size="7" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{estadoSifen}]]></textFieldExpression></textField>
+            <staticText><reportElement x="0" y="467" width="206" height="22" uuid="9f5e8ac7-0e27-4ef1-b8b8-abd0d2d248f0"/><textElement textAlignment="Center"><font fontName="SansSerif" size="6"/></textElement><text><![CDATA[Consulte la validez del Documento Electronico con el codigo QR o CDC.]]></text></staticText>
+            <staticText><reportElement x="0" y="505" width="206" height="12" uuid="e3dc1ac6-bb37-4f84-b944-a4690be3cc3c"/><textElement textAlignment="Center"><font fontName="SansSerif" size="6"/></textElement><text><![CDATA[Imprimir en papel termico de 80 mm sin escalar.]]></text></staticText>
+        </band>
+    </title>
+</jasperReport>

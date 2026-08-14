@@ -31,3 +31,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local tools, caches and generated artifacts ###
+/.codex-remote-attachments/
+/.m2/
+/.m2-repository/
+/output/
+/classpath.txt
+/nbactions.tmp
+/*.apk
+/*.sql
+/DataSqlImport/*_origen.csv
+/DataSqlImport/*_origen.json
+
+### Separate Android workspaces (versioned independently) ###
+/android-facturacion/
+/android-printer/

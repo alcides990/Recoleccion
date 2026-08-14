@@ -39,6 +39,7 @@ public class EstadoCuenta implements Serializable {
         if (pagoHasta != null) {
             int anos = Period.between(pagoHasta, cierrePeriodo).getYears();
             int meses = Period.between(pagoHasta, cierrePeriodo).getMonths();
+            // Un valor negativo representa la cantidad de períodos adelantados.
             this.cantidadDeuda = (anos * 12) + meses;
         }
 

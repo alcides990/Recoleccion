@@ -1,0 +1,163 @@
+#ingresosV2 {
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+}
+
+#ingresosV2 .ingresos-v2-panel {
+    margin-top: .95rem;
+}
+
+#ingresosV2 .ingresos-v2-card {
+    padding: 1.15rem;
+    border: 1px solid var(--borde-suave);
+    border-radius: .75rem;
+    background: var(--superficie-color);
+    box-shadow: var(--sombra-suave);
+}
+
+#ingresosV2 .ingresos-v2-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-bottom: 1rem;
+}
+
+#ingresosV2 .ingresos-v2-card-header h4 {
+    margin: 0;
+    color: #343a40;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+#ingresosV2 .ingresos-v2-card-header p {
+    margin: .24rem 0 0;
+    color: #6c757d;
+    font-size: .88rem;
+}
+
+#ingresosV2 .ingresos-v2-icon {
+    display: grid;
+    width: 2.35rem;
+    height: 2.35rem;
+    flex: 0 0 2.35rem;
+    place-items: center;
+    border-radius: .55rem;
+    background: var(--btn-color);
+    color: #fff;
+}
+
+#ingresosV2 .ingresos-v2-tabs {
+    display: inline-flex;
+    gap: .35rem;
+    margin-bottom: 1rem;
+    padding: .3rem;
+    border-radius: .55rem;
+    background: rgba(108, 117, 125, .1);
+}
+
+#ingresosV2 .ingresos-v2-tab {
+    border: 0;
+    border-radius: .4rem;
+    color: #545c63;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+#ingresosV2 .ingresos-v2-tab:hover,
+#ingresosV2 .ingresos-v2-tab:focus {
+    color: var(--btn-color);
+}
+
+#ingresosV2 .ingresos-v2-tab.active {
+    background: var(--btn-color);
+    color: #fff;
+    box-shadow: 0 .16rem .45rem rgba(33, 37, 41, .18);
+}
+
+#ingresosV2 .ingresos-v2-filtros {
+    margin: 0 0 1rem;
+}
+
+#ingresosV2 .ingresos-v2-filtros label {
+    display: block;
+    margin: 0 0 .28rem .08rem;
+    color: #545c63;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+#ingresosV2 .ingresos-v2-chart-wrap {
+    position: relative;
+    min-height: 19rem;
+}
+
+#ingresosV2 .ingresos-v2-chart-wrap canvas {
+    max-height: 19rem;
+}
+
+#ingresosV2 .ingresos-v2-resumen {
+    margin-top: .8rem;
+}
+
+#ingresosV2 .ingresos-v2-metrica {
+    min-height: 5.2rem;
+    padding: .78rem .9rem;
+    border: 1px solid rgba(108, 117, 125, .18);
+    border-left: .23rem solid var(--btn-color);
+    border-radius: .55rem;
+    background: rgba(255, 255, 255, .65);
+}
+
+#ingresosV2 .ingresos-v2-metrica span {
+    display: block;
+    margin-bottom: .22rem;
+    color: #69727a;
+    font-size: .77rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+#ingresosV2 .ingresos-v2-metrica strong {
+    color: #343a40;
+    font-size: 1.05rem;
+}
+
+#ingresosV2 .ingresos-v2-torta-wrap {
+    position: relative;
+    min-height: 24rem;
+}
+
+#ingresosV2 .ingresos-v2-torta-wrap canvas {
+    max-height: 24rem;
+}
+
+#ingresosV2 .ingresos-v2-sin-datos {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    left: 1rem;
+    margin: 0;
+    color: #6c757d;
+    font-size: .9rem;
+    text-align: center;
+    transform: translateY(-50%);
+}
+
+@media (max-width: 575.98px) {
+    #ingresosV2 .ingresos-v2-card {
+        padding: .9rem;
+    }
+
+    #ingresosV2 .ingresos-v2-tab {
+        padding-right: .6rem;
+        padding-left: .6rem;
+        font-size: .82rem;
+    }
+
+    #ingresosV2 .ingresos-v2-chart-wrap {
+        min-height: 16rem;
+    }
+}

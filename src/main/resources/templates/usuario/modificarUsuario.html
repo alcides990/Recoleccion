@@ -1,80 +1,126 @@
 <!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-    <head th:replace="~{layout/layout :: heat}">  </head>
-    <body> 
-        <header  th:replace="~{layout/layout :: header}"> </header>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" href="/css/usuario/formulario.css">
+    <body>
+        <header th:replace="~{layout/layout :: header}"></header>
         <aside th:replace="~{layout/layout :: aside}"></aside>
 
-        <div class="container p-1"> 
-            <div class="form-title"> <h3>Datos de Usuario</h3> </div>
-            <a th:href="@{/usuario/listar}" class="btn btn-primario ms-3">Regresar</a>
-            <form th:action="@{/usuario/guardar}" method="post" th:object="${usuario}">
-                <div class="row d-flex m-1">
-                    <input type="hidden" name="codigoUsuario"  th:value="*{codigoUsuario}" />
-                    <div class="form-group col-sm-2">
-                        <label class="  form-label" for="tipoDocumento">Tipo Documento  </label>
-                        <select th:object="${tipoDocumento}" class="form-select" name="tipoDocumento" >
-                            <option th:each="tipoDocumento : ${tipoDocumento}" 
-                                    th:value="${tipoDocumento.codigoTipoDocumento}"
-                                    th:text="${tipoDocumento.tipoDocumento} " 
-                                    th:selected="${tipoDocumento}== ${usuario.tipoDocumento}"/>
-                        </select>
+        <main class="container usuario-form-page py-3">
+            <div class="usuario-form-card">
+                <header class="usuario-form-header form-view-header">
+                    <div>
+                        <span class="usuario-form-kicker">Gestión de usuarios</span>
+                        <h3 th:text="${usuario.codigoUsuario == null ? 'Agregar usuario' : 'Editar usuario'}">Agregar usuario</h3>
+                        <p>Complete los datos personales, de contacto y ubicación.</p>
                     </div>
-                    <div class="form-group col-sm-2">
-                        <label class="  form-label" for="numeroDocumento">N° Documento </label>
-                        <input type="text" name="numeroDocumento" id="numeroDocumento"  th:value="*{numeroDocumento}" class="form-control" placeholder="Ingrese numero de documento" required="campo ogligatorio"/>
-                    </div>
-                    <div class="form-group col-sm-4">
-                        <label class="  form-label" for="nombre">Nombre </label>
-                        <input type="text" name="nombre" id="nombre" th:value="*{nombre}" class="form-control" placeholder="Ingrese nombre " required="campo ogligatorio"/>
-                    </div>
-                    <div class="form-group col-sm-4">
-                        <label class="  form-label" for="apellido">Apellido </label>
-                        <input type="text" name="apellido" id="apellido" th:value="*{apellido}" class="form-control" placeholder="Ingrese apellido" required="campo ogligatorio"/>
-                    </div>
-                    <div class="form-group col-sm-3">
-                        <label class="form-label" for="celular">Celular </label>
-                        <input type="text" name="celular" id="celular"  th:value="*{celular}" class="form-control" placeholder="Ingrese numero de celular" />
-                    </div>
-                    <div class="form-group col-sm-3">
-                        <label  class="form-label" for="telefono">Telefono </label>
-                        <input type="text" name="telefono" id="telefono" th:value="*{telefono}" class="form-control" placeholder="Ingrese numero de telefono" />
-                    </div>
-                    <div class="form-group col-sm-3">
-                        <label class="form-label" for="barrio">Barrio </label>
-                        <input type="text" name="barrio" id="barrio" th:value="*{barrio}" class="form-control" placeholder="Ingrese nombre del barrio" />
-                    </div>
-                    <div class="form-group col-sm-5">
-                        <label  class="form-label" for="direccio">Direccion </label>
-                        <input type="text" name="direccion" id="direccion" th:value="*{direccion}" class="form-control" placeholder="Ingrese direccion" />
-                    </div>
-                    <div class="form-group col-sm-5">
-                        <label  class="form-label" for="observacion">Observacion </label>
-                        <input type="text" name="observacion" id="observacion" th:value="*{observacion}" class="form-control" placeholder="Ingrese observacion " />
-                    </div>
-                    <div class="form-group col-sm-3">
-                        <label class="  form-label" for="sucursal">Sucursal</label>
-                        <select th:object="${sucursal}" class="form-control" name="sucursal" >
-                            <option th:each="sucursal : ${sucursal}" 
-                                    th:value="${sucursal.codigoSucursal}"
-                                    th:text="${sucursal.nombreSucursal} +' '+${sucursal.ciudad.nombreCiudad} "  />
-                        </select>
+                    <i class="fa-solid fa-user-plus usuario-form-icon" aria-hidden="true"></i>
+                </header>
+
+                <form th:action="@{/usuario/guardar}" method="post" th:object="${usuario}">
+                    <input type="hidden" name="codigoUsuario" th:value="*{codigoUsuario}">
+
+                    <div class="usuario-form-body">
+                        <section class="usuario-form-section">
+                            <h4><i class="fa-regular fa-id-card"></i> Identificación</h4>
+                            <div class="row g-3">
+                                <div class="col-md-4 col-lg-3">
+                                    <label class="form-label" for="tipoDocumento">Tipo de documento</label>
+                                    <select id="tipoDocumento" class="form-select" name="tipoDocumento" required>
+                                        <option th:each="tipo : ${tipoDocumento}"
+                                                th:value="${tipo.codigoTipoDocumento}"
+                                                th:text="${tipo.tipoDocumento}"
+                                                th:selected="${tipo == usuario.tipoDocumento}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-8 col-lg-3">
+                                    <label class="form-label" for="numeroDocumento">Número de documento</label>
+                                    <input type="text" name="numeroDocumento" id="numeroDocumento"
+                                           th:value="*{numeroDocumento}" class="form-control"
+                                           placeholder="RUC o CI" autocomplete="off" required>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <label class="form-label" for="nombre">Nombre</label>
+                                    <input type="text" name="nombre" id="nombre" th:value="*{nombre}"
+                                           class="form-control" placeholder="Nombre" required>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <label class="form-label" for="apellido">Apellido</label>
+                                    <input type="text" name="apellido" id="apellido" th:value="*{apellido}"
+                                           class="form-control" placeholder="Apellido" required>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="usuario-form-section">
+                            <h4><i class="fa-solid fa-address-book"></i> Contacto y dirección</h4>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label" for="celular">Celular</label>
+                                    <input type="text" name="celular" id="celular" th:value="*{celular}"
+                                           class="form-control" placeholder="Número de celular" inputmode="tel">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="telefono">Teléfono</label>
+                                    <input type="text" name="telefono" id="telefono" th:value="*{telefono}"
+                                           class="form-control" placeholder="Número de teléfono" inputmode="tel">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="barrio">Barrio</label>
+                                    <input type="text" name="barrio" id="barrio" th:value="*{barrio}"
+                                           class="form-control" placeholder="Barrio">
+                                </div>
+                                <div class="col-md-7">
+                                    <label class="form-label" for="direccion">Dirección</label>
+                                    <input type="text" name="direccion" id="direccion" th:value="*{direccion}"
+                                           class="form-control" placeholder="Dirección completa">
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="observacion">Observación</label>
+                                    <input type="text" name="observacion" id="observacion" th:value="*{observacion}"
+                                           class="form-control" placeholder="Información adicional">
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="usuario-form-section mb-0">
+                            <h4><i class="fa-solid fa-building"></i> Asignación</h4>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label" for="sucursalUsuario">Sucursal</label>
+                                    <select id="sucursalUsuario" class="form-select" name="sucursal" required>
+                                        <option th:each="item : ${sucursal}"
+                                                th:value="${item.codigoSucursal}"
+                                                th:text="${item.nombreSucursal + ' - ' + item.ciudad.nombreCiudad}"
+                                                th:selected="${item == usuario.sucursal}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="estadoUsuario">Estado</label>
+                                    <select id="estadoUsuario" class="form-select" name="estado" required>
+                                        <option th:each="item : ${estado}"
+                                                th:value="${item.codigoEstado}"
+                                                th:text="${item.estado}"
+                                                th:selected="${item == usuario.estado}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
                     </div>
 
-                    <div class="form-group col-sm-3">
-                        <label class="  form-label" for="estado">Estado</label>
-                        <select th:object="${estado}" class="form-control" name="estado" >
-                            <option th:each="estado : ${estado} " 
-                                    th:value="${estado.codigoEstado}"
-                                    th:text="${estado.estado}"  />
-                        </select>
-                    </div>
-                </div>
-                <input type="submit" name="guardar" value="Guardar" class="btn-primario m-3"/>
-            </form>
-        </div>
+                    <footer class="usuario-form-footer">
+                        <a th:href="@{/usuario/listar}" class="btn btn-light">
+                            <i class="fa-solid fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" name="guardar" class="btn btn-primario">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span th:text="${usuario.codigoUsuario == null ? 'Guardar usuario' : 'Guardar cambios'}">Guardar usuario</span>
+                        </button>
+                    </footer>
+                </form>
+            </div>
+        </main>
+
         <footer th:replace="~{layout/layout :: footer}"></footer>
         <script type="module">
             import {tabulador, tabular} from '/js/modulos.js';

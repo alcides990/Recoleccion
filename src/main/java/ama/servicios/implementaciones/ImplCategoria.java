@@ -33,6 +33,18 @@ public class ImplCategoria implements CategoriaService {
         return  categoriaDao.filtrar(pageable, sucursal);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Categoria> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro) {
+        return categoriaDao.buscarPorSucursal(pageable, codigoSucursal, filtro);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public long contarPorSucursal(Integer codigoSucursal) {
+        return categoriaDao.contarPorSucursal(codigoSucursal);
+    }
+
     @Transactional
     @Override
     public Categoria guardar(Categoria categoria) {

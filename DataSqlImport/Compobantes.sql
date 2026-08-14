@@ -22,7 +22,8 @@ INSERT INTO recoleccion.comprobantes (
   codigo_cobrador,
   codigo_usuario_sistema,
   codigo_estado,
-  codigo_categoria
+  codigo_categoria,
+  codigo_comision
 )
 SELECT DISTINCT
   CAST(NULLIF(o.nrorecibo, 'None') AS UNSIGNED)                         AS numero_comprobante,
@@ -44,7 +45,12 @@ END AS codigo_serie,
   STR_TO_DATE(NULLIF(o.fechapago, 'None'), '%Y-%m-%d %H:%i')              AS fecha_emision,
  STR_TO_DATE(NULLIF(o.fechapago, 'None'), '%Y-%m-%d %H:%i')                 AS fecha_pago,
   0                                                                      AS cantida_deuda,
-  o.importe/cantidadperiodo                                             AS tarifa,
+  CASE
+    WHEN COALESCE(CAST(NULLIF(o.cantidadperiodo, 'None') AS UNSIGNED), 0) > 0
+      THEN CAST(NULLIF(o.importe, 'None') AS DECIMAL(12,2))
+           / CAST(o.cantidadperiodo AS UNSIGNED)
+    ELSE COALESCE(cat.tarifa, 0)
+  END                                                                    AS tarifa,
   COALESCE(CAST(NULLIF(o.cantidadperiodo, 'None') AS UNSIGNED), 0)       AS cantidad_pago,
   0                                                                      AS recargo,
   0                                                                      AS saldo,
@@ -63,10 +69,21 @@ END AS codigo_serie,
   when catego='FRI' then 2
   WHEN catego = '055' THEN 3
   ELSE catego
-  end  AS  codigo_categoria
+  end  AS codigo_categoria,
+  1 AS codigo_comision -- La migración histórica tiene porcomnormal = 10%, código 1.
 FROM recoleccion_migracion.comprobantes o
+INNER JOIN recoleccion.servicios s
+  ON s.cuenta_corriente = o.cuenta
+INNER JOIN recoleccion.categorias cat
+  ON cat.codigo_categoria = CASE
+      WHEN o.catego = 'A240' THEN 1
+      WHEN o.catego = 'FRI' THEN 2
+      WHEN o.catego = '055' THEN 3
+      ELSE CAST(o.catego AS UNSIGNED)
+  END
 WHERE NOT EXISTS (
   SELECT 1
   FROM recoleccion.comprobantes c
   WHERE c.numero_comprobante = CAST(NULLIF(o.nrorecibo, 'None') AS UNSIGNED)
-) and cuenta !='None' group by nrorecibo, tiporecibo;
+) AND o.cuenta != 'None'
+GROUP BY o.nrorecibo, o.tiporecibo;
