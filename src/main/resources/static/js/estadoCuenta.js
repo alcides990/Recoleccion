@@ -1,9 +1,7 @@
-$(document).on('change', '#cuentaCorriente', function(event) {
-
-    //    Obtener cuenta corriente seleccionada
-        var cuentaCorriente = $("#cuentaCorriente option:selected").text();
-//     mandar url con la cuenta corriente
-        $(location).attr('href', '/servicio/estadoCuenta/' + cuentaCorriente);
-        });
-
+$(document).on('change', '#cuentaCorriente', function () {
+    const url = new URL('/servicio/estadoCuenta', window.location.origin);
+    url.searchParams.set('cuentaCorriente', $(this).val());
+    url.searchParams.set('page', '0');
+    window.location.href = url;
+});
 

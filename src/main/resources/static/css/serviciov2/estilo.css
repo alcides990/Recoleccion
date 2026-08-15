@@ -6,6 +6,48 @@
     box-shadow: 0 1.25rem 3rem rgba(26, 35, 44, .22);
 }
 
+#historialServicioModal .servicio-historial-modal { overflow: hidden; border: 0; border-radius: .85rem; box-shadow: 0 1.2rem 3rem rgba(26,35,44,.24); }
+#historialServicioModal .servicio-v2-header { padding: 1.05rem 1.35rem; background: var(--btn-color); color: #fff; }
+#historialServicioModal .servicio-v2-header .btn-close { filter: brightness(0) invert(1); }
+#historialServicioModal .servicio-v2-kicker { display:block; font-size:.68rem; font-weight:700; letter-spacing:.08em; opacity:.8; text-transform:uppercase; }
+#historialServicioModal .modal-body { padding: 1.25rem; background: #f7f8fa; }
+#historialServicioModal .historial-form { padding: 1rem; border: 1px solid rgba(108,117,125,.18); border-radius: .65rem; background:#fff; }
+#historialServicioModal .table-responsive { padding: .5rem; border: 1px solid rgba(108,117,125,.16); border-radius:.65rem; background:#fff; }
+#historialServicioModal table { margin-bottom:0; }
+#historialServicioModal .form-label { color:#555d64; font-size:.73rem; font-weight:700; text-transform:uppercase; }
+
+.estado-cuenta-acciones { padding: 1rem; border: 1px solid rgba(108,117,125,.18); border-radius:.7rem; background:#f7f8fa; }
+.estado-cuenta-acciones h6 { margin:0; color:#394047; font-weight:700; }
+.estado-cuenta-acciones h6 i { margin-right:.35rem; color:var(--btn-color); }
+.estado-cuenta-acciones p { margin:.35rem 0 .85rem; color:#68737d; font-size:.86rem; }
+.estado-cuenta-acciones-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
+.estado-cuenta-acciones-grid .btn { display:grid; grid-template-columns:auto 1fr; align-items:center; gap:.08rem .55rem; padding:.75rem; text-align:left; }
+.estado-cuenta-acciones-grid .btn i { grid-row:1 / 3; font-size:1.2rem; }
+.estado-cuenta-acciones-grid .btn span { font-weight:700; }
+.estado-cuenta-acciones-grid .btn small { opacity:.75; }
+.estado-cuenta-pagina { padding-bottom:1.5rem; }
+.estado-cuenta-page-header { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; padding:1.15rem 1.35rem; border-radius:.75rem; background:var(--btn-color); color:#fff; }
+.estado-cuenta-page-header .form-title { margin:.1rem 0; color:#fff; }
+.estado-cuenta-page-header p { margin:0; opacity:.82; }
+.estado-cuenta-page-header .servicio-v2-kicker { display:block; font-size:.68rem; font-weight:700; letter-spacing:.08em; opacity:.8; text-transform:uppercase; }
+.estado-cuenta-resumen fieldset { padding:1.15rem; border:1px solid rgba(108,117,125,.2); border-radius:.7rem; background:#fff; }
+.estado-cuenta-resumen legend { float:none; width:auto; margin:0 0 .2rem; padding:0 .35rem; color:#394047; font-size:1rem; font-weight:700; }
+.estado-cuenta-resumen .form-leyenda { margin:0 0 1rem; color:#68737d; font-size:.85rem; }
+.estado-cuenta-resumen label { margin:.25rem 0 .3rem; color:#555d64; font-size:.73rem; font-weight:700; text-transform:uppercase; }
+.extracto-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 1rem; border:1px solid rgba(108,117,125,.18); border-radius:.65rem; background:#fff; }
+.extracto-toolbar strong, .extracto-toolbar small { display:block; }
+.extracto-toolbar small { margin-top:.15rem; color:#68737d; }
+
+@media (max-width: 767.98px) {
+    #historialServicioModal .modal-dialog { margin:.55rem; }
+    #historialServicioModal .modal-body { padding:.85rem; }
+    #historialServicioModal .historial-form { padding:.85rem; }
+    #historialServicioModal .dataTables_length, #historialServicioModal .dataTables_filter { text-align:left; }
+    .estado-cuenta-acciones-grid { grid-template-columns:1fr; }
+    .estado-cuenta-page-header, .extracto-toolbar { align-items:stretch; flex-direction:column; }
+    .estado-cuenta-page-header .btn, .extracto-toolbar .btn { width:100%; }
+}
+
 #servicioModal .servicio-v2-header {
     padding: 1.1rem 1.4rem;
     border-bottom: 1px solid rgba(108, 117, 125, .18);

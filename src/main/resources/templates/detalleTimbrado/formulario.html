@@ -22,7 +22,28 @@
                 <section class="detalle-timbrado-section">
                     <h4><i class="fa-solid fa-link"></i> Asociación del comprobante</h4>
                     <div class="row g-3">
-                        <div class="col-12 col-lg-6">
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label" for="sucursal">Sucursal</label>
+                            <select id="sucursal" name="codigoSucursal" class="form-select" required th:disabled="${edicion}">
+                                <option value="">Seleccione...</option>
+                                <option th:each="s : ${sucursales}" th:value="${s.codigoSucursal}"
+                                        th:text="${s.nombreSucursal}"
+                                        th:selected="${edicion and s.codigoSucursal == detalle.detalleTimbradoPK.codigoSucursal}"></option>
+                            </select>
+                            <input th:if="${edicion}" type="hidden" name="codigoSucursal" th:value="${detalle.detalleTimbradoPK.codigoSucursal}">
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label" for="punto">Punto de expedición</label>
+                            <select id="punto" name="codigoPuntoExpedicion" class="form-select" required th:disabled="${edicion}">
+                                <option value="">Seleccione...</option>
+                                <option th:each="p : ${puntos}" th:value="${p.puntoExpedicionPK.codigoPuntoExpedicion}"
+                                        th:attr="data-sucursal=${p.puntoExpedicionPK.codigoSucursal}"
+                                        th:text="${p.nombrePuntoExpedicion}"
+                                        th:selected="${edicion and p.puntoExpedicionPK.codigoPuntoExpedicion == detalle.detalleTimbradoPK.codigoPuntoExpedicion and p.puntoExpedicionPK.codigoSucursal == detalle.detalleTimbradoPK.codigoSucursal}"></option>
+                            </select>
+                            <input th:if="${edicion}" type="hidden" name="codigoPuntoExpedicion" th:value="${detalle.detalleTimbradoPK.codigoPuntoExpedicion}">
+                        </div>
+                        <div class="col-12 col-lg-4">
                             <label class="form-label" for="timbrado">Timbrado</label>
                             <select id="timbrado" name="codigoTimbrado" class="form-select" required th:disabled="${edicion}">
                                 <option value="">Seleccione...</option>
@@ -31,18 +52,6 @@
                                         th:selected="${edicion and t.codigoTimbrado == detalle.detalleTimbradoPK.codigoTimbrado}"></option>
                             </select>
                             <input th:if="${edicion}" type="hidden" name="codigoTimbrado" th:value="${detalle.detalleTimbradoPK.codigoTimbrado}">
-                        </div>
-                        <div class="col-12 col-lg-6">
-                            <label class="form-label" for="punto">Punto de expedición / sucursal</label>
-                            <select id="punto" name="codigoPuntoExpedicion" class="form-select" required th:disabled="${edicion}">
-                                <option value="">Seleccione...</option>
-                                <option th:each="p : ${puntos}" th:value="${p.puntoExpedicionPK.codigoPuntoExpedicion}"
-                                        th:attr="data-sucursal=${p.puntoExpedicionPK.codigoSucursal}"
-                                        th:text="${p.nombrePuntoExpedicion + ' - ' + p.sucursal.nombreSucursal}"
-                                        th:selected="${edicion and p.puntoExpedicionPK.codigoPuntoExpedicion == detalle.detalleTimbradoPK.codigoPuntoExpedicion}"></option>
-                            </select>
-                            <input th:if="${edicion}" type="hidden" name="codigoPuntoExpedicion" th:value="${detalle.detalleTimbradoPK.codigoPuntoExpedicion}">
-                            <input id="sucursal" type="hidden" name="codigoSucursal" th:value="${edicion ? detalle.detalleTimbradoPK.codigoSucursal : ''}">
                         </div>
                     </div>
                 </section>
@@ -79,10 +88,20 @@
 
 <footer th:replace="~{layout/layout :: footer}"></footer>
 <script>
-    document.getElementById('punto').addEventListener('change', function () {
-        const opcion = this.options[this.selectedIndex];
-        document.getElementById('sucursal').value = opcion.dataset.sucursal || '';
-    });
+    (function () {
+        const sucursal = document.getElementById('sucursal');
+        const punto = document.getElementById('punto');
+        const opciones = Array.from(punto.querySelectorAll('option[data-sucursal]'));
+        function filtrarPuntos() {
+            const seleccionada = sucursal.value;
+            opciones.forEach(opcion => opcion.hidden = opcion.dataset.sucursal !== seleccionada);
+            const actual = punto.options[punto.selectedIndex];
+            if (!punto.disabled && actual && actual.dataset.sucursal !== seleccionada) punto.value = '';
+            punto.disabled = sucursal.disabled || !seleccionada;
+        }
+        sucursal.addEventListener('change', filtrarPuntos);
+        filtrarPuntos();
+    }());
 </script>
 </body>
 </html>

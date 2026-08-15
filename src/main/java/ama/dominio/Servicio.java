@@ -3,6 +3,7 @@ package ama.dominio;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Data;
@@ -31,6 +32,10 @@ public class Servicio implements Serializable {
     @Temporal(TemporalType.DATE)
     @Column(name = "fecha_inicio")
     private LocalDate fechaInicio;
+
+    @Column(name = "ocupado", nullable = false)
+    @Pattern(regexp = "OCUPADO|DESOCUPADO|BALDIO", message = "Ocupación no válida")
+    private String ocupado = "OCUPADO";
 
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -73,5 +78,13 @@ public class Servicio implements Serializable {
 
     @Transient
     EstadoCuenta estadoCuenta;
+
+    @PrePersist
+    @PreUpdate
+    private void completarDatosCuenta() {
+        if (ocupado == null) {
+            ocupado = "OCUPADO";
+        }
+    }
 
 }

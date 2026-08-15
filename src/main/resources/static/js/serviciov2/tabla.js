@@ -25,6 +25,11 @@ $(function () {
             {data: 'cuentaCorriente'},
             {data: 'usuario'},
             {data: 'fechaInicio'},
+            {data: 'ocupado', render: valor => valor === 'BALDIO'
+                    ? '<span class="badge bg-warning text-dark">Baldío</span>'
+                    : (valor === 'DESOCUPADO'
+                        ? '<span class="badge bg-secondary">Desocupado</span>'
+                        : '<span class="badge bg-success">Ocupado</span>')},
             {data: 'categoria'},
             {data: 'estado'},
             {

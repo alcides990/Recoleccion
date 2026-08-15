@@ -3,198 +3,132 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
     <head  th:replace="~{layout/layout :: heat}"> </head>
-    <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside th:replace="~{layout/layout :: aside}">  </aside>
-        <div class="container-fluid"> 
-            <h3 class="form-title">Estado Cuenta</h3> 
-            <div class="mensaje-alerta" id="contenedor-alertas"> </div>
-            <form name=" frm-servicio" id="frm-servicio" th:action="@{/servicio/guardar}" method="post" th:object="${servicio}">
-                <a th:href="@{/servicio/listar}" class="btn btn-primario">Regresar</a>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-sm-3"> 
-                            <label for="cuentaCorriente">CuentaCorriente  </label>
-                            <select th:object="${servicio}" class="form-control" name="cuentaCorriente" id="cuentaCorriente" >
-                                <option th:each="cuenta : ${cuentas}" 
-                                        th:value="${cuenta}"
-                                        th:text="${cuenta}" 
-                                        th:selected="${cuenta}== ${servicio.cuentaCorriente}"/>
-                            </select>
-                        </div>
-
-                        <div class="col-sm-5"> 
-                            <label for="categoria">Categoria</label>
-                            <select th:object="${categoria}" class="form-control" name="categoria" >
-                                <option th:each="categoria : ${categoria}" 
-                                        th:value="${categoria.codigoCategoria}"
-                                        th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} "
-                                        th:selected="${categoria}== ${servicio.categoria}"/>
-                            </select>
-
-                        </div>
-
-                        <div class="col-sm-3">
-                            <label for="fechaInicio"> Fecha Inicio   </label>
-                            <input type="text" readonly="true"  name="fechaInicio" id="fechaInicio" th:value="*{fechaInicio}" class="form-control"  required="campo ogligatorio"  />
-                        </div>
-
+    <link rel="stylesheet" href="/css/serviciov2/estilo.css">
+        <body>
+            <header  th:replace="~{layout/layout :: header}"> </header>
+            <aside th:replace="~{layout/layout :: aside}">  </aside>
+            <main class="container-fluid estado-cuenta-pagina"> 
+                <header class="estado-cuenta-page-header">
+                    <div>
+                        <span class="servicio-v2-kicker">Gestión de cuentas</span>
+                        <h3 class="form-title">Estado de cuenta</h3>
+                        <p>Consulte los datos del servicio, sus períodos y todos los movimientos registrados.</p>
                     </div>
+                    <a th:href="@{/servicio/listar}" class="btn btn-light"><i class="fa-solid fa-arrow-left"></i> Regresar</a>
+                </header>
+                <div class="mensaje-alerta" id="contenedor-alertas"> </div>
+                <form name="frm-servicio" id="frm-servicio" class="estado-cuenta-resumen" th:object="${servicio}">
+                    <fieldset>
+                        <legend><i class="fa-solid fa-file-invoice"></i> Datos generales del servicio</legend>
+                        <p class="form-leyenda">La fecha de inicio y la fecha desde son informativas y no pueden modificarse desde esta pantalla.</p>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-3"> 
+                                <label for="cuentaCorriente">CuentaCorriente  </label>
+                                <select th:object="${servicio}" class="form-control" name="cuentaCorriente" id="cuentaCorriente" >
+                                    <option th:each="cuenta : ${cuentas}" 
+                                            th:value="${cuenta}"
+                                            th:text="${cuenta}" 
+                                            th:selected="${cuenta}== ${servicio.cuentaCorriente}"/>
+                                </select>
+                            </div>
 
-                    <div class="row">
-                        <div>
-                            <input type="text" hidden="true" name="codigoUsuario" id="codigoUsuario" th:field="${servicio.usuario.codigoUsuario}">
-                        </div>
-                        <div class="col-sm-3">
-                            <label for="numeroDocumento">RUC </label>
-                            <input type="text" id="numeroDocumento" name="numeroDocumento" disabled="true" class="form-control "  th:value="${servicio.usuario.numeroDocumento}"  required="campo ogligatorio"/>
-                        </div>
-                        <div class="col">
-                            <label for="buscarUsuario">Usuario </label>
-                            <input  type="text" disabled="true" name="buscarUsuario" id="buscarUsuario" th:value="${servicio.usuario.nombre}+' '+${servicio.usuario.apellido}"  class="form-control"  required="campo ogligatorio"/>
+                            <div class="col-sm-5"> 
+                                <label for="categoria">Categoria</label>
+                                <select th:object="${categoria}" class="form-control" name="categoria" >
+                                    <option th:each="categoria : ${categoria}" 
+                                            th:value="${categoria.codigoCategoria}"
+                                            th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} "
+                                            th:selected="${categoria}== ${servicio.categoria}"/>
+                                </select>
+
+                            </div>
+
+                            <div class="col-sm-3">
+                                <label for="fechaInicio"> Fecha Inicio   </label>
+                                <input type="text" disabled name="fechaInicio" id="fechaInicio" th:value="*{fechaInicio}" class="form-control" />
+                            </div>
+
                         </div>
 
+                        <div class="row">
+                            <div>
+                                <input type="text" hidden="true" name="codigoUsuario" id="codigoUsuario" th:field="${servicio.usuario.codigoUsuario}">
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="numeroDocumento">RUC </label>
+                                <input type="text" id="numeroDocumento" name="numeroDocumento" disabled="true" class="form-control "  th:value="${servicio.usuario.numeroDocumento}"  required="campo ogligatorio"/>
+                            </div>
+                            <div class="col">
+                                <label for="buscarUsuario">Usuario </label>
+                                <input  type="text" disabled="true" name="buscarUsuario" id="buscarUsuario" th:value="${servicio.usuario.nombre}+' '+${servicio.usuario.apellido}"  class="form-control"  required="campo ogligatorio"/>
+                            </div>
 
-                        <div class="col-sm-2"> 
-                            <label for="estado">Estado</label>
-                            <select th:object="${estado}" class="form-control" name="estado" >
-                                <option th:each="estado : ${estado} " 
-                                        th:value="${estado.codigoEstado}"
-                                        th:text="${estado.estado}"  />
-                            </select>
+
+                            <div class="col-sm-2"> 
+                                <label for="estado">Estado</label>
+                                <select th:object="${estado}" class="form-control" name="estado" >
+                                    <option th:each="estado : ${estado} " 
+                                            th:value="${estado.codigoEstado}"
+                                            th:text="${estado.estado}"  />
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </form>
-            <hr>
+                    </fieldset>
+                </form>
+                <section class="estado-cuenta-acciones estado-cuenta-completo-acciones my-3">
+                    <h6><i class="fa-solid fa-gears"></i> Gestión e historiales de la cuenta</h6>
+                    <p>Registre suspensiones o exoneraciones y consulte los pagos de la cuenta seleccionada.</p>
+                    <div class="estado-cuenta-acciones-grid">
+                        <button type="button" class="btn btn-outline-secondary historial-suspensiones">
+                            <i class="fa-solid fa-pause"></i><span>Suspensión</span><small>Registrar o consultar</small>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning historial-exoneraciones">
+                            <i class="fa-solid fa-calendar-minus"></i><span>Exoneración</span><small>Registrar o consultar</small>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary historial-pagos">
+                            <i class="fa-solid fa-receipt"></i><span>Historial de pagos</span><small>Consultar pagos</small>
+                        </button>
+                    </div>
+                </section>
                 <div class="row">
+                </div>
 
-                    <div class="col-md-4 mb-3"> 
-                        <div class="estadoCuenta  my-1 "> 
-                            <h5 class="text-center">Estado de Cuenta</h5>
-
-                            <div class="row">
-                                <div class="col-4 my-1">
-                                    <label  for="pagoHasta">Pago desde:</label>
-                                </div>
-                                <div class="col my-1">
-                                    <input  type="text" disabled="true" name="pagoHasta" id="pagoHasta" th:value="${#temporals.format(estadoCuenta.pagoHasta,'MM-yyyy')}" class="form-control"  />
-                                </div>
+                <div class="modal fade" id="historialServicioModal" tabindex="-1" aria-labelledby="historialServicioTitulo" aria-hidden="true">
+                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content servicio-historial-modal">
+                            <div class="modal-header servicio-v2-header"><div><span class="servicio-v2-kicker">Estado de cuenta</span><h5 class="modal-title" id="historialServicioTitulo">Historial</h5></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                            <div class="modal-body">
+                                <div id="historialServicioAlerta" class="alert alert-danger d-none"></div>
+                                <section id="panelSuspensiones" class="d-none">
+                                    <form id="formSuspension" class="historial-form mb-3"><div class="row g-2 align-items-end"><div class="col-md-3"><label class="form-label" for="suspensionFecha">Fecha desde</label><input id="suspensionFecha" type="text" class="form-control" autocomplete="off" required></div><div class="col-md-6"><label class="form-label" for="suspensionMotivo">Motivo</label><input id="suspensionMotivo" class="form-control" maxlength="500" required></div><div class="col-md-3 d-grid"><button class="btn btn-primario" type="submit"><i class="fa-solid fa-pause"></i> Suspender</button></div></div></form>
+                                    <div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Desde</th><th>Hasta</th><th>Períodos pendientes</th><th>Motivo</th><th>Registrado por</th><th></th></tr></thead><tbody id="suspensionesCuerpo"></tbody></table></div>
+                                </section>
+                                <section id="panelExoneraciones" class="d-none">
+                                    <form id="formExoneracion" class="historial-form mb-3"><div class="row g-2 align-items-end"><div class="col-md-3"><label class="form-label" for="exoneracionFecha">Nueva fecha desde</label><input id="exoneracionFecha" type="text" class="form-control" autocomplete="off" required></div><div class="col-md-6"><label class="form-label" for="exoneracionMotivo">Motivo</label><input id="exoneracionMotivo" class="form-control" maxlength="500" required></div><div class="col-md-3 d-grid"><button class="btn btn-warning" type="submit"><i class="fa-solid fa-calendar-minus"></i> Exonerar</button></div></div></form>
+                                    <div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Fecha anterior</th><th>Nueva fecha</th><th>Períodos</th><th>Motivo</th><th>Registrado por</th></tr></thead><tbody id="exoneracionesCuerpo"></tbody></table></div>
+                                </section>
+                                <section id="panelPagos" class="d-none">
+                                    <div class="extracto-toolbar mb-3">
+                                        <div><strong>Extracto completo</strong><small>Incluye todos los comprobantes registrados de esta cuenta.</small></div>
+                                        <button id="btnExtractoPdfHistorial" type="button" class="btn btn-danger"><i class="fa-solid fa-file-pdf"></i> <span>Generar extracto PDF</span></button>
+                                    </div>
+                                    <div id="extractoEstadoHistorial" class="alert d-none" role="status" aria-live="polite"></div>
+                                    <div class="table-responsive"><table id="tablaHistorialPagos" class="table table-hover w-100"><thead><tr><th>Comprobante</th><th>Fecha</th><th>Período</th><th>Meses</th><th>Importe</th><th>Estado</th></tr></thead></table></div>
+                                </section>
                             </div>
-                            <div class="row">
-                                <div class="col-4  my-1">
-                                    <label  for="cantidadPeriodo">Cant. Deuda:</label>
-                                </div>
-                                <div class="col"  my-1>
-                                    <input  type="text" disabled="true" name="cantidadPeriodo" id="cantidadPeriodo" th:field="${estadoCuenta.cantidadDeuda}"   class="form-control"  />
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-4 my-1">
-                                    <label for="subTotal">SubTotal:</label>
-                                </div>
-                                <div class="col my-1">
-                                    <input  type="text" disabled="true" name="subTotal" id="subTotal"  th:value="${#numbers.formatDecimal(estadoCuenta.subTotal, 0, 'COMMA', 0, 'POINT')}"  class="form-control"  />
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-4 my-1">
-                                    <label  for="saldo">Saldo</label>
-                                </div>
-                                <div class="col my-1">
-                                    <input  type="text" disabled="true" name="recargo" id="saldo" th:value="${#numbers.formatDecimal(estadoCuenta.saldoAnterior, 0, 'COMMA', 0, 'POINT')}"   class="form-control"  />
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-4 my-1">
-                                    <label  for="recargo">Recargo:</label>
-                                </div>
-                                <div class="col my-1">
-                                    <input  type="text" disabled="true" name="recargo" id="recargo" th:value="${#numbers.formatDecimal(estadoCuenta.recargo, 0, 'COMMA', 0, 'POINT')}"   class="form-control"  />
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-4 my-1">
-                                    <label  for="totalDeuda">Total:</label>
-                                </div>
-                                <div class="col my-1">
-                                    <input  type="text" disabled="true" name="totalDeuda" id="totalDeuda"  th:value="${#numbers.formatDecimal(estadoCuenta.totalDeuda, 0, 'COMMA', 0, 'POINT')}"  class="form-control"  />
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="m-3">
-                            <button  id="extracto-cuenta"class="btn-primario"> Extracto de Cuenta</button>
-                        </div>
-                    </div>
-                    <div class=" col-md-12 col-lg-8"> 
-                        <div class="table-responsive">
-                            <table id="tabla" class="table  table-border table-striped  table-hover small" >
-                                <thead class="sticky-top bg-color">
-                                    <tr>
-                                        <th>Tipo</th>
-                                        <th>Nro.Comprobante</th>
-                                        <th>FechaPago</th>
-                                        <th>PagoHasta</th>
-                                        <th>PeriodoPago</th>
-                                        <th>Tarifa</th>
-                                        <th>Cant.Pago</th>
-                                        <th>Recargo</th>
-                                        <th>Total</th>
-                                        <th>Importe</th>
-                                        <th>Saldo</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="table-secondary"  >
-                                    <tr  th:each="comprobante : ${comprobantes}"> 
-                                        <td th:text="${comprobante.tipoComprobante.nombreTipoComprobante}" > </td>
-                                        <td th:text="${comprobante.puntoExpedicion.sucursal.nombreSucursal}+'-'+ ${comprobante.puntoExpedicion.nombrePuntoExpedicion}+'-'+ ${comprobante.comprobantePK.numeroComprobante}"> </td>
-                                        <td th:text="${#temporals.format(comprobante.fechaPago,'yyyy-MM-dd')}"></td>
-                                        <td th:text="${comprobante.pagoHasta == null ? '' : #temporals.format(comprobante.pagoHasta,'MM-yyyy')}"></td>
-                                        <td th:text="${comprobante.periodoPago}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.tarifa, 0, 'POINT', 0, 'COMMA')}"></td>
-                                        <td th:text="${comprobante.cantidadPago}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.recargo, 0, 'POINT', 0, 'COMMA')}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.tarifa * comprobante.cantidadPago + comprobante.recargo, 0, 'COMMA', 0, 'POINT')}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.totalImporte, 0, 'COMMA', 0, 'POINT')}"></td>
-                                        <td th:text="${#numbers.formatDecimal(comprobante.saldo, 0, 'COMMA', 0, 'POINT')}"></td>
-                                        <td th:text="${comprobante.estado.estado}"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <nav  th:replace="~{layout/paginador :: paginador}"> </nav>
+                            <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button></div>
                         </div>
                     </div>
                 </div>
-        </div>
 
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
-        <script src="/js/buscarUsuario.js"></script>
-        <script src="/js/estadoCuenta.js"></script>
+                <footer  th:replace="~{layout/layout :: footer}"> </footer>
+                <script src="/js/buscarUsuario.js"></script>
+                <script src="/js/estadoCuenta.js?v=20260814-2"></script>
+                <script type="module" src="/js/serviciov2/estado-cuenta-historiales.js?v=20260814-2"></script>
 
-        <script type="module">
-            import {getReporte} from '/js/modulos.js';
-            $("#extracto-cuenta").click(e => {
-                let url = '/servicio/extractoCuenta';
-                let cuentaCorriente = $("#cuentaCorriente").val();
-                let cantidadRegistro = $("#cantidadRegistro").val();
-                let data = {cuentaCorriente: cuentaCorriente,
-                    cantidadRegistro: cantidadRegistro};
-                getReporte(data, url);
-            });
-            $("#cantidadRegistro").change(function () {
-                var cantidadRegistro = $(this).val();
-                var url = new URL(window.location.href);
-                var searchParams = new URLSearchParams(url.search);
-                searchParams.set('page', 0);
-                searchParams.set('cantidadRegistro', cantidadRegistro);
-                url.search = searchParams.toString();
-                window.location.href = url;
-            }
-            );
-        </script>
-    </body>
+            </main>
+        </body>
 
 </html>

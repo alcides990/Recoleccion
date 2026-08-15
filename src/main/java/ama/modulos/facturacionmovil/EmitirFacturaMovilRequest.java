@@ -11,6 +11,7 @@ public class EmitirFacturaMovilRequest {
     private Integer codigoTimbrado;
     private Integer codigoSerie;
     private Integer codigoTipoComprobante;
+    private Integer numeroComprobante;
     private Integer codigoCobrador;
     private Integer codigoComision;
     private Integer codigoCondicionVenta;

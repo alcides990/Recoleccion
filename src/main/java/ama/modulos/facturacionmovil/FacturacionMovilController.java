@@ -158,7 +158,8 @@ public class FacturacionMovilController {
         List<String> cuentas = encontrados.stream().map(Servicio::getCuentaCorriente).toList();
         Map<String, Object[]> resumenPorCuenta = new LinkedHashMap<>();
         if (!cuentas.isEmpty()) {
-            for (Object[] resumen : servicios.resumirEstadosMovil(cuentas)) {
+            for (Object[] resumen : servicios.resumirEstadosMovil(
+                    cuentas, usuario.getSucursal().getCodigoSucursal())) {
                 resumenPorCuenta.put(String.valueOf(resumen[0]), resumen);
             }
         }
@@ -178,6 +179,9 @@ public class FacturacionMovilController {
             }
             EstadoCuenta estado = new EstadoCuenta(servicio.getCategoria().getTarifa(), parametro, pagoDesde);
             estado.setSaldoAnterior(saldo);
+            if (resumen != null && resumen[3] instanceof Number) {
+                estado.setCantidadDeuda(((Number) resumen[3]).intValue());
+            }
             Map<String, Object> fila = new LinkedHashMap<>();
             fila.put("cuenta", servicio.getCuentaCorriente());
             fila.put("nombre", (servicio.getUsuario().getNombre() + " "
@@ -213,6 +217,20 @@ public class FacturacionMovilController {
                 "serie", String.valueOf(x[3]),
                 "nombre", "Timbrado " + x[1] + " · Serie " + x[3]
         )).toList());
+    }
+
+    @GetMapping("/numero-siguiente")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> numeroSiguiente(@RequestParam Integer codigoPuntoExpedicion,
+            @RequestParam Integer codigoTipoComprobante, @RequestParam Integer codigoSerie) {
+        UsuarioSistema usuario = usuarioSession();
+        if (usuario == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("mensaje", "Sesión vencida."));
+        PuntoExpedicionPK punto = PuntoExpedicionPK.builder()
+                .codigoSucursal(usuario.getSucursal().getCodigoSucursal())
+                .codigoPuntoExpedicion(codigoPuntoExpedicion).build();
+        ComprobantePK clave = ComprobantePK.builder().puntoExpedicionPK(punto)
+                .codigoTipoComprobante(codigoTipoComprobante).codigoSerie(codigoSerie).build();
+        return ResponseEntity.ok(Map.of("numeroComprobante", comprobantes.getNumeroComprobante(clave)));
     }
 
     @GetMapping("/estado-cuenta")
@@ -283,7 +301,17 @@ public class FacturacionMovilController {
         ComprobantePK clave = ComprobantePK.builder().puntoExpedicionPK(punto)
                 .codigoTipoComprobante(entrada.getCodigoTipoComprobante())
                 .codigoSerie(entrada.getCodigoSerie()).build();
-        Integer numero = comprobantes.getNumeroComprobante(clave);
+        var tipoSeleccionado = tipos.listar().stream()
+                .filter(x -> x.getCodigoTipoComprobante().equals(entrada.getCodigoTipoComprobante()))
+                .findFirst().orElse(null);
+        if (tipoSeleccionado == null) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", "El tipo de comprobante seleccionado no existe."));
+        }
+        boolean facturaManual = "FACTURA MANUAL".equalsIgnoreCase(tipoSeleccionado.getNombreTipoComprobante().trim());
+        Integer numero = facturaManual ? entrada.getNumeroComprobante() : comprobantes.getNumeroComprobante(clave);
+        if (numero == null || numero <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", "Ingrese un número válido para la factura manual."));
+        }
 
         double recargo = entrada.getRecargo() == null ? estado.getRecargo() : entrada.getRecargo();
         if (recargo < 0) {
@@ -332,6 +360,10 @@ public class FacturacionMovilController {
         return ResponseEntity.ok(Map.of(
                 "mensaje", "Comprobante guardado correctamente.",
                 "numeroComprobante", numero,
+                "codigoSucursal", usuario.getSucursal().getCodigoSucursal(),
+                "codigoPuntoExpedicion", entrada.getCodigoPuntoExpedicion(),
+                "codigoTipoComprobante", entrada.getCodigoTipoComprobante(),
+                "codigoSerie", entrada.getCodigoSerie(),
                 "total", total,
                 "totalCobrado", totalCobrado,
                 "saldoFavor", Math.max(0, totalCobrado - total),
@@ -361,7 +393,8 @@ public class FacturacionMovilController {
     }
 
     private EstadoCuenta calcularEstado(Servicio servicio, UsuarioSistema usuario) {
-        List<Object[]> datos = comprobantes.getPagoDesdeAndSaldo(servicio.getCuentaCorriente());
+        List<Object[]> datos = comprobantes.getEstadoCuentaMovil(servicio.getCuentaCorriente(),
+                usuario.getSucursal().getCodigoSucursal());
         LocalDate pagoDesde = servicio.getFechaInicio();
         double saldo = 0;
         for (Object[] fila : datos) {
@@ -371,6 +404,9 @@ public class FacturacionMovilController {
         EstadoCuenta estado = new EstadoCuenta(servicio.getCategoria().getTarifa(),
                 parametros.encontrar(usuario.getSucursal()), pagoDesde);
         estado.setSaldoAnterior(saldo);
+        if (!datos.isEmpty() && datos.get(0)[2] instanceof Number) {
+            estado.setCantidadDeuda(((Number) datos.get(0)[2]).intValue());
+        }
         // Fuerza el cálculo antes de consultar recargo/subtotales.
         estado.getCantidadDeuda();
         return estado;

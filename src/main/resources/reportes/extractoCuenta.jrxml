@@ -9,9 +9,6 @@
 	<parameter name="cuentaCorriente" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
-	<parameter name="cantidadRegistro" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
-	</parameter>
 	<parameter name="codigoSucursal" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[SELECT c.`numero_comprobante`, c.`cuenta_corriente`, c.`cantidad_pago`, c.`fecha_pago`,  c.`razon_social`, c.`total_importe`,
@@ -24,8 +21,7 @@ JOIN servicios AS s
  JOIN categorias cate
    ON cate.codigo_categoria=s.codigo_categoria
 WHERE c.cuenta_corriente=$P{cuentaCorriente}
-ORDER BY c.fecha_pago DESC 
-LIMIT  $P{cantidadRegistro}]]>
+ORDER BY c.fecha_pago DESC, c.fecha_emision DESC, c.numero_comprobante DESC]]>
 	</queryString>
 	<field name="numero_comprobante" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="numero_comprobante"/>

@@ -14,13 +14,7 @@ public interface ServicioDao extends JpaRepository<Servicio, Integer> {
 
     @Query(value = """
             SELECT s.cuenta_corriente,
-                   DATE_FORMAT(
-                       DATE_ADD(s.fecha_inicio, INTERVAL COALESCE(SUM(
-                           CASE WHEN c.codigo_estado = 1
-                                THEN COALESCE(c.cantidad_pago, 0) ELSE 0 END
-                       ), 0) MONTH),
-                       '%m-%Y'
-                   ) AS pago_desde,
+                   fn_pagar_desde(s.cuenta_corriente) AS pago_desde,
                    COALESCE((
                        SELECT c2.saldo
                          FROM comprobantes c2
@@ -34,12 +28,12 @@ public interface ServicioDao extends JpaRepository<Servicio, Integer> {
                                  c2.codigo_tipo_comprobante DESC
                         LIMIT 1
                    ), 0) AS saldo
+                   , fn_mes_deuda(s.cuenta_corriente, :sucursal) AS cantidad_deuda
               FROM servicios s
-              LEFT JOIN comprobantes c ON c.cuenta_corriente = s.cuenta_corriente
              WHERE s.cuenta_corriente IN (:cuentas)
-             GROUP BY s.cuenta_corriente, s.fecha_inicio
             """, nativeQuery = true)
-    List<Object[]> resumirEstadosMovil(@Param("cuentas") Collection<String> cuentas);
+    List<Object[]> resumirEstadosMovil(@Param("cuentas") Collection<String> cuentas,
+            @Param("sucursal") Integer sucursal);
 
     @Query("""
             SELECT s FROM Servicio s

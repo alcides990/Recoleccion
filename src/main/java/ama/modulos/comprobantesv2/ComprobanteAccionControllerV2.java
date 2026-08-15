@@ -145,16 +145,17 @@ public class ComprobanteAccionControllerV2 {
         if (esAnulado(comprobante)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje", "No se puede editar un comprobante anulado."));
         }
+        if (!Objects.equals(comprobante.getCantidadPago(), solicitud.getCantidadPago())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje",
+                    "La cantidad de períodos no puede modificarse después de emitir el comprobante; anule el último comprobante y vuelva a emitirlo."));
+        }
         Estado estado = estados.findById(solicitud.getCodigoEstado()).orElse(null);
         if (estado == null) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "El estado seleccionado no es válido."));
         }
-        if (!Objects.equals(estado.getCodigoEstado(), 1) && !Objects.equals(estado.getCodigoEstado(), 3)) {
-            return ResponseEntity.badRequest().body(Map.of("mensaje", "El estado debe ser ACTIVO o ANULADO."));
-        }
-        if (Objects.equals(estado.getCodigoEstado(), 3) && !esUltimoActivo(comprobante)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
-                    "mensaje", "Solo se puede anular el ultimo comprobante activo de la cuenta corriente."));
+        if (!Objects.equals(estado.getCodigoEstado(), 1)) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje",
+                    "Para cambiar el estado a ANULADO utilice la acción Anular; así también se revierte la fecha desde."));
         }
         Cobrador cobrador = cobradores.findById(solicitud.getCodigoCobrador()).orElse(null);
         if (cobrador == null || cobrador.getSucursal() == null

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Controller
@@ -64,6 +67,8 @@ public class ServicioController {
     private ManzanaService servicioManzana;
     @Autowired
     private DataSource dataSource;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     private ReportGenerator reportGenerator;
 
     @GetMapping("/listar")
@@ -128,6 +133,7 @@ public class ServicioController {
             fila.put("usuario", servicio.getUsuario().getNombre() + " "
                     + (servicio.getUsuario().getApellido() == null ? "" : servicio.getUsuario().getApellido()));
             fila.put("fechaInicio", servicio.getFechaInicio());
+            fila.put("ocupado", servicio.getOcupado());
             fila.put("categoria", servicio.getCategoria().getTarifa() + "-" + servicio.getCategoria().getNombreCategoria());
             fila.put("estado", servicio.getEstado().getEstado());
             return fila;
@@ -139,8 +145,9 @@ public class ServicioController {
         return switch (columna) {
             case 1 -> "usuario.nombre";
             case 2 -> "fechaInicio";
-            case 3 -> "categoria.nombreCategoria";
-            case 4 -> "estado.estado";
+            case 3 -> "ocupado";
+            case 4 -> "categoria.nombreCategoria";
+            case 5 -> "estado.estado";
             default -> "cuentaCorriente";
         };
     }
@@ -269,7 +276,10 @@ public class ServicioController {
         resumen.put("saldoAnterior", estadoCuenta.getSaldoAnterior());
         resumen.put("recargo", estadoCuenta.getRecargo());
         resumen.put("totalDeuda", estadoCuenta.getTotalDeuda());
-        return ResponseEntity.ok(resumen);
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+                .header("Pragma", "no-cache")
+                .body(resumen);
     }
 
     @PostMapping("/guardar/{accion}")
@@ -285,6 +295,9 @@ public class ServicioController {
         }
         if (accion.equals("editar")) {
             mensaje = "Registro modificado correctamente";
+            if (servicio.getOcupado() == null) {
+                servicio.setOcupado(servicioEncontrada.getOcupado());
+            }
         }
         String cuentaCorriente[] = servicio.getCuentaCorriente().split("-");
         Integer numeroManzana = Integer.parseInt(cuentaCorriente[1]);
@@ -303,6 +316,189 @@ public class ServicioController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(mensaje + " " + e.getMostSpecificCause().getMessage());
         }
     }
+
+    @GetMapping("/historial/suspensiones")
+    @ResponseBody
+    public List<Map<String, Object>> historialSuspensiones(@RequestParam String cuentaCorriente) {
+        validarCuentaSucursal(cuentaCorriente);
+        return jdbcTemplate.queryForList("""
+                SELECT hs.codigo_suspension AS codigoSuspension,
+                       hs.fecha_desde AS fechaDesde, hs.fecha_hasta AS fechaHasta,
+                       hs.cantidad_periodos_pendientes AS cantidadPeriodosPendientes,
+                       hs.motivo, us.usuario, hs.fecha_registro AS fechaRegistro
+                FROM historial_suspensiones_servicio hs
+                JOIN usuarios_sistema us
+                  ON us.codigo_usuario_sistema = hs.codigo_usuario_sistema
+                WHERE hs.cuenta_corriente = ?
+                ORDER BY hs.fecha_desde DESC, hs.codigo_suspension DESC
+                """, cuentaCorriente);
+    }
+
+    @PostMapping("/historial/suspensiones")
+    @ResponseBody
+    @Transactional
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR')")
+    public ResponseEntity<?> registrarSuspension(@RequestBody SuspensionSolicitud solicitud) {
+        Servicio servicio = validarCuentaSucursal(solicitud.cuentaCorriente());
+        if (solicitud.fechaDesde() == null || solicitud.motivo() == null || solicitud.motivo().isBlank()) {
+            return ResponseEntity.badRequest().body("Indique la fecha y el motivo de la suspensión");
+        }
+        Integer activas = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM historial_suspensiones_servicio
+                WHERE cuenta_corriente = ? AND fecha_hasta IS NULL
+                """, Integer.class, solicitud.cuentaCorriente());
+        if (activas != null && activas > 0) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("La cuenta ya posee una suspensión activa");
+        }
+        Integer periodosPendientes = jdbcTemplate.queryForObject(
+                "SELECT fn_mes_deuda(?, ?)", Integer.class,
+                solicitud.cuentaCorriente(), getUserSession().getSucursal().getCodigoSucursal());
+        jdbcTemplate.update("""
+                INSERT INTO historial_suspensiones_servicio
+                    (cuenta_corriente, fecha_desde, cantidad_periodos_pendientes,
+                     motivo, codigo_usuario_sistema)
+                VALUES (?, ?, ?, ?, ?)
+                """, solicitud.cuentaCorriente(), solicitud.fechaDesde(),
+                periodosPendientes == null ? 0 : periodosPendientes, solicitud.motivo().trim(),
+                getUserSession().getCodigoUsuarioSistema());
+        jdbcTemplate.update("UPDATE servicios SET ocupado = 'DESOCUPADO' WHERE cuenta_corriente = ?",
+                servicio.getCuentaCorriente());
+        return ResponseEntity.ok("Suspensión registrada correctamente");
+    }
+
+    @PostMapping("/historial/suspensiones/finalizar")
+    @ResponseBody
+    @Transactional
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR')")
+    public ResponseEntity<?> finalizarSuspension(@RequestBody FinalizarSuspensionSolicitud solicitud) {
+        validarCuentaSucursal(solicitud.cuentaCorriente());
+        if (solicitud.fechaHasta() == null) {
+            return ResponseEntity.badRequest().body("Indique la fecha de finalización");
+        }
+        int actualizadas = jdbcTemplate.update("""
+                UPDATE historial_suspensiones_servicio
+                SET fecha_hasta = ?
+                WHERE cuenta_corriente = ? AND fecha_hasta IS NULL
+                  AND fecha_desde <= ?
+                """, solicitud.fechaHasta(), solicitud.cuentaCorriente(), solicitud.fechaHasta());
+        if (actualizadas == 0) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("No existe una suspensión activa para finalizar");
+        }
+        jdbcTemplate.update("UPDATE servicios SET ocupado = 'OCUPADO' WHERE cuenta_corriente = ?",
+                solicitud.cuentaCorriente());
+        return ResponseEntity.ok("Suspensión finalizada; la cuenta quedó marcada como ocupada");
+    }
+
+    @GetMapping("/historial/exoneraciones")
+    @ResponseBody
+    public List<Map<String, Object>> historialExoneraciones(@RequestParam String cuentaCorriente) {
+        validarCuentaSucursal(cuentaCorriente);
+        return jdbcTemplate.queryForList("""
+                SELECT he.codigo_exoneracion AS codigoExoneracion,
+                       he.fecha_desde_anterior AS fechaDesdeAnterior,
+                       he.fecha_desde_nueva AS fechaDesdeNueva,
+                       he.cantidad_periodos AS cantidadPeriodos,
+                       he.motivo, us.usuario, he.fecha_registro AS fechaRegistro
+                FROM historial_exoneraciones_servicio he
+                JOIN usuarios_sistema us
+                  ON us.codigo_usuario_sistema = he.codigo_usuario_sistema
+                WHERE he.cuenta_corriente = ?
+                ORDER BY he.fecha_registro DESC, he.codigo_exoneracion DESC
+                """, cuentaCorriente);
+    }
+
+    @PostMapping("/historial/exoneraciones")
+    @ResponseBody
+    @Transactional
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR')")
+    public ResponseEntity<?> registrarExoneracion(@RequestBody ExoneracionSolicitud solicitud) {
+        Servicio servicio = validarCuentaSucursal(solicitud.cuentaCorriente());
+        if (solicitud.fechaDesdeNueva() == null || solicitud.motivo() == null || solicitud.motivo().isBlank()) {
+            return ResponseEntity.badRequest().body("Indique la nueva fecha desde y el motivo de la exoneración");
+        }
+        if (solicitud.fechaDesdeNueva().isBefore(servicio.getFechaInicio())) {
+            return ResponseEntity.badRequest().body("La fecha desde no puede ser anterior al inicio del servicio");
+        }
+        LocalDate anterior = jdbcTemplate.queryForObject(
+                "SELECT STR_TO_DATE(CONCAT(fn_pagar_desde(?), '-01'), '%m-%Y-%d')",
+                LocalDate.class, solicitud.cuentaCorriente());
+        if (anterior == null) anterior = servicio.getFechaInicio();
+        long cantidadPeriodos = ChronoUnit.MONTHS.between(
+                YearMonth.from(anterior), YearMonth.from(solicitud.fechaDesdeNueva()));
+        if (cantidadPeriodos <= 0) {
+            return ResponseEntity.badRequest().body(
+                    "La nueva fecha desde debe avanzar al menos un período mensual");
+        }
+        jdbcTemplate.update("""
+                INSERT INTO historial_exoneraciones_servicio
+                    (cuenta_corriente, fecha_desde_anterior, fecha_desde_nueva,
+                     cantidad_periodos, motivo, codigo_usuario_sistema)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, solicitud.cuentaCorriente(), anterior, solicitud.fechaDesdeNueva(),
+                cantidadPeriodos, solicitud.motivo().trim(), getUserSession().getCodigoUsuarioSistema());
+        return ResponseEntity.ok("Exoneración registrada correctamente");
+    }
+
+    @GetMapping("/historial/pagos")
+    @ResponseBody
+    public DataTableResponseV2<Map<String, Object>> historialPagos(
+            @RequestParam int draw,
+            @RequestParam(defaultValue = "0") int start,
+            @RequestParam(defaultValue = "10") int length,
+            @RequestParam String cuentaCorriente,
+            @RequestParam(name = "search[value]", required = false) String busqueda,
+            @RequestParam(name = "order[0][column]", defaultValue = "1") int columna,
+            @RequestParam(name = "order[0][dir]", defaultValue = "desc") String direccion) {
+        validarCuentaSucursal(cuentaCorriente);
+        int limite = Math.min(Math.max(length, 1), 100);
+        int inicio = Math.max(start, 0);
+        String filtro = busqueda == null ? "" : busqueda.trim();
+        String like = "%" + filtro + "%";
+        String[] ordenes = {"c.numero_comprobante", "c.fecha_pago", "c.periodo_pago",
+            "c.cantidad_pago", "c.total_importe", "e.estado"};
+        String orden = ordenes[Math.max(0, Math.min(columna, ordenes.length - 1))];
+        String sentido = "asc".equalsIgnoreCase(direccion) ? "ASC" : "DESC";
+        Long total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM comprobantes WHERE cuenta_corriente = ?", Long.class, cuentaCorriente);
+        Long filtrado = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM comprobantes c
+                JOIN estados e ON e.codigo_estado = c.codigo_estado
+                WHERE c.cuenta_corriente = ?
+                  AND (? = '' OR CAST(c.numero_comprobante AS CHAR) LIKE ?
+                       OR COALESCE(c.periodo_pago, '') LIKE ? OR e.estado LIKE ?)
+                """, Long.class, cuentaCorriente, filtro, like, like, like);
+        String sqlPagos = """
+                SELECT c.numero_comprobante AS numeroComprobante,
+                       c.fecha_pago AS fechaPago, c.periodo_pago AS periodoPago,
+                       c.cantidad_pago AS cantidadPago, c.total_importe AS totalImporte,
+                       e.estado
+                FROM comprobantes c
+                JOIN estados e ON e.codigo_estado = c.codigo_estado
+                WHERE c.cuenta_corriente = ?
+                  AND (? = '' OR CAST(c.numero_comprobante AS CHAR) LIKE ?
+                       OR COALESCE(c.periodo_pago, '') LIKE ? OR e.estado LIKE ?)
+                ORDER BY %s %s
+                LIMIT ? OFFSET ?
+                """.formatted(orden, sentido);
+        List<Map<String, Object>> filas = jdbcTemplate.queryForList(sqlPagos,
+                cuentaCorriente, filtro, like, like, like, limite, inicio);
+        return new DataTableResponseV2<>(draw, total == null ? 0 : total,
+                filtrado == null ? 0 : filtrado, filas);
+    }
+
+    private Servicio validarCuentaSucursal(String cuentaCorriente) {
+        Servicio servicio = servicioServicio.encontrar(cuentaCorriente);
+        if (servicio == null || !servicio.getSucursal().getCodigoSucursal()
+                .equals(getSucursalSession().getCodigoSucursal())) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Cuenta no encontrada");
+        }
+        return servicio;
+    }
+
+    public record SuspensionSolicitud(String cuentaCorriente, LocalDate fechaDesde, String motivo) {}
+    public record FinalizarSuspensionSolicitud(String cuentaCorriente, LocalDate fechaHasta) {}
+    public record ExoneracionSolicitud(String cuentaCorriente, LocalDate fechaDesdeNueva, String motivo) {}
 
     @PostMapping("/editar")
     @PreAuthorize("hasAnyAuthority('ROOT','ADMIN')")
@@ -333,17 +529,16 @@ public class ServicioController {
 
     @PostMapping("/extractoCuenta")
     public ResponseEntity<?> getExtractoCuenta(
-            @RequestParam String cuentaCorriente,
-            @RequestParam int cantidadRegistro
+            @RequestParam String cuentaCorriente
     ) throws SQLException {
+        validarCuentaSucursal(cuentaCorriente);
         Map<String, Object> parametros = new HashMap<>();
         parametros.put("cuentaCorriente", cuentaCorriente);
-        parametros.put("cantidadRegistro", cantidadRegistro);
-        parametros.put("codigoSucursal", 1);
+        parametros.put("codigoSucursal", getUserSession().getSucursal().getCodigoSucursal());
 
         Reporte reporte = Reporte.builder()
                 .conexion(dataSource.getConnection())
-                .ruta("reportes/extractoCuenta.jasper")
+                .ruta("reportes/extractoCuenta.jrxml")
                 .nombre("ExtractoCuenta")
                 .parametros(parametros)
                 .build();
@@ -352,17 +547,19 @@ public class ServicioController {
     }
 
     private EstadoCuenta getEstadoCuenta(Servicio servicio) {
-        List<Object[]> datos = comprobanteService.getPagoDesdeAndSaldo(servicio.getCuentaCorriente());
-        LocalDate pagoHasta = null;
+        List<Object[]> datos = comprobanteService.getEstadoCuentaMovil(
+                servicio.getCuentaCorriente(), getSucursalSession().getCodigoSucursal());
+        LocalDate pagoHasta = servicio.getFechaInicio();
         Double saldo = 0.0;
-        if (datos.isEmpty()) {
-            pagoHasta = servicio.getFechaInicio();
-        } else {
+        Integer cantidadDeuda = null;
+        if (!datos.isEmpty()) {
             for (Object[] resul : datos) {
-                pagoHasta = YearMonth.parse(
-                        (String) resul[0], DateTimeFormatter.ofPattern("MM-yyyy"))
-                        .atDay(1);
-                saldo = (Double) resul[1];
+                if (resul[0] != null) {
+                    pagoHasta = YearMonth.parse(String.valueOf(resul[0]),
+                            DateTimeFormatter.ofPattern("MM-yyyy")).atDay(1);
+                }
+                if (resul[1] instanceof Number) saldo = ((Number) resul[1]).doubleValue();
+                if (resul[2] instanceof Number) cantidadDeuda = ((Number) resul[2]).intValue();
             }
         }
         EstadoCuenta estadoCuenta = new EstadoCuenta(
@@ -370,6 +567,7 @@ public class ServicioController {
                 getParametro(),
                 pagoHasta);
         estadoCuenta.setSaldoAnterior(saldo);
+        if (cantidadDeuda != null) estadoCuenta.setCantidadDeuda(cantidadDeuda);
         return estadoCuenta;
     }
 

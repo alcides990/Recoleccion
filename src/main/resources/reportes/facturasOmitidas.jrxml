@@ -53,12 +53,14 @@ FROM (
     CROSS JOIN (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) miles
     CROSS JOIN (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) decenas_mil
 ) numeros
-LEFT JOIN comprobantes comprobante
-  ON comprobante.codigo_sucursal = $P{codigoSucursal}
- AND ($P{codigoSerie} = 0 OR comprobante.codigo_serie = $P{codigoSerie})
- AND comprobante.numero_comprobante = $P{desde} + numeros.n
-WHERE numeros.n <= $P{hasta} - $P{desde}
-  AND comprobante.numero_comprobante IS NULL
+WHERE numeros.n BETWEEN 0 AND $P{hasta} - $P{desde}
+  AND NOT EXISTS (
+      SELECT 1
+        FROM comprobantes comprobante
+       WHERE comprobante.codigo_sucursal = $P{codigoSucursal}
+         AND ($P{codigoSerie} = 0 OR comprobante.codigo_serie = $P{codigoSerie})
+         AND comprobante.numero_comprobante = $P{desde} + numeros.n
+  )
 ORDER BY numero_comprobante]]>
 	</queryString>
 	<field name="numero_comprobante" class="java.lang.Integer">

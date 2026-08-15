@@ -4,6 +4,7 @@ import ama.DTO.ComprobanteDTO;
 import ama.DTO.DetallePagoDTO;
 import ama.dominio.*;
 import ama.dao.DetalleTimbradoDao;
+import ama.facturaelectronica.FacturaElectronicaService;
 import ama.servicio.*;
 import ama.utilerias.TableResponse;
 import ama.utilerias.PageRender;
@@ -74,6 +75,8 @@ public class ComprobanteController {
     private HttpSession httpSession;
     @Autowired
     private DetalleTimbradoDao detalleTimbradoDao;
+    @Autowired
+    private FacturaElectronicaService facturaElectronicaService;
 
     @GetMapping("/listar")
     public String listar(
@@ -325,7 +328,8 @@ public class ComprobanteController {
                         .toList()
         );
         comprobanteRequest.setParametro(getParametro());
-        getEstadoCuenta(comprobanteRequest.getCuentaCorriente());
+        EstadoCuenta estadoCuentaActual = getEstadoCuenta(comprobanteRequest.getCuentaCorriente());
+        comprobanteRequest.setPagoHasta(estadoCuentaActual.getPagoHasta());
         CalcularPago datosPagopago = new CalcularPago(comprobanteRequest);
         datosPagopago.setTotalImporte(totalImporte);
 
@@ -359,6 +363,7 @@ public class ComprobanteController {
         }
         try {
             comprobanteService.guardar(comprobante);
+            facturaElectronicaService.registrar(comprobante);
             return ResponseEntity.ok("Comprobante Guardada Correctamente !!!");
         } catch (org.springframework.transaction.UnexpectedRollbackException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -386,6 +391,12 @@ public class ComprobanteController {
     @PutMapping("/guardar")
     public ResponseEntity<?> moficicarComprobante(@RequestBody Comprobante comprobanteReques) {
         Comprobante comprobante = comprobanteService.getComprobante(comprobanteReques.getComprobantePK());
+        if (comprobanteReques.getEstado() != null
+                && comprobanteReques.getEstado().getCodigoEstado() == 3
+                && comprobante.getEstado().getCodigoEstado() != 3) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    "Utilice la acción Anular para revertir también la fecha desde de la cuenta");
+        }
         comprobante.setCobrador(comprobanteReques.getCobrador());
         comprobante.setFechaPago(comprobanteReques.getFechaPago());
         comprobante.setEstado(comprobanteReques.getEstado());
@@ -395,6 +406,7 @@ public class ComprobanteController {
     }
 
     @PutMapping("/anular")
+    @Transactional
     public ResponseEntity<?> anulalComprobante(@RequestBody Comprobante comprobanteRequest) {
         Comprobante comprobante = comprobanteService.getComprobante(comprobanteRequest.getComprobantePK());
         if (comprobante.getEstado().getCodigoEstado() == 3) {
@@ -480,7 +492,8 @@ public class ComprobanteController {
     private EstadoCuenta getEstadoCuenta(String cuentaCorriente) {
 
         Servicio servicio = servicioService.encontrar(cuentaCorriente);
-        List<Object[]> datos = comprobanteService.getPagoDesdeAndSaldo(cuentaCorriente);
+        List<Object[]> datos = comprobanteService.getEstadoCuentaMovil(
+                cuentaCorriente, getSucursalSession().getCodigoSucursal());
         LocalDate pagoHasta = null;
         Double saldo = 0.0;
         if (datos.isEmpty()) {
@@ -499,6 +512,9 @@ public class ComprobanteController {
                 getParametro(),
                 pagoHasta);
         estadoCuenta.setSaldoAnterior(saldo);
+        if (!datos.isEmpty() && datos.get(0)[2] instanceof Number) {
+            estadoCuenta.setCantidadDeuda(((Number) datos.get(0)[2]).intValue());
+        }
         return estadoCuenta;
     }
 

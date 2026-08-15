@@ -36,4 +36,6 @@ public interface ComprobanteService {
 
     public List<Object[]> getPagoDesdeAndSaldo(String cuentaCorriente);
 
+    public List<Object[]> getEstadoCuentaMovil(String cuentaCorriente, Integer codigoSucursal);
+
 }

@@ -2,6 +2,7 @@ package ama.dominio;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import org.junit.jupiter.api.Test;
 
 class CalcularPagoPeriodoTest {
@@ -18,6 +19,13 @@ class CalcularPagoPeriodoTest {
         CalcularPago pago = pagoDesdeAgosto(3);
         assertEquals("08-2026 / 10-2026", pago.getPeriodoPago());
         assertEquals(LocalDate.of(2026, 11, 1), pago.getPagoHasta());
+    }
+
+    @Test
+    void calculaDosPeriodosAdelantadosSinDependerDelDiaDelMes() {
+        EstadoCuenta estado = new EstadoCuenta();
+        estado.setPagoHasta(YearMonth.now().plusMonths(2).atDay(1));
+        assertEquals(-2, estado.getCantidadDeuda());
     }
 
     private CalcularPago pagoDesdeAgosto(int cantidad) {

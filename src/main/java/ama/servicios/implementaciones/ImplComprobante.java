@@ -73,7 +73,7 @@ public class ImplComprobante implements ComprobanteService {
     @Transactional
     @Override
     public Comprobante guardar(Comprobante comprobante) {
-        return comprobanteDao.save(comprobante);
+        return comprobanteDao.saveAndFlush(comprobante);
     }
 
     @Transactional
@@ -134,5 +134,10 @@ public class ImplComprobante implements ComprobanteService {
     @Override
     public List<Object[]> getPagoDesdeAndSaldo(String cuentaCorriente) {
         return comprobanteDao.getPagoDesdeAndSaldo(cuentaCorriente);
+    }
+
+    @Override
+    public List<Object[]> getEstadoCuentaMovil(String cuentaCorriente, Integer codigoSucursal) {
+        return comprobanteDao.getEstadoCuentaMovil(cuentaCorriente, codigoSucursal);
     }
 }

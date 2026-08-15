@@ -11,10 +11,10 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobantePK> {
+public interface ComprobanteDao extends JpaRepository<Comprobante, ComprobantePK> {
 
      @Query("SELECT COUNT(*) FROM Comprobante c  WHERE c.servicio.cuentaCorriente= ?1")
      int getCantidadComprobante(String cuentaCorriente);
@@ -225,7 +225,7 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobanteP
                """, nativeQuery = true)
      Optional<Comprobante> getUltimoComprobanteCuentaActivo(String cuentaCorriente);
      
-     @Query(value = "SELECT fn_pagar_desde(?1)", 
+     @Query(value = "SELECT fn_pagar_desde(?1)",
              nativeQuery = true)
      Optional<String> getPagoDesde(String cuentaCorriente);
 
@@ -243,5 +243,18 @@ public interface ComprobanteDao extends CrudRepository<Comprobante, ComprobanteP
                   LIMIT 1
                """, nativeQuery = true)
      List<Object[]> getPagoDesdeAndSaldo(String cuentaCorriente);
+
+     @Query(value = """
+                 SELECT fn_pagar_desde(?1),
+                        COALESCE((SELECT c.saldo
+                                    FROM comprobantes c
+                                   WHERE c.cuenta_corriente = ?1
+                                     AND c.codigo_estado = 1
+                                   ORDER BY c.fecha_emision DESC,
+                                            c.numero_comprobante DESC
+                                   LIMIT 1), 0),
+                        fn_mes_deuda(?1, ?2)
+               """, nativeQuery = true)
+     List<Object[]> getEstadoCuentaMovil(String cuentaCorriente, Integer codigoSucursal);
 
 }

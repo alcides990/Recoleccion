@@ -12,6 +12,7 @@ import ama.servicio.EstadoService;
 import ama.servicio.PuntoExpedicionService;
 import ama.servicio.SerieService;
 import ama.servicio.TimbradoService;
+import ama.servicio.SucursalService;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,16 +35,18 @@ public class DetalleTimbradoController {
     private final PuntoExpedicionService puntoService;
     private final SerieService serieService;
     private final EstadoService estadoService;
+    private final SucursalService sucursalService;
     private final HttpSession session;
 
     public DetalleTimbradoController(DetalleTimbradoDao detalleDao, TimbradoService timbradoService,
             PuntoExpedicionService puntoService, SerieService serieService,
-            EstadoService estadoService, HttpSession session) {
+            EstadoService estadoService, SucursalService sucursalService, HttpSession session) {
         this.detalleDao = detalleDao;
         this.timbradoService = timbradoService;
         this.puntoService = puntoService;
         this.serieService = serieService;
         this.estadoService = estadoService;
+        this.sucursalService = sucursalService;
         this.session = session;
     }
 
@@ -129,9 +132,10 @@ public class DetalleTimbradoController {
         model.addAttribute("series", serieService.listar());
         model.addAttribute("estados", estadoService.findByEstadoIn(List.of("Activo", "Inactivo", "Anulado")));
         if (usuario.getCodigoUsuarioSistema() == 0) {
-            model.addAttribute("puntos", sucursalEdicion == null ? puntoService.listar()
-                    : puntoService.listar(new ama.dominio.Sucursal(sucursalEdicion)));
+            model.addAttribute("sucursales", sucursalService.listar());
+            model.addAttribute("puntos", puntoService.listar());
         } else {
+            model.addAttribute("sucursales", List.of(usuario.getSucursal()));
             model.addAttribute("puntos", puntoService.listar(usuario.getSucursal()));
         }
     }
