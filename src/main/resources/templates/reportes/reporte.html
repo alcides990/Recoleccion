@@ -371,11 +371,22 @@
 
             $('#frm-facturas-omitidas').on('submit', (event)=> {
                 event.preventDefault();
+                const boton = $(event.currentTarget).find('button[type="submit"]');
                 getReporte({
                     codigoSerie: $('#omitidas-serie').val(),
                     desde: $('#omitidas-desde').val(),
                     hasta: $('#omitidas-hasta').val()
-                }, '/reporte/facturas_omitidas', '#contenedor-alertas-facturas-omitidas');
+                }, '/reporte/facturas_omitidas', '#contenedor-alertas-facturas-omitidas', boton);
+            });
+
+            $('#frm-ingresos, #frm-comisiones').on('submit', (event) => {
+                event.preventDefault();
+                const formulario = event.currentTarget;
+                const datos = Object.fromEntries(new FormData(formulario).entries());
+                const contenedor = formulario.id === 'frm-comisiones'
+                        ? '#contenedor-alertas-comisiones' : '#contenedor-alertas-ingresos';
+                getReporte(datos, '/reporte/ingresos', contenedor,
+                        $(formulario).find('button[type="submit"]'));
             });
 
             $('#detalle-zona-modal').on('shown.bs.modal', ()=> {
@@ -422,7 +433,8 @@
                     hasta: hasta,
                     manzana: manzana
                 };
-                getReporte(datos, url);
+                getReporte(datos, url, '#contenedor-alertas',
+                        $(event.currentTarget).find('button[type="submit"]'));
             });
         </script>
         <script th:inline="javascript">

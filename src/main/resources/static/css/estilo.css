@@ -110,14 +110,7 @@ li {
 }
 
 
-.menu_aside>* :hover:not(.active) {
-    background-color: #bca007;
-    color: white;
-}
-
-
-
-aside div {
+#user-session {
     display: none;
     position: fixed;
     left: 2px;

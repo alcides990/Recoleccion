@@ -8,6 +8,7 @@ import ama.utilerias.Reporte;
 import ama.modulos.comprobantesv2.DataTableResponseV2;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -69,6 +70,8 @@ public class ServicioController {
     private DataSource dataSource;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private UbicacionServicioService ubicacionServicioService;
     private ReportGenerator reportGenerator;
 
     @GetMapping("/listar")
@@ -486,6 +489,35 @@ public class ServicioController {
                 filtrado == null ? 0 : filtrado, filas);
     }
 
+    @GetMapping("/ubicacion")
+    @ResponseBody
+    @PreAuthorize("isAuthenticated()")
+    public UbicacionServicioService.DetalleUbicacion consultarUbicacion(
+            @RequestParam String cuentaCorriente) {
+        validarCuentaSucursal(cuentaCorriente);
+        return ubicacionServicioService.consultar(cuentaCorriente);
+    }
+
+    @PostMapping("/ubicacion")
+    @ResponseBody
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> guardarUbicacion(@RequestBody UbicacionSolicitud solicitud) {
+        if (solicitud == null || solicitud.cuentaCorriente() == null
+                || solicitud.cuentaCorriente().isBlank()) {
+            return ResponseEntity.badRequest().body("Indique la cuenta corriente");
+        }
+        validarCuentaSucursal(solicitud.cuentaCorriente());
+        try {
+            return ResponseEntity.ok(ubicacionServicioService.guardar(
+                    solicitud.cuentaCorriente().trim(),
+                    solicitud.latitud(), solicitud.longitud(),
+                    solicitud.precisionMetros(), solicitud.metodo(),
+                    getUserSession().getCodigoUsuarioSistema()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     private Servicio validarCuentaSucursal(String cuentaCorriente) {
         Servicio servicio = servicioServicio.encontrar(cuentaCorriente);
         if (servicio == null || !servicio.getSucursal().getCodigoSucursal()
@@ -499,6 +531,8 @@ public class ServicioController {
     public record SuspensionSolicitud(String cuentaCorriente, LocalDate fechaDesde, String motivo) {}
     public record FinalizarSuspensionSolicitud(String cuentaCorriente, LocalDate fechaHasta) {}
     public record ExoneracionSolicitud(String cuentaCorriente, LocalDate fechaDesdeNueva, String motivo) {}
+    public record UbicacionSolicitud(String cuentaCorriente, BigDecimal latitud,
+            BigDecimal longitud, BigDecimal precisionMetros, String metodo) {}
 
     @PostMapping("/editar")
     @PreAuthorize("hasAnyAuthority('ROOT','ADMIN')")

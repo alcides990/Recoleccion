@@ -82,84 +82,84 @@ ORDER BY numero_comprobante]]>
 			<staticText>
 				<reportElement x="10" y="10" width="326" height="20" uuid="d817048c-0ede-4d24-be71-a41394a36e07"/>
 				<textElement>
-					<font fontName="Arial" size="12"/>
+					<font fontName="DejaVu Sans" size="12"/>
 				</textElement>
 				<text><![CDATA[Informe de facturas omitidas]]></text>
 			</staticText>
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="468" y="10" width="100" height="20" uuid="e8ad5528-49c6-4b3d-b956-f0f3ad2bd635"/>
 				<textElement>
-					<font fontName="Arial"/>
+					<font fontName="DejaVu Sans"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="432" y="10" width="36" height="20" uuid="07d7d59a-f15b-4c5f-a3e6-d405508a9193"/>
 				<textElement>
-					<font fontName="Arial"/>
+					<font fontName="DejaVu Sans"/>
 				</textElement>
 				<text><![CDATA[Fecha]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="209" y="81" width="127" height="20" uuid="656ef45b-3376-4f63-9f2f-7568640fc822"/>
 				<textElement>
-					<font fontName="Arial" size="14"/>
+					<font fontName="DejaVu Sans" size="14"/>
 				</textElement>
 				<text><![CDATA[Detalle Facturas]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="502" y="48" width="19" height="20" uuid="cbe16b56-a292-4e72-ab47-341f17ddf07d"/>
 				<textElement>
-					<font fontName="Arial" size="10"/>
+					<font fontName="DejaVu Sans" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="521" y="48" width="17" height="20" uuid="f4989797-7a89-48a8-9c59-b673dac458e0"/>
 				<textElement>
-					<font fontName="Arial"/>
+					<font fontName="DejaVu Sans"/>
 				</textElement>
 				<text><![CDATA[de]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="468" y="48" width="34" height="20" uuid="72f540ed-55b3-4530-b214-6f404d0c02cd"/>
 				<textElement>
-					<font fontName="Arial" size="10"/>
+					<font fontName="DejaVu Sans" size="10"/>
 				</textElement>
 				<text><![CDATA[Pagina]]></text>
 			</staticText>
 			<textField evaluationTime="Report">
 				<reportElement x="538" y="48" width="17" height="20" uuid="95f90a06-27fe-45d2-85d1-d710119067d3"/>
 				<textElement>
-					<font fontName="Arial"/>
+					<font fontName="DejaVu Sans"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="48" width="42" height="20" uuid="9d815e79-0b83-465f-9f4e-0b9157bd89ca"/>
 				<textElement>
-					<font fontName="Arial" size="12"/>
+					<font fontName="DejaVu Sans" size="12"/>
 				</textElement>
 				<text><![CDATA[Desde]]></text>
 			</staticText>
 			<textField pattern="#,##0.###;#,##0.###-">
 				<reportElement x="52" y="48" width="76" height="20" uuid="8fc2c6ac-d3a0-4699-9a41-75e53d17ad65"/>
 				<textElement>
-					<font fontName="Arial" size="12"/>
+					<font fontName="DejaVu Sans" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{desde}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="128" y="48" width="50" height="20" uuid="78cca389-5b15-4e76-b031-4e8bf012af92"/>
 				<textElement>
-					<font fontName="Arial" size="12"/>
+					<font fontName="DejaVu Sans" size="12"/>
 				</textElement>
 				<text><![CDATA[Hasta]]></text>
 			</staticText>
 			<textField pattern="#,##0.###;#,##0.###-">
 				<reportElement x="178" y="48" width="100" height="20" uuid="514ca886-0138-4047-97c0-e7a9dbb89d44"/>
 				<textElement>
-					<font fontName="Arial" size="12"/>
+					<font fontName="DejaVu Sans" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{hasta}]]></textFieldExpression>
 			</textField>
@@ -174,7 +174,7 @@ ORDER BY numero_comprobante]]>
 				<textField pattern="#,##0.###;#,##0.###-">
 					<reportElement x="10" y="0" width="100" height="14" uuid="15743556-565f-4dae-9f51-7ff65c0ebfa0"/>
 					<textElement>
-						<font fontName="Arial"/>
+						<font fontName="DejaVu Sans"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{numero_comprobante}]]></textFieldExpression>
 				</textField>
@@ -186,7 +186,7 @@ ORDER BY numero_comprobante]]>
 			<staticText>
 				<reportElement x="5" y="16" width="295" height="20" uuid="3f62fd2f-d627-4ce3-9132-79ab53c97137"/>
 				<textElement>
-					<font fontName="Arial"/>
+					<font fontName="DejaVu Sans"/>
 				</textElement>
 				<text><![CDATA[Total Comprobantes no registradas dentro del rango especificado]]></text>
 			</staticText>

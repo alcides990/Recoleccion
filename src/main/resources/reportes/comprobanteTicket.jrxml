@@ -30,6 +30,8 @@
        COALESCE(cv.condicion_venta, '') AS condicionVenta,
        CASE
          WHEN c.periodo_pago IS NULL OR c.periodo_pago = '' THEN ''
+         WHEN TRIM(c.periodo_pago) REGEXP '^[0-9]{2}-[0-9]{4}([[:space:]]*/[[:space:]][0-9]{2}-[0-9]{4})?$'
+           THEN REPLACE(TRIM(c.periodo_pago), ' / ', ' - ')
          WHEN c.periodo_pago LIKE '%/%' THEN CONCAT(
            DATE_FORMAT(STR_TO_DATE(SUBSTRING_INDEX(c.periodo_pago, '/', 1), '%Y-%m-%d'), '%m/%Y'),
            ' - ',
@@ -95,10 +97,7 @@
 	<field name="pagos" class="java.lang.String"/>
 	<field name="observacion" class="java.lang.String"/>
 	<title>
-		<band height="226" splitType="Stretch">
-			<rectangle>
-				<reportElement mode="Transparent" x="0" y="213" width="149" height="12" backcolor="#EDEBEB" uuid="4e284405-2640-445e-ae64-79b5fc2eae67"/>
-			</rectangle>
+		<band height="175" splitType="Immediate">
 			<textField textAdjust="StretchHeight">
 				<reportElement x="0" y="0" width="150" height="18" uuid="0ecc7f4a-6862-49f8-b7bf-4ca9ad8a2aa0"/>
 				<textElement textAlignment="Center">
@@ -145,179 +144,185 @@
 				<reportElement x="0" y="77" width="150" height="1" uuid="866ff233-8e6a-4caa-b8ca-1adf6704f42a"/>
 			</line>
 			<textField>
-				<reportElement x="0" y="83" width="150" height="14" uuid="c6ff737d-e667-47bc-be56-e5057ebaa350"/>
+				<reportElement x="0" y="78" width="150" height="14" uuid="c6ff737d-e667-47bc-be56-e5057ebaa350"/>
 				<textElement textAlignment="Center">
 					<font size="10" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{tipoComprobante}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["FACTURA"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="99" width="150" height="13" uuid="75daca3a-5441-4056-bb9b-a282b92d08cf"/>
+				<reportElement x="0" y="91" width="150" height="13" uuid="75daca3a-5441-4056-bb9b-a282b92d08cf"/>
 				<textElement textAlignment="Center">
 					<font size="10" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{numeroDocumento}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Nro.: "+$F{numeroDocumento}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="114" width="150" height="12" uuid="70d7cfff-853a-4ad8-9f45-5e4ab8f8dcdb"/>
+				<reportElement x="0" y="104" width="150" height="12" uuid="70d7cfff-853a-4ad8-9f45-5e4ab8f8dcdb"/>
 				<textElement textAlignment="Center">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Fecha: " + $F{fecha}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="129" width="150" height="1" uuid="99b371fd-5e0a-4dba-a548-07a18d74d8db"/>
+				<reportElement x="0" y="115" width="150" height="1" uuid="99b371fd-5e0a-4dba-a548-07a18d74d8db"/>
 			</line>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="0" y="135" width="150" height="25" uuid="bc468387-7f02-40b7-8531-139a31a32f87"/>
+				<reportElement x="0" y="161" width="150" height="14" uuid="bc468387-7f02-40b7-8531-139a31a32f87"/>
 				<textElement>
 					<font size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Cliente: " + $F{receptor}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="160" width="150" height="12" uuid="189066e2-d334-4591-8b07-d675fba922f4"/>
+				<reportElement x="0" y="150" width="150" height="12" uuid="189066e2-d334-4591-8b07-d675fba922f4"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA["RUC/CI: " + $F{documento} ]]></textFieldExpression>
+				<textFieldExpression><![CDATA["RUC/CI: " + $F{documento}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="0" y="186" width="150" height="12" uuid="83726d47-2e1e-4ee1-a01c-190388b8cde3"/>
+				<reportElement x="-1" y="128" width="150" height="12" uuid="83726d47-2e1e-4ee1-a01c-190388b8cde3"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Categoria: " + $F{categoria}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="199" width="150" height="12" uuid="ec1559fc-a962-4e5c-9752-f65b9e4f0e52"/>
+				<reportElement x="0" y="140" width="150" height="12" uuid="ec1559fc-a962-4e5c-9752-f65b9e4f0e52"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Condicion Venta: " + $F{condicionVenta}]]></textFieldExpression>
 			</textField>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="0" y="117" width="150" height="12" uuid="7beec9a9-04ef-4fc7-9f98-63c9d5636127"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Cuenta:  " + $F{cuenta}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="12">
 			<staticText>
-				<reportElement x="0" y="213" width="100" height="12" uuid="0f92bb14-0034-421b-8dec-d56303b30f55"/>
+				<reportElement x="-1" y="0" width="151" height="12" uuid="0f92bb14-0034-421b-8dec-d56303b30f55"/>
 				<textElement>
 					<font size="9" isBold="true"/>
 				</textElement>
 				<text><![CDATA[DESCRIPCION]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="100" y="213" width="50" height="12" uuid="8ad41b9e-76b1-48ec-9907-b6773e7dbdbf"/>
-				<textElement textAlignment="Center">
-					<font size="9" isBold="true"/>
-				</textElement>
-				<text><![CDATA[CANTIDAD]]></text>
-			</staticText>
-			<textField textAdjust="ScaleFont">
-				<reportElement x="0" y="173" width="150" height="12" uuid="7beec9a9-04ef-4fc7-9f98-63c9d5636127"/>
-				<textElement>
-					<font size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[ "Cuenta:  " + $F{cuenta}]]></textFieldExpression>
-			</textField>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="149" height="12" backcolor="#EDEBEB" uuid="4e284405-2640-445e-ae64-79b5fc2eae67"/>
+			</rectangle>
 		</band>
-	</title>
+	</columnHeader>
 	<detail>
-		<band height="44" splitType="Stretch">
-			<textField textAdjust="ScaleFont">
-				<reportElement x="0" y="0" width="120" height="44" uuid="88128413-34bb-488c-856b-c880cdd3157b"/>
+		<band height="12" splitType="Immediate">
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="149" height="12" uuid="88128413-34bb-488c-856b-c880cdd3157b"/>
 				<textElement textAlignment="Left" verticalAlignment="Top">
-					<font size="9"/>
+					<font size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Servicio de recoleccion de residuos correspondiente al periodo de " + $F{periodo}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="120" y="0" width="30" height="44" uuid="b05ac9c2-d14b-4675-ab55-7faebe8fb6c1"/>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["SERVICIO DE RECOLECCION DE RESIDUOS INOCUO CORRESPONDIENTE AL PERIODO DE " + $F{periodo}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
 	<summary>
-		<band height="223" splitType="Stretch">
-			<textField>
-				<reportElement x="0" y="0" width="150" height="12" uuid="091a4181-e190-4d14-91b4-2c88e1f94d50"/>
+		<band height="234" splitType="Stretch">
+			<textField textAdjust="StretchHeight">
+				<reportElement x="0" y="14" width="150" height="12" uuid="091a4181-e190-4d14-91b4-2c88e1f94d50"/>
 				<textElement textAlignment="Left">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Tarifa: Gs. " + $F{tarifa}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="13" width="150" height="12" uuid="ea09619b-b726-4316-8c36-bdc298ba1aad"/>
+				<reportElement x="0" y="27" width="150" height="12" uuid="ea09619b-b726-4316-8c36-bdc298ba1aad"/>
 				<textElement textAlignment="Left">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Recargo: Gs. " + $F{recargo}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="0" y="28" width="150" height="16" uuid="f68fc4f0-2152-4f24-a890-76e929361a3c"/>
+				<reportElement x="0" y="42" width="150" height="16" uuid="f68fc4f0-2152-4f24-a890-76e929361a3c"/>
 				<textElement textAlignment="Left">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["TOTAL: Gs. " + $F{total}]]></textFieldExpression>
 			</textField>
-			<textField textAdjust="ScaleFont">
-				<reportElement x="0" y="44" width="150" height="48" uuid="7a393dba-9373-41c4-9827-ccdbb064d6b5"/>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement x="0" y="59" width="150" height="30" uuid="7a393dba-9373-41c4-9827-ccdbb064d6b5"/>
 				<textElement textAlignment="Left">
 					<font size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{montoLetras} == null || $P{montoLetras}.isEmpty() ? "" : "SON: " + $P{montoLetras}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="100" width="150" height="1" uuid="08e8f478-eb6c-4234-99dd-13c05fb75591"/>
+				<reportElement positionType="Float" x="0" y="92" width="150" height="1" uuid="08e8f478-eb6c-4234-99dd-13c05fb75591"/>
 			</line>
 			<staticText>
-				<reportElement x="0" y="100" width="150" height="12" uuid="0c407a7b-cd66-4e40-b960-eff6bb385ada"/>
+				<reportElement positionType="Float" x="0" y="95" width="150" height="12" uuid="0c407a7b-cd66-4e40-b960-eff6bb385ada"/>
 				<textElement>
 					<font size="9" isBold="true"/>
 				</textElement>
 				<text><![CDATA[LIQUIDACION DEL IVA]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="0" y="113" width="150" height="12" uuid="1f445e51-03b3-4562-8e00-851082e78825"/>
+				<reportElement positionType="Float" x="0" y="108" width="150" height="12" uuid="1f445e51-03b3-4562-8e00-851082e78825"/>
 				<textElement textAlignment="Left">
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Gravada 10%: Gs. " + $F{gravada10}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="126" width="150" height="12" uuid="accf6afd-576a-4c33-8adc-2217f9704f9c"/>
+				<reportElement positionType="Float" x="0" y="121" width="150" height="12" uuid="accf6afd-576a-4c33-8adc-2217f9704f9c"/>
 				<textElement textAlignment="Left">
 					<font size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["IVA 10%: Gs. " + $F{iva10}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="143" width="150" height="1" uuid="56570fe5-8d4f-4c7b-8d08-987a8c539f4c"/>
+				<reportElement positionType="Float" x="0" y="137" width="150" height="1" uuid="56570fe5-8d4f-4c7b-8d08-987a8c539f4c"/>
 			</line>
 			<staticText>
-				<reportElement x="0" y="148" width="150" height="12" uuid="d6c97232-c469-458e-9196-937814bc2529"/>
+				<reportElement positionType="Float" x="0" y="142" width="150" height="12" uuid="d6c97232-c469-458e-9196-937814bc2529"/>
 				<textElement>
 					<font size="9" isBold="true"/>
 				</textElement>
 				<text><![CDATA[DETALLE DE PAGO]]></text>
 			</staticText>
 			<textField textAdjust="StretchHeight">
-				<reportElement x="0" y="162" width="150" height="30" uuid="df7d8758-f22e-493b-a0a0-8cfe9b1587b5"/>
+				<reportElement positionType="Float" x="0" y="155" width="150" height="24" uuid="df7d8758-f22e-493b-a0a0-8cfe9b1587b5"/>
 				<textElement>
 					<font fontName="SansSerif" size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{pagos}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pagos} == null || $F{pagos}.trim().isEmpty()
+    ? "Sin detalle de pago"
+    : $F{pagos}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="197" width="150" height="1" uuid="e4ab1691-6757-4ab3-ac69-abb2b31d39cc"/>
+				<reportElement positionType="Float" x="0" y="183" width="150" height="1" uuid="e4ab1691-6757-4ab3-ac69-abb2b31d39cc"/>
 			</line>
 			<staticText>
-				<reportElement x="-1" y="210" width="150" height="13" uuid="04a27023-85b4-42f9-81db-89b23b135e77"/>
+				<reportElement positionType="Float" x="0" y="195" width="150" height="13" uuid="04a27023-85b4-42f9-81db-89b23b135e77"/>
 				<textElement textAlignment="Center">
 					<font size="9" isBold="true"/>
 				</textElement>
 				<text><![CDATA[GRACIAS POR SU PAGO]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="90" height="13" uuid="987702d4-fdaf-4be3-aa09-4214deae0b94"/>
+				<text><![CDATA[Cantida Periodo:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="0" width="60" height="13" uuid="64d365a5-3f1d-4a14-9536-ad7043dde76c"/>
+				<textElement textAlignment="Left">
+					<font isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
 		</band>
 	</summary>
 </jasperReport>

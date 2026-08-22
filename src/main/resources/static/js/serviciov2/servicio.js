@@ -269,3 +269,176 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
                   boton.prop('disabled', false).html(contenidoOriginal);
               }
           });
+
+          const modalUbicacion = new bootstrap.Modal(document.getElementById('ubicacionServicioModal'));
+          let cargandoCoordenadas = false;
+
+          function mostrarAlertaUbicacion(mensaje, tipo = 'danger') {
+              $('#ubicacionServicioAlerta')
+                      .removeClass('d-none alert-danger alert-success alert-info alert-warning')
+                      .addClass('alert-' + tipo)
+                      .text(mensaje);
+          }
+
+          function ocultarAlertaUbicacion() {
+              $('#ubicacionServicioAlerta').addClass('d-none').text('');
+          }
+
+          function textoCoordenadas(latitud, longitud) {
+              if (latitud === null || latitud === undefined
+                      || longitud === null || longitud === undefined) return 'Sin ubicación';
+              return Number(latitud).toFixed(7) + ', ' + Number(longitud).toFixed(7);
+          }
+
+          function fechaHoraUbicacion(valor) {
+              if (!valor) return '';
+              const fecha = new Date(valor);
+              return Number.isNaN(fecha.getTime()) ? escaparHtml(valor)
+                      : fecha.toLocaleString('es-PY');
+          }
+
+          function actualizarEnlaceMapa() {
+              const latitud = $('#ubicacionLatitud').val();
+              const longitud = $('#ubicacionLongitud').val();
+              const enlace = $('#abrirUbicacionMapa');
+              if (latitud !== '' && longitud !== '') {
+                  enlace.attr('href', 'https://www.google.com/maps?q='
+                          + encodeURIComponent(latitud + ',' + longitud))
+                          .removeClass('disabled').attr('aria-disabled', 'false');
+              } else {
+                  enlace.removeAttr('href').addClass('disabled').attr('aria-disabled', 'true');
+              }
+          }
+
+          function pintarUbicacion(datos) {
+              const actual = datos.actual;
+              cargandoCoordenadas = true;
+              $('#ubicacionLatitud').val(actual ? actual.latitud : '');
+              $('#ubicacionLongitud').val(actual ? actual.longitud : '');
+              $('#ubicacionPrecision').val(actual && actual.precisionMetros !== null
+                      ? actual.precisionMetros : '');
+              $('#ubicacionMetodo').val(actual ? actual.metodo : 'MANUAL');
+              cargandoCoordenadas = false;
+              $('#ubicacionActualizada').text(actual
+                      ? 'Última actualización: ' + fechaHoraUbicacion(actual.fechaActualizacion)
+                          + ' · ' + actual.usuario
+                      : 'Todavía no tiene una ubicación registrada');
+              actualizarEnlaceMapa();
+
+              const historial = Array.isArray(datos.historial) ? datos.historial : [];
+              $('#ubicacionHistorialCuerpo').html(historial.length
+                      ? historial.map(item => '<tr>'
+                          + '<td>' + escaparHtml(fechaHoraUbicacion(item.fechaModificacion)) + '</td>'
+                          + '<td>' + escaparHtml(textoCoordenadas(item.latitudAnterior, item.longitudAnterior)) + '</td>'
+                          + '<td><strong>' + escaparHtml(textoCoordenadas(item.latitudNueva, item.longitudNueva)) + '</strong>'
+                          + (item.precisionNuevaMetros !== null
+                              ? '<small class="d-block text-muted">± ' + escaparHtml(item.precisionNuevaMetros) + ' m</small>' : '') + '</td>'
+                          + '<td><span class="badge bg-secondary">' + escaparHtml(item.metodo) + '</span>'
+                          + '<small class="d-block text-muted">' + escaparHtml(item.origen) + '</small></td>'
+                          + '<td>' + escaparHtml(item.usuario) + '</td></tr>').join('')
+                      : '<tr><td colspan="5" class="text-center text-muted py-4">Sin modificaciones registradas</td></tr>');
+          }
+
+          async function apiUbicacion(url, opciones = {}) {
+              const respuesta = await fetch(url, opciones);
+              if (!respuesta.ok) {
+                  const tipo = respuesta.headers.get('content-type') || '';
+                  if (tipo.includes('json')) {
+                      const error = await respuesta.json();
+                      throw new Error(error.message || error.detail || 'No se pudo completar la operación');
+                  }
+                  throw new Error(await respuesta.text() || 'No se pudo completar la operación');
+              }
+              return respuesta.json();
+          }
+
+          async function cargarUbicacion(cuentaCorriente) {
+              ocultarAlertaUbicacion();
+              $('#ubicacionHistorialCuerpo').html('<tr><td colspan="5" class="text-center py-4"><span class="spinner-border spinner-border-sm"></span> Cargando…</td></tr>');
+              const datos = await apiUbicacion('/servicio/ubicacion?cuentaCorriente='
+                      + encodeURIComponent(cuentaCorriente));
+              pintarUbicacion(datos);
+          }
+
+          $(document).on('click', '.ubicacion-servicio', async function () {
+              const cuentaCorriente = String($(this).data('id') || '');
+              $('#ubicacionCuenta').val(cuentaCorriente);
+              $('#ubicacionLatitud,#ubicacionLongitud,#ubicacionPrecision').val('');
+              $('#ubicacionMetodo').val('MANUAL');
+              actualizarEnlaceMapa();
+              modalUbicacion.show();
+              try {
+                  await cargarUbicacion(cuentaCorriente);
+              } catch (error) {
+                  mostrarAlertaUbicacion(error.message);
+              }
+          });
+
+          $('#ubicacionLatitud,#ubicacionLongitud').on('input', function () {
+              if (!cargandoCoordenadas) {
+                  $('#ubicacionMetodo').val('MANUAL');
+                  $('#ubicacionPrecision').val('');
+              }
+              actualizarEnlaceMapa();
+          });
+
+          $('#obtenerUbicacionActual').on('click', function () {
+              if (!navigator.geolocation) {
+                  mostrarAlertaUbicacion('Este dispositivo no permite obtener la ubicación.');
+                  return;
+              }
+              const boton = $(this);
+              boton.prop('disabled', true)
+                      .html('<span class="spinner-border spinner-border-sm"></span> Obteniendo ubicación…');
+              mostrarAlertaUbicacion('Espere mientras se obtiene una posición precisa.', 'info');
+              navigator.geolocation.getCurrentPosition(posicion => {
+                  cargandoCoordenadas = true;
+                  $('#ubicacionLatitud').val(posicion.coords.latitude.toFixed(7));
+                  $('#ubicacionLongitud').val(posicion.coords.longitude.toFixed(7));
+                  $('#ubicacionPrecision').val(Number(posicion.coords.accuracy).toFixed(2));
+                  $('#ubicacionMetodo').val('GPS');
+                  cargandoCoordenadas = false;
+                  actualizarEnlaceMapa();
+                  mostrarAlertaUbicacion('Ubicación obtenida. Revise las coordenadas y presione Guardar ubicación.', 'success');
+                  boton.prop('disabled', false)
+                          .html('<i class="fa-solid fa-crosshairs"></i> Usar ubicación actual');
+              }, error => {
+                  const mensajes = {
+                      1: 'Permiso de ubicación denegado.',
+                      2: 'No fue posible determinar la ubicación.',
+                      3: 'Se agotó el tiempo para obtener la ubicación.'
+                  };
+                  mostrarAlertaUbicacion(mensajes[error.code] || 'No fue posible obtener la ubicación.');
+                  boton.prop('disabled', false)
+                          .html('<i class="fa-solid fa-crosshairs"></i> Usar ubicación actual');
+              }, {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
+          });
+
+          $('#formUbicacionServicio').on('submit', async function (event) {
+              event.preventDefault();
+              const boton = $('#guardarUbicacionServicio');
+              const contenido = boton.html();
+              boton.prop('disabled', true)
+                      .html('<span class="spinner-border spinner-border-sm"></span> Guardando…');
+              ocultarAlertaUbicacion();
+              try {
+                  const precision = $('#ubicacionPrecision').val();
+                  const datos = await apiUbicacion('/servicio/ubicacion', {
+                      method: 'POST',
+                      headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': tokenCsrf},
+                      body: JSON.stringify({
+                          cuentaCorriente: $('#ubicacionCuenta').val(),
+                          latitud: Number($('#ubicacionLatitud').val()),
+                          longitud: Number($('#ubicacionLongitud').val()),
+                          precisionMetros: precision === '' ? null : Number(precision),
+                          metodo: $('#ubicacionMetodo').val()
+                      })
+                  });
+                  pintarUbicacion(datos);
+                  mostrarAlertaUbicacion('Ubicación guardada y registrada en el historial.', 'success');
+              } catch (error) {
+                  mostrarAlertaUbicacion(error.message);
+              } finally {
+                  boton.prop('disabled', false).html(contenido);
+              }
+          });

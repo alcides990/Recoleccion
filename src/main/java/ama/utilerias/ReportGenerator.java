@@ -1,12 +1,10 @@
 package ama.utilerias;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.extern.log4j.Log4j2;
-import net.sf.jasperreports.engine.JRException;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -20,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-@Log4j2
+@Slf4j
 public class ReportGenerator {
 
     public ReportGenerator() {
@@ -52,21 +50,35 @@ public class ReportGenerator {
                         .body(pdfBytes);
 
             }
-        } catch (IOException | JRException  ex) {
-            log.error("Error al generar el reporte {}", reporte.getNombre(), ex);
-             mensaje.put("mensaje", ex.getMessage());
-            return ResponseEntity.internalServerError().body(mensaje);
+        } catch (Exception ex) {
+            String detalle = obtenerDetalleError(ex);
+            log.error("No fue posible generar el reporte '{}', recurso '{}': {}",
+                    reporte.getNombre(), reporte.getRuta(), detalle, ex);
+            mensaje.put("mensaje", "No fue posible generar el reporte: " + detalle);
+            return ResponseEntity.internalServerError()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(mensaje);
         } finally {
             try {
-                if( reporte.getConexion()!=null){
-                reporte.getConexion().close();
+                if (reporte.getConexion() != null) {
+                    reporte.getConexion().close();
                 }
             } catch (SQLException ex) {
-                 mensaje.put("mensaje", ex.getMessage());
-                return ResponseEntity.internalServerError().body(mensaje);
+                log.warn("No se pudo cerrar la conexion del reporte '{}'", reporte.getNombre(), ex);
             }
         }
+    }
 
+    private String obtenerDetalleError(Throwable error) {
+        Throwable causa = error;
+        while (causa.getCause() != null && causa.getCause() != causa) {
+            causa = causa.getCause();
+        }
+        String detalle = causa.getMessage();
+        if (detalle == null || detalle.isBlank()) {
+            detalle = causa.getClass().getSimpleName();
+        }
+        return detalle;
     }
 
 }

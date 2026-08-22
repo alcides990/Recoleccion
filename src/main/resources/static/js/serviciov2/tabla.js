@@ -40,6 +40,7 @@ $(function () {
                 render: function (_, __, fila) {
                     const cuenta = escapar(fila.cuentaCorriente);
                     let acciones = '<button type="button" class="btn btn-primario btn-sm estado-cuenta" data-id="' + cuenta + '">Estado Cuenta</button> ';
+                    acciones += '<button type="button" class="btn btn-success btn-sm ubicacion-servicio" data-id="' + cuenta + '" title="Ubicación del servicio"><i class="fa-solid fa-location-dot"></i></button> ';
                     if (puedeEditar) {
                         acciones += '<a id="editar" data-id="' + cuenta + '" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#servicioModal" title="Editar"><i class="fa-regular fa-pen-to-square fa-lg"></i></a> ';
                     }

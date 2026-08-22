@@ -270,58 +270,112 @@ function objectToQueryString(obj) {
     return Object.keys(obj).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`).join('&');
 }
 
-export function getReporte(datos, url, contenedorAlertas = '#contenedor-alertas') {
-    datos = objectToQueryString(datos);
-//    console.log(datos);
-    let token = $("#token").val();
-    fetch(url, {
+export function getReporte(datos, url, contenedorAlertas = '#contenedor-alertas', boton = null) {
+    const cuerpo = objectToQueryString(datos);
+    const token = $("#token").val();
+    const $boton = boton ? $(boton) : $(document.activeElement).filter('button[type="submit"]');
+    const contenidoOriginal = $boton.length ? $boton.html() : '';
+    const $formulario = $boton.closest('form');
+    const $cancelar = $formulario.find('button[type="button"][data-bs-dismiss="modal"]').last();
+    const contenidoCancelarOriginal = $cancelar.length ? $cancelar.html() : '';
+    const controlador = new AbortController();
+    let solicitudFinalizada = false;
+
+    const restaurarControles = () => {
+        if ($boton.length) {
+            $boton.prop('disabled', false).html(contenidoOriginal);
+        }
+        if ($cancelar.length) {
+            $cancelar.prop('disabled', false).html(contenidoCancelarOriginal);
+        }
+    };
+
+    $boton.prop('disabled', true)
+            .html('<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Generando reporte…');
+    $cancelar.html('<i class="fa-solid fa-xmark"></i> Cancelar generación')
+            .off('click.cancelarReporte')
+            .on('click.cancelarReporte', () => {
+                if (!solicitudFinalizada) {
+                    controlador.abort();
+                    restaurarControles();
+                }
+            });
+
+    return fetch(url, {
         headers: {
             'X-CSRF-TOKEN': token,
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         method: 'POST',
-        body: datos
-    }).then(response => {
-        if (response.status === 200) {
-            response.blob().then(report => {
-                let url = URL.createObjectURL(report);
-//                window.open(url);
-                window.location.href = url;
-            });
-        } else if (response.status === 409) {
-            response.json().then(data => {
+        body: cuerpo,
+        signal: controlador.signal
+    }).then(async response => {
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('application/pdf')) {
+            const reporte = await response.blob();
+            const reporteUrl = URL.createObjectURL(reporte);
+            const ancho = Math.min(1200, Math.round(window.screen.availWidth * 0.88));
+            const alto = Math.min(900, Math.round(window.screen.availHeight * 0.88));
+            const izquierda = Math.max(0, Math.round((window.screen.availWidth - ancho) / 2));
+            const arriba = Math.max(0, Math.round((window.screen.availHeight - alto) / 2));
+            const opcionesVentana = `popup=yes,width=${ancho},height=${alto},left=${izquierda},top=${arriba},resizable=yes,scrollbars=yes`;
+            const nombreVentana = `reporte_${Date.now()}`;
+            const visorPdf = window.open(reporteUrl, nombreVentana, opcionesVentana);
+            if (!visorPdf) {
+                URL.revokeObjectURL(reporteUrl);
                 mostrarAlerta({
-                    mensaje: data.mensaje,
+                    mensaje: 'El reporte terminó, pero el navegador bloqueó la nueva ventana. Permita ventanas emergentes e intente nuevamente.',
                     url: url,
                     tipo: 'warning',
                     contenedor: contenedorAlertas,
-                    time: 7000
-
+                    time: 8000
                 });
-            });
-        } else if (response.status === 500) {
-            response.json().then(data => {
-                mostrarAlerta({
-                    mensaje: data.mensaje,
-                    url: url,
-                    tipo: 'danger',
-                    contenedor: contenedorAlertas,
-                    time: 10000
-
-                });
-            });
+                return false;
+            }
+            try {
+                visorPdf.resizeTo(ancho, alto);
+                visorPdf.moveTo(izquierda, arriba);
+            } catch (e) {
+                // El navegador puede restringir el tamaño o la posición de ventanas emergentes.
+            }
+            visorPdf.focus();
+            window.setTimeout(() => URL.revokeObjectURL(reporteUrl), 60000);
+            return true;
         }
 
+        let mensaje = 'No fue posible generar el reporte.';
+        try {
+            const data = contentType.includes('application/json')
+                    ? await response.json() : {mensaje: await response.text()};
+            mensaje = data.mensaje || data.message || mensaje;
+        } catch (e) {
+            // Se conserva el mensaje general cuando la respuesta no es legible.
+        }
+        mostrarAlerta({
+            mensaje: mensaje,
+            url: url,
+            tipo: response.status === 409 ? 'warning' : 'danger',
+            contenedor: contenedorAlertas,
+            time: response.status === 409 ? 7000 : 10000
+        });
+        return false;
     }).catch(error => {
-        var mensajeError = 'Error al imprimir reporte ' + error;
+        if (error.name === 'AbortError') {
+            return false;
+        }
+        const mensajeError = 'Error al generar el reporte: ' + error.message;
         mostrarAlerta({
             mensaje: mensajeError,
             url: url,
             tipo: 'danger',
             contenedor: contenedorAlertas,
             time: 5000
-
         });
+        return false;
+    }).finally(() => {
+        solicitudFinalizada = true;
+        $cancelar.off('click.cancelarReporte');
+        restaurarControles();
     });
 }
 

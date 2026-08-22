@@ -101,7 +101,7 @@ export function agregarTfoot(tableName, value) {
 }
 
 export function seleccionarAutoComplete(campo) {
-    $(campo).on('keyup', function (e) {
+    $(campo).on('keypress', function (e) {
         if (e.key === "Enter" || e.keyCode === 13) {
             var autocomplete = $(campo).autocomplete("widget");
             if (autocomplete.is(":visible")) {

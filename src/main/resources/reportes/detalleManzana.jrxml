@@ -14,11 +14,11 @@
 	<parameter name="codigoZona" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[SELECT servi.cuenta_corriente, man.codigo_manzana,
-fn_mes_deuda(servi.cuenta_corriente, 1) AS mes_deuda, 
+fn_mes_deuda(servi.cuenta_corriente, $P{codigoSucursal}) AS mes_deuda,
 fn_pagar_desde(servi.cuenta_corriente) AS pago_desde,
 fn_ultimo_pago(servi.cuenta_corriente) AS ultimo_pago,
 cate.`categoria`, cate.`tarifa`,
-usu.numero_documento, usu.`nombre`, usu.`apellido`, usu.`direccion`,
+usu.numero_documento, usu.`nombre`, usu.`apellido`, usu.`direccion`, usu.celular,
 cob.codigo_cobrador, CONCAT_WS(' ',cob.nombre, cob.apellido) AS cobrador,
 zon.codigo_zona, zon.zona
 FROM servicios AS servi
@@ -36,6 +36,7 @@ INNER JOIN zonas AS zon
   
 INNER JOIN cobradores AS cob
   ON cob.`codigo_cobrador`=zon.`codigo_cobrador` 
+  AND cob.codigo_sucursal=zon.codigo_sucursal
 
   
 INNER JOIN categorias AS cate
@@ -48,8 +49,7 @@ INNER JOIN usuarios AS usu
  WHERE suc.codigo_sucursal= $P{codigoSucursal} 
  AND zon.codigo_zona= $P{codigoZona}
   AND man.codigo_manzana= $P{manzana}
- AND fn_mes_deuda(servi.cuenta_corriente, 1)>= $P{desde} 
- AND fn_mes_deuda(servi.cuenta_corriente, 1)  <= $P{hasta}]]>
+ HAVING mes_deuda BETWEEN $P{desde} AND $P{hasta}]]>
 	</queryString>
 	<field name="cuenta_corriente" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="cuenta_corriente"/>
@@ -69,7 +69,7 @@ INNER JOIN usuarios AS usu
 		<property name="com.jaspersoft.studio.field.name" value="pago_desde"/>
 		<property name="com.jaspersoft.studio.field.label" value="pago_desde"/>
 	</field>
-	<field name="ultimo_pago" class="java.lang.String">
+	<field name="ultimo_pago" class="java.sql.Date">
 		<property name="com.jaspersoft.studio.field.name" value="ultimo_pago"/>
 		<property name="com.jaspersoft.studio.field.label" value="ultimo_pago"/>
 	</field>
@@ -102,6 +102,11 @@ INNER JOIN usuarios AS usu
 	<field name="direccion" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="direccion"/>
 		<property name="com.jaspersoft.studio.field.label" value="direccion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="usuarios"/>
+	</field>
+	<field name="celular" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="celular"/>
+		<property name="com.jaspersoft.studio.field.label" value="celular"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="usuarios"/>
 	</field>
 	<field name="codigo_cobrador" class="java.lang.Integer">
@@ -141,7 +146,7 @@ INNER JOIN usuarios AS usu
 	<group name="manzana" keepTogether="true">
 		<groupExpression><![CDATA[$F{codigo_manzana}]]></groupExpression>
 		<groupHeader>
-			<band height="42">
+			<band height="44">
 				<textField>
 					<reportElement x="86" y="1" width="79" height="18" uuid="6b616442-dca2-40c5-91d2-6511b48ef257"/>
 					<textElement>
@@ -186,7 +191,7 @@ INNER JOIN usuarios AS usu
 					<reportElement x="2" y="41" width="948" height="1" uuid="8c372302-d808-47bf-8155-081ae2ea674a"/>
 				</line>
 				<staticText>
-					<reportElement x="707" y="23" width="74" height="16" uuid="4e6439c0-a7eb-4e49-9f60-b7f9d9069175">
+					<reportElement x="740" y="23" width="74" height="16" uuid="4e6439c0-a7eb-4e49-9f60-b7f9d9069175">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<textElement textAlignment="Center">
@@ -195,7 +200,7 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[Tarifa]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="789" y="23" width="56" height="16" uuid="3817decf-dad4-45bc-a9d6-b650ee99fb6a">
+					<reportElement x="829" y="23" width="56" height="16" uuid="3817decf-dad4-45bc-a9d6-b650ee99fb6a">
 						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 					</reportElement>
 					<textElement textAlignment="Center">
@@ -204,7 +209,7 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[Mes  Deuda]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="853" y="23" width="77" height="16" uuid="3edb00a5-0dfc-45a0-b752-67c348721928">
+					<reportElement x="886" y="23" width="77" height="16" uuid="3edb00a5-0dfc-45a0-b752-67c348721928">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<textElement textAlignment="Center">
@@ -213,7 +218,7 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[Deuda Total]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="567" y="23" width="72" height="16" uuid="9115eed5-32cf-4ceb-bd2f-641d53d684c3">
+					<reportElement x="529" y="23" width="72" height="16" uuid="9115eed5-32cf-4ceb-bd2f-641d53d684c3">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<textElement textAlignment="Center">
@@ -222,7 +227,7 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[Ultimo Pago]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="643" y="23" width="60" height="16" uuid="a5493ab2-546e-41e8-b35b-a4e69b0bc4ca">
+					<reportElement x="605" y="23" width="60" height="16" uuid="a5493ab2-546e-41e8-b35b-a4e69b0bc4ca">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<textElement textAlignment="Center">
@@ -231,13 +236,22 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[RUC]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="500" y="23" width="60" height="16" uuid="c90aae0f-b3e9-4a7c-a7a4-04731fc241ac">
+					<reportElement x="462" y="23" width="60" height="16" uuid="c90aae0f-b3e9-4a7c-a7a4-04731fc241ac">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<textElement textAlignment="Center">
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[ Pago desde]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="666" y="23" width="74" height="16" uuid="eaf6e880-4981-4f77-b5f5-7921d8892849">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Center">
+						<font fontName="SansSerif"/>
+					</textElement>
+					<text><![CDATA[Celular]]></text>
 				</staticText>
 			</band>
 		</groupHeader>
@@ -333,53 +347,60 @@ INNER JOIN usuarios AS usu
 				<textFieldExpression><![CDATA[$F{nombre}+" "+$F{apellido}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
-				<reportElement x="310" y="1" width="180" height="15" uuid="470638f0-64ac-4328-84e0-d1c3836ab194"/>
+				<reportElement x="310" y="1" width="150" height="15" uuid="470638f0-64ac-4328-84e0-d1c3836ab194"/>
 				<textElement>
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0">
-				<reportElement x="710" y="1" width="82" height="15" uuid="404c14d2-7a99-4080-9ec9-8cc121982751"/>
+				<reportElement x="743" y="1" width="82" height="15" uuid="404c14d2-7a99-4080-9ec9-8cc121982751"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{tarifa}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="797" y="1" width="54" height="15" uuid="4f126d34-ad1d-480b-b142-72d22087d1e3"/>
+				<reportElement x="830" y="1" width="54" height="15" uuid="4f126d34-ad1d-480b-b142-72d22087d1e3"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{mes_deuda}]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤#,##0.##;¤-#,##0.##">
-				<reportElement x="855" y="1" width="76" height="15" uuid="dbdb920f-a5a6-45fb-9534-c47e8f32b8a1"/>
+				<reportElement x="888" y="1" width="76" height="15" uuid="dbdb920f-a5a6-45fb-9534-c47e8f32b8a1"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{deuda}]]></textFieldExpression>
 			</textField>
 			<textField pattern="MM/dd/yyyy">
-				<reportElement x="567" y="1" width="73" height="14" uuid="a9ff0f61-eb43-4c17-86ab-1636a7c0ccae"/>
+				<reportElement x="529" y="1" width="73" height="14" uuid="a9ff0f61-eb43-4c17-86ab-1636a7c0ccae"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ultimo_pago}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="643" y="1" width="61" height="15" uuid="7a74f64e-497a-4204-a5ae-a3f31920f536"/>
+				<reportElement x="605" y="1" width="61" height="15" uuid="7a74f64e-497a-4204-a5ae-a3f31920f536"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{numero_documento}]]></textFieldExpression>
 			</textField>
 			<textField pattern="MM/yyyy">
-				<reportElement x="500" y="1" width="65" height="14" uuid="04bcf319-5ea7-49de-bbd6-2980ee98f8a5"/>
+				<reportElement x="462" y="1" width="65" height="14" uuid="04bcf319-5ea7-49de-bbd6-2980ee98f8a5"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{pago_desde}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="670" y="1" width="61" height="15" uuid="c2d825fd-3d0d-453f-b634-10d689207a01"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{celular}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

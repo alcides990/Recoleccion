@@ -48,14 +48,25 @@ $(function () {
 
     const token = $('#token').val();
     const roles = String($('#roles').text() || '');
-    const puedeEditar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR');
+    const puedeEditar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR')|| roles.includes('SUERVISOR');
     let accionActual = null;
+    let cargandoEdicion = false;
+    let comprobantePendienteImpresion = null;
+    const claveFormatoImpresion = 'formatoComprobanteV2';
+    const formatosImpresion = ['58mm', '80mm', 'a4'];
 
     const escapar = function (valor) {
         return $('<div>').text(valor ?? '').html();
     };
     const formatearImporte = function (valor) {
         return Number(valor || 0).toLocaleString('es-PY');
+    };
+    const calcularSubtotal = function (cantidadPago, tarifa) {
+        return Number(cantidadPago || 0) * Number(tarifa || 0);
+    };
+    const actualizarSubtotalEdicion = function () {
+        $('#editarSubtotalV2').val(calcularSubtotal(
+                $('#editarCantidadPagoV2').val(), $('#editarTarifaV2').val()));
     };
     const formatearFecha = function (valor) {
         if (!valor) return '';
@@ -67,7 +78,7 @@ $(function () {
                 + detalle.serie + ' · N.º ' + String(detalle.numeroComprobante).padStart(7, '0');
     };
     const mostrarMensaje = function (tipo, mensaje) {
-        const contenedor = $('#mensajeComprobantesV2').empty();
+        const contenedor = $('#mensajeComprobantesV2').empty().appendTo(document.body);
         $('<div>', {class: 'alert alert-' + tipo + ' alert-dismissible fade show mb-0', role: 'alert'})
                 .text(mensaje)
                 .append($('<button>', {type: 'button', class: 'btn-close', 'data-bs-dismiss': 'alert', 'aria-label': 'Cerrar'}))
@@ -89,7 +100,41 @@ $(function () {
         $('#totalPagosEdicionV2').val(formatearImporte(total));
         $('#resumenPagosEdicionV2').text(cantidad
                 ? cantidad + (cantidad === 1 ? ' medio' : ' medios') + ' · ₲ ' + formatearImporte(total)
-                : 'Sin detalle cargado');
+                 : 'Sin detalle cargado');
+    };
+    const redistribuirDetallePagos = function (nuevoTotal) {
+        const filas = $('#tablaPagosEdicionV2 tbody tr');
+        if (!filas.length) return;
+        let totalAnterior = 0;
+        filas.each(function () {
+            totalAnterior += Number($(this).attr('data-importe') || 0);
+        });
+        let acumulado = 0;
+        filas.each(function (indice) {
+            let importe;
+            if (indice === filas.length - 1) {
+                importe = Math.max(0, Math.round((nuevoTotal - acumulado) * 100) / 100);
+            } else {
+                const proporcion = totalAnterior > 0
+                        ? Number($(this).attr('data-importe') || 0) / totalAnterior
+                        : 1 / filas.length;
+                importe = Math.min(Math.max(0, nuevoTotal - acumulado),
+                        Math.round(nuevoTotal * proporcion * 100) / 100);
+                acumulado += importe;
+            }
+            $(this).attr('data-importe', importe).children('td').eq(2).text(formatearImporte(importe));
+        });
+        actualizarTotalPagos();
+    };
+    const recalcularImporteEdicion = function () {
+        actualizarSubtotalEdicion();
+        if (cargandoEdicion) return;
+        const subtotal = Number($('#editarSubtotalV2').val() || 0);
+        const recargo = Number($('#editarRecargoV2').val() || 0);
+        const saldoFavor = Number($('#editarSaldoV2').val() || 0);
+        const total = Math.round((subtotal + recargo + saldoFavor) * 100) / 100;
+        $('#editarImporteV2').val(total);
+        redistribuirDetallePagos(total);
     };
     const agregarPagoTabla = function (pago) {
         const codigo = Number(pago.codigoMetodoPago);
@@ -138,8 +183,32 @@ $(function () {
             numeroComprobante: Number(boton.attr('data-numero'))
         };
     };
-    const urlTicket = function (claves) {
-        return '/comprobantes-v2/ticket?' + new URLSearchParams(claves).toString();
+    const urlTicket = function (claves, formato) {
+        return '/comprobantes-v2/ticket?' + new URLSearchParams({...claves, formato: formato}).toString();
+    };
+    const formatoRecordado = function () {
+        try {
+            const formato = localStorage.getItem(claveFormatoImpresion);
+            return formatosImpresion.includes(formato) ? formato : '58mm';
+        } catch (error) {
+            return '58mm';
+        }
+    };
+    const abrirSelectorImpresion = function (claves) {
+        comprobantePendienteImpresion = claves;
+        const formato = formatoRecordado();
+        $('#formatoComprobanteV2').val(formato);
+        $('#recordarFormatoComprobanteV2').prop('checked', true);
+        abrirModal('formatoImpresionComprobanteV2');
+    };
+    const imprimirComprobante = function (claves, formato) {
+        const destino = urlTicket(claves, formato);
+        if (window.AndroidPrinter && typeof window.AndroidPrinter.imprimirPdf === 'function'
+                && window.AndroidPrinter.disponible()) {
+            window.AndroidPrinter.imprimirPdf(new URL(destino, window.location.origin).href);
+        } else {
+            window.open(destino, '_blank', 'noopener');
+        }
     };
     const pintarDetalle = function (detalle) {
         const fila = function (etiqueta, valor) {
@@ -165,9 +234,10 @@ $(function () {
                 + fila('Cantidad de deuda', detalle.cantidadDeuda)
                 + fila('Cantidad de pagos', detalle.cantidadPago)
                 + fila('Tarifa', '₲ ' + formatearImporte(detalle.tarifa))
+                + fila('Subtotal', '₲ ' + formatearImporte(calcularSubtotal(detalle.cantidadPago, detalle.tarifa)))
                 + fila('Recargo', '₲ ' + formatearImporte(detalle.recargo))
                 + fila('Importe total', '₲ ' + formatearImporte(detalle.importe))
-                + fila('Saldo', '₲ ' + formatearImporte(detalle.saldo))
+                + fila('Saldo a favor', '₲ ' + formatearImporte(detalle.saldo))
                 + fila('Categoría', detalle.categoria)
                 + fila('Condición de venta', detalle.condicionVenta)
                 + '<div class="col-12"><div class="detalle-v2-campo"><div class="text-muted small">Observación</div><div>'
@@ -205,7 +275,8 @@ $(function () {
                 + filaValor('Periodo pago', detalle.periodoPago)
                 + filaValor('Cantidad pago', detalle.cantidadPago)
                 + filaImporte('Tarifa', detalle.tarifa)
-                + filaImporte('Saldo', detalle.saldo)
+                + filaImporte('Subtotal', calcularSubtotal(detalle.cantidadPago, detalle.tarifa))
+                + filaImporte('Saldo a favor', detalle.saldo)
                 + filaImporte('Recargo', detalle.recargo)
                 + filaImporte('Total importe', detalle.importe)
                 + '<div><h5>Metodo Pago</h5>' + metodosPago + '</div></div>'
@@ -265,7 +336,7 @@ $(function () {
                     const editar = puedeEditar ? '<button type="button" class="btn-primario p-1 accion-v2" data-accion="editar" ' + datos + deshabilitado
                             + ' title="Editar comprobante" aria-label="Editar comprobante"><i class="fa-regular fa-pen-to-square"></i></button> ' : '';
                     return '<button type="button" class="btn-primario p-1 accion-v2" data-accion="imprimir" ' + datos
-                            + ' title="Imprimir ticket" aria-label="Imprimir ticket"><i class="fa-solid fa-print"></i></button> '
+                            + ' title="Imprimir comprobante" aria-label="Imprimir comprobante"><i class="fa-solid fa-print"></i></button> '
                             + editar
                             + '<button type="button" class="btn-primario p-1 accion-v2" data-accion="anular" ' + datos + deshabilitado
                             + ' title="' + (anulado ? 'Comprobante anulado' : 'Anular comprobante') + '" aria-label="Anular comprobante"><i class="fa-solid fa-ban"></i></button>';
@@ -279,13 +350,7 @@ $(function () {
         const boton = $(this);
         const accion = boton.attr('data-accion');
         if (accion === 'imprimir') {
-            const destino = urlTicket(clavesBoton(boton));
-            if (window.AndroidPrinter && typeof window.AndroidPrinter.imprimirPdf === 'function'
-                    && window.AndroidPrinter.disponible()) {
-                window.AndroidPrinter.imprimirPdf(new URL(destino, window.location.origin).href);
-            } else {
-                window.open(destino, '_blank', 'noopener');
-            }
+            abrirSelectorImpresion(clavesBoton(boton));
             return;
         }
         boton.prop('disabled', true);
@@ -296,6 +361,7 @@ $(function () {
                 pintarDetalle(detalle);
                 abrirModal('detalleComprobanteV2');
             } else if (accion === 'editar') {
+                cargandoEdicion = true;
                 $('#editarIdentificadorV2').text(identificador(detalle));
                 $('#editarCuentaV2').val(detalle.cuentaCorriente || '');
                 $('#editarDocumentoV2').val(detalle.documento || '');
@@ -306,6 +372,7 @@ $(function () {
                 $('#editarCantidadDeudaV2').val(detalle.cantidadDeuda ?? 0);
                 $('#editarCantidadPagoV2').val(detalle.cantidadPago ?? 0);
                 $('#editarTarifaV2').val(detalle.tarifa ?? 0);
+                actualizarSubtotalEdicion();
                 $('#editarRecargoV2').val(detalle.recargo ?? 0);
                 $('#editarImporteV2').val(detalle.importe ?? 0);
                 $('#editarSaldoV2').val(detalle.saldo ?? 0);
@@ -318,6 +385,7 @@ $(function () {
                 (detalle.pagos || []).forEach(agregarPagoTabla);
                 $('#editarImportePagoV2').val('');
                 actualizarTotalPagos();
+                cargandoEdicion = false;
                 $('#configModal').addClass('d-none');
                 $('#mostrarEdicionPagosV2').html('<i class="fa-regular fa-pen-to-square"></i> Editar detalle de pago');
                 $('#editarObservacionV2').val(detalle.observacion || '');
@@ -330,8 +398,27 @@ $(function () {
         } catch (error) {
             mostrarMensaje('danger', error.message);
         } finally {
+            cargandoEdicion = false;
             boton.prop('disabled', false);
         }
+    });
+
+    $('#confirmarFormatoImpresionV2').on('click', function () {
+        if (!comprobantePendienteImpresion) return;
+        const formato = $('#formatoComprobanteV2').val() || '58mm';
+        try {
+            if ($('#recordarFormatoComprobanteV2').prop('checked')) {
+                localStorage.setItem(claveFormatoImpresion, formato);
+            } else {
+                localStorage.removeItem(claveFormatoImpresion);
+            }
+        } catch (error) {
+            // La impresión funciona aunque el navegador no permita almacenamiento local.
+        }
+        const claves = comprobantePendienteImpresion;
+        comprobantePendienteImpresion = null;
+        cerrarModal('formatoImpresionComprobanteV2');
+        imprimirComprobante(claves, formato);
     });
 
     $('#formEditarComprobanteV2').on('submit', async function (evento) {
@@ -345,6 +432,11 @@ $(function () {
                     importe: Number($(this).attr('data-importe'))
                 };
             }).get();
+            const totalPagos = pagos.reduce(function (total, pago) { return total + pago.importe; }, 0);
+            const importeTotal = Number($('#editarImporteV2').val());
+            if (Math.abs(totalPagos - importeTotal) > 0.001) {
+                throw new Error('La suma del detalle de pago debe coincidir con el importe total.');
+            }
             const respuesta = await solicitar('/comprobantes-v2/editar', 'PUT', {
                 ...accionActual,
                 razonSocial: $('#editarRazonSocialV2').val(),
@@ -355,7 +447,7 @@ $(function () {
                 cantidadPago: Number($('#editarCantidadPagoV2').val()),
                 tarifa: Number($('#editarTarifaV2').val()),
                 recargo: Number($('#editarRecargoV2').val()),
-                totalImporte: Number($('#editarImporteV2').val()),
+                totalImporte: importeTotal,
                 saldo: Number($('#editarSaldoV2').val()),
                 codigoEstado: Number($('#editarEstadoV2').val()),
                 codigoCobrador: Number($('#editarCobradorV2').val()),
@@ -399,7 +491,9 @@ $(function () {
     $('#editarCategoriaV2').on('change', function () {
         const tarifa = Number($(this).find('option:selected').attr('data-tarifa') || 0);
         $('#editarTarifaV2').val(tarifa);
+        recalcularImporteEdicion();
     });
+    $('#editarCantidadPagoV2,#editarRecargoV2').on('input', recalcularImporteEdicion);
     $('#editarImportePagoV2').on('keypress', function (evento) {
         if (evento.key === 'Enter') {
             evento.preventDefault();

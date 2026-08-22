@@ -3,6 +3,25 @@
     padding-bottom: 2rem;
 }
 
+#mensajeComprobantesV2 {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    z-index: 2000;
+    width: min(42rem, calc(100vw - 2rem));
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+#mensajeComprobantesV2:empty {
+    display: none;
+}
+
+#mensajeComprobantesV2 > .alert {
+    pointer-events: auto;
+    box-shadow: 0 .65rem 1.8rem rgba(33, 37, 41, .28);
+}
+
 #comprobantesV2 .v2-filtros {
     margin-left: 0;
     margin-right: 0;

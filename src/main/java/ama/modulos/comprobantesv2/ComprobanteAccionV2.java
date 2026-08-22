@@ -25,7 +25,7 @@ public class ComprobanteAccionV2 {
     private Integer codigoCondicionVenta;
     @Size(max = 255) private String razonSocial;
     @Size(max = 100) private String periodoPago;
-    @Min(0) private Integer cantidadDeuda;
+    private Integer cantidadDeuda;
     @Min(0) private Integer cantidadPago;
     @DecimalMin("0") private BigDecimal tarifa;
     @DecimalMin("0") private BigDecimal recargo;

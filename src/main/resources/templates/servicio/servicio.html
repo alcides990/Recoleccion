@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
     <head th:replace="~{layout/layout :: heat}"> </head>
-    <link rel="stylesheet" href="/css/serviciov2/estilo.css">
+    <link rel="stylesheet" href="/css/serviciov2/estilo.css?v=20260819-1">
 
     <body>
         <header th:replace="~{layout/layout :: header}"> </header>
@@ -59,6 +59,10 @@
                             <td class="text-center"><button type="button" class="btn btn-primario btn-sm estado-cuenta"
                                                        th:data-id="${servicio.cuentaCorriente}">
                                     Estado Cuenta
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm ubicacion-servicio"
+                                        th:data-id="${servicio.cuentaCorriente}" title="Ubicación del servicio">
+                                    <i class="fa-solid fa-location-dot"></i>
                                 </button>
                                 <a sec:authorize="hasAnyAuthority('ADMIN','ROOT')" id="editar"
                                    th:data-id="${servicio.cuentaCorriente}" class="btn btn-info btn-sm"
@@ -151,6 +155,83 @@
             </div>
         </div>
 
+        <div class="modal fade" id="ubicacionServicioModal" tabindex="-1"
+             aria-labelledby="ubicacionServicioTitulo" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content ubicacion-servicio-modal">
+                    <div class="modal-header servicio-v2-header">
+                        <div>
+                            <span class="servicio-v2-kicker">Geolocalización</span>
+                            <h5 class="modal-title" id="ubicacionServicioTitulo">Ubicación del servicio</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="ubicacionServicioAlerta" class="alert d-none" role="alert"></div>
+                        <form id="formUbicacionServicio" class="ubicacion-servicio-form">
+                            <input type="hidden" id="ubicacionMetodo" value="MANUAL">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12">
+                                    <label class="form-label" for="ubicacionCuenta">Cuenta corriente</label>
+                                    <input id="ubicacionCuenta" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="ubicacionLatitud">Latitud</label>
+                                    <input id="ubicacionLatitud" class="form-control" type="number"
+                                           min="-90" max="90" step="0.0000001" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="ubicacionLongitud">Longitud</label>
+                                    <input id="ubicacionLongitud" class="form-control" type="number"
+                                           min="-180" max="180" step="0.0000001" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="ubicacionPrecision">Precisión (m)</label>
+                                    <input id="ubicacionPrecision" class="form-control" type="number"
+                                           min="0" step="0.01" readonly>
+                                </div>
+                                <div class="col-md-6 d-grid">
+                                    <button id="obtenerUbicacionActual" type="button" class="btn btn-outline-primary">
+                                        <i class="fa-solid fa-crosshairs"></i> Usar ubicación actual
+                                    </button>
+                                </div>
+                                <div class="col-md-6 d-grid">
+                                    <a id="abrirUbicacionMapa" class="btn btn-outline-success disabled"
+                                       target="_blank" rel="noopener" aria-disabled="true">
+                                        <i class="fa-solid fa-map-location-dot"></i> Abrir en el mapa
+                                    </a>
+                                </div>
+                            </div>
+                            <p class="ubicacion-servicio-ayuda">
+                                Puede capturar el GPS del dispositivo o escribir las coordenadas manualmente.
+                                La captura automática requiere permiso de ubicación y HTTPS.
+                            </p>
+                        </form>
+
+                        <section class="ubicacion-historial mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left"></i> Historial de modificaciones</h6>
+                                <small id="ubicacionActualizada" class="text-muted"></small>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead><tr><th>Fecha</th><th>Anterior</th><th>Nueva</th><th>Método</th><th>Usuario</th></tr></thead>
+                                    <tbody id="ubicacionHistorialCuerpo"></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                        <button id="guardarUbicacionServicio" type="submit" form="formUbicacionServicio"
+                                class="btn btn-primario">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar ubicación
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Ventana modal -->
         <div class="modal fade" id="servicioModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
              aria-hidden="true" data-bs-backdrop="static">
@@ -236,8 +317,8 @@
 
         <script src="/js/buscarUsuario.js"></script>
         <script src="/js/validarFormulario.js" async="true"></script>
-        <script type="module" src="/js/serviciov2/servicio.js?v=20260814-3"></script>
-        <script th:if="${versionDos}" src="/js/serviciov2/tabla.js"></script>
+        <script type="module" src="/js/serviciov2/servicio.js?v=20260819-1"></script>
+        <script th:if="${versionDos}" src="/js/serviciov2/tabla.js?v=20260819-1"></script>
     </body>
 
 </html>

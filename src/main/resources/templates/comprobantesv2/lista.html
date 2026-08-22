@@ -12,7 +12,7 @@
                 <h3 class="form-title">Comprobantes</h3>
             </div>
 
-            <div id="mensajeComprobantesV2" class="mt-2" aria-live="polite"></div>
+            <div id="mensajeComprobantesV2" aria-live="polite"></div>
 
             <section class="v2-filtros row g-2 my-2">
                 <div class="col-md-2"><label class="v2-filter-label" for="fNumero">Comprobante</label><input id="fNumero" class="form-control" inputmode="numeric" placeholder="Nro. comprobante"></div>
@@ -80,12 +80,13 @@
                             </div>
                             <div class="col-md-4"><label for="editarPagoDesdeV2">Pago desde</label><input id="editarPagoDesdeV2" class="form-control" type="text" autocomplete="off"></div>
                             <div class="col-md-4"><label for="editarPeriodoV2">Per&#237;odo de pago</label><input id="editarPeriodoV2" class="form-control" maxlength="100"></div>
-                            <div class="col-md-3"><label for="editarCantidadDeudaV2">Cantidad de deuda</label><input id="editarCantidadDeudaV2" class="form-control" type="number" min="0" step="1"></div>
+                            <div class="col-md-3"><label for="editarCantidadDeudaV2">Cantidad de deuda</label><input id="editarCantidadDeudaV2" class="form-control" type="number" readonly="" step="1"></div>
                             <div class="col-md-3"><label for="editarCantidadPagoV2">Cantidad de pagos</label><input id="editarCantidadPagoV2" class="form-control" type="number" min="0" step="1" required></div>
                             <div class="col-md-3"><label for="editarTarifaV2">Tarifa</label><input id="editarTarifaV2" class="form-control" type="number" min="0" step="0.01" disabled></div>
+                            <div class="col-md-3"><label for="editarSubtotalV2">Subtotal</label><input id="editarSubtotalV2" class="form-control" type="number" step="0.01" ></div>
                             <div class="col-md-3"><label for="editarRecargoV2">Recargo</label><input id="editarRecargoV2" class="form-control" type="number" min="0" step="0.01" required></div>
                             <div class="col-md-3"><label for="editarImporteV2">Importe total</label><input id="editarImporteV2" class="form-control" type="number" min="0" step="0.01" required></div>
-                            <div class="col-md-3"><label for="editarSaldoV2">Saldo</label><input id="editarSaldoV2" class="form-control" type="number" min="0" step="0.01" required></div>
+                            <div class="col-md-3"><label for="editarSaldoV2">Saldo a favor</label><input id="editarSaldoV2" class="form-control" type="number" min="0" step="0.01"  required></div>
                             <div class="col-md-3">
                                 <label for="editarCategoriaV2">Categor&#237;a</label>
                                 <select id="editarCategoriaV2" class="form-select" required>
@@ -224,6 +225,36 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <div class="modal fade" id="formatoImpresionComprobanteV2" tabindex="-1"
+             aria-labelledby="tituloFormatoImpresionV2" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="tituloFormatoImpresionV2" class="form-title">Formato de impresión</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label" for="formatoComprobanteV2">Papel de impresión</label>
+                        <select class="form-select" id="formatoComprobanteV2" name="formatoComprobanteV2">
+                            <option value="58mm">Ticket térmico 58 mm</option>
+                            <option value="80mm">Ticket térmico 80 mm</option>
+                            <option value="a4">Comprobante A4</option>
+                        </select>
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="recordarFormatoComprobanteV2" checked>
+                            <label class="form-check-label" for="recordarFormatoComprobanteV2">Recordar este formato para próximas impresiones</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="confirmarFormatoImpresionV2">
+                            <i class="fa-solid fa-print"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 

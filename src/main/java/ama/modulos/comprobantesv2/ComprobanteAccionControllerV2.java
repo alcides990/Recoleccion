@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.core.io.ClassPathResource;
@@ -94,9 +95,19 @@ public class ComprobanteAccionControllerV2 {
     @GetMapping("/ticket")
     @ResponseBody
     @Transactional(readOnly = true)
-    public ResponseEntity<?> ticket(ComprobanteAccionV2 solicitud) {
+    public ResponseEntity<?> ticket(ComprobanteAccionV2 solicitud,
+            @RequestParam(name = "formato", defaultValue = "58mm") String formato) {
         try {
             Comprobante comprobante = buscarAutorizado(solicitud);
+            String rutaReporte = switch (formato.toLowerCase()) {
+                case "58mm" -> "reportes/comprobanteTicket.jrxml";
+                case "80mm" -> "reportes/comprobanteTicket80mm.jrxml";
+                case "a4" -> "reportes/comprobanteA4.jrxml";
+                default -> null;
+            };
+            if (rutaReporte == null) {
+                return ResponseEntity.badRequest().body(Map.of("mensaje", "Formato de comprobante no válido."));
+            }
             var parametros = new HashMap<String, Object>();
             parametros.put("codigoSucursal", solicitud.getCodigoSucursal());
             parametros.put("codigoPuntoExpedicion", solicitud.getCodigoPuntoExpedicion());
@@ -104,14 +115,15 @@ public class ComprobanteAccionControllerV2 {
             parametros.put("codigoSerie", solicitud.getCodigoSerie());
             parametros.put("numeroComprobante", solicitud.getNumeroComprobante());
             parametros.put("montoLetras", montoEnLetras.convertir(BigDecimal.valueOf(comprobante.getTotalImporte())));
-            try (InputStream jasper = new ClassPathResource("reportes/comprobanteTicket.jrxml").getInputStream();
+            try (InputStream jasper = new ClassPathResource(rutaReporte).getInputStream();
                     var conexion = dataSource.getConnection()) {
                 JasperReport reporte = JasperCompileManager.compileReport(jasper);
                 var impresion = JasperFillManager.fillReport(reporte, parametros, conexion);
                 byte[] pdf = JasperExportManager.exportReportToPdf(impresion);
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentDisposition(ContentDisposition.inline()
-                        .filename("ticket-" + solicitud.getNumeroComprobante() + ".pdf").build());
+                        .filename("comprobante-" + formato.toLowerCase() + "-"
+                                + solicitud.getNumeroComprobante() + ".pdf").build());
                 return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
                         .contentLength(pdf.length).body(pdf);
             }
@@ -144,10 +156,6 @@ public class ComprobanteAccionControllerV2 {
         Comprobante comprobante = buscarAutorizado(solicitud);
         if (esAnulado(comprobante)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje", "No se puede editar un comprobante anulado."));
-        }
-        if (!Objects.equals(comprobante.getCantidadPago(), solicitud.getCantidadPago())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje",
-                    "La cantidad de períodos no puede modificarse después de emitir el comprobante; anule el último comprobante y vuelva a emitirlo."));
         }
         Estado estado = estados.findById(solicitud.getCodigoEstado()).orElse(null);
         if (estado == null) {
@@ -271,14 +279,22 @@ public class ComprobanteAccionControllerV2 {
 
     private void actualizarDetallePago(Comprobante comprobante, List<DetallePagoV2> pagos,
             List<MetodoPago> metodosSeleccionados) {
-        var anteriores = new ArrayList<>(comprobante.getDetallePago());
-        comprobante.getDetallePago().clear();
-        detallesPago.deleteAll(anteriores);
-        detallesPago.flush();
+        Map<Integer, DetallePago> anterioresPorMetodo = new HashMap<>();
+        for (DetallePago anterior : comprobante.getDetallePago()) {
+            anterioresPorMetodo.put(anterior.getDetallePagoPK().getCodigoMetodoPago(), anterior);
+        }
 
-        var nuevos = new ArrayList<DetallePago>();
+        var actualizados = new ArrayList<DetallePago>();
         for (int i = 0; i < pagos.size(); i++) {
             DetallePagoV2 pago = pagos.get(i);
+            DetallePago detalle = anterioresPorMetodo.remove(pago.getCodigoMetodoPago());
+            if (detalle != null) {
+                detalle.setImporte(pago.getImporte().doubleValue());
+                detalle.setMetodoPago(metodosSeleccionados.get(i));
+                actualizados.add(detalle);
+                continue;
+            }
+
             DetallePagoPK clave = DetallePagoPK.builder()
                     .codigoMetodoPago(pago.getCodigoMetodoPago())
                     .puntoExpedicionPK(comprobante.getComprobantePK().getPuntoExpedicionPK())
@@ -286,11 +302,15 @@ public class ComprobanteAccionControllerV2 {
                     .codigoTiopoComprobante(comprobante.getComprobantePK().getCodigoTipoComprobante())
                     .codigoSerie(comprobante.getComprobantePK().getCodigoSerie())
                     .build();
-            nuevos.add(DetallePago.builder().detallePagoPK(clave)
-                    .importe(pago.getImporte().doubleValue()).metodoPago(metodosSeleccionados.get(i)).build());
+            DetallePago nuevo = DetallePago.builder().detallePagoPK(clave)
+                    .importe(pago.getImporte().doubleValue()).metodoPago(metodosSeleccionados.get(i)).build();
+            actualizados.add(detallesPago.save(nuevo));
         }
-        detallesPago.saveAll(nuevos);
-        comprobante.getDetallePago().addAll(nuevos);
+
+        var eliminados = new ArrayList<>(anterioresPorMetodo.values());
+        comprobante.getDetallePago().clear();
+        comprobante.getDetallePago().addAll(actualizados);
+        detallesPago.deleteAll(eliminados);
     }
 
     private boolean esAnulado(Comprobante comprobante) {

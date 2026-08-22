@@ -23,6 +23,7 @@ import net.sf.jasperreports.engine.util.JRLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -161,6 +162,7 @@ public class ReportController {
             @RequestParam("desde") Integer desde,
             @RequestParam("hasta") Integer hasta) throws JRException, IOException, SQLException {
         Map<String, Object> parametro = new HashMap<>();
+        parametro.put("codigoSucursal", getSucursalSession().getCodigoSucursal());
         parametro.put("codigoCobrador", codigoCobrador);
         parametro.put("codigoZona", codigoZona);
         parametro.put("desde", desde);
@@ -179,20 +181,58 @@ public class ReportController {
             @RequestParam("codigoSerie") Integer codigoSerie,
             @RequestParam("desde") Integer desde,
             @RequestParam("hasta") Integer hasta) throws SQLException {
-        if (desde == null || hasta == null || desde < 0 || hasta < desde) {
+        if (codigoSerie == null || codigoSerie < 0
+                || desde == null || hasta == null || desde < 0 || hasta < desde) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("mensaje", "El rango de comprobantes no es válido."));
         }
-        if ((long) hasta - desde > 99999) {
+        Integer codigoSucursal = getSucursalSession().getCodigoSucursal();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        Integer numeroMaximoRegistrado = jdbcTemplate.queryForObject("""
+                SELECT MAX(c.numero_comprobante)
+                  FROM comprobantes c
+                 WHERE c.codigo_sucursal = ?
+                   AND (? = 0 OR c.codigo_serie = ?)
+                   AND c.numero_comprobante BETWEEN ? AND ?
+                """, Integer.class, codigoSucursal, codigoSerie, codigoSerie, desde, hasta);
+
+        if (numeroMaximoRegistrado == null) {
+            String serie = codigoSerie == 0 ? "todas las series" : "la serie seleccionada";
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                    "mensaje", "No existen comprobantes registrados para " + serie + "."));
+        }
+
+        int hastaEfectivo = numeroMaximoRegistrado;
+        if ((long) hastaEfectivo - desde > 99999) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("mensaje", "El rango no puede superar 100.000 comprobantes."));
+                    .body(Map.of("mensaje", "El rango efectivo no puede superar 100.000 comprobantes."));
+        }
+
+        Long comprobantesEnRango = jdbcTemplate.queryForObject("""
+                SELECT COUNT(DISTINCT c.numero_comprobante)
+                  FROM comprobantes c
+                 WHERE c.codigo_sucursal = ?
+                   AND (? = 0 OR c.codigo_serie = ?)
+                   AND c.numero_comprobante BETWEEN ? AND ?
+                """, Long.class, codigoSucursal, codigoSerie, codigoSerie, desde, hastaEfectivo);
+
+        if (comprobantesEnRango == null || comprobantesEnRango == 0) {
+            String serie = codigoSerie == 0 ? "todas las series" : "la serie seleccionada";
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                    "mensaje", "No existen comprobantes registrados en el rango proporcionado para " + serie + "."));
+        }
+
+        long cantidadNumerosRango = (long) hastaEfectivo - desde + 1;
+        if (comprobantesEnRango >= cantidadNumerosRango) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                    "mensaje", "Sin resultados: no existen comprobantes omitidos dentro del rango proporcionado."));
         }
 
         Map<String, Object> parametros = new HashMap<>();
-        parametros.put("codigoSucursal", getSucursalSession().getCodigoSucursal());
+        parametros.put("codigoSucursal", codigoSucursal);
         parametros.put("codigoSerie", codigoSerie);
         parametros.put("desde", desde);
-        parametros.put("hasta", hasta);
+        parametros.put("hasta", hastaEfectivo);
 
         Reporte reporte = Reporte.builder()
                 .conexion(dataSource.getConnection())

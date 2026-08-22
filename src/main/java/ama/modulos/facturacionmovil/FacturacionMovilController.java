@@ -14,7 +14,9 @@ import ama.servicio.PuntoExpedicionService;
 import ama.servicio.TipoComprobanteService;
 import ama.servicio.SerieService;
 import ama.servicio.TimbradoService;
+import ama.servicio.UbicacionServicioService;
 import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -23,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import ama.dominio.Parametro;
-import ama.dominio.CalcularPago;
 import ama.dominio.ComprobanteGuardar;
 import ama.dominio.ComprobantePK;
 import ama.dominio.DetallePago;
@@ -63,6 +64,7 @@ public class FacturacionMovilController {
     private final HttpSession session;
     private final ComprobanteController comprobanteController;
     private final ComprobanteMovilRepository comprobantesMovil;
+    private final UbicacionServicioService ubicaciones;
     private static final DateTimeFormatter MES_ANO = DateTimeFormatter.ofPattern("MM-yyyy");
 
     public FacturacionMovilController(CobradorService cobradores, ComisionService comisiones,
@@ -72,7 +74,8 @@ public class FacturacionMovilController {
             ComprobanteService comprobantes, ParametroService parametros,
             DetalleTimbradoMovilRepository detallesTimbrado, HttpSession session,
             ComprobanteController comprobanteController,
-            ComprobanteMovilRepository comprobantesMovil) {
+            ComprobanteMovilRepository comprobantesMovil,
+            UbicacionServicioService ubicaciones) {
         this.cobradores = cobradores;
         this.comisiones = comisiones;
         this.condiciones = condiciones;
@@ -88,6 +91,7 @@ public class FacturacionMovilController {
         this.session = session;
         this.comprobanteController = comprobanteController;
         this.comprobantesMovil = comprobantesMovil;
+        this.ubicaciones = ubicaciones;
     }
 
     @GetMapping("/catalogos")
@@ -127,7 +131,7 @@ public class FacturacionMovilController {
     }
 
     @GetMapping("/servicios")
-    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','ADMIN','SUPERVISOR','SECRETARIO')")
+    @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
     public ResponseEntity<?> buscarServicios(@RequestParam String tipo,
             @RequestParam String valor) {
@@ -151,6 +155,12 @@ public class FacturacionMovilController {
             }
         } else if ("nombre".equalsIgnoreCase(tipo)) {
             encontrados = servicios.buscarActivosPorNombre(sucursal, filtro, PageRequest.of(0, 100));
+        } else if ("cuenta".equalsIgnoreCase(tipo)) {
+            encontrados = servicios.buscarPorSucursal(PageRequest.of(0, 20), sucursal, filtro)
+                    .getContent().stream()
+                    .filter(servicio -> servicio.getEstado() != null
+                    && servicio.getEstado().getCodigoEstado() == 1)
+                    .toList();
         } else {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "Tipo de búsqueda inválido."));
         }
@@ -200,7 +210,7 @@ public class FacturacionMovilController {
     }
 
     @GetMapping("/detalles-timbrado")
-    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','ADMIN','SUPERVISOR','SECRETARIO')")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')")
     @Transactional(readOnly = true)
     public ResponseEntity<?> detallesTimbrado(@RequestParam Integer codigoPuntoExpedicion) {
         UsuarioSistema usuario = usuarioSession();
@@ -260,6 +270,51 @@ public class FacturacionMovilController {
         salida.put("recargo", estado.getRecargo());
         salida.put("totalDeuda", estado.getTotalDeuda());
         return ResponseEntity.ok(salida);
+    }
+
+    @GetMapping("/ubicacion")
+    @PreAuthorize("isAuthenticated()")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> consultarUbicacion(@RequestParam String cuentaCorriente) {
+        UsuarioSistema usuario = usuarioSession();
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("mensaje", "Sesión vencida."));
+        }
+        Servicio servicio = servicioDeSucursal(cuentaCorriente, usuario);
+        if (servicio == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("mensaje", "Cuenta no encontrada en su sucursal."));
+        }
+        return ResponseEntity.ok(ubicaciones.consultar(servicio.getCuentaCorriente()));
+    }
+
+    @PostMapping("/ubicacion")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> guardarUbicacion(@RequestBody UbicacionMovilRequest entrada) {
+        UsuarioSistema usuario = usuarioSession();
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("mensaje", "Sesión vencida."));
+        }
+        if (entrada == null || entrada.cuentaCorriente() == null
+                || entrada.cuentaCorriente().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("mensaje", "Seleccione una cuenta corriente."));
+        }
+        Servicio servicio = servicioDeSucursal(entrada.cuentaCorriente(), usuario);
+        if (servicio == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("mensaje", "Cuenta no encontrada en su sucursal."));
+        }
+        try {
+            return ResponseEntity.ok(ubicaciones.guardar(
+                    servicio.getCuentaCorriente(), entrada.latitud(), entrada.longitud(),
+                    entrada.precisionMetros(), entrada.metodo(),
+                    usuario.getCodigoUsuarioSistema(), "APP"));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", ex.getMessage()));
+        }
     }
 
     @PostMapping("/emitir")
@@ -416,5 +471,20 @@ public class FacturacionMovilController {
         UsuarioSistema usuario = (UsuarioSistema) session.getAttribute("usuarioSistema");
         return usuario == null || usuario.getSucursal() == null ? null : usuario;
     }
+
+    private Servicio servicioDeSucursal(String cuentaCorriente, UsuarioSistema usuario) {
+        Servicio servicio = servicios.encontrar(
+                cuentaCorriente == null ? "" : cuentaCorriente.trim());
+        return servicio != null && servicio.getSucursal() != null
+                && servicio.getSucursal().getCodigoSucursal().equals(
+                        usuario.getSucursal().getCodigoSucursal()) ? servicio : null;
+    }
+
+    public record UbicacionMovilRequest(
+            String cuentaCorriente,
+            BigDecimal latitud,
+            BigDecimal longitud,
+            BigDecimal precisionMetros,
+            String metodo) {}
 
 }

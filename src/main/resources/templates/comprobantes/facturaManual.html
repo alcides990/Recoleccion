@@ -278,12 +278,15 @@
         <script src="/js/datepicker-es.js"></script>
         <script type="module">
                                 import {tabulador, tabular, datePickerInit} from '/js/modulos.js';
+                                import {seleccionarAutoComplete} from '/js/utils.js';
                                 import {buscarServicio} from '/js/buscarServicios.js';
                                 import {generarNumeroComprobante, cargarDatosComprobante, limpiarMetodosPago, agregarMetodoPago,
                                         limpiarComprobante, formatPYG, soloNumero}
                                 from '/js/comprobante.js';
 
                                 cargarTimbradosDelPunto();
+                                seleccionarAutoComplete("#cuentaCorriente");
+                                seleccionarAutoComplete("#razonSocial");
 
                                 $('#puntoExpedicion').on('change.factura', function () {
                                     cargarTimbradosDelPunto();
@@ -306,9 +309,7 @@
 
                                 datePickerInit("#fechaPago");
                                 $("#fechaPago").datepicker("setDate", new Date());
-                                if ($("#tipoComprobanye option:selected").text() === 'ELECTRONICA') {
-                                    $("#fechaPago").prop('disabled', true);
-                                }
+                                
 
                                 function cargarTimbradosDelPunto() {
                                     const punto = $('#puntoExpedicion').val();
@@ -334,16 +335,16 @@
                                         });
                                 }
 
-                                $("#cuentaCorriente").on('keypress', (e) => {
-                                    if (e.keyCode === 13) {
-                                        e.preventDefault();
-                                        limpiarComprobante();
-                                        let cuentaCorriente = $("#cuentaCorriente").val();
-                                        let url = '/comprobante/facturar';
-                                        let datos = {cuentaCorriente: cuentaCorriente};
-                                        cargarDatosComprobante(datos, url);
-                                    }
-                                });
+//                                $("#cuentaCorriente").on('keypress', (e) => {
+//                                    if (e.keyCode === 13) {
+//                                        e.preventDefault();
+//                                        limpiarComprobante();
+//                                        let cuentaCorriente = $("#cuentaCorriente").val();
+//                                        let url = '/comprobante/facturar';
+//                                        let datos = {cuentaCorriente: cuentaCorriente};
+//                                        cargarDatosComprobante(datos, url);
+//                                    }
+//                                });
                                 $("#numeroComprobante").keyup(() => {
                                     let numeroComprobante = parseInt($("#numeroComprobante").val());
                                     $("#numeroComprobante").val(numeroComprobante.toString().padStart(7, 0));

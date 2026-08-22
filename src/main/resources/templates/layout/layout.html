@@ -13,7 +13,7 @@
         <!-- Agrega esta línea para cargar los recursos de los iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
         <link rel="stylesheet" href="/css/jquery.dataTables.min.css" />
-        <link rel="stylesheet" href="/css/diseno-global.css" />
+        <link rel="stylesheet" href="/css/diseno-global.css?v=20260819-2" />
     </head>
 
     <body>
@@ -68,6 +68,9 @@
                 <li> <a th:href="@{/cobrador/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SECRETARIO','SUPERVISOR')"> <i
                             class="fa-solid fa-money-bill-transfer"></i> COBRADORES</a></li>
                 <hr />
+                <li sec:authorize="hasAuthority('ROOT')"><a th:href="@{/recorridos}">
+                        <i class="fa-solid fa-route"></i> RECORRIDOS</a></li>
+                <hr sec:authorize="hasAuthority('ROOT')" />
                 <li><a th:href="@{/categoria/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"> <i
                             class="fa-solid fa-tags"></i> CATEGORÍAS</a></li>
                 <hr />
@@ -81,19 +84,35 @@
                 </li>
                 <hr />
             </ul>
-            <button id="btn-user" class="user-session">
-                <i class="fa-solid fa-circle-user"></i>
-
+            <button id="btn-user" class="user-session" type="button"
+                    aria-controls="user-session" aria-expanded="false">
+                <span class="user-session-avatar"><i class="fa-solid fa-user"></i></span>
+                <span class="user-session-resumen">
+                    <strong sec:authentication="name"></strong>
+                    <small>Mi cuenta</small>
+                </span>
+                <i class="fa-solid fa-chevron-up user-session-chevron"></i>
             </button>
-            <div id="user-session">
-                <p sec:authentication="name"></p>
-                <a th:href="@{/usuarioSistema/editarClave/}+''+${session.usuarioSistema.codigoUsuarioSistema}">Editar
-                    Clave</a>
+            <div id="user-session" role="menu" aria-label="Opciones del usuario">
+                <div class="user-session-cabecera">
+                    <span class="user-session-avatar"><i class="fa-solid fa-user"></i></span>
+                    <span>
+                        <strong sec:authentication="name"></strong>
+                        <small>Sesión activa</small>
+                    </span>
+                </div>
+                <a class="user-session-accion"
+                   th:href="@{/usuarioSistema/editarClave/}+''+${session.usuarioSistema.codigoUsuarioSistema}"
+                   role="menuitem">
+                    <i class="fa-solid fa-key"></i>
+                    <span><strong>Editar clave</strong><small>Cambiar contraseña de acceso</small></span>
+                </a>
                 <form id="logoutForm" th:action="@{/logout}" method="post">
-                    <button class="dropdown-item" onclick="document.getElementById('logoutForm').submit();"
-                            type="submit">Cerrar Sesion</button>
+                    <button class="user-session-accion user-session-salir" type="submit" role="menuitem">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span><strong>Cerrar sesión</strong><small>Salir de forma segura</small></span>
+                    </button>
                 </form>
-
             </div>
 
         </aside>
@@ -118,7 +137,21 @@
                             });
 
                             $('#btn-user').click(function () {
-                                $('#user-session').slideToggle(300);
+                                const $menuUsuario = $('#user-session');
+                                $menuUsuario.stop(true, true).slideToggle(180);
+                                $(this).attr('aria-expanded', $menuUsuario.is(':visible'));
+                            });
+
+                            $(document).on('click', function (event) {
+                                if (!$(event.target).closest('#btn-user, #user-session').length) {
+                                    $('#user-session').stop(true, true).slideUp(150);
+                                    $('#btn-user').attr('aria-expanded', 'false');
+                                }
+                            }).on('keydown', function (event) {
+                                if (event.key === 'Escape') {
+                                    $('#user-session').stop(true, true).slideUp(150);
+                                    $('#btn-user').attr('aria-expanded', 'false').trigger('focus');
+                                }
                             });
 
                             $('.menu_aside ul ul').click(function () {
