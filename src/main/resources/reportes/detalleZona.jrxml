@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="detalle_zona" language="groovy" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0b749f85-bf21-4a8b-9aa1-f4a6340eeda3">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="detalle_zona" language="groovy" printOrder="Horizontal" pageWidth="935" pageHeight="612" orientation="Landscape" columnWidth="915" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" uuid="0b749f85-bf21-4a8b-9aa1-f4a6340eeda3">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="164"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.report.description" value="Reporte de etado de cuentas por  zona"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="codigoSucursal" class="java.lang.Integer"/>
 	<parameter name="codigoZona" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
@@ -142,102 +149,109 @@ INNER JOIN usuarios AS usu
 	<variable name="totaUsuarioManzana" class="java.lang.Integer" resetType="Group" resetGroup="manzana" calculation="Count">
 		<variableExpression><![CDATA[$F{cuenta_corriente}]]></variableExpression>
 	</variable>
-	<group name="manzana" keepTogether="true">
+	<group name="manzana">
 		<groupExpression><![CDATA[$F{codigo_manzana}]]></groupExpression>
 		<groupHeader>
-			<band height="32">
+			<band height="25">
+				<frame>
+					<reportElement mode="Opaque" x="0" y="0" width="913" height="21" backcolor="#EDE8E8" uuid="802a69aa-1e57-4af0-97c8-6707fc8a3690"/>
+				</frame>
 				<textField>
-					<reportElement x="86" y="0" width="79" height="14" uuid="6b616442-dca2-40c5-91d2-6511b48ef257"/>
+					<reportElement x="59" y="0" width="79" height="14" uuid="6b616442-dca2-40c5-91d2-6511b48ef257"/>
 					<textElement>
 						<font fontName="SansSerif"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{codigo_manzana}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement x="15" y="0" width="58" height="14" uuid="8d9d2d23-1349-4fc8-a18a-e3e92a225bfa"/>
+					<reportElement x="6" y="0" width="54" height="14" uuid="8d9d2d23-1349-4fc8-a18a-e3e92a225bfa"/>
 					<textElement>
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[Manzanas :]]></text>
 				</staticText>
 				<line>
-					<reportElement x="0" y="1" width="970" height="1" uuid="8c7cdf64-f48d-403a-90a4-de485f717f4a">
+					<reportElement x="0" y="0" width="913" height="1" uuid="8c7cdf64-f48d-403a-90a4-de485f717f4a">
 						<property name="com.jaspersoft.studio.unit.y" value="px"/>
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					</reportElement>
 				</line>
 				<staticText>
-					<reportElement x="6" y="13" width="100" height="17" uuid="8171c8d4-a415-424f-9108-9f6168201c36"/>
+					<reportElement x="6" y="8" width="100" height="13" uuid="8171c8d4-a415-424f-9108-9f6168201c36">
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					</reportElement>
 					<textElement>
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[Cuenta]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="115" y="13" width="104" height="17" uuid="87fe12c0-dca1-4a82-8b64-1ad92a187714"/>
+					<reportElement x="115" y="8" width="104" height="13" uuid="87fe12c0-dca1-4a82-8b64-1ad92a187714"/>
 					<textElement textAlignment="Left">
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[Usuario]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="310" y="12" width="100" height="17" uuid="bcc5321f-e458-44ef-996c-ea4107e3f8ef"/>
+					<reportElement x="308" y="8" width="100" height="13" uuid="bcc5321f-e458-44ef-996c-ea4107e3f8ef"/>
 					<textElement>
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[Direccion]]></text>
 				</staticText>
 				<line>
-					<reportElement x="2" y="31" width="968" height="1" uuid="8c372302-d808-47bf-8155-081ae2ea674a">
+					<reportElement x="0" y="21" width="915" height="1" uuid="8c372302-d808-47bf-8155-081ae2ea674a">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					</reportElement>
 				</line>
 				<staticText>
-					<reportElement x="749" y="11" width="85" height="17" uuid="4e6439c0-a7eb-4e49-9f60-b7f9d9069175"/>
+					<reportElement x="695" y="8" width="77" height="13" uuid="4e6439c0-a7eb-4e49-9f60-b7f9d9069175"/>
 					<textElement textAlignment="Center">
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[Tarifa]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="834" y="11" width="56" height="17" uuid="3817decf-dad4-45bc-a9d6-b650ee99fb6a"/>
+					<reportElement x="778" y="8" width="56" height="13" uuid="3817decf-dad4-45bc-a9d6-b650ee99fb6a"/>
 					<textElement>
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[Mes  Deuda]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="890" y="11" width="77" height="17" uuid="3edb00a5-0dfc-45a0-b752-67c348721928"/>
+					<reportElement x="837" y="8" width="76" height="13" uuid="3edb00a5-0dfc-45a0-b752-67c348721928"/>
 					<textElement>
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[Deuda Total]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="559" y="12" width="72" height="17" uuid="9115eed5-32cf-4ceb-bd2f-641d53d684c3"/>
+					<reportElement x="507" y="8" width="72" height="13" uuid="9115eed5-32cf-4ceb-bd2f-641d53d684c3"/>
 					<textElement textAlignment="Center">
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[Ultimo Pago]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="634" y="11" width="54" height="17" uuid="a5493ab2-546e-41e8-b35b-a4e69b0bc4ca"/>
-					<textElement>
+					<reportElement x="581" y="8" width="61" height="13" uuid="a5493ab2-546e-41e8-b35b-a4e69b0bc4ca"/>
+					<textElement textAlignment="Center">
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[RUC]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="491" y="12" width="60" height="17" uuid="c90aae0f-b3e9-4a7c-a7a4-04731fc241ac"/>
+					<reportElement x="437" y="8" width="66" height="13" uuid="c90aae0f-b3e9-4a7c-a7a4-04731fc241ac"/>
 					<textElement textAlignment="Left">
 						<font fontName="SansSerif"/>
 					</textElement>
 					<text><![CDATA[ Pagar desde]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="696" y="11" width="52" height="17" uuid="1b1ba5fc-a9f9-4d68-93bb-1f0d5c754728"/>
+					<reportElement x="642" y="8" width="52" height="13" uuid="1b1ba5fc-a9f9-4d68-93bb-1f0d5c754728"/>
 					<textElement>
 						<font fontName="SansSerif"/>
 					</textElement>
@@ -246,7 +260,7 @@ INNER JOIN usuarios AS usu
 			</band>
 		</groupHeader>
 		<groupFooter>
-			<band height="21">
+			<band height="21" splitType="Stretch">
 				<staticText>
 					<reportElement x="2" y="0" width="128" height="20" uuid="86a8ba77-d822-4df2-bef8-415239c7362e"/>
 					<textElement>
@@ -262,19 +276,21 @@ INNER JOIN usuarios AS usu
 					<textFieldExpression><![CDATA[$V{totaUsuarioManzana}]]></textFieldExpression>
 				</textField>
 				<line>
-					<reportElement x="0" y="0" width="970" height="1" uuid="b808a4c0-7267-4f51-8361-0075f12d89c2">
+					<reportElement x="0" y="0" width="913" height="1" uuid="b808a4c0-7267-4f51-8361-0075f12d89c2">
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					</reportElement>
 				</line>
 				<staticText>
-					<reportElement x="777" y="0" width="88" height="20" uuid="4e63ddfa-f8b9-4d44-a33d-dcef15a078a5"/>
+					<reportElement x="705" y="0" width="88" height="20" uuid="4e63ddfa-f8b9-4d44-a33d-dcef15a078a5"/>
 					<textElement>
 						<font fontName="SansSerif" size="12" isBold="false"/>
 					</textElement>
 					<text><![CDATA[Deuda Total :]]></text>
 				</staticText>
 				<textField pattern="#,##0">
-					<reportElement x="852" y="0" width="115" height="20" uuid="578802ef-e3fe-4c34-9e9d-2eb3d925315c"/>
+					<reportElement x="780" y="0" width="115" height="20" uuid="578802ef-e3fe-4c34-9e9d-2eb3d925315c"/>
 					<textElement>
 						<font fontName="SansSerif" size="12" isBold="false"/>
 					</textElement>
@@ -303,14 +319,14 @@ INNER JOIN usuarios AS usu
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="15" y="0" width="230" height="20" uuid="7a345da3-eed7-44bc-adc8-0c7f07803ccc"/>
+				<reportElement x="15" y="0" width="275" height="20" uuid="7a345da3-eed7-44bc-adc8-0c7f07803ccc"/>
 				<textElement>
 					<font fontName="SansSerif" size="14" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Informe de Saldo de inmuebles]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="28" y="38" width="174" height="20" uuid="4adf837e-3001-4d9e-928f-3046ba00075c"/>
+				<reportElement x="12" y="38" width="191" height="20" uuid="4adf837e-3001-4d9e-928f-3046ba00075c"/>
 				<textElement>
 					<font fontName="SansSerif" size="10"/>
 				</textElement>
@@ -331,7 +347,7 @@ INNER JOIN usuarios AS usu
 				<textFieldExpression><![CDATA[$F{cobrador}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="199" y="39" width="144" height="20" uuid="611063fd-cb96-4a2d-bf24-8b0759d0f115"/>
+				<reportElement x="190" y="39" width="158" height="20" uuid="611063fd-cb96-4a2d-bf24-8b0759d0f115"/>
 				<textElement textAlignment="Left">
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -354,74 +370,74 @@ INNER JOIN usuarios AS usu
 		</band>
 	</title>
 	<detail>
-		<band height="16" splitType="Stretch">
+		<band height="10" splitType="Stretch">
 			<textField>
-				<reportElement x="4" y="1" width="96" height="15" uuid="4a5fa312-246c-4ecb-ae1d-0244a083af4d"/>
-				<textElement>
-					<font fontName="SansSerif" size="10"/>
+				<reportElement x="4" y="-2" width="96" height="12" uuid="4a5fa312-246c-4ecb-ae1d-0244a083af4d"/>
+				<textElement textAlignment="Left">
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{cuenta_corriente}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="109" y="1" width="200" height="14" uuid="16078beb-9404-48c4-bec0-d13d8a4c43f2"/>
+				<reportElement x="103" y="-2" width="204" height="12" uuid="16078beb-9404-48c4-bec0-d13d8a4c43f2"/>
 				<textElement textAlignment="Left">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{nombre}+" "+$F{apellido}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
-				<reportElement x="310" y="1" width="180" height="15" uuid="470638f0-64ac-4328-84e0-d1c3836ab194"/>
+				<reportElement x="307" y="-1" width="130" height="11" uuid="470638f0-64ac-4328-84e0-d1c3836ab194"/>
 				<textElement>
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0">
-				<reportElement x="754" y="0" width="82" height="15" uuid="404c14d2-7a99-4080-9ec9-8cc121982751"/>
+				<reportElement x="701" y="-1" width="77" height="11" uuid="404c14d2-7a99-4080-9ec9-8cc121982751"/>
 				<textElement textAlignment="Center">
-					<font fontName="SansSerif"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{tarifa}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="837" y="0" width="54" height="15" uuid="4f126d34-ad1d-480b-b142-72d22087d1e3"/>
+				<reportElement x="778" y="-1" width="57" height="11" uuid="4f126d34-ad1d-480b-b142-72d22087d1e3"/>
 				<textElement textAlignment="Center">
-					<font fontName="SansSerif"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{mes_deuda}]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤#,##0.##;¤-#,##0.##">
-				<reportElement x="892" y="0" width="76" height="15" uuid="dbdb920f-a5a6-45fb-9534-c47e8f32b8a1"/>
+				<reportElement x="839" y="-1" width="74" height="11" uuid="dbdb920f-a5a6-45fb-9534-c47e8f32b8a1"/>
 				<textElement>
-					<font fontName="SansSerif"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{deuda}]]></textFieldExpression>
 			</textField>
 			<textField pattern="MM/dd/yyyy">
-				<reportElement x="558" y="1" width="73" height="14" uuid="a9ff0f61-eb43-4c17-86ab-1636a7c0ccae"/>
+				<reportElement x="506" y="-1" width="73" height="11" uuid="a9ff0f61-eb43-4c17-86ab-1636a7c0ccae"/>
 				<textElement textAlignment="Center">
-					<font fontName="SansSerif"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ultimo_pago}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
-				<reportElement x="634" y="1" width="61" height="14" uuid="7a74f64e-497a-4204-a5ae-a3f31920f536"/>
+				<reportElement x="581" y="-2" width="61" height="12" uuid="7a74f64e-497a-4204-a5ae-a3f31920f536"/>
 				<textElement textAlignment="Left">
-					<font fontName="SansSerif"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{numero_documento}]]></textFieldExpression>
 			</textField>
 			<textField pattern="MM/yyyy">
-				<reportElement x="492" y="1" width="65" height="14" uuid="04bcf319-5ea7-49de-bbd6-2980ee98f8a5"/>
+				<reportElement x="438" y="-2" width="65" height="12" uuid="04bcf319-5ea7-49de-bbd6-2980ee98f8a5"/>
 				<textElement textAlignment="Center">
-					<font fontName="SansSerif"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{pago_desde}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="696" y="1" width="58" height="14" uuid="41b14611-579f-4c74-a466-b3d7046694f8"/>
+				<reportElement x="643" y="-1" width="58" height="11" uuid="41b14611-579f-4c74-a466-b3d7046694f8"/>
 				<textElement>
-					<font fontName="SansSerif"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{celular}]]></textFieldExpression>
 			</textField>
@@ -462,7 +478,7 @@ INNER JOIN usuarios AS usu
 	<summary>
 		<band height="24" splitType="Stretch">
 			<staticText>
-				<reportElement x="747" y="4" width="88" height="20" uuid="b9047697-315d-43c4-8751-83d36ae34668"/>
+				<reportElement x="693" y="4" width="88" height="20" uuid="b9047697-315d-43c4-8751-83d36ae34668"/>
 				<textElement>
 					<font fontName="SansSerif" size="12" isBold="false"/>
 				</textElement>
@@ -483,14 +499,18 @@ INNER JOIN usuarios AS usu
 				<textFieldExpression><![CDATA[$V{totaUsuario}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0">
-				<reportElement x="834" y="4" width="115" height="20" uuid="e7994e4c-6fb7-42c4-9d12-7d127f53a1a2"/>
+				<reportElement x="780" y="4" width="115" height="20" uuid="e7994e4c-6fb7-42c4-9d12-7d127f53a1a2"/>
 				<textElement>
 					<font fontName="SansSerif" size="12" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{total_deuda}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="3" width="950" height="1" uuid="afe87a59-0cc4-4ec4-bddc-67e06cc31777"/>
+				<reportElement x="0" y="0" width="913" height="1" uuid="afe87a59-0cc4-4ec4-bddc-67e06cc31777">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 			</line>
 		</band>
 	</summary>

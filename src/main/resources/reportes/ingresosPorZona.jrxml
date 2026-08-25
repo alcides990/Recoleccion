@@ -225,7 +225,7 @@ GROUP BY zon.codigo_zona, zon.zona]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Impresa}]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤#,##0.##;¤-#,##0.##">
+			<textField pattern="#,##0.###;#,##0">
 				<reportElement x="480" y="0" width="75" height="16" uuid="79574a73-f97a-4197-8eba-7309b8d01453"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
@@ -277,7 +277,7 @@ GROUP BY zon.codigo_zona, zon.zona]]>
 	</pageFooter>
 	<summary>
 		<band height="39" splitType="Stretch">
-			<textField pattern="¤#,##0.##;¤-#,##0.##">
+			<textField pattern="#,##0.###;#,##0">
 				<reportElement x="477" y="4" width="78" height="20" uuid="d80bc612-dfdd-479c-b4cf-43b198099c2e"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>

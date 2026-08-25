@@ -60,7 +60,6 @@ ORDER BY  comp.codigo_cobrador ASC]]>
 		<property name="com.jaspersoft.studio.field.name" value="importe"/>
 		<property name="com.jaspersoft.studio.field.label" value="importe"/>
 	</field>
-	<sortField name="cobrador"/>
 	<variable name="TOTALMONTO" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{importe}]]></variableExpression>
 	</variable>
@@ -131,7 +130,7 @@ ORDER BY  comp.codigo_cobrador ASC]]>
 				<textElement>
 					<font fontName="SansSerif" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{PAGE_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="477" y="37" width="17" height="20" uuid="ae5fcdc7-0488-4d82-b08c-737b16b4c904"/>
