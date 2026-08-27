@@ -76,6 +76,10 @@ public class ComprobanteController {
     @Autowired
     private DetalleTimbradoDao detalleTimbradoDao;
     @Autowired
+    private NumeradorAutoimpresorService numeradorAutoimpresorService;
+    @Autowired
+    private AuditoriaComprobanteService auditoriaComprobanteService;
+    @Autowired
     private FacturaElectronicaService facturaElectronicaService;
 
     @GetMapping("/listar")
@@ -268,14 +272,38 @@ public class ComprobanteController {
                 || hoy.isBefore(inicioVigencia) || hoy.isAfter(finVigencia)) {
             return ResponseEntity.badRequest().body("El timbrado seleccionado no está activo o está fuera de vigencia.");
         }
+        if (timbradoVigente.getNumeroTimbrado() == null) {
+            return ResponseEntity.badRequest().body("El timbrado seleccionado no tiene número fiscal configurado.");
+        }
+        String establecimientoFiscal = valorFiscal(
+                detalleTimbrado.getPuntoExpedicion().getSucursal().getNombreSucursal(),
+                puntoExpedicionPK.getCodigoSucursal());
+        String puntoExpedicionFiscal = valorFiscal(
+                detalleTimbrado.getPuntoExpedicion().getNombrePuntoExpedicion(),
+                puntoExpedicionPK.getCodigoPuntoExpedicion());
+        String serieFiscal = valorFiscal(
+                detalleTimbrado.getSerie().getSerie(), comprobanteRequest.getCodigoSerie());
+        boolean autoimpresor = detalleTimbrado.esAutoimpresor();
+        if (!autoimpresor && (comprobanteRequest.getNumeroComprobante() == null
+                || comprobanteRequest.getNumeroComprobante() < 1
+                || comprobanteRequest.getNumeroComprobante() > 9_999_999)) {
+            return ResponseEntity.badRequest().body("Ingrese un número válido para el comprobante manual.");
+        }
+        // En autoimpresor este valor es solamente provisional para validar el objeto.
+        // El número fiscal se reserva al final, después de superar todas las validaciones.
+        if (autoimpresor && (comprobanteRequest.getNumeroComprobante() == null
+                || comprobanteRequest.getNumeroComprobante() < 1)) {
+            comprobanteRequest.setNumeroComprobante(1);
+        }
         ComprobantePK comprobantePK = ComprobantePK.builder()
                 .numeroComprobante(comprobanteRequest.getNumeroComprobante())
                 .codigoTipoComprobante(comprobanteRequest.getCodigoTipoComprobante())
                 .puntoExpedicionPK(puntoExpedicionPK)
                 .codigoSerie(comprobanteRequest.getCodigoSerie())
                 .build();
-        Optional<Comprobante> comprobanteOP = comprobanteService.findById(comprobantePK);
-        if (comprobanteOP.isPresent()) {
+        Optional<Comprobante> comprobanteOP = autoimpresor
+                ? Optional.empty() : comprobanteService.findById(comprobantePK);
+        if (!autoimpresor && comprobanteOP.isPresent()) {
             Comprobante comprobante = comprobanteOP.get();
             if (comprobantePK.equals(comprobante.getComprobantePK())) {
                 Servicio servicio = comprobante.getServicio();
@@ -349,6 +377,12 @@ public class ComprobanteController {
                 .fechaPago(comprobanteRequest.getFechaPago())
                 .periodoPago(datosPagopago.getPeriodoPago())
                 .pagoHasta(datosPagopago.getPagoHasta())
+                .establecimientoFiscal(establecimientoFiscal)
+                .puntoExpedicionFiscal(puntoExpedicionFiscal)
+                .numeroTimbradoFiscal(String.valueOf(timbradoVigente.getNumeroTimbrado()))
+                .inicioVigenciaFiscal(inicioVigencia)
+                .finVigenciaFiscal(finVigencia)
+                .serieFiscal(serieFiscal)
                 .servicio(new Servicio(comprobanteRequest.getCuentaCorriente()))
                 .usuario(new Usuario(comprobanteRequest.getCodigoUsuario()))
                 .estado(
@@ -361,10 +395,26 @@ public class ComprobanteController {
         if (validarComprobate(comprobante).getStatusCode() != HttpStatus.OK) {
             return validarComprobate(comprobante);
         }
+        if (autoimpresor) {
+            try {
+                int numeroFiscal = numeradorAutoimpresorService.reservar(
+                        detalleTimbrado, comprobanteRequest.getCodigoTipoComprobante());
+                comprobanteRequest.setNumeroComprobante(numeroFiscal);
+                comprobantePK.setNumeroComprobante(numeroFiscal);
+                comprobante.getDetallePago().forEach(pago ->
+                        pago.getDetallePagoPK().setNumeroComprobante(numeroFiscal));
+            } catch (IllegalArgumentException | IllegalStateException ex) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+            }
+        }
         try {
             comprobanteService.guardar(comprobante);
             facturaElectronicaService.registrar(comprobante);
-            return ResponseEntity.ok("Comprobante Guardada Correctamente !!!");
+            auditoriaComprobanteService.registrar("EMISION", comprobantePK,
+                    getUserSession().getCodigoUsuarioSistema(),
+                    autoimpresor ? "Emisión autoimpresor" : "Emisión manual");
+            return ResponseEntity.ok("Comprobante guardado correctamente. N.º "
+                    + String.format("%07d", comprobantePK.getNumeroComprobante()));
         } catch (org.springframework.transaction.UnexpectedRollbackException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al guardar factura: " + e.getMostSpecificCause().getMessage());
@@ -389,8 +439,18 @@ public class ComprobanteController {
     }
 
     @PutMapping("/guardar")
+    @Transactional
     public ResponseEntity<?> moficicarComprobante(@RequestBody Comprobante comprobanteReques) {
         Comprobante comprobante = comprobanteService.getComprobante(comprobanteReques.getComprobantePK());
+        if (comprobante == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (esAutoimpresor(comprobante)) {
+            auditoriaComprobanteService.registrar("INTENTO_MODIFICACION", comprobante.getComprobantePK(),
+                    getUserSession().getCodigoUsuarioSistema(), "Edición rechazada por inalterabilidad fiscal");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    "Un comprobante autoimpreso emitido es inalterable. Utilice anulación o nota de crédito/débito.");
+        }
         if (comprobanteReques.getEstado() != null
                 && comprobanteReques.getEstado().getCodigoEstado() == 3
                 && comprobante.getEstado().getCodigoEstado() != 3) {
@@ -426,6 +486,8 @@ public class ComprobanteController {
         comprobante.setObs(comprobanteRequest.getObs());
 
         comprobanteService.anular(comprobante);
+        auditoriaComprobanteService.registrar("ANULACION", comprobante.getComprobantePK(),
+                getUserSession().getCodigoUsuarioSistema(), comprobanteRequest.getObs());
         return ResponseEntity.ok("Comprobante anulada correctamente!!");
     }
 
@@ -479,6 +541,22 @@ public class ComprobanteController {
         PuntoExpedicionPK puntoExpedicionPK = comprobantePK.getPuntoExpedicionPK();
         puntoExpedicionPK.setCodigoSucursal(getSucursalSession().getCodigoSucursal());
         return comprobanteService.getNumeroComprobante(comprobantePK);
+    }
+
+    private boolean esAutoimpresor(Comprobante comprobante) {
+        ComprobantePK clave = comprobante.getComprobantePK();
+        DetalleTimbradoPK detalleId = new DetalleTimbradoPK(
+                comprobante.getTimbrado().getCodigoTimbrado(),
+                clave.getPuntoExpedicionPK().getCodigoPuntoExpedicion(),
+                clave.getPuntoExpedicionPK().getCodigoSucursal());
+        return detalleTimbradoDao.findById(detalleId).map(DetalleTimbrado::esAutoimpresor).orElse(false);
+    }
+
+    private String valorFiscal(String valorConfigurado, Integer codigoInterno) {
+        if (valorConfigurado != null && !valorConfigurado.isBlank()) {
+            return valorConfigurado.trim();
+        }
+        return codigoInterno == null ? null : String.format("%03d", codigoInterno);
     }
 
     private UsuarioSistema getUserSession() {

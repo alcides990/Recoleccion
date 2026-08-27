@@ -10,7 +10,8 @@ public interface DetalleTimbradoMovilRepository extends JpaRepository<Timbrado, 
 
     @Query(value = """
             SELECT dt.codigo_timbrado, t.numero_timbrado,
-                   dt.codigo_serie, s.serie
+                   dt.codigo_serie, s.serie, dt.modo_emision,
+                   dt.numero_desde, dt.numero_hasta
               FROM detalle_timbrado dt
               JOIN timbrados t ON t.codigo_timbrado = dt.codigo_timbrado
               JOIN series s ON s.codigo_serie = dt.codigo_serie

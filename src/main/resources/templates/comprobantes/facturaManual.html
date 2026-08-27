@@ -325,7 +325,8 @@
                                             }
                                             datos.forEach(function (item) {
                                                 selector.append($('<option>', {value: item.codigoTimbrado, text: item.nombre})
-                                                    .attr('data-serie', item.codigoSerie));
+                                                    .attr('data-serie', item.codigoSerie)
+                                                    .attr('data-modo-emision', item.modoEmision));
                                             });
                                             selector.prop('disabled', false);
                                             generarNumeroComprobante();

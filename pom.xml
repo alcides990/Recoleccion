@@ -17,6 +17,8 @@
     <packaging>jar</packaging>
     <properties>
         <java.version>17</java.version>
+        <!-- Spring Boot 3.0 administra Flyway 9.5, que no reconoce MySQL 8.4. -->
+        <flyway.version>11.18.0</flyway.version>
     </properties>
     <dependencies>
 
@@ -69,6 +71,16 @@
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -91,6 +91,9 @@ public class DetalleTimbradoController {
             @RequestParam Integer codigoSucursal,
             @RequestParam Integer codigoSerie,
             @RequestParam Integer codigoEstado,
+            @RequestParam(defaultValue = "MANUAL") String modoEmision,
+            @RequestParam(defaultValue = "1") Integer numeroDesde,
+            @RequestParam(defaultValue = "9999999") Integer numeroHasta,
             RedirectAttributes redirect) {
         if (!puedeAdministrar(codigoSucursal)) {
             redirect.addFlashAttribute("error", "No puede administrar otra sucursal.");
@@ -102,10 +105,20 @@ public class DetalleTimbradoController {
             return "redirect:/detalleTimbrado/listar";
         }
         DetalleTimbradoPK id = new DetalleTimbradoPK(codigoTimbrado, codigoPuntoExpedicion, codigoSucursal);
+        String modo = modoEmision == null ? "MANUAL" : modoEmision.trim().toUpperCase();
+        if (!("MANUAL".equals(modo) || "AUTOIMPRESOR".equals(modo))
+                || numeroDesde == null || numeroHasta == null || numeroDesde < 1
+                || numeroHasta < numeroDesde || numeroHasta > 9_999_999) {
+            redirect.addFlashAttribute("error", "El modo de emisión o el rango autorizado no es válido.");
+            return "redirect:/detalleTimbrado/listar";
+        }
         DetalleTimbrado detalle = detalleDao.findById(id).orElseGet(DetalleTimbrado::new);
         detalle.setDetalleTimbradoPK(id);
         detalle.setSerie(serieService.encontrar(new Serie(codigoSerie)));
         detalle.setEstado(estadoService.encontrar(new Estado(codigoEstado)));
+        detalle.setModoEmision(modo);
+        detalle.setNumeroDesde(numeroDesde);
+        detalle.setNumeroHasta(numeroHasta);
         detalleDao.save(detalle);
         redirect.addFlashAttribute("info", "Detalle de timbrado guardado correctamente.");
         return "redirect:/detalleTimbrado/listar";

@@ -523,8 +523,8 @@ $("#cantidadRegistro").change(function () {
 }
 );
 export function generarNumeroComprobante() {
-    var seleccionado = $("#tipoComprobante option:selected").text();
-    if (seleccionado === 'FACTURA MANUAL') {
+    var modoEmision = $("#detalleTimbrado option:selected").attr('data-modo-emision');
+    if (modoEmision !== 'AUTOIMPRESOR') {
         $("#numeroComprobante").prop('readonly', false);
     } else {
         $("#numeroComprobante").prop('readonly', true);

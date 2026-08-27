@@ -73,6 +73,25 @@ public class Comprobante implements Serializable {
 
     private String obs;
 
+    /** Valores inmutables usados fiscalmente al momento de la emisión. */
+    @Column(name = "establecimiento_fiscal", length = 20)
+    private String establecimientoFiscal;
+
+    @Column(name = "punto_expedicion_fiscal", length = 20)
+    private String puntoExpedicionFiscal;
+
+    @Column(name = "numero_timbrado_fiscal", length = 30)
+    private String numeroTimbradoFiscal;
+
+    @Column(name = "inicio_vigencia_fiscal")
+    private LocalDate inicioVigenciaFiscal;
+
+    @Column(name = "fin_vigencia_fiscal")
+    private LocalDate finVigenciaFiscal;
+
+    @Column(name = "serie_fiscal", length = 20)
+    private String serieFiscal;
+
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @JoinColumn(name = "codigo_cobrador", referencedColumnName = "codigo_cobrador", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)

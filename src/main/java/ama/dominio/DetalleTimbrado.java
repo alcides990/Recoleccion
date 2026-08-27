@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import java.io.Serializable;
 import lombok.Data;
 
@@ -36,4 +37,17 @@ public class DetalleTimbrado implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "codigo_estado", nullable = false)
     private Estado estado;
+
+    @Column(name = "modo_emision", nullable = false, length = 20)
+    private String modoEmision = "MANUAL";
+
+    @Column(name = "numero_desde", nullable = false)
+    private Integer numeroDesde = 1;
+
+    @Column(name = "numero_hasta", nullable = false)
+    private Integer numeroHasta = 9999999;
+
+    public boolean esAutoimpresor() {
+        return "AUTOIMPRESOR".equalsIgnoreCase(modoEmision);
+    }
 }

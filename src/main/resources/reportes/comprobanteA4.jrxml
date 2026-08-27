@@ -7,16 +7,18 @@
 	<parameter name="codigoSerie" class="java.lang.Integer"/>
 	<parameter name="numeroComprobante" class="java.lang.Integer"/>
 	<parameter name="montoLetras" class="java.lang.String"/>
+	<parameter name="ejemplar" class="java.lang.String"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT COALESCE(e.razon_social, '') AS empresa,
        COALESCE(e.ruc, '') AS ruc,
        CONCAT(COALESCE(s.sucursal, ''), CASE WHEN ci.ciudad IS NULL OR ci.ciudad = '' THEN '' ELSE CONCAT(' - ', ci.ciudad) END) AS sucursal,
        COALESCE(s.direccion, '') AS direccion,
        COALESCE(NULLIF(NULLIF(TRIM(s.telefono), ''), '0'), NULLIF(NULLIF(TRIM(s.celular), ''), '0'), '') AS telefono,
-       COALESCE(CAST(t.numero_timbrado AS CHAR), '') AS timbrado,
-       COALESCE(DATE_FORMAT(t.fecha_inicio, '%d/%m/%Y'), '') AS inicioVigencia,
+       COALESCE(NULLIF(c.numero_timbrado_fiscal, ''), CAST(t.numero_timbrado AS CHAR), '') AS timbrado,
+       COALESCE(DATE_FORMAT(c.inicio_vigencia_fiscal, '%d/%m/%Y'), DATE_FORMAT(t.fecha_inicio, '%d/%m/%Y'), '') AS inicioVigencia,
+       COALESCE(DATE_FORMAT(c.fin_vigencia_fiscal, '%m/%Y'), DATE_FORMAT(t.fecha_fin, '%m/%Y'), '') AS finVigencia,
        COALESCE(tc.tipo_comprobante, '') AS tipoComprobante,
-       CONCAT(LPAD(COALESCE(s.sucursal, c.codigo_sucursal), 3, '0'), '-', LPAD(COALESCE(pe.punto_expedicion, c.codigo_punto_expedicion), 3, '0'), '-', LPAD(c.numero_comprobante, 7, '0')) AS numeroDocumento,
+       CONCAT(LPAD(COALESCE(NULLIF(c.establecimiento_fiscal, ''), s.sucursal, c.codigo_sucursal), 3, '0'), '-', LPAD(COALESCE(NULLIF(c.punto_expedicion_fiscal, ''), pe.punto_expedicion, c.codigo_punto_expedicion), 3, '0'), '-', LPAD(c.numero_comprobante, 7, '0')) AS numeroDocumento,
        DATE_FORMAT(COALESCE(c.fecha_pago, c.fecha_emision), '%d/%m/%Y') AS fecha,
        COALESCE(c.razon_social, '') AS receptor,
        COALESCE(u.numero_documento, '') AS documento,
@@ -67,6 +69,7 @@
 	<field name="telefono" class="java.lang.String"/>
 	<field name="timbrado" class="java.lang.String"/>
 	<field name="inicioVigencia" class="java.lang.String"/>
+	<field name="finVigencia" class="java.lang.String"/>
 	<field name="tipoComprobante" class="java.lang.String"/>
 	<field name="numeroDocumento" class="java.lang.String"/>
 	<field name="fecha" class="java.lang.String"/>
@@ -131,7 +134,7 @@
 				<textElement textAlignment="Center">
 					<font size="13" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["FACTURA"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["FACTURA - " + $P{ejemplar}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="360" y="49" width="167" height="22" uuid="29ec41e2-9a24-4a54-825f-91d972ad66de"/>
@@ -152,7 +155,7 @@
 				<textElement textAlignment="Left">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Timbrado: " + $F{timbrado} + " - Inicio: " + $F{inicioVigencia}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Timbrado: " + $F{timbrado} + " - Vigencia: " + $F{inicioVigencia} + " a " + $F{finVigencia}]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="18" y="130" width="519" height="1" uuid="dce7d8b1-e8c1-4432-9dc5-4e30edd2012f"/>

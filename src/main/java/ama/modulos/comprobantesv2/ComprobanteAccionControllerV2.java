@@ -12,6 +12,9 @@ import ama.dominio.MetodoPago;
 import ama.dao.CategoriaDao;
 import ama.dao.CondicionVentaDao;
 import ama.dao.MetodoPagoDao;
+import ama.dao.DetalleTimbradoDao;
+import ama.dominio.DetalleTimbradoPK;
+import ama.servicio.AuditoriaComprobanteService;
 import ama.dominio.PuntoExpedicionPK;
 import ama.dominio.UsuarioSistema;
 import jakarta.servlet.http.HttpSession;
@@ -67,12 +70,15 @@ public class ComprobanteAccionControllerV2 {
     private final HttpSession session;
     private final DataSource dataSource;
     private final MontoEnLetrasService montoEnLetras;
+    private final DetalleTimbradoDao detallesTimbrado;
+    private final AuditoriaComprobanteService auditoria;
 
     public ComprobanteAccionControllerV2(ComprobanteJpaRepositoryV2 comprobantes,
             CobradorJpaRepositoryV2 cobradores, EstadoJpaRepositoryV2 estados,
             CategoriaDao categorias, CondicionVentaDao condicionesVenta, MetodoPagoDao metodosPago,
             DetallePagoJpaRepositoryV2 detallesPago, HttpSession session, DataSource dataSource,
-            MontoEnLetrasService montoEnLetras) {
+            MontoEnLetrasService montoEnLetras, DetalleTimbradoDao detallesTimbrado,
+            AuditoriaComprobanteService auditoria) {
         this.comprobantes = comprobantes;
         this.cobradores = cobradores;
         this.estados = estados;
@@ -83,6 +89,8 @@ public class ComprobanteAccionControllerV2 {
         this.session = session;
         this.dataSource = dataSource;
         this.montoEnLetras = montoEnLetras;
+        this.detallesTimbrado = detallesTimbrado;
+        this.auditoria = auditoria;
     }
 
     @PostMapping("/detalle")
@@ -94,7 +102,7 @@ public class ComprobanteAccionControllerV2 {
 
     @GetMapping("/ticket")
     @ResponseBody
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseEntity<?> ticket(ComprobanteAccionV2 solicitud,
             @RequestParam(name = "formato", defaultValue = "58mm") String formato) {
         try {
@@ -115,11 +123,15 @@ public class ComprobanteAccionControllerV2 {
             parametros.put("codigoSerie", solicitud.getCodigoSerie());
             parametros.put("numeroComprobante", solicitud.getNumeroComprobante());
             parametros.put("montoLetras", montoEnLetras.convertir(BigDecimal.valueOf(comprobante.getTotalImporte())));
+            boolean primeraImpresion = auditoria.esPrimeraImpresion(comprobante.getComprobantePK());
+            parametros.put("ejemplar", primeraImpresion ? "ORIGINAL" : "COPIA - REIMPRESIÓN");
             try (InputStream jasper = new ClassPathResource(rutaReporte).getInputStream();
                     var conexion = dataSource.getConnection()) {
                 JasperReport reporte = JasperCompileManager.compileReport(jasper);
                 var impresion = JasperFillManager.fillReport(reporte, parametros, conexion);
                 byte[] pdf = JasperExportManager.exportReportToPdf(impresion);
+                auditoria.registrarImpresion(comprobante.getComprobantePK(),
+                        usuarioSesion().getCodigoUsuarioSistema(), formato.toLowerCase());
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentDisposition(ContentDisposition.inline()
                         .filename("comprobante-" + formato.toLowerCase() + "-"
@@ -154,6 +166,12 @@ public class ComprobanteAccionControllerV2 {
         }
         UsuarioSistema usuario = usuarioSesion();
         Comprobante comprobante = buscarAutorizado(solicitud);
+        if (esAutoimpresor(comprobante)) {
+            auditoria.registrar("INTENTO_MODIFICACION", comprobante.getComprobantePK(),
+                    usuario.getCodigoUsuarioSistema(), "Edición rechazada por inalterabilidad fiscal");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje",
+                    "Un comprobante autoimpreso emitido es inalterable. Utilice anulación o nota de crédito/débito."));
+        }
         if (esAnulado(comprobante)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje", "No se puede editar un comprobante anulado."));
         }
@@ -237,6 +255,8 @@ public class ComprobanteAccionControllerV2 {
         comprobante.setEstado(new Estado(3));
         comprobante.setObs(limpiar(solicitud.getObservacion()));
         comprobantes.save(comprobante);
+        auditoria.registrar("ANULACION", comprobante.getComprobantePK(),
+                usuarioSesion().getCodigoUsuarioSistema(), solicitud.getObservacion());
         return ResponseEntity.ok(Map.of("mensaje", "Comprobante anulado correctamente."));
     }
 
@@ -330,6 +350,15 @@ public class ComprobanteAccionControllerV2 {
                 && Objects.equals(uno.getCodigoSerie(), otro.getCodigoSerie())
                 && Objects.equals(uno.getPuntoExpedicionPK().getCodigoSucursal(), otro.getPuntoExpedicionPK().getCodigoSucursal())
                 && Objects.equals(uno.getPuntoExpedicionPK().getCodigoPuntoExpedicion(), otro.getPuntoExpedicionPK().getCodigoPuntoExpedicion());
+    }
+
+    private boolean esAutoimpresor(Comprobante comprobante) {
+        ComprobantePK clave = comprobante.getComprobantePK();
+        DetalleTimbradoPK id = new DetalleTimbradoPK(
+                comprobante.getTimbrado().getCodigoTimbrado(),
+                clave.getPuntoExpedicionPK().getCodigoPuntoExpedicion(),
+                clave.getPuntoExpedicionPK().getCodigoSucursal());
+        return detallesTimbrado.findById(id).map(x -> x.esAutoimpresor()).orElse(false);
     }
 
     private String limpiar(String texto) {

@@ -225,7 +225,11 @@ public class FacturacionMovilController {
                 "numeroTimbrado", String.valueOf(x[1]),
                 "codigoSerie", ((Number) x[2]).intValue(),
                 "serie", String.valueOf(x[3]),
+                "modoEmision", String.valueOf(x[4]),
+                "numeroDesde", ((Number) x[5]).intValue(),
+                "numeroHasta", ((Number) x[6]).intValue(),
                 "nombre", "Timbrado " + x[1] + " · Serie " + x[3]
+                        + ("AUTOIMPRESOR".equals(String.valueOf(x[4])) ? " · Autoimpresor" : " · Manual")
         )).toList());
     }
 
@@ -414,7 +418,7 @@ public class FacturacionMovilController {
         if (!guardado.getStatusCode().is2xxSuccessful()) return guardado;
         return ResponseEntity.ok(Map.of(
                 "mensaje", "Comprobante guardado correctamente.",
-                "numeroComprobante", numero,
+                "numeroComprobante", comprobante.getNumeroComprobante(),
                 "codigoSucursal", usuario.getSucursal().getCodigoSucursal(),
                 "codigoPuntoExpedicion", entrada.getCodigoPuntoExpedicion(),
                 "codigoTipoComprobante", entrada.getCodigoTipoComprobante(),

@@ -10,7 +10,21 @@ class ComprobanteTicketJasperTest {
 
     @Test
     void compilaElTicketTermico() throws Exception {
-        try (var jrxml = new ClassPathResource("reportes/comprobanteTicket.jrxml").getInputStream()) {
+        compilar("reportes/comprobanteTicket.jrxml");
+    }
+
+    @Test
+    void compilaElTicket80mm() throws Exception {
+        compilar("reportes/comprobanteTicket80mm.jrxml");
+    }
+
+    @Test
+    void compilaElComprobanteA4() throws Exception {
+        compilar("reportes/comprobanteA4.jrxml");
+    }
+
+    private void compilar(String reporte) throws Exception {
+        try (var jrxml = new ClassPathResource(reporte).getInputStream()) {
             assertNotNull(JasperCompileManager.compileReport(jrxml));
         }
     }

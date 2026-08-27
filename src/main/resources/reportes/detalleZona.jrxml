@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="detalle_zona" language="groovy" printOrder="Horizontal" pageWidth="935" pageHeight="612" orientation="Landscape" columnWidth="915" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" uuid="0b749f85-bf21-4a8b-9aa1-f4a6340eeda3">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="detalle_zona" language="groovy" printOrder="Horizontal" pageWidth="935" pageHeight="612" orientation="Landscape" columnWidth="900" leftMargin="25" rightMargin="10" topMargin="10" bottomMargin="10" uuid="0b749f85-bf21-4a8b-9aa1-f4a6340eeda3">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="164"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.report.description" value="Reporte de etado de cuentas por  zona"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
 	<parameter name="codigoSucursal" class="java.lang.Integer"/>
 	<parameter name="codigoZona" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
@@ -154,7 +149,7 @@ INNER JOIN usuarios AS usu
 		<groupHeader>
 			<band height="25">
 				<frame>
-					<reportElement mode="Opaque" x="0" y="0" width="913" height="21" backcolor="#EDE8E8" uuid="802a69aa-1e57-4af0-97c8-6707fc8a3690"/>
+					<reportElement mode="Opaque" x="0" y="0" width="900" height="21" backcolor="#EDE8E8" uuid="802a69aa-1e57-4af0-97c8-6707fc8a3690"/>
 				</frame>
 				<textField>
 					<reportElement x="59" y="0" width="79" height="14" uuid="6b616442-dca2-40c5-91d2-6511b48ef257"/>
@@ -171,7 +166,7 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[Manzanas :]]></text>
 				</staticText>
 				<line>
-					<reportElement x="0" y="0" width="913" height="1" uuid="8c7cdf64-f48d-403a-90a4-de485f717f4a">
+					<reportElement x="0" y="0" width="900" height="1" uuid="8c7cdf64-f48d-403a-90a4-de485f717f4a">
 						<property name="com.jaspersoft.studio.unit.y" value="px"/>
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -201,7 +196,7 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[Direccion]]></text>
 				</staticText>
 				<line>
-					<reportElement x="0" y="21" width="915" height="1" uuid="8c372302-d808-47bf-8155-081ae2ea674a">
+					<reportElement x="0" y="21" width="900" height="1" uuid="8c372302-d808-47bf-8155-081ae2ea674a">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						<property name="com.jaspersoft.studio.unit.x" value="px"/>
 						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
@@ -223,7 +218,7 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[Mes  Deuda]]></text>
 				</staticText>
 				<staticText>
-					<reportElement x="837" y="8" width="76" height="13" uuid="3edb00a5-0dfc-45a0-b752-67c348721928"/>
+					<reportElement x="837" y="8" width="63" height="13" uuid="3edb00a5-0dfc-45a0-b752-67c348721928"/>
 					<textElement>
 						<font fontName="SansSerif"/>
 					</textElement>
@@ -276,7 +271,7 @@ INNER JOIN usuarios AS usu
 					<textFieldExpression><![CDATA[$V{totaUsuarioManzana}]]></textFieldExpression>
 				</textField>
 				<line>
-					<reportElement x="0" y="0" width="913" height="1" uuid="b808a4c0-7267-4f51-8361-0075f12d89c2">
+					<reportElement x="0" y="1" width="900" height="1" uuid="b808a4c0-7267-4f51-8361-0075f12d89c2">
 						<property name="com.jaspersoft.studio.unit.y" value="px"/>
 						<property name="com.jaspersoft.studio.unit.x" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -290,7 +285,7 @@ INNER JOIN usuarios AS usu
 					<text><![CDATA[Deuda Total :]]></text>
 				</staticText>
 				<textField pattern="#,##0">
-					<reportElement x="780" y="0" width="115" height="20" uuid="578802ef-e3fe-4c34-9e9d-2eb3d925315c"/>
+					<reportElement x="780" y="0" width="120" height="20" uuid="578802ef-e3fe-4c34-9e9d-2eb3d925315c"/>
 					<textElement>
 						<font fontName="SansSerif" size="12" isBold="false"/>
 					</textElement>
@@ -407,7 +402,7 @@ INNER JOIN usuarios AS usu
 				<textFieldExpression><![CDATA[$F{mes_deuda}]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤#,##0.##;¤-#,##0.##">
-				<reportElement x="839" y="-1" width="74" height="11" uuid="dbdb920f-a5a6-45fb-9534-c47e8f32b8a1"/>
+				<reportElement x="839" y="-1" width="61" height="11" uuid="dbdb920f-a5a6-45fb-9534-c47e8f32b8a1"/>
 				<textElement>
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
@@ -499,14 +494,14 @@ INNER JOIN usuarios AS usu
 				<textFieldExpression><![CDATA[$V{totaUsuario}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0">
-				<reportElement x="780" y="4" width="115" height="20" uuid="e7994e4c-6fb7-42c4-9d12-7d127f53a1a2"/>
+				<reportElement x="780" y="4" width="120" height="20" uuid="e7994e4c-6fb7-42c4-9d12-7d127f53a1a2"/>
 				<textElement>
 					<font fontName="SansSerif" size="12" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{total_deuda}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="0" width="913" height="1" uuid="afe87a59-0cc4-4ec4-bddc-67e06cc31777">
+				<reportElement x="0" y="0" width="900" height="1" uuid="afe87a59-0cc4-4ec4-bddc-67e06cc31777">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>

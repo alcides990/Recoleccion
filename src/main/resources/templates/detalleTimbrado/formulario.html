@@ -75,6 +75,30 @@
                             </select>
                         </div>
                     </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label" for="modoEmision">Modo de emisión</label>
+                            <select id="modoEmision" name="modoEmision" class="form-select" required>
+                                <option value="MANUAL" th:selected="${!edicion or detalle.modoEmision == 'MANUAL'}">Manual / preimpreso</option>
+                                <option value="AUTOIMPRESOR" th:selected="${edicion and detalle.modoEmision == 'AUTOIMPRESOR'}">Autoimpresor</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label" for="numeroDesde">Numeración desde</label>
+                            <input id="numeroDesde" name="numeroDesde" class="form-control" type="number"
+                                   min="1" max="9999999" required
+                                   th:value="${edicion ? detalle.numeroDesde : 1}">
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label" for="numeroHasta">Numeración hasta</label>
+                            <input id="numeroHasta" name="numeroHasta" class="form-control" type="number"
+                                   min="1" max="9999999" required
+                                   th:value="${edicion ? detalle.numeroHasta : 9999999}">
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted">Active Autoimpresor solamente con el timbrado y rango autorizados por la DNIT.</small>
+                        </div>
+                    </div>
                 </section>
             </div>
 
