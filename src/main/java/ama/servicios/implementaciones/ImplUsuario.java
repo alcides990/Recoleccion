@@ -56,6 +56,7 @@ public class ImplUsuario implements UsuarioService {
     @Override
     public void eliminar(Usuario usuario) {
         usuarioDao.delete(usuario);
+        usuarioDao.flush();
     }
 
     @Transactional(readOnly = true)

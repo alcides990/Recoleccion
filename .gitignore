@@ -37,6 +37,7 @@ build/
 /.m2/
 /.m2-repository/
 /output/
+/tmp/
 /classpath.txt
 /nbactions.tmp
 /*.apk

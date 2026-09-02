@@ -1,7 +1,8 @@
 $(function () {
     const token = $('#token').val();
     const roles = String($('#roles').text() || '');
-    const puedeAdministrar = roles.includes('ROOT') || roles.includes('ADMIN');
+    const puedeAdministrar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR');
+    const puedeEditar = puedeAdministrar || roles.includes('SUPERVISOR');
     const escapar = valor => $('<div>').text(valor ?? '').html();
 
     $('#tablaCobradores').DataTable({
@@ -52,9 +53,14 @@ $(function () {
                 searchable: false,
                 className: 'text-center text-nowrap',
                 render: function (_, __, fila) {
-                    if (!puedeAdministrar) return '';
-                    return '<a href="/cobrador/editar/' + fila.codigo + '" class="btn btn-info btn-sm" title="Editar cobrador" aria-label="Editar cobrador"><i class="fa-regular fa-pen-to-square"></i></a> '
-                            + '<button type="button" id="eliminar" data-url="/cobrador/eliminar/" data-id="' + fila.codigo + '" class="btn btn-danger btn-sm" title="Eliminar cobrador" aria-label="Eliminar cobrador"><i class="fa-solid fa-trash-can"></i></button>';
+                    let acciones = '';
+                    if (puedeEditar) {
+                        acciones += '<a href="/cobrador/editar/' + fila.codigo + '" class="btn btn-info btn-sm" title="Editar cobrador" aria-label="Editar cobrador"><i class="fa-regular fa-pen-to-square"></i></a> ';
+                    }
+                    if (puedeAdministrar) {
+                        acciones += '<button type="button" id="eliminar" data-url="/cobrador/eliminar/" data-id="' + fila.codigo + '" class="btn btn-danger btn-sm" title="Eliminar cobrador" aria-label="Eliminar cobrador"><i class="fa-solid fa-trash-can"></i></button>';
+                    }
+                    return acciones;
                 }
             }
         ],

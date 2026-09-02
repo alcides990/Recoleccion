@@ -7,6 +7,32 @@ tabulador("#numeroComprobante", "#cantidadPago");
 tabulador("#subTotal", "#recargoPago");
 tabulador("#recargoPago", "#guardar");
 
+function fechaIsoDesdeCampo(campo) {
+    const valor = String($(campo).val() || '').trim();
+    if (!valor) {
+        return null;
+    }
+    try {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+            const fechaIso = $.datepicker.parseDate('yy-mm-dd', valor);
+            return $.datepicker.formatDate('yy-mm-dd', fechaIso);
+        }
+        if (!/^\d{4}\/\d{2}\/\d{2}$/.test(valor)) {
+            return null;
+        }
+        const fecha = $.datepicker.parseDate('yy/mm/dd', valor);
+        return $.datepicker.formatDate('yy-mm-dd', fecha);
+    } catch (error) {
+        return null;
+    }
+}
+
+function mensajeFechaPagoInvalida() {
+    return String($("#fechaPago").val() || '').trim()
+            ? 'El formato de la fecha de pago no es válido. Use aaaa-mm-dd.'
+            : 'Seleccione la fecha de pago.';
+}
+
 function fechaPagoHastaFormateada(pagoHasta) {
     if (!pagoHasta) return '';
     const partes = pagoHasta.substring(0, 10).split('-');
@@ -130,9 +156,10 @@ $("#cantidadPago").blur(function (e) {
     var tarifa = $('#tarifa').val();
     subTotal = cantidadPago * tarifa;
     $('#subTotal').val(formatPYG(subTotal));
-    if (isTbodyNotEmpty) {
-        limpiarMetodosPago("#tablaMetodoPago");
+    if (isTbodyNotEmpty("#tablaMetodoPago")) {
+        limpiarMetodosPago();
     }
+    calcularTotalImporte();
 });
 
 $("#recargoPago").on('keyup', function (e) {
@@ -157,10 +184,8 @@ function calcularTotalImporte() {
     let saldoAnterior = parseInt(soloNumero($("#saldoAnterior").val()) || 0);
     let total = 0;
     total = recargo + subTotal - saldoAnterior;
-    if ($("#recargoPago").val() !== '') {
-        $("#totalPagar").val(formatPYG(total));
-        $("#subTotal").val(formatPYG(subTotal));
-    }
+    $("#totalPagar").val(formatPYG(total));
+    $("#subTotal").val(formatPYG(subTotal));
 }
 //    -----------------GUARDAR COMPROBANTE-------------------------------
 //Campos a limpira
@@ -302,31 +327,60 @@ function getDetallePago() {
 
 
 
-$('#frm-comprobante').submit(function (event) {
+$('#frm-comprobante').off('submit.guardarComprobante').on('submit.guardarComprobante', function (event) {
     event.preventDefault();
+});
+
+$('#guardar').off('click.guardarComprobante').on('click.guardarComprobante', function (event) {
+    event.preventDefault();
+    const formulario = $('#frm-comprobante');
+    if (formulario.data('guardandoComprobante')) {
+        return;
+    }
     let timbradoSeleccionado = $("#detalleTimbrado option:selected");
     let codigoSerie = timbradoSeleccionado.data("serie");
     let codigoTimbrado = timbradoSeleccionado.val();
+    let autoimpresor = esTipoAutoimpresorSeleccionado();
     if (!codigoTimbrado || codigoSerie === undefined) {
-        mostrarAlerta({mensaje: 'Seleccione un timbrado y serie vigente.', url: '/comprobante/guardar', tipo: 'danger'});
+        mostrarAlerta({mensaje: 'Seleccione un timbrado vigente.', url: '/comprobante/guardar', tipo: 'danger'});
         return;
     }
     let codigoCondicionVenta = $("#condicionVenta").val();
     ;
-    let fechaPago = $("#fechaPago").val();
+    let fechaPago = fechaIsoDesdeCampo("#fechaPago");
+    if (!fechaPago) {
+        mostrarAlerta({mensaje: mensajeFechaPagoInvalida(), url: '/comprobante/guardar', tipo: 'danger'});
+        $("#fechaPago").focus();
+        return;
+    }
     let pagoHasta = $("#pagoHasta").attr('data-iso') || null;
     let cuentaCorriente = $("#cuentaCorriente").val();
     let codigoUsuario = $("#codigoUsuario").val();
     let razonSocial = $("#razonSocial").val();
     let numeroComprobante = $("#numeroComprobante").val();
+    if (!autoimpresor && !numeroComprobante) {
+        mostrarAlerta({mensaje: 'Ingrese el número de la factura manual.', url: '/comprobante/guardar', tipo: 'danger'});
+        $("#numeroComprobante").focus();
+        return;
+    }
     let codigoPuntoExpedicion = $("#puntoExpedicion").val();
     let codigoTipoComprobante = $("#tipoComprobante").val();
     let codigoCobrador = $("#cobrador").val();
     let codigoComision = $("#comision").val();
     let cantidadDeuda = $("#cantidadDeuda").val();
-    let cantidadPago = $("#cantidadPago").val();
+    let cantidadPago = Number($("#cantidadPago").val());
+    if (!Number.isInteger(cantidadPago) || cantidadPago < 0) {
+        mostrarAlerta({mensaje: 'Ingrese una cantidad de pago válida.', url: '/comprobante/guardar', tipo: 'danger'});
+        $("#cantidadPago").focus();
+        return;
+    }
     let codigoCategoria = $("#categoria").val();
-    let tarifa = $("#categoria").text().split('-')[1];
+    let tarifa = Number($("#tarifa").val());
+    if (!Number.isFinite(tarifa) || tarifa <= 0) {
+        mostrarAlerta({mensaje: 'No se pudo recuperar la tarifa de la cuenta seleccionada.', url: '/comprobante/guardar', tipo: 'danger'});
+        $("#cuentaCorriente").focus();
+        return;
+    }
     let recargoPago = soloNumero($("#recargoPago").val());
     let saldoAnterior = soloNumero($("#saldoAnterior").val());
     let url = '/comprobante/guardar';
@@ -350,20 +404,35 @@ $('#frm-comprobante').submit(function (event) {
         tarifa: tarifa,
         recargoPago: recargoPago,
         saldoAnterior: saldoAnterior,
-        detallePago: getDetallePago()
+        detallePago: cantidadPago === 0 ? [] : getDetallePago()
     };
     let contenType = 'application/json';
+    let botonGuardar = $("#guardar");
+    let contenidoBoton = botonGuardar.html();
+    formulario.data('guardandoComprobante', true);
+    botonGuardar.prop('disabled', true)
+            .html('<i class="fa-solid fa-spinner fa-spin"></i> Guardando...');
     guardar(datos, url, contenType).then(function (data) {
         mostrarAlerta({
             mensaje: data,
             url: url,
             tipo: 'success'
         });
-        let numComprobante = $("#numeroComprobante").val();
         limpiarComprobante();
         limpiarMetodosPago();
-        $("#numeroComprobante").val(numeroComprobanteSiguiente(numComprobante));
+        if (autoimpresor) {
+            generarNumeroComprobante();
+        } else {
+            $("#numeroComprobante")
+                    .prop('readonly', false)
+                    .val(numeroComprobanteSiguiente(numeroComprobante));
+        }
         $("#cuentaCorriente").focus();
+    }).catch(function () {
+        // guardar() ya muestra al usuario el detalle del error.
+    }).finally(function () {
+        formulario.data('guardandoComprobante', false);
+        botonGuardar.prop('disabled', false).html(contenidoBoton);
     });
 });
 
@@ -403,7 +472,12 @@ export function modificarComprobante(url) {
     let codigoTipoComprobante = $("#tipoComprobante").val();
     let codigoSerie = $('#serieModal').val();
     let numeroComprobante = $("#numeroComprobante").val();
-    let fechaPago = $("#fechaPago").val();
+    let fechaPago = fechaIsoDesdeCampo("#fechaPago");
+    if (url === '/comprobante/guardar' && !fechaPago) {
+        mostrarAlerta({mensaje: mensajeFechaPagoInvalida(), url: url, tipo: 'danger'});
+        $("#fechaPago").focus();
+        return;
+    }
     let codigoCobrador = $("#cobrador").val();
     let codigoEstado = $("#estado").val();
     let motivoAnulacion = $("#motivoAnulacion").val();
@@ -523,18 +597,17 @@ $("#cantidadRegistro").change(function () {
 }
 );
 export function generarNumeroComprobante() {
-    var modoEmision = $("#detalleTimbrado option:selected").attr('data-modo-emision');
-    if (modoEmision !== 'AUTOIMPRESOR') {
-        $("#numeroComprobante").prop('readonly', false);
-    } else {
-        $("#numeroComprobante").prop('readonly', true);
+    var campoNumero = $("#numeroComprobante");
+    if (!esTipoAutoimpresorSeleccionado()) {
+        campoNumero.prop('readonly', false).val('');
+        return;
     }
+    campoNumero.prop('readonly', true).val('');
 
     var codigoPuntoExpedicion = $("#puntoExpedicion").val();
     var codigoTipoComprobante = $("#tipoComprobante").val();
     var codigoSerie = $("#detalleTimbrado option:selected").data("serie");
     if (codigoSerie === undefined) {
-        $("#numeroComprobante").val("");
         return;
     }
     var url = '/comprobante/numComprobante';
@@ -546,7 +619,7 @@ export function generarNumeroComprobante() {
         codigoSerie: codigoSerie
     };
     consultar(datos, url).then(data => {
-        $("#numeroComprobante").val(data.toString().padStart(7, 0));
+        campoNumero.val(data.toString().padStart(7, 0));
     }).catch(error => {
 
         mostrarAlerta({
@@ -557,6 +630,11 @@ export function generarNumeroComprobante() {
     });
 
 
+}
+
+function esTipoAutoimpresorSeleccionado() {
+    var nombreTipo = $("#tipoComprobante option:selected").text();
+    return nombreTipo.trim().toUpperCase().includes('AUTOIMPRESOR');
 }
 
 

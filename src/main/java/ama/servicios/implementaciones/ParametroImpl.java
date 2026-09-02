@@ -5,6 +5,7 @@ import ama.dominio.Parametro;
 import ama.dominio.Sucursal;
 import ama.servicio.ParametroService;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,11 @@ public class ParametroImpl implements ParametroService {
     @Override
     public Parametro encontrar(Sucursal sucursal) {
         return parametroDao.getParametro(sucursal).orElseThrow(()-> new NullPointerException("Parametro no encontrado"));
+    }
+
+    @Override
+    public Optional<Parametro> buscar(Sucursal sucursal) {
+        return parametroDao.getParametro(sucursal);
     }
 
     @Override

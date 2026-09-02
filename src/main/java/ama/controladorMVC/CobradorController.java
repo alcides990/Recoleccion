@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ama.servicio.CobradorService;
+import ama.servicio.EliminacionCobradorService;
+import ama.servicio.EliminacionCobradorService.CobradorConRegistrosRelacionadosException;
 import ama.servicio.SucursalService;
 import ama.servicio.CiudadService;
 import ama.servicio.EstadoService;
@@ -37,6 +39,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Slf4j
 @Controller
@@ -51,6 +54,8 @@ public class CobradorController {
 
     @Autowired
     private SucursalService servicioSucursal;
+    @Autowired
+    private EliminacionCobradorService eliminacionCobradorService;
 
     @Autowired
     private CiudadService servicioCiudad;
@@ -147,7 +152,7 @@ public class CobradorController {
         return "redirect:/cobrador/listar";
     }
 
-    @PreAuthorize("hasAnyAuthority({'ROOT','ADMIN','ADMINISTRADOR'})")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')")
     @GetMapping("/editar/{codigoCobrador}")
     public String editar(Cobrador cobrador, Model model) {
         cobrador = servicioCobrador.encontrar(cobrador);
@@ -168,7 +173,7 @@ public class CobradorController {
         return "cobrador/modificarCobrador";
     }
 
-    @PreAuthorize("hasAnyAuthority('ROOT','ADMIN','ADMINISTRADOR')")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR')")
     @PostMapping("/eliminar/{codigoCobrador}")
     public ResponseEntity<?> eliminar(Cobrador cobrador) {
         try {
@@ -178,11 +183,14 @@ public class CobradorController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("El cobrador no pertenece a su sucursal");
             }
-            servicioCobrador.eliminar(cobradorEncontrado);
-            return ResponseEntity.ok("Cobrador Eliminado Correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al Eliminar Cobrador"+e.getMessage());
+            eliminacionCobradorService.eliminar(cobradorEncontrado);
+            return ResponseEntity.ok("Cobrador eliminado correctamente.");
+        } catch (CobradorConRegistrosRelacionadosException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No se puede eliminar el cobrador. " + e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No se puede eliminar el cobrador porque tiene registros relacionados.");
         }
     }
 

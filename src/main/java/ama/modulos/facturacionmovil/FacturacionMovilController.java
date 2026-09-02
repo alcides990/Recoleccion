@@ -30,6 +30,7 @@ import ama.dominio.ComprobantePK;
 import ama.dominio.DetallePago;
 import ama.dominio.DetallePagoPK;
 import ama.dominio.PuntoExpedicionPK;
+import ama.dominio.TipoComprobante;
 import ama.controladorMVC.ComprobanteController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -212,25 +213,41 @@ public class FacturacionMovilController {
     @GetMapping("/detalles-timbrado")
     @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')")
     @Transactional(readOnly = true)
-    public ResponseEntity<?> detallesTimbrado(@RequestParam Integer codigoPuntoExpedicion) {
+    public ResponseEntity<?> detallesTimbrado(@RequestParam Integer codigoPuntoExpedicion,
+            @RequestParam Integer codigoTipoComprobante) {
         UsuarioSistema usuario = usuarioSession();
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("mensaje", "Sesión vencida."));
         }
+        TipoComprobante tipo = tipos.encontrar(new TipoComprobante(codigoTipoComprobante));
+        if (tipo == null) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", "El tipo de comprobante no existe."));
+        }
+        String modoEmision = esAutoimpresor(tipo) ? "AUTOIMPRESOR" : "MANUAL";
         var filas = detallesTimbrado.buscarActivos(
-                usuario.getSucursal().getCodigoSucursal(), codigoPuntoExpedicion);
-        return ResponseEntity.ok(filas.stream().map(x -> Map.of(
-                "codigoTimbrado", ((Number) x[0]).intValue(),
-                "numeroTimbrado", String.valueOf(x[1]),
-                "codigoSerie", ((Number) x[2]).intValue(),
-                "serie", String.valueOf(x[3]),
-                "modoEmision", String.valueOf(x[4]),
-                "numeroDesde", ((Number) x[5]).intValue(),
-                "numeroHasta", ((Number) x[6]).intValue(),
-                "nombre", "Timbrado " + x[1] + " · Serie " + x[3]
-                        + ("AUTOIMPRESOR".equals(String.valueOf(x[4])) ? " · Autoimpresor" : " · Manual")
-        )).toList());
+                usuario.getSucursal().getCodigoSucursal(), codigoPuntoExpedicion, modoEmision);
+        return ResponseEntity.ok(filas.stream().map(x -> {
+            String serie = String.valueOf(x[3]);
+            Map<String, Object> fila = new LinkedHashMap<>();
+            fila.put("codigoTimbrado", ((Number) x[0]).intValue());
+            fila.put("numeroTimbrado", String.valueOf(x[1]));
+            fila.put("codigoSerie", ((Number) x[2]).intValue());
+            fila.put("serie", serie);
+            fila.put("modoEmision", String.valueOf(x[4]));
+            fila.put("numeroDesde", ((Number) x[5]).intValue());
+            fila.put("numeroHasta", ((Number) x[6]).intValue());
+            fila.put("nombre", "Timbrado " + x[1]
+                    + (serie.isBlank() ? " · Sin serie" : " · Serie " + serie)
+                    + ("AUTOIMPRESOR".equals(String.valueOf(x[4]))
+                            ? " · Autoimpresor" : " · Manual"));
+            return fila;
+        }).toList());
+    }
+
+    private boolean esAutoimpresor(TipoComprobante tipo) {
+        return tipo.getNombreTipoComprobante() != null
+                && tipo.getNombreTipoComprobante().trim().toUpperCase().contains("AUTOIMPRESOR");
     }
 
     @GetMapping("/numero-siguiente")
@@ -248,7 +265,7 @@ public class FacturacionMovilController {
     }
 
     @GetMapping("/estado-cuenta")
-    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','ADMIN','SUPERVISOR','SECRETARIO')")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')")
     @Transactional(readOnly = true)
     public ResponseEntity<?> estadoCuenta(@RequestParam String cuentaCorriente) {
         UsuarioSistema usuario = usuarioSession();
@@ -322,7 +339,7 @@ public class FacturacionMovilController {
     }
 
     @PostMapping("/emitir")
-    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','ADMIN','SUPERVISOR','SECRETARIO')")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')")
     @Transactional
     public ResponseEntity<?> emitir(@RequestBody EmitirFacturaMovilRequest entrada) {
         UsuarioSistema usuario = usuarioSession();

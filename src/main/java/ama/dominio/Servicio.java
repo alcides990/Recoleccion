@@ -74,6 +74,7 @@ public class Servicio implements Serializable {
         this.cuentaCorriente = cuentaCorriente;
     }
 
+    @Column(name = "observacion", length = 150)
     private String observacion;
 
     @Transient

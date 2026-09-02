@@ -89,7 +89,7 @@ public class DetalleTimbradoController {
     public String guardar(@RequestParam Integer codigoTimbrado,
             @RequestParam Integer codigoPuntoExpedicion,
             @RequestParam Integer codigoSucursal,
-            @RequestParam Integer codigoSerie,
+            @RequestParam(required = false) Integer codigoSerie,
             @RequestParam Integer codigoEstado,
             @RequestParam(defaultValue = "MANUAL") String modoEmision,
             @RequestParam(defaultValue = "1") Integer numeroDesde,
@@ -112,9 +112,18 @@ public class DetalleTimbradoController {
             redirect.addFlashAttribute("error", "El modo de emisión o el rango autorizado no es válido.");
             return "redirect:/detalleTimbrado/listar";
         }
+        Integer codigoSerieNormalizado = codigoSerie == null || codigoSerie == 0 ? null : codigoSerie;
+        Serie serie = codigoSerieNormalizado == null
+                ? null : serieService.encontrar(new Serie(codigoSerieNormalizado));
+        if ((!"AUTOIMPRESOR".equals(modo) && serie == null)
+                || (codigoSerieNormalizado != null && serie == null)) {
+            redirect.addFlashAttribute("error",
+                    "Seleccione una serie válida. En autoimpresor puede dejarla sin serie.");
+            return "redirect:/detalleTimbrado/listar";
+        }
         DetalleTimbrado detalle = detalleDao.findById(id).orElseGet(DetalleTimbrado::new);
         detalle.setDetalleTimbradoPK(id);
-        detalle.setSerie(serieService.encontrar(new Serie(codigoSerie)));
+        detalle.setSerie(serie);
         detalle.setEstado(estadoService.encontrar(new Estado(codigoEstado)));
         detalle.setModoEmision(modo);
         detalle.setNumeroDesde(numeroDesde);

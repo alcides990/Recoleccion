@@ -37,7 +37,9 @@ $(function () {
                 className: 'text-center text-nowrap',
                 render: function (_, __, fila) {
                     if (!administra) return '';
-                    let acciones = '<a href="/detalleUsuarioSistema/agregar/' + fila.codigo
+                    let acciones = '<a href="/auditoria-entidades?entidad=USUARIO_SISTEMA&identificador=' + encodeURIComponent(fila.codigo)
+                            + '" class="btn btn-outline-secondary btn-sm" title="Ver historial de modificaciones" aria-label="Ver historial de modificaciones"><i class="fa-solid fa-clock-rotate-left"></i></a> '
+                            + '<a href="/detalleUsuarioSistema/agregar/' + fila.codigo
                             + '" class="btn btn-primario btn-sm" title="Administrar roles" aria-label="Administrar roles"><i class="fa-solid fa-user-gear"></i></a> ';
                     if (esRoot) {
                         acciones += '<a href="/usuarioSistema/editar/' + fila.codigo

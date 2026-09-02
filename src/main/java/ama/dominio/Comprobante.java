@@ -170,8 +170,12 @@ public class Comprobante implements Serializable {
 
     @PrePersist
     public void getEmision() {
-        this.fechaEmision = LocalDateTime.now();
-        this.fechaPago = LocalDate.now();
+        if (this.fechaEmision == null) {
+            this.fechaEmision = LocalDateTime.now();
+        }
+        if (this.fechaPago == null) {
+            this.fechaPago = LocalDate.now();
+        }
     }
 
     @Override

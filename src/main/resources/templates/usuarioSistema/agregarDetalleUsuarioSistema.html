@@ -23,6 +23,11 @@
                     <span th:text="${mensaje}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                 </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show m-3 mb-0" role="alert">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
 
                 <div class="usuario-sistema-body">
                     <section class="roles-usuario-resumen">
@@ -42,14 +47,18 @@
                             <div class="col-md-8">
                                 <label class="form-label" for="rolUsuarioSistema">Rol disponible</label>
                                 <select id="rolUsuarioSistema" class="form-select" name="rol" required>
-                                    <option value="" selected disabled>Seleccione un rol</option>
+                                    <option value="" selected disabled
+                                            th:text="${#lists.isEmpty(roles) ? 'No hay roles disponibles' : 'Seleccione un rol'}">
+                                        Seleccione un rol
+                                    </option>
                                     <option th:each="rol : ${roles}"
                                             th:value="${rol.codigoRol}"
                                             th:text="${rol.nombre}"></option>
                                 </select>
                             </div>
                             <div class="col-md-4 d-grid">
-                                <button type="submit" name="guardar" class="btn btn-primario roles-asignar-btn">
+                                <button type="submit" name="guardar" class="btn btn-primario roles-asignar-btn"
+                                        th:disabled="${#lists.isEmpty(roles)}">
                                     <i class="fa-solid fa-plus"></i> Asignar rol
                                 </button>
                             </div>

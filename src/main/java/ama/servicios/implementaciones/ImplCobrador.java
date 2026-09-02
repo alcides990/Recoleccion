@@ -51,8 +51,10 @@ public class ImplCobrador implements CobradorService {
     }
 
     @Override
+    @Transactional
     public void eliminar(Cobrador cobrador) {
         cobradorDao.delete(cobrador);
+        cobradorDao.flush();
     }
 
     @Override

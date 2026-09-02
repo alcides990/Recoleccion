@@ -18,19 +18,29 @@
 
             <section class="card border-0 shadow-sm p-3 mb-3">
                 <div class="row g-2 align-items-end">
-                    <div class="col-md-3">
-                        <label class="form-label" for="numero">Número de comprobante</label>
+                    <div class="col-md-2">
+                        <label class="form-label" for="fEstablecimientoAuditoria">Establecimiento</label>
+                        <input class="form-control" id="fEstablecimientoAuditoria" type="text"
+                               inputmode="numeric" maxlength="3" placeholder="Ej. 004">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" for="fPuntoExpedicionAuditoria">Punto de expedición</label>
+                        <input class="form-control" id="fPuntoExpedicionAuditoria" type="text"
+                               inputmode="numeric" maxlength="3" placeholder="Ej. 001">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" for="fNumeroAuditoria">Número de comprobante</label>
                         <input class="form-control" id="fNumeroAuditoria" type="number" min="1" placeholder="Nro. comprobante">
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="accion">Acción</label>
+                    <div class="col-md-3">
+                        <label class="form-label" for="fAccionAuditoria">Acción</label>
                         <select class="form-select" id="fAccionAuditoria">
                             <option value="">Todas</option>
                             <option th:each="opcion : ${acciones}" th:value="${opcion}"
                                     th:text="${opcion}"></option>
                         </select>
                     </div>
-                    <div class="col-md-5 d-flex gap-2">
+                    <div class="col-md-3 d-flex gap-2">
                         <button class="btn btn-primary" id="filtrarAuditoria" type="button"><i class="fa-solid fa-filter"></i> Filtrar</button>
                         <button class="btn btn-outline-secondary" id="limpiarAuditoria" type="button">Limpiar</button>
                     </div>
@@ -39,10 +49,36 @@
 
             <div class="card border-0 shadow-sm p-3 table-responsive">
                 <table id="tablaAuditoriaComprobantes" class="table table-striped table-hover align-middle small w-100">
-                    <thead><tr><th>Fecha</th><th>Acción</th><th>Documento</th><th>Timbrado</th><th>Serie</th><th>Usuario</th><th>Motivo</th></tr></thead>
+                    <thead><tr><th>Fecha</th><th>Acción</th><th>Documento</th><th>Timbrado</th><th>Serie</th><th>Usuario</th><th>Motivo</th><th>Detalle</th></tr></thead>
                 </table>
             </div>
         </main>
+
+        <div class="modal fade" id="comparacionAuditoriaComprobante" tabindex="-1"
+             aria-labelledby="tituloComparacionAuditoriaComprobante" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="tituloComparacionAuditoriaComprobante">
+                            <i class="fa-solid fa-code-compare"></i> Comparación de la modificación
+                        </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info py-2">Los campos resaltados contienen cambios.</div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead><tr><th style="width: 20%">Campo</th><th style="width: 40%">Antes</th><th style="width: 40%">Después</th></tr></thead>
+                                <tbody id="cuerpoComparacionAuditoriaComprobante"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <footer th:replace="~{layout/layout :: footer}"></footer>
         <script src="/js/comprobantesv2/auditoria.js"></script>
     </body>

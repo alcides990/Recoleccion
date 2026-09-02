@@ -2,6 +2,8 @@ $(function () {
     const token = $('#token').val();
     const escapar = valor => $('<div>').text(valor ?? '').html();
     const moneda = new Intl.NumberFormat('es-PY', {maximumFractionDigits: 0});
+    const roles = String($('#roles').text() || '');
+    const puedeVerAuditoria = roles.includes('ROOT') || roles.includes('ADMINISTRADOR');
 
     $('#tablaCategorias').DataTable({
         processing: true,
@@ -37,7 +39,10 @@ $(function () {
                 searchable: false,
                 className: 'text-center text-nowrap',
                 render: function (_, __, fila) {
-                    return '<button type="button" class="btn btn-info btn-sm editar-categoria" data-id="' + fila.codigo + '" data-bs-toggle="modal" data-bs-target="#modificarModal" title="Editar categoría" aria-label="Editar categoría"><i class="fa-regular fa-pen-to-square"></i></button> '
+                    const historial = puedeVerAuditoria
+                            ? '<a href="/auditoria-entidades?entidad=CATEGORIA&identificador=' + encodeURIComponent(fila.codigo) + '" class="btn btn-outline-secondary btn-sm" title="Ver historial de modificaciones" aria-label="Ver historial de modificaciones"><i class="fa-solid fa-clock-rotate-left"></i></a> '
+                            : '';
+                    return historial + '<button type="button" class="btn btn-info btn-sm editar-categoria" data-id="' + fila.codigo + '" data-bs-toggle="modal" data-bs-target="#modificarModal" title="Editar categoría" aria-label="Editar categoría"><i class="fa-regular fa-pen-to-square"></i></button> '
                             + '<button type="button" id="eliminar" data-url="/categoria/eliminar/" data-id="' + fila.codigo + '" class="btn btn-danger btn-sm" title="Eliminar categoría" aria-label="Eliminar categoría"><i class="fa-solid fa-trash-can"></i></button>';
                 }
             }

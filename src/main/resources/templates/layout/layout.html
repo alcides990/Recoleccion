@@ -13,7 +13,7 @@
         <!-- Agrega esta línea para cargar los recursos de los iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
         <link rel="stylesheet" href="/css/jquery.dataTables.min.css" />
-        <link rel="stylesheet" href="/css/diseno-global.css?v=20260819-2" />
+        <link rel="stylesheet" href="/css/diseno-global.css?v=20260829-4" />
     </head>
 
     <body>
@@ -34,10 +34,8 @@
                 </li>
                 <hr />
                 <ul><span class="menu-seccion"><i class="fa-solid fa-hand-holding-dollar"></i> COBRANZA</span>
-                    <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-circle-plus"></i> Factura
-                            Manual </a></li>
-                    <!--                <li id="factura-electronica"><a th:href="@{/comprobante/facturaElectronica}">
-                                            <i class="fa-solid fa-file-lines"></i> Factura Electronica</a></li>-->
+                    <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-circle-plus"></i> Registrar/Emitir Comprobante
+                           </a></li>
                     <li id="facturas" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"><a
                             th:href="@{/comprobantes-v2}"> <i class="fa-solid fa-receipt"></i>
                             Comprobantes</a></li>
@@ -57,6 +55,8 @@
                                 class="fa-solid fa-file-circle-check"></i> Tipos de comprobante</a></li>
                     <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/sucursal/listar}"><i
                                 class="fa-solid fa-building"></i> Sucursales</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/auditoria-entidades}"><i
+                                class="fa-solid fa-clock-rotate-left"></i> Auditoría operativa</a></li>
                     <li sec:authorize="hasAnyAuthority('ROOT')"><a th:href="@{/ciudad/listar}"><i
                                 class="fa-solid fa-city"></i> Ciudades</a></li>
                 </ul>
@@ -80,6 +80,12 @@
                 <li>
                     <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')" th:href="@{/reporte}">
                         <i class="fa-solid fa-chart-column"></i> REPORTES
+                    </a>
+                </li>
+                <hr />
+                <li>
+                    <a th:href="@{/documentacion}">
+                        <i class="fa-solid fa-circle-question"></i> AYUDA Y DOCUMENTACIÓN
                     </a>
                 </li>
                 <hr />

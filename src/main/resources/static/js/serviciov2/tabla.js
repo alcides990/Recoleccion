@@ -5,7 +5,9 @@ $(function () {
     const token = $('#token').val();
     const escapar = valor => $('<div>').text(valor ?? '').html();
     const roles = String($('#roles').text() || '');
-    const puedeEditar = roles.includes('ROOT') || roles.includes('ADMIN');
+    const puedeEditar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR') || roles.includes('SUPERVISOR');
+    const puedeEliminar = puedeEditar;
+    const puedeVerAuditoria = roles.includes('ROOT') || roles.includes('ADMINISTRADOR');
 
     const tabla = tablaElemento.DataTable({
         processing: true,
@@ -41,10 +43,15 @@ $(function () {
                     const cuenta = escapar(fila.cuentaCorriente);
                     let acciones = '<button type="button" class="btn btn-primario btn-sm estado-cuenta" data-id="' + cuenta + '">Estado Cuenta</button> ';
                     acciones += '<button type="button" class="btn btn-success btn-sm ubicacion-servicio" data-id="' + cuenta + '" title="Ubicación del servicio"><i class="fa-solid fa-location-dot"></i></button> ';
+                    if (puedeVerAuditoria) {
+                        acciones += '<a href="/auditoria-entidades?entidad=CUENTA&identificador=' + encodeURIComponent(fila.cuentaCorriente) + '" class="btn btn-outline-secondary btn-sm" title="Ver historial de modificaciones" aria-label="Ver historial de modificaciones"><i class="fa-solid fa-clock-rotate-left"></i></a> ';
+                    }
                     if (puedeEditar) {
                         acciones += '<a id="editar" data-id="' + cuenta + '" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#servicioModal" title="Editar"><i class="fa-regular fa-pen-to-square fa-lg"></i></a> ';
                     }
-                    acciones += '<a id="eliminar" data-url="/servicio/eliminar" data-id="' + cuenta + '" class="btn btn-danger eliminar btn-sm" title="Eliminar"><i class="fa-solid fa-trash-can"></i></a>';
+                    if (puedeEliminar) {
+                        acciones += '<a id="eliminar" data-url="/servicio/eliminar" data-id="' + cuenta + '" class="btn btn-danger eliminar btn-sm" title="Eliminar"><i class="fa-solid fa-trash-can"></i></a>';
+                    }
                     return acciones;
                 }
             }

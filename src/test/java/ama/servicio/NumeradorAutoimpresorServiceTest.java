@@ -35,6 +35,17 @@ class NumeradorAutoimpresorServiceTest {
         assertEquals("Se agotó el rango autorizado del autoimpresor (1 a 10).", error.getMessage());
     }
 
+    @Test
+    void reservaSinSerieFiscalUsandoLaClaveTecnicaCero() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        prepararConsultas(jdbc, 20);
+        NumeradorAutoimpresorService servicio = new NumeradorAutoimpresorService(jdbc);
+        DetalleTimbrado detalle = detalle(1, 100);
+        detalle.setSerie(null);
+
+        assertEquals(21, servicio.reservar(detalle, 1));
+    }
+
     private DetalleTimbrado detalle(int desde, int hasta) {
         DetalleTimbrado detalle = new DetalleTimbrado();
         detalle.setDetalleTimbradoPK(new DetalleTimbradoPK(2, 1, 1));

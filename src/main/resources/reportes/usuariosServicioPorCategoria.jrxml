@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="usuariosServicioPorCategoria" pageWidth="595" pageHeight="842"
+              columnWidth="555" leftMargin="20" rightMargin="20"
+              topMargin="18" bottomMargin="18" whenNoDataType="AllSectionsNoDetail">
+
+    <parameter name="codigoSucursal" class="java.lang.Integer"/>
+    <parameter name="sucursal" class="java.lang.String"/>
+    <parameter name="agrupacion" class="java.lang.String"/>
+    <parameter name="agrupacionDescripcion" class="java.lang.String"/>
+
+    <queryString language="SQL"><![CDATA[
+SELECT
+       CASE $P{agrupacion}
+           WHEN 'ZONA' THEN CONCAT(LPAD(z.codigo_zona, 3, '0'), ' - ', z.zona)
+           WHEN 'COBRADOR' THEN TRIM(CONCAT_WS(' ', cob.nombre, cob.apellido))
+           ELSE 'GENERAL'
+       END AS agrupacionNombre,
+       CASE $P{agrupacion}
+           WHEN 'ZONA' THEN CONCAT('Z-', LPAD(z.codigo_zona, 10, '0'))
+           WHEN 'COBRADOR' THEN CONCAT('C-', LPAD(cob.codigo_cobrador, 10, '0'))
+           ELSE 'G-0000000000'
+       END AS agrupacionClave,
+       cat.categoria,
+       CAST(cat.tarifa AS DECIMAL(18,2)) AS tarifa,
+       COUNT(*) AS cantidadServicios,
+       CAST(COUNT(*) * cat.tarifa AS DECIMAL(18,2)) AS totalCategoria
+  FROM servicios s
+  JOIN categorias cat
+    ON cat.codigo_categoria = s.codigo_categoria
+   AND cat.codigo_sucursal = s.codigo_sucursal
+  JOIN manzanas m
+    ON m.codigo_manzana = s.codigo_manzana
+   AND m.codigo_sucursal = s.codigo_sucursal
+  JOIN zonas z
+    ON z.codigo_zona = m.codigo_zona
+   AND z.codigo_sucursal = m.codigo_sucursal
+  JOIN cobradores cob
+    ON cob.codigo_cobrador = z.codigo_cobrador
+   AND cob.codigo_sucursal = z.codigo_sucursal
+ WHERE s.codigo_sucursal = $P{codigoSucursal}
+ GROUP BY agrupacionClave, agrupacionNombre, cat.categoria, cat.tarifa
+ ORDER BY agrupacionClave, cat.categoria, cat.tarifa
+    ]]></queryString>
+
+    <field name="agrupacionNombre" class="java.lang.String"/>
+    <field name="agrupacionClave" class="java.lang.String"/>
+    <field name="categoria" class="java.lang.String"/>
+    <field name="tarifa" class="java.math.BigDecimal"/>
+    <field name="cantidadServicios" class="java.lang.Long"/>
+    <field name="totalCategoria" class="java.math.BigDecimal"/>
+
+    <variable name="cantidadGeneral" class="java.lang.Long" calculation="Sum">
+        <variableExpression><![CDATA[$F{cantidadServicios}]]></variableExpression>
+        <initialValueExpression><![CDATA[0L]]></initialValueExpression>
+    </variable>
+    <variable name="montoGeneral" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{totalCategoria}]]></variableExpression>
+        <initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+    </variable>
+    <variable name="cantidadAgrupacion" class="java.lang.Long" resetType="Group"
+              resetGroup="agrupacion" calculation="Sum">
+        <variableExpression><![CDATA[$F{cantidadServicios}]]></variableExpression>
+        <initialValueExpression><![CDATA[0L]]></initialValueExpression>
+    </variable>
+    <variable name="montoAgrupacion" class="java.math.BigDecimal" resetType="Group"
+              resetGroup="agrupacion" calculation="Sum">
+        <variableExpression><![CDATA[$F{totalCategoria}]]></variableExpression>
+        <initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+    </variable>
+
+    <group name="agrupacion" isStartNewPage="false" isReprintHeaderOnEachPage="true">
+        <groupExpression><![CDATA[$F{agrupacionClave}]]></groupExpression>
+        <groupHeader>
+            <band height="52">
+                <rectangle radius="3">
+                    <reportElement mode="Opaque" x="0" y="3" width="555" height="22" backcolor="#DCEAF7" forecolor="#AFCBE3"/>
+                </rectangle>
+                <textField textAdjust="ScaleFont">
+                    <reportElement x="8" y="6" width="539" height="16" forecolor="#163A59"/>
+                    <textElement><font size="10" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$P{agrupacion}.equals("GENERAL") ? "RESUMEN GENERAL" : $P{agrupacionDescripcion}.toUpperCase() + ": " + $F{agrupacionNombre}]]></textFieldExpression>
+                </textField>
+                <rectangle>
+                    <reportElement mode="Opaque" x="0" y="29" width="555" height="21" backcolor="#163A59" forecolor="#163A59"/>
+                </rectangle>
+                <staticText><reportElement x="8" y="33" width="240" height="14" forecolor="#FFFFFF"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[CATEGORIA]]></text></staticText>
+                <staticText><reportElement x="255" y="33" width="92" height="14" forecolor="#FFFFFF"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[TARIFA (Gs.)]]></text></staticText>
+                <staticText><reportElement x="354" y="33" width="82" height="14" forecolor="#FFFFFF"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[CANTIDAD]]></text></staticText>
+                <staticText><reportElement x="443" y="33" width="104" height="14" forecolor="#FFFFFF"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[TOTAL (Gs.)]]></text></staticText>
+            </band>
+        </groupHeader>
+        <groupFooter>
+            <band height="35">
+                <line><reportElement x="0" y="2" width="555" height="1" forecolor="#AFCBE3"/></line>
+                <textField>
+                    <reportElement x="8" y="8" width="339" height="18" forecolor="#163A59"/>
+                    <textElement textAlignment="Right"><font size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$P{agrupacion}.equals("GENERAL") ? "TOTAL GENERAL" : "TOTAL " + $F{agrupacionNombre}]]></textFieldExpression>
+                </textField>
+                <textField pattern="#,##0">
+                    <reportElement x="354" y="8" width="82" height="18" forecolor="#163A59"/>
+                    <textElement textAlignment="Right"><font size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$V{cantidadAgrupacion}]]></textFieldExpression>
+                </textField>
+                <textField pattern="#,##0">
+                    <reportElement x="443" y="8" width="104" height="18" forecolor="#163A59"/>
+                    <textElement textAlignment="Right"><font size="9" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$V{montoAgrupacion}]]></textFieldExpression>
+                </textField>
+            </band>
+        </groupFooter>
+    </group>
+
+    <title>
+        <band height="68">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="23" forecolor="#163A59"/>
+                <textElement textAlignment="Center"><font size="15" isBold="true"/></textElement>
+                <text><![CDATA[SERVICIOS POR CATEGORIA]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="26" width="555" height="16" forecolor="#526574"/>
+                <textElement textAlignment="Center"><font size="9"/></textElement>
+                <textFieldExpression><![CDATA["Sucursal: " + $P{sucursal} + " | Agrupacion: " + $P{agrupacionDescripcion}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="355" y="48" width="200" height="13" forecolor="#687A89"/>
+                <textElement textAlignment="Right"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+            </textField>
+            <line><reportElement x="0" y="64" width="555" height="1" forecolor="#163A59"/></line>
+        </band>
+    </title>
+
+    <detail>
+        <band height="24">
+            <textField textAdjust="ScaleFont"><reportElement x="8" y="4" width="240" height="15"/><textElement><font size="8"/></textElement><textFieldExpression><![CDATA[$F{categoria}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="255" y="4" width="92" height="15"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{tarifa}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="354" y="4" width="82" height="15"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{cantidadServicios}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="443" y="4" width="104" height="15"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{totalCategoria}]]></textFieldExpression></textField>
+            <line><reportElement x="0" y="23" width="555" height="1" forecolor="#E8EDF1"/></line>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <line><reportElement x="0" y="1" width="555" height="1" forecolor="#D5DDE5"/></line>
+            <textField>
+                <reportElement x="395" y="5" width="160" height="11" forecolor="#687A89"/>
+                <textElement textAlignment="Right"><font size="7"/></textElement>
+                <textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="43">
+            <printWhenExpression><![CDATA[!$P{agrupacion}.equals("GENERAL")]]></printWhenExpression>
+            <rectangle radius="3"><reportElement mode="Opaque" x="0" y="5" width="555" height="30" backcolor="#163A59" forecolor="#163A59"/></rectangle>
+            <staticText><reportElement x="8" y="12" width="339" height="17" forecolor="#FFFFFF"/><textElement textAlignment="Right"><font size="10" isBold="true"/></textElement><text><![CDATA[TOTAL GENERAL]]></text></staticText>
+            <textField pattern="#,##0"><reportElement x="354" y="12" width="82" height="17" forecolor="#FFFFFF"/><textElement textAlignment="Right"><font size="10" isBold="true"/></textElement><textFieldExpression><![CDATA[$V{cantidadGeneral}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="443" y="12" width="104" height="17" forecolor="#FFFFFF"/><textElement textAlignment="Right"><font size="10" isBold="true"/></textElement><textFieldExpression><![CDATA[$V{montoGeneral}]]></textFieldExpression></textField>
+        </band>
+    </summary>
+</jasperReport>

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -32,12 +33,20 @@ public class RecorridoCobradorController {
     private final CobradorService cobradorService;
     private final RecorridoCobradorService recorridoService;
 
+    @Value("${recoleccion.mapas.tiles-url}")
+    private String mapaTilesUrl;
+
+    @Value("${recoleccion.mapas.attribution}")
+    private String mapaAttribution;
+
     @GetMapping
     public String pagina(Model modelo) {
         UsuarioSistema usuario = usuarioActual();
         modelo.addAttribute("titulo", "Recorridos de cobradores");
         modelo.addAttribute("cobradores",
                 cobradorService.listarIsEstadoActivo(usuario.getSucursal()));
+        modelo.addAttribute("mapaTilesUrl", mapaTilesUrl);
+        modelo.addAttribute("mapaAttribution", mapaAttribution);
         return "recorrido/recorridos";
     }
 

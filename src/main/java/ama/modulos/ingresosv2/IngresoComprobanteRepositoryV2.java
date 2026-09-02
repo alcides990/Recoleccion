@@ -11,49 +11,49 @@ import org.springframework.data.repository.query.Param;
 public interface IngresoComprobanteRepositoryV2 extends JpaRepository<Comprobante, ComprobantePK> {
 
     @Query("""
-            select distinct year(c.fechaEmision)
+            select distinct year(c.fechaPago)
             from Comprobante c
             where c.comprobantePK.puntoExpedicionPK.codigoSucursal = :sucursal
               and c.estado.codigoEstado = 1
-            order by year(c.fechaEmision) desc
+            order by year(c.fechaPago) desc
             """)
     List<Integer> aniosDisponibles(@Param("sucursal") Integer sucursal);
 
     @Query("""
             select new ama.modulos.ingresosv2.IngresoPeriodoV2(
-                day(c.fechaEmision), sum(c.totalImporte), count(c))
+                day(c.fechaPago), sum(c.totalImporte), count(c))
             from Comprobante c
             where c.comprobantePK.puntoExpedicionPK.codigoSucursal = :sucursal
               and c.estado.codigoEstado = 1
-              and year(c.fechaEmision) = :anio
-              and month(c.fechaEmision) = :mes
-            group by day(c.fechaEmision)
-            order by day(c.fechaEmision)
+              and year(c.fechaPago) = :anio
+              and month(c.fechaPago) = :mes
+            group by day(c.fechaPago)
+            order by day(c.fechaPago)
             """)
     List<IngresoPeriodoV2> ingresosPorDia(@Param("sucursal") Integer sucursal,
             @Param("anio") Integer anio, @Param("mes") Integer mes);
 
     @Query("""
             select new ama.modulos.ingresosv2.IngresoPeriodoV2(
-                month(c.fechaEmision), sum(c.totalImporte), count(c))
+                month(c.fechaPago), sum(c.totalImporte), count(c))
             from Comprobante c
             where c.comprobantePK.puntoExpedicionPK.codigoSucursal = :sucursal
               and c.estado.codigoEstado = 1
-              and year(c.fechaEmision) = :anio
-            group by month(c.fechaEmision)
-            order by month(c.fechaEmision)
+              and year(c.fechaPago) = :anio
+            group by month(c.fechaPago)
+            order by month(c.fechaPago)
             """)
     List<IngresoPeriodoV2> ingresosPorMes(@Param("sucursal") Integer sucursal,
             @Param("anio") Integer anio);
 
     @Query("""
             select new ama.modulos.ingresosv2.IngresoPeriodoV2(
-                year(c.fechaEmision), sum(c.totalImporte), count(c))
+                year(c.fechaPago), sum(c.totalImporte), count(c))
             from Comprobante c
             where c.comprobantePK.puntoExpedicionPK.codigoSucursal = :sucursal
               and c.estado.codigoEstado = 1
-            group by year(c.fechaEmision)
-            order by year(c.fechaEmision)
+            group by year(c.fechaPago)
+            order by year(c.fechaPago)
             """)
     List<IngresoPeriodoV2> ingresosPorAnio(@Param("sucursal") Integer sucursal);
 
@@ -64,8 +64,8 @@ public interface IngresoComprobanteRepositoryV2 extends JpaRepository<Comprobant
             from Comprobante c
             where c.comprobantePK.puntoExpedicionPK.codigoSucursal = :sucursal
               and c.estado.codigoEstado = 1
-              and year(c.fechaEmision) = :anio
-              and (:mes is null or month(c.fechaEmision) = :mes)
+              and year(c.fechaPago) = :anio
+              and (:mes is null or month(c.fechaPago) = :mes)
             group by c.cobrador.codigoCobrador, c.cobrador.nombre, c.cobrador.apellido
             order by sum(c.totalImporte) desc
             """)

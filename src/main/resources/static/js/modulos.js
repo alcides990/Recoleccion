@@ -391,9 +391,8 @@ export function mostrarAlerta(opciones) {
     } = opciones;
     $(contenedor).empty();
     var alerta =
-            `<div class="alert modal-header
-             alert-${tipo} alert-dismissible fade show" role="alert"> 
-            ${mensaje} 
+            `<div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+            ${mensaje}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
             <span aria-hidden="true"> &times; </span>
             </button>

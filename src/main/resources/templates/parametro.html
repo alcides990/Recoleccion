@@ -17,8 +17,32 @@
                 <span th:text="${error}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+            <form th:if="${esRoot}" th:action="@{/parametro/listar}" method="get"
+                  class="card border-0 shadow-sm p-3 m-1 mb-3">
+                <div class="row align-items-end">
+                    <div class="col-md-6">
+                        <label class="form-label" for="selectorSucursalParametro">Sucursal a configurar</label>
+                        <select id="selectorSucursalParametro" name="codigoSucursal" class="form-select"
+                                onchange="this.form.submit()">
+                            <option th:each="item : ${sucursales}"
+                                    th:value="${item.codigoSucursal}"
+                                    th:text="${item.nombreSucursal + ' - ' + item.ciudad.nombreCiudad}"
+                                    th:selected="${item.codigoSucursal == sucursal.codigoSucursal}"></option>
+                        </select>
+                    </div>
+                </div>
+            </form>
             <form th:action="@{/parametro/guardar}" method="post" th:object="${parametro}">
+                <div class="d-flex justify-content-between align-items-center m-1 mb-3">
+                    <div>
+                        <h4 class="mb-1" th:text="${existeParametro ? 'Configuración actual' : 'Nuevo parámetro'}"></h4>
+                        <span class="badge"
+                              th:classappend="${existeParametro ? 'bg-success' : 'bg-warning text-dark'}"
+                              th:text="${existeParametro ? 'CONFIGURADO' : 'SIN CONFIGURAR'}"></span>
+                    </div>
+                </div>
                 <div class="row d-flex m-1">
+                    <input type="hidden" name="codigoSucursal" th:value="${sucursal.codigoSucursal}" />
                     <input type="hidden" name="codigoEmpresa"  th:value="${empresa.codigoEmpresa}" />
                     <input type="hidden" name="codigoParametro"  th:value="*{codigoParametro}" />
                     <div class="form-group col-sm-3">
@@ -31,17 +55,15 @@
                     </div>
                     <div class="form-group col-sm-3">
                         <label class="  form-label" for="sucursal">Sucursal</label>
-                        <select th:object="${sucursal}" class="form-control" name="sucursal" >
-                            <option th:each="sucursal : ${sucursal}" 
-                                    th:value="${sucursal.codigoSucursal}"
-                                    th:text="${sucursal.nombreSucursal} +' '+${sucursal.ciudad.nombreCiudad} "  />
-                        </select>
+                        <input id="sucursal" type="text" class="form-control" readonly
+                               th:value="${sucursal.nombreSucursal + ' - ' + sucursal.ciudad.nombreCiudad}" />
                     </div>
                 </div>
                 <div class="row d-flex m-1">
                     <div class="form-group col-sm-2">
                         <label class="  form-label" for="recargoMora">Recargo Mora %</label>
-                        <input type="text" name="recargoMora"  th:value="*{recargoMora}" class="form-control"  required="campo ogligatorio"/>
+                        <input type="number" name="recargoMora" th:value="*{recargoMora}"
+                               class="form-control" min="0" max="100" step="0.1" required />
                     </div>
                     <div class="form-group col-sm-2">
                         <label class="  form-label" for="cierrePeriodo">Cierre Periodo</label>
@@ -49,15 +71,27 @@
                     </div>
                     <div class="form-group col-sm-3">
                         <label class="  form-label" for="comision">Comision </label>
-                        <select th:object="${comision}" class="form-select" name="comision" >
+                        <select class="form-select" name="comision" required>
+                            <option value="" th:selected="${parametro.comision == null}">Seleccione una comisión</option>
                             <option th:each="comision : ${comisiones}" 
                                     th:value="${comision.codigoComision}"
                                     th:text="${comision.nombreComision} " 
-                                    th:selected="${comision}== ${parametro.comision}"/>
+                                    th:selected="${parametro.comision != null
+                                        and comision.codigoComision == parametro.comision.codigoComision}"/>
                         </select>
                     </div>
                 </div>
-                <input type="submit" name="guardar" value="Guardar" class="btn-primario m-3"/>
+                <button type="submit" name="guardar" class="btn-primario m-3">
+                    <i class="fa-solid" th:classappend="${existeParametro ? 'fa-floppy-disk' : 'fa-plus'}"></i>
+                    <span th:text="${existeParametro ? 'Guardar cambios' : 'Crear parámetro'}"></span>
+                </button>
+            </form>
+            <form th:if="${existeParametro}" id="formEliminarParametro"
+                  th:action="@{/parametro/eliminar}" method="post" class="m-1">
+                <input type="hidden" name="codigoSucursal" th:value="${sucursal.codigoSucursal}" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar parámetro
+                </button>
             </form>
         </div>
         <footer th:replace="~{layout/layout :: footer}"></footer>
@@ -68,6 +102,11 @@
                 changeYear: true
             }
             );
+            $("#formEliminarParametro").on("submit", function (evento) {
+                if (!window.confirm("¿Seguro que desea eliminar los parámetros de esta sucursal?")) {
+                    evento.preventDefault();
+                }
+            });
         </script>
     </body>
 </html>

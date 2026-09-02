@@ -4,7 +4,6 @@ import ama.DTO.ComprobanteDTO;
 import ama.DTO.DetallePagoDTO;
 import ama.dominio.*;
 import ama.dao.DetalleTimbradoDao;
-import ama.facturaelectronica.FacturaElectronicaService;
 import ama.servicio.*;
 import ama.utilerias.TableResponse;
 import ama.utilerias.PageRender;
@@ -33,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -43,6 +43,15 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/comprobante")
 public class ComprobanteController {
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseBody
+    public ResponseEntity<String> cuerpoSolicitudInvalido(HttpMessageNotReadableException excepcion) {
+        log.warn("Solicitud inválida al guardar comprobante: {}", excepcion.getMostSpecificCause().getMessage());
+        return ResponseEntity.badRequest().body(
+                "No se pudieron interpretar los datos. Verifique que la fecha use el formato año-mes-día "
+                + "y que los campos numéricos contengan solamente números.");
+    }
 
     @Autowired
     private ServicioService servicioService;
@@ -79,8 +88,6 @@ public class ComprobanteController {
     private NumeradorAutoimpresorService numeradorAutoimpresorService;
     @Autowired
     private AuditoriaComprobanteService auditoriaComprobanteService;
-    @Autowired
-    private FacturaElectronicaService facturaElectronicaService;
 
     @GetMapping("/listar")
     public String listar(
@@ -179,14 +186,6 @@ public class ComprobanteController {
         return "comprobantes/facturaManual";
     }
 
-    @GetMapping("/facturaElectronica")
-    public String facturaElectronica(Model modelo) {
-        modelo.addAttribute("tiposComprobante", tipoComprobanteService.listar());
-
-        cargarDatosComprobante(modelo);
-        return "comprobantes/facturaManual";
-    }
-
     private void cargarDatosComprobante(Model modelo) {
         modelo.addAttribute("titulo", "Comprobate");
         modelo.addAttribute("condicionesVenta", servicioCondicionVenta.listar());
@@ -237,6 +236,29 @@ public class ComprobanteController {
     @Transactional
     @ResponseBody
     public ResponseEntity<?> guardarComprobante(@RequestBody ComprobanteGuardar comprobanteRequest) {
+        if (comprobanteRequest.getFechaPago() == null) {
+            return ResponseEntity.badRequest().body("Seleccione la fecha de pago.");
+        }
+        if (comprobanteRequest.getCuentaCorriente() == null
+                || comprobanteRequest.getCuentaCorriente().isBlank()) {
+            return ResponseEntity.badRequest().body("Seleccione una cuenta corriente.");
+        }
+        Servicio servicioFacturado = servicioService.encontrar(
+                comprobanteRequest.getCuentaCorriente().trim());
+        if (servicioFacturado == null || servicioFacturado.getSucursal() == null
+                || !getSucursalSession().getCodigoSucursal().equals(
+                        servicioFacturado.getSucursal().getCodigoSucursal())) {
+            return ResponseEntity.badRequest().body("La cuenta seleccionada no pertenece a la sucursal.");
+        }
+        if (servicioFacturado.getCategoria() == null
+                || servicioFacturado.getCategoria().getTarifa() == null
+                || servicioFacturado.getCategoria().getTarifa() <= 0) {
+            return ResponseEntity.badRequest().body("La cuenta no tiene una categoría con tarifa válida.");
+        }
+        comprobanteRequest.setCuentaCorriente(servicioFacturado.getCuentaCorriente());
+        comprobanteRequest.setCodigoCategoria(
+                servicioFacturado.getCategoria().getCodigoCategoria());
+        comprobanteRequest.setTarifa(servicioFacturado.getCategoria().getTarifa());
         if (comprobanteRequest.getCodigoComision() == null) {
             return ResponseEntity.badRequest().body("Seleccione una comision.");
         }
@@ -248,19 +270,36 @@ public class ComprobanteController {
                 .codigoSucursal(getSucursalSession().getCodigoSucursal())
                 .codigoPuntoExpedicion(comprobanteRequest.getCodigoPuntoExpedicion())
                 .build();
-        if (comprobanteRequest.getCodigoTimbrado() == null || comprobanteRequest.getCodigoSerie() == null) {
-            return ResponseEntity.badRequest().body("Seleccione un timbrado y serie para el punto de expedición.");
+        if (comprobanteRequest.getCodigoTimbrado() == null) {
+            return ResponseEntity.badRequest().body("Seleccione un timbrado para el punto de expedición.");
         }
         DetalleTimbradoPK detalleTimbradoPK = new DetalleTimbradoPK(
                 comprobanteRequest.getCodigoTimbrado(), comprobanteRequest.getCodigoPuntoExpedicion(),
                 getSucursalSession().getCodigoSucursal());
         DetalleTimbrado detalleTimbrado = detalleTimbradoDao.findById(detalleTimbradoPK).orElse(null);
+        boolean autoimpresor = detalleTimbrado != null && detalleTimbrado.esAutoimpresor();
+        TipoComprobante tipoSeleccionado = tipoComprobanteService.encontrar(
+                new TipoComprobante(comprobanteRequest.getCodigoTipoComprobante()));
+        if (tipoSeleccionado == null) {
+            return ResponseEntity.badRequest().body("El tipo de comprobante seleccionado no existe.");
+        }
+        boolean tipoAutoimpresor = tipoSeleccionado.getNombreTipoComprobante() != null
+                && tipoSeleccionado.getNombreTipoComprobante().trim().toUpperCase().contains("AUTOIMPRESOR");
+        if (detalleTimbrado != null && tipoAutoimpresor != autoimpresor) {
+            return ResponseEntity.badRequest()
+                    .body("El timbrado seleccionado no corresponde al tipo de comprobante.");
+        }
+        Integer serieConfigurada = detalleTimbrado == null || detalleTimbrado.getSerie() == null
+                ? 0 : detalleTimbrado.getSerie().getCodigoSerie();
+        Integer serieSolicitada = comprobanteRequest.getCodigoSerie() == null
+                ? 0 : comprobanteRequest.getCodigoSerie();
         if (detalleTimbrado == null
                 || detalleTimbrado.getEstado() == null || detalleTimbrado.getEstado().getCodigoEstado() != 1
-                || detalleTimbrado.getSerie() == null
-                || !detalleTimbrado.getSerie().getCodigoSerie().equals(comprobanteRequest.getCodigoSerie())) {
+                || (!autoimpresor && detalleTimbrado.getSerie() == null)
+                || !serieConfigurada.equals(serieSolicitada)) {
             return ResponseEntity.badRequest().body("El timbrado y la serie no están habilitados para el punto de expedición.");
         }
+        comprobanteRequest.setCodigoSerie(serieConfigurada);
         Timbrado timbradoVigente = detalleTimbrado.getTimbrado();
         LocalDate hoy = LocalDate.now();
         LocalDate inicioVigencia = timbradoVigente.getFechaInicio() == null ? null
@@ -281,9 +320,11 @@ public class ComprobanteController {
         String puntoExpedicionFiscal = valorFiscal(
                 detalleTimbrado.getPuntoExpedicion().getNombrePuntoExpedicion(),
                 puntoExpedicionPK.getCodigoPuntoExpedicion());
-        String serieFiscal = valorFiscal(
-                detalleTimbrado.getSerie().getSerie(), comprobanteRequest.getCodigoSerie());
-        boolean autoimpresor = detalleTimbrado.esAutoimpresor();
+        String serieFiscal = detalleTimbrado.getSerie() == null
+                || detalleTimbrado.getSerie().getCodigoSerie() == 0
+                ? null
+                : valorFiscal(detalleTimbrado.getSerie().getSerie(),
+                        comprobanteRequest.getCodigoSerie());
         if (!autoimpresor && (comprobanteRequest.getNumeroComprobante() == null
                 || comprobanteRequest.getNumeroComprobante() < 1
                 || comprobanteRequest.getNumeroComprobante() > 9_999_999)) {
@@ -314,7 +355,15 @@ public class ComprobanteController {
                                 + " a nombre de " + nombreUsuario);
             }
         }
-        if (comprobanteRequest.getDetallePago() == null || comprobanteRequest.getDetallePago().isEmpty()) {
+        if (comprobanteRequest.getCantidadPago() == null || comprobanteRequest.getCantidadPago() < 0) {
+            return ResponseEntity.badRequest().body("Ingrese una cantidad de pago válida.");
+        }
+        boolean comprobanteAnulado = comprobanteRequest.getCantidadPago() == 0;
+        if (comprobanteAnulado) {
+            // Un comprobante sin períodos pagados se registra anulado y no genera movimiento de caja.
+            comprobanteRequest.setDetallePago(new ArrayList<>());
+            comprobanteRequest.setRecargoPago(0D);
+        } else if (comprobanteRequest.getDetallePago() == null || comprobanteRequest.getDetallePago().isEmpty()) {
             return ResponseEntity.badRequest().body("Agregue al menos un medio de pago.");
         }
         Map<Integer, DetallePago> pagosConsolidados = new LinkedHashMap<>();
@@ -386,7 +435,7 @@ public class ComprobanteController {
                 .servicio(new Servicio(comprobanteRequest.getCuentaCorriente()))
                 .usuario(new Usuario(comprobanteRequest.getCodigoUsuario()))
                 .estado(
-                        comprobanteRequest.getCantidadPago() == 0 ? new Estado(3) : new Estado(1)
+                        comprobanteAnulado ? new Estado(3) : new Estado(1)
                 )
                 .timbrado(new Timbrado(comprobanteRequest.getCodigoTimbrado()))
                 .usuarioSistema(getUserSession())
@@ -409,7 +458,6 @@ public class ComprobanteController {
         }
         try {
             comprobanteService.guardar(comprobante);
-            facturaElectronicaService.registrar(comprobante);
             auditoriaComprobanteService.registrar("EMISION", comprobantePK,
                     getUserSession().getCodigoUsuarioSistema(),
                     autoimpresor ? "Emisión autoimpresor" : "Emisión manual");
@@ -457,11 +505,18 @@ public class ComprobanteController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                     "Utilice la acción Anular para revertir también la fecha desde de la cuenta");
         }
+        String datosAnteriores = auditoriaComprobanteService.capturarFoto(
+                comprobante.getComprobantePK());
         comprobante.setCobrador(comprobanteReques.getCobrador());
         comprobante.setFechaPago(comprobanteReques.getFechaPago());
         comprobante.setEstado(comprobanteReques.getEstado());
         comprobante.setObs(comprobanteReques.getObs());
         comprobanteService.guardar(comprobante);
+        auditoriaComprobanteService.registrarModificacion(
+                comprobante.getComprobantePK(),
+                getUserSession().getCodigoUsuarioSistema(),
+                "Modificación desde la gestión de comprobantes",
+                datosAnteriores);
         return ResponseEntity.ok("Comprobante modificada correctamente!!");
     }
 

@@ -61,6 +61,7 @@ public class ImplServicio implements ServicioService {
     @Override
     public void eliminar(Servicio servicio) {
         servicioDao.delete(servicio);
+        servicioDao.flush();
     }
 
   

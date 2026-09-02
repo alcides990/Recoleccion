@@ -319,6 +319,39 @@ public class ReportController {
         return new ReportGenerator().getReporte(reporte);
     }
 
+    @PostMapping("/usuarios-servicio")
+    public ResponseEntity<?> reporteUsuariosServicio(
+            @RequestParam(name = "agrupacion", defaultValue = "GENERAL") String agrupacion)
+            throws SQLException {
+        String agrupacionNormalizada = agrupacion == null
+                ? "GENERAL" : agrupacion.trim().toUpperCase();
+        String descripcion = switch (agrupacionNormalizada) {
+            case "GENERAL" -> "General";
+            case "ZONA" -> "Por zona";
+            case "COBRADOR" -> "Por cobrador";
+            default -> null;
+        };
+        if (descripcion == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("mensaje", "La agrupación seleccionada no es válida."));
+        }
+
+        Sucursal sucursal = getSucursalSession();
+        Map<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoSucursal", sucursal.getCodigoSucursal());
+        parametros.put("sucursal", sucursal.getNombreSucursal());
+        parametros.put("agrupacion", agrupacionNormalizada);
+        parametros.put("agrupacionDescripcion", descripcion);
+
+        Reporte reporte = Reporte.builder()
+                .conexion(dataSource.getConnection())
+                .nombre("Servicios por categoria")
+                .ruta("reportes/usuariosServicioPorCategoria.jasper")
+                .parametros(parametros)
+                .build();
+        return new ReportGenerator().getReporte(reporte);
+    }
+
     @GetMapping("/imprimir")
     @ResponseBody
     public void imorimir(Map<String, Object> parameters, HttpServletResponse response)

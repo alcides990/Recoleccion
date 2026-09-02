@@ -7,6 +7,7 @@ import ama.dominio.Rol;
 import ama.dominio.UsuarioSistema;
 import ama.servicio.RolService;
 import ama.servicio.UsuarioSistemaService;
+import ama.servicio.AuditoriaEntidadService;
 import ama.utilerias.PageRender;
 import ama.validador.Mayuscula;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,6 +59,9 @@ public class UsuarioSistemaController {
 
     @Autowired
     private DetalleUsuarioSistemaDao detalleUsuarioSistemaDao;
+
+    @Autowired
+    private AuditoriaEntidadService auditoriaEntidad;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -125,9 +129,13 @@ public class UsuarioSistemaController {
 
     @PostMapping("/guardar")
     @PreAuthorize("hasAnyAuthority({'ADMINISTRADOR','ROOT'})")
+    @Transactional
     public String guardar(UsuarioSistema usuarioSistema, RedirectAttributes flash) {
         String mensaje = "Usuario modificado correctamente!!";
         UsuarioSistema userSession = (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
+        boolean alta = usuarioSistema.getCodigoUsuarioSistema() == null;
+        Map<String, Object> datosAntes = alta ? null
+                : auditoriaEntidad.usuarioSistema(usuarioSistema.getCodigoUsuarioSistema());
         usuarioSistema.setEstado(new Estado(1));
         usuarioSistema.setSucursal(userSession.getSucursal());
         if (usuarioSistema.getCodigoUsuarioSistema() == null) {
@@ -142,7 +150,10 @@ public class UsuarioSistemaController {
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado !!"));
             usuarioSistema.setClave(usuarioActual.getClave());
         }
-        usuarioSistemaService.save(usuarioSistema);
+        usuarioSistemaService.saveAndFlush(usuarioSistema);
+        auditoriaEntidad.registrar("USUARIO_SISTEMA", alta ? "ALTA" : "MODIFICACION",
+                String.valueOf(usuarioSistema.getCodigoUsuarioSistema()), datosAntes,
+                auditoriaEntidad.usuarioSistema(usuarioSistema.getCodigoUsuarioSistema()), null);
         flash.addFlashAttribute("mensaje", mensaje);
         return "redirect:/usuarioSistema/listar";
     }
@@ -180,12 +191,19 @@ public class UsuarioSistemaController {
     }
 
     @PostMapping("/editarClave")
+    @Transactional
     public String modifgicarContraseña(UsuarioSistema usuario, RedirectAttributes flash, HttpServletRequest request, HttpServletResponse response) {
         UsuarioSistema usuarioSistema = usuarioSistemaService.findById(usuario.getCodigoUsuarioSistema())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado !!"));
+        Map<String, Object> datosAntes = auditoriaEntidad.usuarioSistema(
+                usuarioSistema.getCodigoUsuarioSistema());
         String clave = encoder.encode(usuario.getClave());
         usuarioSistema.setClave(clave);
-        usuarioSistemaService.save(usuarioSistema);
+        usuarioSistemaService.saveAndFlush(usuarioSistema);
+        auditoriaEntidad.registrar("USUARIO_SISTEMA", "MODIFICACION",
+                String.valueOf(usuarioSistema.getCodigoUsuarioSistema()), datosAntes,
+                auditoriaEntidad.usuarioSistema(usuarioSistema.getCodigoUsuarioSistema()),
+                "Cambio de contraseña");
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
 
         flash.addFlashAttribute("info", "Contraseña modificada corectamente!!");
@@ -194,12 +212,22 @@ public class UsuarioSistemaController {
     }
 
     @PostMapping("/passwordReset/{codigoUsuarioSistema}")
+    @Transactional
     public ResponseEntity<?> passwordReset(UsuarioSistema usuarioSistema) {
         try {
             usuarioSistema = usuarioSistemaService.findById(usuarioSistema.getCodigoUsuarioSistema()).orElse(null);
+            if (usuarioSistema == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+            }
+            Map<String, Object> datosAntes = auditoriaEntidad.usuarioSistema(
+                    usuarioSistema.getCodigoUsuarioSistema());
             String clave = encoder.encode("1234");
             usuarioSistema.setClave(clave);
-            usuarioSistema = usuarioSistemaService.save(usuarioSistema);
+            usuarioSistema = usuarioSistemaService.saveAndFlush(usuarioSistema);
+            auditoriaEntidad.registrar("USUARIO_SISTEMA", "MODIFICACION",
+                    String.valueOf(usuarioSistema.getCodigoUsuarioSistema()), datosAntes,
+                    auditoriaEntidad.usuarioSistema(usuarioSistema.getCodigoUsuarioSistema()),
+                    "Restablecimiento de contraseña");
 
             return ResponseEntity.ok("Clave reseteada al 1234, inicie sesion y modifique su clave!!");
 
@@ -214,10 +242,17 @@ public class UsuarioSistemaController {
     @PostMapping("/eliminar/{codigoUsuarioSistema}")
     public ResponseEntity<?> modal(UsuarioSistema usuarioSistema) {
         try {
+            Map<String, Object> datosAntes = auditoriaEntidad.usuarioSistema(
+                    usuarioSistema.getCodigoUsuarioSistema());
+            if (datosAntes == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+            }
             detalleUsuarioSistemaDao.deleteByUsuarioSistema(usuarioSistema);
             usuarioSistema = usuarioSistemaService.findById(usuarioSistema.getCodigoUsuarioSistema()).orElse(null);
 
             usuarioSistemaService.delete(usuarioSistema);
+            auditoriaEntidad.registrar("USUARIO_SISTEMA", "ELIMINACION",
+                    String.valueOf(datosAntes.get("codigo")), datosAntes, null, null);
             return ResponseEntity.ok("Usuario eliminado correctamente !!");
 
         } catch (Exception e) {

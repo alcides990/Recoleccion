@@ -153,30 +153,6 @@
             <artifactId>groovy</artifactId>
             <version>3.0.21</version>
         </dependency>
-        <dependency>
-            <groupId>com.roshka.sifen</groupId>
-            <artifactId>rshk-jsifenlib</artifactId>
-            <version>0.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.soap</groupId>
-            <artifactId>javax.xml.soap-api</artifactId>
-            <version>1.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.messaging.saaj</groupId>
-            <artifactId>saaj-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>core</artifactId>
-            <version>3.5.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>javase</artifactId>
-            <version>3.5.3</version>
-        </dependency>
     </dependencies>
 
     <build>

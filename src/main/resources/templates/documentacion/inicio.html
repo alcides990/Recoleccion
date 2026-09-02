@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/layout :: heat}">
+        <title>Ayuda y documentación</title>
+    </head>
+    <body>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
+
+        <div class="container-fluid">
+            <main class="contenedor documentacion-contenedor">
+                <section class="documentacion-encabezado">
+                    <div>
+                        <span class="documentacion-etiqueta">Centro de ayuda</span>
+                        <h1>Manuales y documentación</h1>
+                        <p>Consulta los procedimientos del sistema o descarga una copia para trabajar sin conexión.</p>
+                    </div>
+                    <i class="fa-solid fa-book-open documentacion-icono" aria-hidden="true"></i>
+                </section>
+
+                <section class="documentacion-grid" aria-label="Documentos disponibles">
+                    <article class="documentacion-tarjeta">
+                        <div class="documentacion-tarjeta-icono"><i class="fa-solid fa-user-check" aria-hidden="true"></i></div>
+                        <div class="documentacion-tarjeta-contenido">
+                            <h2>Manual de usuario</h2>
+                            <p>Guía práctica para usuarios, cuentas, servicios, comprobantes, auditoría, reportes y tareas habituales.</p>
+                            <div class="documentacion-acciones">
+                                <a class="documentacion-boton documentacion-boton-primario" th:href="@{/documentacion/manual/pdf}" target="_blank" rel="noopener">
+                                    <i class="fa-solid fa-eye" aria-hidden="true"></i> Ver manual
+                                </a>
+                                <a class="documentacion-boton documentacion-boton-secundario" th:href="@{/documentacion/manual/word}">
+                                    <i class="fa-solid fa-download" aria-hidden="true"></i> Descargar Word
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="documentacion-tarjeta documentacion-tarjeta-tecnica" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')">
+                        <div class="documentacion-tarjeta-icono"><i class="fa-solid fa-gears" aria-hidden="true"></i></div>
+                        <div class="documentacion-tarjeta-contenido">
+                            <span class="documentacion-restringido"><i class="fa-solid fa-lock" aria-hidden="true"></i> Solo administrador</span>
+                            <h2>Documentación técnica</h2>
+                            <p>Arquitectura, seguridad, modelo fiscal, concurrencia, auditoría, despliegue y lista de verificación para producción.</p>
+                            <div class="documentacion-acciones">
+                                <a class="documentacion-boton documentacion-boton-primario" th:href="@{/documentacion/tecnica/pdf}" target="_blank" rel="noopener">
+                                    <i class="fa-solid fa-eye" aria-hidden="true"></i> Ver documentación
+                                </a>
+                                <a class="documentacion-boton documentacion-boton-secundario" th:href="@{/documentacion/tecnica/word}">
+                                    <i class="fa-solid fa-download" aria-hidden="true"></i> Descargar Word
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+            </main>
+        </div>
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <link rel="stylesheet" th:href="@{/css/documentacion.css}">
+    </body>
+</html>

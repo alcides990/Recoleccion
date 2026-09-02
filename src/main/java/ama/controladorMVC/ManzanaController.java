@@ -145,7 +145,7 @@ public class ManzanaController {
 
     }
 
-    @PreAuthorize("hasAnyAuthority({'ROOT','ADMIN','ADMINISTRADOR'})")
+    @PreAuthorize("hasAnyAuthority({'ROOT','ADMINISTRADOR'})")
     @PostMapping("/eliminar/{numeroManzana}/{codigoSucursal}")
     public ResponseEntity<String> eliminar(ManzanaPK manzanaPK) {
         try {

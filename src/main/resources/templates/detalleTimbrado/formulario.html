@@ -12,7 +12,7 @@
             <div>
                 <span class="detalle-timbrado-kicker">Facturación</span>
                 <h3 th:text="${edicion ? 'Editar detalle de timbrado' : 'Agregar detalle de timbrado'}">Detalle de timbrado</h3>
-                <p>Asocie un timbrado con un punto de expedición y su serie habilitada.</p>
+                <p>Asocie un timbrado con un punto de expedición y, cuando corresponda, su serie habilitada.</p>
             </div>
             <span class="detalle-timbrado-icon"><i class="fa-solid fa-file-invoice"></i></span>
         </header>
@@ -60,11 +60,12 @@
                     <h4><i class="fa-solid fa-sliders"></i> Configuración</h4>
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
-                            <label class="form-label" for="serie">Serie</label>
-                            <select id="serie" name="codigoSerie" class="form-select" required>
-                                <option value="">Seleccione...</option>
-                                <option th:each="s : ${series}" th:value="${s.codigoSerie}" th:text="${s.serie}"
-                                        th:selected="${edicion and s.codigoSerie == detalle.serie.codigoSerie}"></option>
+                            <label class="form-label" for="serie">Serie <span class="text-muted">(opcional en autoimpresor)</span></label>
+                            <select id="serie" name="codigoSerie" class="form-select">
+                                <option value="" th:selected="${!edicion or detalle.serie == null}">Sin serie</option>
+                                <option th:each="s : ${series}" th:if="${s.codigoSerie != 0}"
+                                        th:value="${s.codigoSerie}" th:text="${s.serie}"
+                                        th:selected="${edicion and detalle.serie != null and s.codigoSerie == detalle.serie.codigoSerie}"></option>
                             </select>
                         </div>
                         <div class="col-12 col-md-6">
@@ -116,6 +117,8 @@
         const sucursal = document.getElementById('sucursal');
         const punto = document.getElementById('punto');
         const opciones = Array.from(punto.querySelectorAll('option[data-sucursal]'));
+        const modoEmision = document.getElementById('modoEmision');
+        const serie = document.getElementById('serie');
         function filtrarPuntos() {
             const seleccionada = sucursal.value;
             opciones.forEach(opcion => opcion.hidden = opcion.dataset.sucursal !== seleccionada);
@@ -124,7 +127,19 @@
             punto.disabled = sucursal.disabled || !seleccionada;
         }
         sucursal.addEventListener('change', filtrarPuntos);
+        function actualizarSerieObligatoria() {
+            const autoimpresor = modoEmision.value === 'AUTOIMPRESOR';
+            serie.required = !autoimpresor;
+            if (!autoimpresor && !serie.value) {
+                serie.setCustomValidity('Seleccione una serie para el modo manual.');
+            } else {
+                serie.setCustomValidity('');
+            }
+        }
+        modoEmision.addEventListener('change', actualizarSerieObligatoria);
+        serie.addEventListener('change', actualizarSerieObligatoria);
         filtrarPuntos();
+        actualizarSerieObligatoria();
     }());
 </script>
 </body>

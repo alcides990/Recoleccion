@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <body>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
+        <main class="container-fluid py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div><h3 class="form-title mb-1">Auditoría operativa</h3>
+                    <p class="text-muted mb-0">Cambios en usuarios, cuentas y categorías de la sucursal.</p></div>
+                <a class="btn btn-outline-secondary" th:href="@{/comprobantes-v2/auditoria}">
+                    <i class="fa-solid fa-receipt"></i> Auditoría de comprobantes</a>
+            </div>
+            <section class="card border-0 shadow-sm p-3 mb-3"><div class="row g-2 align-items-end">
+                <div class="col-md-3"><label class="form-label" for="fEntidadAuditoria">Módulo</label>
+                    <select id="fEntidadAuditoria" class="form-select"><option value="">Todos</option>
+                        <option th:each="item : ${entidades}" th:value="${item}"
+                                th:text="${item == 'USUARIO_SISTEMA' ? 'USUARIO DEL SISTEMA' : item}"></option></select></div>
+                <div class="col-md-3"><label class="form-label" for="fAccionEntidadAuditoria">Acción</label>
+                    <select id="fAccionEntidadAuditoria" class="form-select"><option value="">Todas</option>
+                        <option th:each="item : ${acciones}" th:value="${item}" th:text="${item}"></option></select></div>
+                <div class="col-md-3"><label class="form-label" for="fIdentificadorAuditoria">Registro</label>
+                    <input id="fIdentificadorAuditoria" class="form-control" type="search"
+                           placeholder="Código o cuenta corriente"></div>
+                <div class="col-md-3 d-flex gap-2"><button id="filtrarAuditoriaEntidades" class="btn btn-primary" type="button">
+                    <i class="fa-solid fa-filter"></i> Filtrar</button>
+                    <button id="limpiarAuditoriaEntidades" class="btn btn-outline-secondary" type="button">Limpiar</button></div>
+            </div></section>
+            <div class="card border-0 shadow-sm p-3 table-responsive">
+                <table id="tablaAuditoriaEntidades" class="table table-striped table-hover align-middle small w-100">
+                    <thead><tr><th>Fecha</th><th>Módulo</th><th>Acción</th><th>Registro</th><th>Usuario</th><th>Cambios</th></tr></thead>
+                </table>
+            </div>
+        </main>
+
+        <div class="modal fade" id="detalleAuditoriaEntidadModal" tabindex="-1"
+             aria-labelledby="detalleAuditoriaEntidadTitulo" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title" id="detalleAuditoriaEntidadTitulo">
+                                <i class="fa-solid fa-code-compare me-2"></i>Detalle de auditoría
+                            </h5>
+                            <small class="text-muted" id="detalleAuditoriaEntidadSubtitulo"></small>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-2 mb-3 small">
+                            <div class="col-sm-6 col-lg-3"><span class="text-muted d-block">Fecha</span><strong id="detalleAuditoriaFecha">—</strong></div>
+                            <div class="col-sm-6 col-lg-3"><span class="text-muted d-block">Usuario</span><strong id="detalleAuditoriaUsuario">—</strong></div>
+                            <div class="col-sm-6 col-lg-3"><span class="text-muted d-block">Módulo</span><strong id="detalleAuditoriaModulo">—</strong></div>
+                            <div class="col-sm-6 col-lg-3"><span class="text-muted d-block">Acción</span><span id="detalleAuditoriaAccion"></span></div>
+                        </div>
+                        <div id="detalleAuditoriaMotivoContenedor" class="alert alert-secondary py-2 mb-3 d-none">
+                            <strong>Motivo:</strong> <span id="detalleAuditoriaMotivo"></span>
+                        </div>
+                        <div class="table-responsive border rounded">
+                            <table id="tablaComparacionAuditoria" class="table table-sm align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr><th>Campo</th><th>Valor anterior</th><th>Valor nuevo</th></tr>
+                                </thead>
+                                <tbody id="detalleAuditoriaCampos"></tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 mt-2 small text-muted">
+                            <span><i class="fa-solid fa-square text-warning me-1"></i>Campo modificado</span>
+                            <span id="detalleAuditoriaResumen"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="/js/auditoria/entidades.js"></script>
+    </body>
+</html>

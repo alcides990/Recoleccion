@@ -19,7 +19,7 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
               }
           });
           var accion = "";
-          var campos = ["#cuentaCorriente", "#fechaInicio", "#buscarUsuario", "#numeroDocumento"];
+          var campos = ["#cuentaCorriente", "#fechaInicio", "#buscarUsuario", "#numeroDocumento", "#direccion", "#observacion"];
 
           const formatoNumero = new Intl.NumberFormat('es-PY', {maximumFractionDigits: 0});
           const formatoFecha = fecha => {
@@ -68,6 +68,7 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
 
           $("#btnAgrerar").click(function (event) {
               event.preventDefault();
+              $("#limpiarFiltroCategoriaServicio").trigger('click');
               limpiar(campos);
               $("#confirmacionModalLabel").text("Nuevo servicio");
               $("#cuentaCorriente").prop("readonly", false);
@@ -78,9 +79,10 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
           });
 
           $(document).on('click', '#editar', function (event) {
+              $("#limpiarFiltroCategoriaServicio").trigger('click');
               $("#confirmacionModalLabel").text("Editar servicio");
               $("#cuentaCorriente").prop("readonly", true);
-              $("#fechaInicio").prop("disabled", true);
+              $("#fechaInicio").prop("disabled", false);
 
               var url = '/servicio/editar';
               var servicio = {cuentaCorriente: $(this).data('id')};
@@ -96,6 +98,7 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
                           $("#categoria").val(respuesta.categoria.codigoCategoria);
                           $("#estado").val(respuesta.estado.codigoEstado);
                           $("#direccion").val(respuesta.direccion);
+                          $("#observacion").val(respuesta.observacion || '');
                           $("#accion").val("editar");
                       });
           });
@@ -104,6 +107,7 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
               var servicio = {
                   cuentaCorriente: $("#cuentaCorriente").val(),
                   direccion: $("#direccion").val(),
+                  observacion: $("#observacion").val(),
                   fechaInicio: $("#fechaInicio").val(),
                   ocupado: $("#ocupado").val(),
                   usuario: {
@@ -310,6 +314,22 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
               }
           }
 
+          async function aplicarUbicacionGoogleMaps(valor) {
+              const coordenadas = await apiUbicacion('/servicio/ubicacion/extraer', {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': tokenCsrf},
+                  body: JSON.stringify({valor})
+              });
+              cargandoCoordenadas = true;
+              $('#ubicacionLatitud').val(Number(coordenadas.latitud).toFixed(7));
+              $('#ubicacionLongitud').val(Number(coordenadas.longitud).toFixed(7));
+              $('#ubicacionPrecision').val('');
+              $('#ubicacionMetodo').val('MAPA');
+              cargandoCoordenadas = false;
+              actualizarEnlaceMapa();
+              mostrarAlertaUbicacion('Ubicación recuperada de Google Maps. Revísela y presione Guardar ubicación.', 'success');
+          }
+
           function pintarUbicacion(datos) {
               const actual = datos.actual;
               cargandoCoordenadas = true;
@@ -363,6 +383,7 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
           $(document).on('click', '.ubicacion-servicio', async function () {
               const cuentaCorriente = String($(this).data('id') || '');
               $('#ubicacionCuenta').val(cuentaCorriente);
+              $('#ubicacionGoogleMaps').val('');
               $('#ubicacionLatitud,#ubicacionLongitud,#ubicacionPrecision').val('');
               $('#ubicacionMetodo').val('MANUAL');
               actualizarEnlaceMapa();
@@ -380,6 +401,44 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
                   $('#ubicacionPrecision').val('');
               }
               actualizarEnlaceMapa();
+          });
+
+          $('#usarUbicacionGoogleMaps').on('click', async function () {
+              const campo = $('#ubicacionGoogleMaps');
+              let valor = String(campo.val() || '').trim();
+              if (!valor && navigator.clipboard && window.isSecureContext) {
+                  try {
+                      valor = (await navigator.clipboard.readText()).trim();
+                      campo.val(valor);
+                  } catch (_) {
+                      mostrarAlertaUbicacion('No fue posible leer el portapapeles. Pegue la ubicación en el campo con Ctrl+V.');
+                      campo.trigger('focus');
+                      return;
+                  }
+              }
+              if (!valor) {
+                  mostrarAlertaUbicacion('Copie una ubicación de Google Maps o péguela en el campo.');
+                  campo.trigger('focus');
+                  return;
+              }
+              const boton = $(this);
+              const contenido = boton.html();
+              boton.prop('disabled', true)
+                      .html('<span class="spinner-border spinner-border-sm"></span> Recuperando…');
+              try {
+                  await aplicarUbicacionGoogleMaps(valor);
+              } catch (error) {
+                  mostrarAlertaUbicacion(error.message);
+              } finally {
+                  boton.prop('disabled', false).html(contenido);
+              }
+          });
+
+          $('#ubicacionGoogleMaps').on('keydown', async function (event) {
+              if (event.key === 'Enter') {
+                  event.preventDefault();
+                  $('#usarUbicacionGoogleMaps').trigger('click');
+              }
           });
 
           $('#obtenerUbicacionActual').on('click', function () {

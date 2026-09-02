@@ -64,12 +64,18 @@
                                         th:data-id="${servicio.cuentaCorriente}" title="Ubicación del servicio">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </button>
-                                <a sec:authorize="hasAnyAuthority('ADMIN','ROOT')" id="editar"
+                                <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"
+                                   th:href="@{/auditoria-entidades(entidad='CUENTA',identificador=${servicio.cuentaCorriente})}"
+                                   class="btn btn-outline-secondary btn-sm" title="Ver historial de modificaciones">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </a>
+                                <a sec:authorize="hasAnyAuthority('ADMINISTRADOR','ROOT', 'SUPERVISOR')" id="editar"
                                    th:data-id="${servicio.cuentaCorriente}" class="btn btn-info btn-sm"
                                    data-bs-toggle="modal" data-bs-target="#servicioModal">
                                     <i class="fa-regular fa-pen-to-square fa-lg"></i>
                                 </a>
-                                <a id="eliminar" data-url="/servicio/eliminar" th:data-id="${servicio.cuentaCorriente}"
+                                <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')"
+                                   id="eliminar" data-url="/servicio/eliminar" th:data-id="${servicio.cuentaCorriente}"
                                    class="btn btn-danger eliminar btn-sm">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </a>
@@ -175,6 +181,18 @@
                                     <label class="form-label" for="ubicacionCuenta">Cuenta corriente</label>
                                     <input id="ubicacionCuenta" class="form-control" readonly>
                                 </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="ubicacionGoogleMaps">Ubicación copiada de Google Maps</label>
+                                    <div class="input-group">
+                                        <input id="ubicacionGoogleMaps" class="form-control" type="text"
+                                               maxlength="2048" autocomplete="off"
+                                               placeholder="Pegue las coordenadas o el enlace de Google Maps">
+                                        <button id="usarUbicacionGoogleMaps" type="button" class="btn btn-outline-primary">
+                                            <i class="fa-solid fa-paste"></i> Pegar y usar
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">También puede pegar con Ctrl+V y luego presionar Pegar y usar.</small>
+                                </div>
                                 <div class="col-md-5">
                                     <label class="form-label" for="ubicacionLatitud">Latitud</label>
                                     <input id="ubicacionLatitud" class="form-control" type="number"
@@ -203,7 +221,7 @@
                                 </div>
                             </div>
                             <p class="ubicacion-servicio-ayuda">
-                                Puede capturar el GPS del dispositivo o escribir las coordenadas manualmente.
+                                Puede pegar una ubicación de Google Maps, capturar el GPS del dispositivo o escribir las coordenadas manualmente.
                                 La captura automática requiere permiso de ubicación y HTTPS.
                             </p>
                         </form>
@@ -273,17 +291,41 @@
                                     <label class="form-label" for="ocupado">Ocupación</label>
                                     <select id="ocupado" class="form-select"><option value="OCUPADO">Ocupado</option><option value="DESOCUPADO">Desocupado</option><option value="BALDIO">Baldío</option></select>
                                 </div>
-                                <div class="col-12">
+                                <div class="col-md-8">
                                     <label class="form-label" for="categoria">Categoría</label>
                                     <select th:object="${categoria}" class="form-select" id="categoria" name="categoria">
                                         <option th:each="categoria : ${categorias}" th:value="${categoria.codigoCategoria}"
                                                 th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa}" />
                                     </select>
                                 </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="filtroCategoriaServicio">Filtrar categorías</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                        <input type="search" id="filtroCategoriaServicio" class="form-control"
+                                               data-filtro-categorias="#categoria"
+                                               data-resultado-filtro="#resultadoFiltroCategoriaServicio"
+                                               placeholder="Filtrar por nombre, código o tarifa"
+                                               aria-label="Filtrar categorías">
+                                        <button type="button" id="limpiarFiltroCategoriaServicio"
+                                                class="btn btn-outline-secondary"
+                                                data-limpiar-filtro-categorias="#filtroCategoriaServicio"
+                                                title="Limpiar filtro" aria-label="Limpiar filtro de categorías">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <small id="resultadoFiltroCategoriaServicio" class="text-muted"></small>
+                                </div>
                                 <div class="col-12">
                                     <label class="form-label" for="direccion">Dirección</label>
                                     <input type="text" name="direccion" id="direccion" class="form-control"
                                            placeholder="Dirección del servicio">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="observacion">Observación</label>
+                                    <textarea name="observacion" id="observacion" class="form-control" rows="3"
+                                              maxlength="150"
+                                              placeholder="Información adicional de la cuenta"></textarea>
                                 </div>
                                 <div class="col-md-8">
                                     <label class="form-label" for="sucursal">Sucursal</label>
@@ -317,8 +359,9 @@
 
         <script src="/js/buscarUsuario.js"></script>
         <script src="/js/validarFormulario.js" async="true"></script>
-        <script type="module" src="/js/serviciov2/servicio.js?v=20260819-1"></script>
-        <script th:if="${versionDos}" src="/js/serviciov2/tabla.js?v=20260819-1"></script>
+        <script src="/js/categoria-select-filter.js"></script>
+        <script type="module" src="/js/serviciov2/servicio.js"></script>
+        <script th:if="${versionDos}" src="/js/serviciov2/tabla.js"></script>
     </body>
 
 </html>

@@ -5,6 +5,7 @@ import ama.dominio.DetalleUsuarioSistema;
 import ama.dominio.DetalleUsuarioSistemaPK;
 import ama.dominio.UsuarioSistema;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -29,15 +30,21 @@ public class DetalleUsuarioSistemaImpl implements DetalleUsuarioSistemaService {
     @Transactional
     @Override
     public void guardar(DetalleUsuarioSistema detalleUsuarioSistema) {
-        detalleUsuarioSistemaDao.save(detalleUsuarioSistema);
+        detalleUsuarioSistemaDao.saveAndFlush(detalleUsuarioSistema);
     }
 
     @Transactional
     @Modifying
     @Override
     public void eliminar(DetalleUsuarioSistemaPK detalleUsuarioSistemaPK) {
-        
-        detalleUsuarioSistemaDao.delete(new DetalleUsuarioSistema(detalleUsuarioSistemaPK));
+        detalleUsuarioSistemaDao.deleteById(detalleUsuarioSistemaPK);
+        detalleUsuarioSistemaDao.flush();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<DetalleUsuarioSistema> buscar(DetalleUsuarioSistemaPK detalleUsuarioSistemaPK) {
+        return detalleUsuarioSistemaDao.findById(detalleUsuarioSistemaPK);
     }
 
 

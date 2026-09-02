@@ -61,9 +61,12 @@
                                            class="form-control" placeholder="Número de celular" inputmode="tel">
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label" for="telefono">Teléfono</label>
-                                    <input type="text" name="telefono" id="telefono" th:value="*{telefono}"
-                                           class="form-control" placeholder="Número de teléfono" inputmode="tel">
+                                    <label class="form-label" for="correo">Correo electrónico</label>
+                                    <input type="email" name="correo" id="correo" th:value="*{correo}"
+                                           class="form-control" placeholder="usuario@ejemplo.com"
+                                           autocomplete="email" maxlength="150">
+                                    <small class="text-danger" th:if="${#fields.hasErrors('correo')}"
+                                           th:errors="*{correo}">Correo inválido</small>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label" for="barrio">Barrio</label>
@@ -128,8 +131,8 @@
             tabulador('#numeroDocumento', '#nombre');
             tabulador('#nombre', '#apellido');
             tabulador('#apellido', '#celular');
-            tabulador('#celular', '#telefono');
-            tabulador('#telefono', '#barrio');
+            tabulador('#celular', '#correo');
+            tabulador('#correo', '#barrio');
             tabulador('#barrio', '#direccion');
             tabulador('#direccion', '#observacion');
         </script>

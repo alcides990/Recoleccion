@@ -44,6 +44,45 @@ h3.form-title {
     box-shadow: var(--sombra-suave);
 }
 
+/* Alertas con contraste alto. No deben heredar fondos translúcidos de los modales. */
+.alert.alert-success,
+.alert.alert-danger,
+.alert.alert-warning,
+.alert.alert-info {
+    border-width: 1px;
+    opacity: 1;
+    color: #fff;
+    font-weight: 700;
+    line-height: 1.4;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, .18);
+    box-shadow: 0 .3rem .85rem rgba(33, 37, 41, .2);
+}
+
+.alert.alert-success {
+    border-color: #0f5132;
+    background-color: #198754;
+}
+
+.alert.alert-danger {
+    border-color: #842029;
+    background-color: #b02a37;
+}
+
+.alert.alert-warning {
+    border-color: #664d03;
+    background-color: #997404;
+}
+
+.alert.alert-info {
+    border-color: #055160;
+    background-color: #087990;
+}
+
+.alert .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: .9;
+}
+
 .card-header {
     padding: 0;
     border: 0;
@@ -915,5 +954,38 @@ form select:hover:not(:disabled),
         padding-top: .55rem;
         background-color: rgba(128, 138, 148, .98) !important;
         box-shadow: .45rem 0 1.45rem rgba(33, 37, 41, .28);
+    }
+}
+/* Comparación campo por campo en la auditoría operativa. */
+#tablaComparacionAuditoria {
+    table-layout: fixed;
+}
+
+#tablaComparacionAuditoria th:first-child {
+    width: 22%;
+}
+
+.auditoria-valor {
+    min-height: 2.1rem;
+    padding: .45rem .6rem;
+    border: 1px solid transparent;
+    border-radius: .35rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.auditoria-valor-anterior {
+    background-color: rgba(220, 53, 69, .08);
+    border-color: rgba(220, 53, 69, .2);
+}
+
+.auditoria-valor-nuevo {
+    background-color: rgba(25, 135, 84, .09);
+    border-color: rgba(25, 135, 84, .22);
+}
+
+@media (max-width: 767.98px) {
+    #tablaComparacionAuditoria {
+        min-width: 720px;
     }
 }

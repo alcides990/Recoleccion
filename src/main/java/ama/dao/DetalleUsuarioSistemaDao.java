@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface DetalleUsuarioSistemaDao extends JpaRepository<DetalleUsuarioSistema, Integer> {
+public interface DetalleUsuarioSistemaDao extends JpaRepository<DetalleUsuarioSistema, ama.dominio.DetalleUsuarioSistemaPK> {
 
     @Query(value = """
                    SELECT dtus FROM DetalleUsuarioSistema AS dtus

@@ -62,7 +62,7 @@ $(document).ready(function () {
                                 </td><td>  ${valor.numeroDocumento} 
                                  </td><td>  ${valor.nombre} ${valor.apellido??''}
                                 </td><td>  ${valor.celular} 
-                                 </td><td>  ${valor.telefono??''} 
+                                 </td><td>  ${valor.correo??''}
                                 </td><td>  ${valor.barrio} 
                                  </td><td>  ${valor.direccion} 
                                  </td><td>  ${valor.nombreSucursal} 

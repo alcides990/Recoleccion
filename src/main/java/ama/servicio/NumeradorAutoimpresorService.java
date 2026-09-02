@@ -29,7 +29,7 @@ public class NumeradorAutoimpresorService {
         int desde = detalle.getNumeroDesde() == null ? 1 : detalle.getNumeroDesde();
         int hasta = detalle.getNumeroHasta() == null ? MAXIMO_NUMERO_FISCAL : detalle.getNumeroHasta();
         var id = detalle.getDetalleTimbradoPK();
-        int serie = detalle.getSerie().getCodigoSerie();
+        int serie = detalle.getSerie() == null ? 0 : detalle.getSerie().getCodigoSerie();
 
         Integer maximoExistente = jdbc.queryForObject("""
             SELECT COALESCE(MAX(numero_comprobante), 0)

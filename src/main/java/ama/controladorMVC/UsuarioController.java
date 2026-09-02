@@ -34,12 +34,19 @@ import ama.servicio.CiudadService;
 import ama.servicio.EstadoService;
 import ama.servicio.TipoDocumentoService;
 import ama.servicio.UsuarioService;
+import ama.servicio.AuditoriaEntidadService;
+import ama.servicio.EliminacionEntidadService;
 import java.util.Arrays;
 import ama.dominio.UsuarioSistema;
+import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.data.domain.Sort;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 @Slf4j
 @Controller
@@ -70,6 +77,10 @@ public class UsuarioController {
 
     @Autowired
     private HttpSession httpSession;
+    @Autowired
+    private AuditoriaEntidadService auditoriaEntidad;
+    @Autowired
+    private EliminacionEntidadService eliminacionEntidadService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -109,7 +120,7 @@ public class UsuarioController {
             fila.put("documento", usuario.getNumeroDocumento());
             fila.put("nombre", usuario.getNombre() + " " + (usuario.getApellido() == null ? "" : usuario.getApellido()));
             fila.put("celular", usuario.getCelular());
-            fila.put("telefono", usuario.getTelefono());
+            fila.put("correo", usuario.getCorreo());
             fila.put("barrio", usuario.getBarrio());
             fila.put("direccion", usuario.getDireccion());
             fila.put("sucursal", usuario.getSucursal().getNombreSucursal());
@@ -177,12 +188,31 @@ public class UsuarioController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(Usuario usuario) {
-        if (usuario.getCodigoUsuario() == null) {
+    @Transactional
+    public String guardar(@Valid Usuario usuario, BindingResult resultado, Model modelo) {
+        if (usuario.getCorreo() != null) {
+            String correo = usuario.getCorreo().trim().toLowerCase();
+            usuario.setCorreo(correo.isBlank() ? null : correo);
+        }
+        if (resultado.hasErrors()) {
+            modelo.addAttribute("titulo", "Usuario");
+            modelo.addAttribute("tipoDocumento", servicioTipoDocumento.listar());
+            modelo.addAttribute("sucursal", servicioSucursal.listar());
+            modelo.addAttribute("ciudad", servicioCiudad.listarCiudad());
+            modelo.addAttribute("estado", servicioEstado.findByEstadoIn(Arrays.asList("ACTIVO", "INACTIVO")));
+            return "usuario/modificarUsuario";
+        }
+        boolean alta = usuario.getCodigoUsuario() == null;
+        Usuario anterior = alta ? null : servicioUsuario.encontrar(usuario);
+        Map<String, Object> datosAntes = auditoriaEntidad.usuario(anterior);
+        if (alta) {
             Integer codigoUsuario = servicioUsuario.getCodigoUsuario() + 1;
             usuario.setCodigoUsuario(codigoUsuario);
         }
         servicioUsuario.guardar(usuario);
+        auditoriaEntidad.registrar("USUARIO", alta ? "ALTA" : "MODIFICACION",
+                String.valueOf(usuario.getCodigoUsuario()), datosAntes,
+                auditoriaEntidad.usuario(usuario), null);
         return "redirect:/usuario/listar";
     }
 
@@ -209,21 +239,28 @@ public class UsuarioController {
 
 
     @PostMapping("/eliminar/{codigoUsuario}")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')")
     public ResponseEntity<?> modal(Usuario usuario) {
-           Usuario usuarioRecuperado= servicioUsuario.encontrar(usuario);
+        Usuario usuarioRecuperado = servicioUsuario.encontrar(usuario);
         try {
-           if(usuarioRecuperado!=null){
-             servicioUsuario.eliminar(usuario);
-            return ResponseEntity.ok("Usuario eliminado correctamente !!");
-           }else{
-               return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Usuario no encontrado..! ");
-           }
-        } catch (Exception e) {
- String nombreUsuario=usuarioRecuperado.getNombre()+" "+usuarioRecuperado.getApellido();
+            if (usuarioRecuperado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Usuario no encontrado.");
+            }
+            if (!usuarioRecuperado.getSucursal().getCodigoSucursal()
+                    .equals(getUserSession().getSucursal().getCodigoSucursal())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No puede eliminar un usuario de otra sucursal.");
+            }
+            Map<String, Object> datosAntes = auditoriaEntidad.usuario(usuarioRecuperado);
+            eliminacionEntidadService.eliminarUsuario(usuarioRecuperado, datosAntes);
+            return ResponseEntity.ok("Usuario eliminado correctamente.");
+        } catch (DataIntegrityViolationException e) {
+            String nombreUsuario = usuarioRecuperado == null ? ""
+                    : usuarioRecuperado.getNombre() + " " + usuarioRecuperado.getApellido();
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Error al eliminar usuario " + nombreUsuario+" "+ e.getMessage());
+                    .body("No se puede eliminar el usuario " + nombreUsuario.trim()
+                            + " porque tiene cuentas u otros registros relacionados.");
         }
-
     }
 }

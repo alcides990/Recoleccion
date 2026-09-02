@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.TimeZone;
 
 @SpringBootApplication(exclude = FlywayAutoConfiguration.class)
 @Slf4j
@@ -26,7 +27,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
     ComprobanteDao comprobanteDao;
 
     public static void main(String[] args) {
-
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Asuncion"));
         SpringApplication.run(recolecion.class, args);
     }
 

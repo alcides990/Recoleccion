@@ -3,16 +3,17 @@ $(function () {
     const iso = fecha => fecha.getFullYear() + '-' + String(fecha.getMonth() + 1).padStart(2, '0') + '-' + String(fecha.getDate()).padStart(2, '0');
 
     function fila(item) {
-        return $('<tr>')
-                .append($('<td>').text(item.nombre || 'Sin especificar'))
-                .append($('<td>').text(Number(item.cantidad || 0).toLocaleString('es-PY')))
-                .append($('<td>', {class: 'text-end fw-bold'}).text(moneda(item.importe)));
+        return $('<div>', {class: 'resumen-linea'})
+                .append($('<span>', {class: 'resumen-linea-nombre'}).text(item.nombre || 'Sin especificar'))
+                .append($('<span>', {class: 'resumen-linea-cantidad'}).text(
+                    Number(item.cantidad || 0).toLocaleString('es-PY')))
+                .append($('<strong>', {class: 'resumen-linea-importe'}).text(moneda(item.importe)));
     }
 
     function llenar(cuerpo, datos) {
         cuerpo.empty();
         if (!datos.length) {
-            cuerpo.append($('<tr>').append($('<td>', {colspan: 3, class: 'text-center text-muted py-4'}).text('Sin ingresos en el período.')));
+            cuerpo.append($('<span>', {class: 'resumen-vacio'}).text('Sin ingresos en el período.'));
             return;
         }
         datos.forEach(item => cuerpo.append(fila(item)));
@@ -21,37 +22,32 @@ $(function () {
     function llenarDetalleCobrador(datos) {
         const cuerpo = $('#detalleCobradorMedio').empty();
         if (!datos.length) {
-            cuerpo.append($('<tr>').append($('<td>', {colspan: 3, class: 'text-center text-muted py-4'}).text('Sin ingresos en el período.')));
+            cuerpo.append($('<span>', {class: 'resumen-vacio'}).text('Sin ingresos en el período.'));
             return;
         }
-        const grupos = new Map();
         datos.forEach(function (item) {
-            const clave = String(item.codigoCobrador);
-            if (!grupos.has(clave)) grupos.set(clave, {nombre: item.cobrador, items: []});
-            grupos.get(clave).items.push(item);
-        });
-        grupos.forEach(function (grupo) {
-            cuerpo.append($('<tr>', {class: 'resumen-grupo-cobrador'})
-                    .append($('<td>', {colspan: 3}).text(grupo.nombre || 'Sin cobrador')));
-            let total = 0;
-            let cantidad = 0;
-            grupo.items.forEach(function (item) {
-                total += Number(item.importe || 0);
-                cantidad += Number(item.cantidad || 0);
-                cuerpo.append($('<tr>')
-                        .append($('<td>', {class: 'ps-4'}).text(item.medioPago || 'Sin especificar'))
-                        .append($('<td>').text(Number(item.cantidad || 0).toLocaleString('es-PY')))
-                        .append($('<td>', {class: 'text-end fw-bold'}).text(moneda(item.importe))));
-            });
-            cuerpo.append($('<tr>', {class: 'resumen-subtotal-cobrador'})
-                    .append($('<td>').text('Total cobrado'))
-                    .append($('<td>').text(cantidad.toLocaleString('es-PY')))
-                    .append($('<td>', {class: 'text-end'}).text(moneda(total))));
+            const cobrador = item.cobrador || 'Sin cobrador';
+            const medio = item.medioPago || 'Sin especificar';
+            cuerpo.append($('<div>', {class: 'resumen-linea'})
+                    .append($('<span>', {class: 'resumen-linea-nombre'}).text(cobrador + ' · ' + medio))
+                    .append($('<span>', {class: 'resumen-linea-cantidad'}).text(
+                        Number(item.cantidad || 0).toLocaleString('es-PY')))
+                    .append($('<strong>', {class: 'resumen-linea-importe'}).text(moneda(item.importe))));
         });
     }
 
     function llenarResumenGeneralMedios(datos) {
-        llenar($('#resumenGeneralPorMedio'), datos);
+        const cuerpo = $('#resumenGeneralPorMedio').empty();
+        if (!datos.length) {
+            cuerpo.append($('<span>', {class: 'resumen-vacio'}).text('Sin ingresos en el período.'));
+        } else {
+            datos.forEach(function (item) {
+                cuerpo.append($('<div>', {class: 'resumen-medio-item'})
+                        .append($('<span>').text(item.nombre || 'Sin especificar'))
+                        .append($('<small>').text(Number(item.cantidad || 0).toLocaleString('es-PY')))
+                        .append($('<strong>').text(moneda(item.importe))));
+            });
+        }
         const cantidad = datos.reduce((total, item) => total + Number(item.cantidad || 0), 0);
         const importe = datos.reduce((total, item) => total + Number(item.importe || 0), 0);
         $('#cantidadGeneralPorMedio').text(cantidad.toLocaleString('es-PY'));

@@ -48,7 +48,7 @@ $(function () {
 
     const token = $('#token').val();
     const roles = String($('#roles').text() || '');
-    const puedeEditar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR')|| roles.includes('SUERVISOR');
+    const puedeEditar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR') || roles.includes('SUPERVISOR');
     let accionActual = null;
     let cargandoEdicion = false;
     let comprobantePendienteImpresion = null;
@@ -171,6 +171,24 @@ $(function () {
         }
         if (!respuesta.ok) {
             throw new Error(cuerpo?.mensaje || cuerpo?.message || cuerpo || 'No fue posible completar la operación.');
+        }
+        return cuerpo;
+    };
+    const consultarCuentaEdicion = async function (cuentaCorriente) {
+        const respuesta = await fetch('/comprobantes-v2/cuenta-edicion?cuentaCorriente='
+                + encodeURIComponent(cuentaCorriente), {
+            method: 'GET',
+            headers: {'Accept': 'application/json', 'X-CSRF-TOKEN': token}
+        });
+        const contenido = await respuesta.text();
+        let cuerpo = null;
+        try {
+            cuerpo = contenido ? JSON.parse(contenido) : null;
+        } catch (error) {
+            cuerpo = contenido;
+        }
+        if (!respuesta.ok) {
+            throw new Error(cuerpo?.mensaje || cuerpo?.message || cuerpo || 'No fue posible recuperar la cuenta corriente.');
         }
         return cuerpo;
     };
@@ -363,7 +381,17 @@ $(function () {
             } else if (accion === 'editar') {
                 cargandoEdicion = true;
                 $('#editarIdentificadorV2').text(identificador(detalle));
-                $('#editarCuentaV2').val(detalle.cuentaCorriente || '');
+                const esFacturaManual = String(detalle.tipoComprobante || '').trim().replace(/\s+/g, ' ').toUpperCase() === 'FACTURA MANUAL';
+                $('#editarNumeroComprobanteV2').val(detalle.numeroComprobante)
+                        .prop('readonly', !esFacturaManual);
+                $('#ayudaNumeroComprobanteV2').text(esFacturaManual
+                        ? 'Puede cambiar el número antes de guardar.'
+                        : 'El número no se puede cambiar para este tipo de comprobante.');
+                $('#editarCuentaV2').val(detalle.cuentaCorriente || '')
+                        .prop('readonly', !esFacturaManual);
+                $('#ayudaCuentaV2').text(esFacturaManual
+                        ? 'Ingrese la cuenta y salga del campo para recuperar sus datos.'
+                        : 'La cuenta no se puede cambiar para este tipo de comprobante.');
                 $('#editarDocumentoV2').val(detalle.documento || '');
                 $('#editarRazonSocialV2').val(detalle.receptor || '');
                 $('#editarFechaPagoV2').val(detalle.fechaPago || '');
@@ -439,6 +467,8 @@ $(function () {
             }
             const respuesta = await solicitar('/comprobantes-v2/editar', 'PUT', {
                 ...accionActual,
+                nuevoNumeroComprobante: Number($('#editarNumeroComprobanteV2').val()),
+                cuentaCorriente: $('#editarCuentaV2').val().trim(),
                 razonSocial: $('#editarRazonSocialV2').val(),
                 fechaPago: $('#editarFechaPagoV2').val(),
                 pagoDesde: $('#editarPagoDesdeV2').val() || null,
@@ -492,6 +522,33 @@ $(function () {
         const tarifa = Number($(this).find('option:selected').attr('data-tarifa') || 0);
         $('#editarTarifaV2').val(tarifa);
         recalcularImporteEdicion();
+    });
+    $('#editarCuentaV2').on('change', async function () {
+        const campo = $(this);
+        if (campo.prop('readonly')) return;
+        const cuenta = campo.val().trim();
+        if (!cuenta) {
+            mostrarMensaje('warning', 'Ingrese una cuenta corriente.');
+            return;
+        }
+        campo.prop('disabled', true);
+        try {
+            const detalle = await consultarCuentaEdicion(cuenta);
+            campo.val(detalle.cuentaCorriente || cuenta);
+            $('#editarDocumentoV2').val(detalle.documento || '');
+            $('#editarRazonSocialV2').val(detalle.razonSocial || '');
+            cargandoEdicion = true;
+            $('#editarCategoriaV2').val(String(detalle.codigoCategoria || '')).trigger('change');
+            $('#editarTarifaV2').val(detalle.tarifa ?? 0);
+            cargandoEdicion = false;
+            recalcularImporteEdicion();
+        } catch (error) {
+            mostrarMensaje('danger', error.message);
+            campo.trigger('focus');
+        } finally {
+            cargandoEdicion = false;
+            campo.prop('disabled', false);
+        }
     });
     $('#editarCantidadPagoV2,#editarRecargoV2').on('input', recalcularImporteEdicion);
     $('#editarImportePagoV2').on('keypress', function (evento) {

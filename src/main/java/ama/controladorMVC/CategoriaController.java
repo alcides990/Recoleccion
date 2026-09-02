@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ama.servicio.CategoriaService;
+import ama.servicio.AuditoriaEntidadService;
 import ama.utilerias.DataTableResponse;
 import ama.modulos.comprobantesv2.DataTableResponseV2;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +32,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Slf4j
 @Controller
@@ -43,6 +46,8 @@ public class CategoriaController {
     private CategoriaService servicioCategoria;
     @Autowired
     private HttpSession httpSession;
+    @Autowired
+    private AuditoriaEntidadService auditoriaEntidad;
 
     @GetMapping("/listar")
     public String listaCtegoria(Model modelo) {
@@ -116,6 +121,7 @@ public class CategoriaController {
 
     @PostMapping("/guardar")
     @ResponseBody
+    @Transactional
     public ResponseEntity<String> guardar(
             @RequestBody @Valid Categoria categoria, BindingResult result
     ) {
@@ -126,7 +132,10 @@ public class CategoriaController {
             });
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al guardar registro: " + errores);
         }
-        if (categoria.getCodigoCategoria() == null) {
+        boolean alta = categoria.getCodigoCategoria() == null;
+        Categoria anterior = alta ? null : servicioCategoria.encontrar(categoria);
+        Map<String, Object> datosAntes = auditoriaEntidad.categoria(anterior);
+        if (alta) {
             Integer codigoCategoria = servicioCategoria.getCodigoCategoria() + 1;
             categoria.setCodigoCategoria(codigoCategoria);
         }
@@ -134,8 +143,12 @@ public class CategoriaController {
         try {
             Categoria newCategoria = new Categoria();
             servicioCategoria.guardar(categoria);
+            auditoriaEntidad.registrar("CATEGORIA", alta ? "ALTA" : "MODIFICACION",
+                    String.valueOf(categoria.getCodigoCategoria()), datosAntes,
+                    auditoriaEntidad.categoria(categoria), null);
             return ResponseEntity.ok("Registro guardado correctamente ");
         } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al guardar registro" + e.getMessage());
         }
     }
@@ -153,6 +166,7 @@ public class CategoriaController {
     }
 
     @PostMapping("/eliminar/{codigoCategoria}")
+    @Transactional
     public ResponseEntity<?> eliminar(Categoria categoria) {
         try {
             Categoria categoriaEncontrada = servicioCategoria.encontrar(categoria);
@@ -160,7 +174,11 @@ public class CategoriaController {
                     .equals(getUserSession().getSucursal().getCodigoSucursal())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La categoría no pertenece a su sucursal");
             }
+            Map<String, Object> datosAntes = auditoriaEntidad.categoria(categoriaEncontrada);
             servicioCategoria.eliminar(categoriaEncontrada);
+            auditoriaEntidad.registrar("CATEGORIA", "ELIMINACION",
+                    String.valueOf(categoriaEncontrada.getCodigoCategoria()),
+                    datosAntes, null, null);
             return ResponseEntity.ok().body("Categoria Eliminda Correctamente ");
         } catch (DataIntegrityViolationException e) {
 

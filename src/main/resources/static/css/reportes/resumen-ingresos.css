@@ -1,15 +1,41 @@
-#resumenIngresos { padding-top: 1rem; padding-bottom: 2rem; }
-#resumenIngresos .resumen-filtros { padding: 1rem; border: 1px solid rgba(108,117,125,.22); border-radius: .65rem; background: #fff; }
+#resumenIngresos { width: 100%; max-width: 68rem; margin-right: auto; margin-left: auto; padding-top: .6rem; padding-bottom: 1.25rem; }
+#resumenIngresos .card-header h3 { margin-bottom: .55rem; padding-top: .6rem; padding-bottom: .6rem; }
+#resumenIngresos .resumen-filtros { padding: .7rem; border: 1px solid rgba(108,117,125,.22); border-radius: .65rem; background: #fff; }
+#resumenIngresos .resumen-filtros .row { --bs-gutter-y: .5rem; }
 #resumenIngresos .resumen-filtros label { margin-bottom: .3rem; color: #4d555c; font-size: .8rem; font-weight: 700; }
 #resumenIngresos .resumen-consultar { min-height: 2.45rem; background: var(--btn-color); color: #fff; font-weight: 700; }
-#resumenIngresos .resumen-metrica { padding: 1rem; border-left: .25rem solid var(--btn-color); border-radius: .6rem; background: #fff; box-shadow: 0 .2rem .7rem rgba(33,37,41,.09); }
-#resumenIngresos .resumen-metrica span, #resumenIngresos .resumen-metrica strong { display: block; }
-#resumenIngresos .resumen-metrica span { color: #737c84; font-size: .75rem; font-weight: 700; text-transform: uppercase; }
-#resumenIngresos .resumen-metrica strong { margin-top: .25rem; color: #343a40; font-size: 1.35rem; }
-#resumenIngresos .resumen-tabla-card { overflow: hidden; border: 1px solid rgba(108,117,125,.2); border-radius: .65rem; background: #fff; }
-#resumenIngresos .resumen-tabla-card h4 { margin: 0; padding: .85rem 1rem; color: #3f474e; font-size: .95rem; font-weight: 800; }
-#resumenIngresos .resumen-tabla-card thead th { border: 0; background: var(--btn-color); color: #fff; font-size: .76rem; text-transform: uppercase; }
-#resumenIngresos .resumen-tabla-card td { font-size: .86rem; }
-#resumenIngresos .resumen-grupo-cobrador td { background: #e9ecef; color: #343a40; font-weight: 800; }
-#resumenIngresos .resumen-subtotal-cobrador td { border-top: 2px solid rgba(108,117,125,.3); background: #f8f9fa; font-weight: 800; }
-#resumenIngresos .resumen-total-general td { border-top: .2rem solid var(--btn-color); background: #e9ecef; color: #343a40; font-weight: 800; }
+#resumenIngresos .resumen-card { overflow: hidden; border: 1px solid rgba(108,117,125,.2); border-radius: .6rem; background: #fff; }
+#resumenIngresos .resumen-card h4 { margin: 0; padding: .5rem .7rem; background: var(--btn-color); color: #fff; font-size: .82rem; font-weight: 800; }
+#resumenIngresos .resumen-subtitulo-card { margin: .25rem 0 0; padding: .4rem .7rem; border-top: 2px solid rgba(108,117,125,.25); background: #e9ecef; color: #3f474e; font-size: .76rem; font-weight: 800; }
+#resumenIngresos .resumen-encabezado-linea { display: grid; grid-template-columns: minmax(6rem, 1fr) 1.8rem 6.8rem; gap: .18rem; padding: .28rem .75rem; border-bottom: 1px solid rgba(108,117,125,.2); background: #f1f3f5; color: #626b73; font-size: .64rem; font-weight: 800; text-transform: uppercase; }
+#resumenIngresos .resumen-encabezado-linea > span:nth-child(2) { text-align: center; }
+#resumenIngresos .resumen-encabezado-linea > span:last-child { text-align: right; }
+#resumenIngresos .resumen-medios-lista { display: block; padding: .25rem .4rem; }
+#resumenIngresos .resumen-medio-item { display: grid; grid-template-columns: minmax(6rem, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; min-height: 1.8rem; padding: .28rem .35rem; border-bottom: 1px solid rgba(108,117,125,.13); }
+#resumenIngresos .resumen-medio-item:nth-child(even) { background: #f8f9fa; }
+#resumenIngresos .resumen-medio-item span { overflow: hidden; color: #4b535a; font-size: .76rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+#resumenIngresos .resumen-medio-item small { color: #737c84; font-size: .7rem; text-align: center; }
+#resumenIngresos .resumen-medio-item strong { color: #343a40; font-size: .8rem; text-align: right; white-space: nowrap; }
+#resumenIngresos .resumen-total-general { display: grid; grid-template-columns: minmax(6rem, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; padding: .38rem .75rem; border-top: .15rem solid var(--btn-color); background: #e9ecef; color: #343a40; font-size: .76rem; font-weight: 700; }
+#resumenIngresos .resumen-total-general > strong { text-align: right; white-space: nowrap; }
+#resumenIngresos .resumen-total-cobrador { display: grid; grid-template-columns: minmax(0, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; padding: .38rem .8rem; border-top: .15rem solid var(--btn-color); background: #e9ecef; color: #343a40; font-size: .76rem; font-weight: 800; }
+#resumenIngresos .resumen-total-cobrador > strong { text-align: right; white-space: nowrap; }
+#resumenIngresos .resumen-lista { padding: .25rem .45rem; }
+#resumenIngresos .resumen-linea { display: grid; grid-template-columns: minmax(0, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; min-height: 1.8rem; padding: .28rem .35rem; border-bottom: 1px solid rgba(108,117,125,.13); font-size: .76rem; }
+#resumenIngresos .resumen-linea:nth-child(even) { background: #f8f9fa; }
+#resumenIngresos .resumen-linea-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#resumenIngresos .resumen-linea-cantidad { color: #737c84; font-size: .7rem; text-align: center; white-space: nowrap; }
+#resumenIngresos .resumen-linea-importe { text-align: right; white-space: nowrap; }
+#resumenIngresos .resumen-vacio { display: block; padding: 1rem; color: #737c84; font-size: .8rem; text-align: center; }
+
+@media (max-width: 991.98px) {
+    #resumenIngresos { max-width: none; }
+    #resumenIngresos .resumen-columnas > div + div { margin-top: .5rem; }
+}
+
+@media (max-width: 575.98px) {
+    #resumenIngresos .resumen-total-general { grid-template-columns: 1fr auto; }
+    #resumenIngresos .resumen-total-general > strong { grid-column: 1 / -1; text-align: right; }
+    #resumenIngresos .resumen-linea { grid-template-columns: minmax(0, 1fr) auto; }
+    #resumenIngresos .resumen-linea-importe { grid-column: 1 / -1; }
+}

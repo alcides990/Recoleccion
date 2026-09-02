@@ -21,7 +21,7 @@
                     <td th:text="${d.timbrado.numeroTimbrado}"></td>
                     <td th:text="${d.puntoExpedicion.nombrePuntoExpedicion}"></td>
                     <td th:text="${d.puntoExpedicion.sucursal.nombreSucursal + ' - ' + d.puntoExpedicion.sucursal.ciudad.nombreCiudad}"></td>
-                    <td th:text="${d.serie.serie}"></td>
+                    <td th:text="${d.serie != null ? d.serie.serie : 'Sin serie'}"></td>
                     <td><span class="badge" th:classappend="${d.modoEmision == 'AUTOIMPRESOR' ? ' bg-primary' : ' bg-secondary'}" th:text="${d.modoEmision}"></span></td>
                     <td th:text="${#numbers.formatInteger(d.numeroDesde, 7) + ' – ' + #numbers.formatInteger(d.numeroHasta, 7)}"></td>
                     <td><span class="badge" th:classappend="${d.estado.codigoEstado == 1 ? ' bg-success' : ' bg-secondary'}" th:text="${d.estado.estado}"></span></td>

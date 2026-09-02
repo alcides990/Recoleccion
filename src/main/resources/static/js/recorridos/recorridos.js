@@ -426,14 +426,19 @@ $(function () {
                     .text('No se pudo cargar el componente del mapa. Compruebe la conexión a Internet.');
             return false;
         }
+        const elementoMapa = document.getElementById('recorridoMapa');
+        const tilesUrl = elementoMapa.dataset.tilesUrl
+                || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const attribution = elementoMapa.dataset.attribution
+                || '&copy; OpenStreetMap contributors';
+
         mapaRecorrido = L.map('recorridoMapa', {zoomControl: true, preferCanvas: true})
                 .setView([-23.4425, -58.4438], 6);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            subdomains: 'abcd',
-            maxZoom: 20,
+        L.tileLayer(tilesUrl, {
+            maxZoom: 19,
             keepBuffer: 4,
             updateWhenIdle: false,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            attribution: attribution
         }).addTo(mapaRecorrido);
         capaTrazoRecorrido = L.layerGroup().addTo(mapaRecorrido);
         capaPuntosRecorrido = L.layerGroup().addTo(mapaRecorrido);

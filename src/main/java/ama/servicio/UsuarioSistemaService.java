@@ -65,6 +65,10 @@ public class UsuarioSistemaService implements UserDetailsService {
         return UsuarioSistemaDao.save(entity);
     }
 
+    public <S extends UsuarioSistema> S saveAndFlush(S entity) {
+        return UsuarioSistemaDao.saveAndFlush(entity);
+    }
+
     public Optional<UsuarioSistema> findById(Integer id) {
         return UsuarioSistemaDao.findById(id);
     }

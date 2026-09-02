@@ -114,7 +114,9 @@
                             </button>
                         </div>
                         <div class="recorrido-mapa-contenedor">
-                            <div id="recorridoMapa" role="application" aria-label="Mapa del recorrido del cobrador"></div>
+                            <div id="recorridoMapa" role="application"
+                                 aria-label="Mapa del recorrido del cobrador"
+                                 th:attr="data-tiles-url=${mapaTilesUrl},data-attribution=${mapaAttribution}"></div>
                             <div id="recorridoSinPuntos" class="recorrido-mapa-vacio d-none">
                                 <i class="fa-solid fa-map-location-dot"></i>
                                 <span>El recorrido todavía no recibió puntos GPS.</span>
@@ -152,6 +154,6 @@
         <footer th:replace="~{layout/layout :: footer}"></footer>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
                 integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-        <script src="/js/recorridos/recorridos.js?v=20260819-8"></script>
+        <script src="/js/recorridos/recorridos.js"></script>
     </body>
 </html>

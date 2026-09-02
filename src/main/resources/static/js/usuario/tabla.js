@@ -2,6 +2,8 @@ $(function () {
     const token = $('#token').val();
     const roles = String($('#roles').text() || '');
     const puedeAdministrar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR');
+    const puedeEditar = puedeAdministrar || roles.includes('SUPERVISOR');
+    const puedeEliminar = puedeEditar;
     const escapar = valor => $('<div>').text(valor ?? '').html();
 
     $('#tablaUsuarios').DataTable({
@@ -33,8 +35,8 @@ $(function () {
                 data: null,
                 render: function (_, __, fila) {
                     const celular = fila.celular ? '<span><i class="fa-solid fa-mobile-screen"></i> ' + escapar(fila.celular) + '</span>' : '';
-                    const telefono = fila.telefono ? '<small><i class="fa-solid fa-phone"></i> ' + escapar(fila.telefono) + '</small>' : '';
-                    return '<div class="usuario-list-doble">' + celular + telefono + (celular || telefono ? '' : '<small>Sin contacto</small>') + '</div>';
+                    const correo = fila.correo ? '<small><i class="fa-solid fa-envelope"></i> ' + escapar(fila.correo) + '</small>' : '';
+                    return '<div class="usuario-list-doble">' + celular + correo + (celular || correo ? '' : '<small>Sin contacto</small>') + '</div>';
                 }
             },
             {
@@ -65,9 +67,17 @@ $(function () {
                 searchable: false,
                 className: 'text-center text-nowrap',
                 render: function (_, __, fila) {
-                    if (!puedeAdministrar) return '';
-                    return '<a href="/usuario/editar/' + fila.codigo + '" class="btn btn-info btn-sm" title="Editar usuario" aria-label="Editar usuario"><i class="fa-regular fa-pen-to-square"></i></a> '
-                            + '<button type="button" id="eliminar" data-url="/usuario/eliminar/" data-id="' + fila.codigo + '" class="btn btn-danger btn-sm" title="Eliminar usuario" aria-label="Eliminar usuario"><i class="fa-solid fa-trash-can"></i></button>';
+                    let acciones = '';
+                    if (puedeAdministrar) {
+                        acciones += '<a href="/auditoria-entidades?entidad=USUARIO&identificador=' + encodeURIComponent(fila.codigo) + '" class="btn btn-outline-secondary btn-sm" title="Ver historial de modificaciones" aria-label="Ver historial de modificaciones"><i class="fa-solid fa-clock-rotate-left"></i></a> ';
+                    }
+                    if (puedeEditar) {
+                        acciones += '<a href="/usuario/editar/' + fila.codigo + '" class="btn btn-info btn-sm" title="Editar usuario" aria-label="Editar usuario"><i class="fa-regular fa-pen-to-square"></i></a> ';
+                    }
+                    if (puedeEliminar) {
+                        acciones += '<button type="button" id="eliminar" data-url="/usuario/eliminar/" data-id="' + fila.codigo + '" class="btn btn-danger btn-sm" title="Eliminar usuario" aria-label="Eliminar usuario"><i class="fa-solid fa-trash-can"></i></button>';
+                    }
+                    return acciones;
                 }
             }
         ],

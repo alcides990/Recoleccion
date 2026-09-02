@@ -9,12 +9,14 @@ import ama.dominio.Estado;
 import ama.dominio.DetallePago;
 import ama.dominio.DetallePagoPK;
 import ama.dominio.MetodoPago;
+import ama.dominio.Servicio;
 import ama.dao.CategoriaDao;
 import ama.dao.CondicionVentaDao;
 import ama.dao.MetodoPagoDao;
 import ama.dao.DetalleTimbradoDao;
 import ama.dominio.DetalleTimbradoPK;
 import ama.servicio.AuditoriaComprobanteService;
+import ama.servicio.ServicioService;
 import ama.dominio.PuntoExpedicionPK;
 import ama.dominio.UsuarioSistema;
 import jakarta.servlet.http.HttpSession;
@@ -30,7 +32,6 @@ import java.util.Objects;
 import java.util.HashMap;
 import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRLoader;
@@ -72,13 +73,14 @@ public class ComprobanteAccionControllerV2 {
     private final MontoEnLetrasService montoEnLetras;
     private final DetalleTimbradoDao detallesTimbrado;
     private final AuditoriaComprobanteService auditoria;
+    private final ServicioService servicios;
 
     public ComprobanteAccionControllerV2(ComprobanteJpaRepositoryV2 comprobantes,
             CobradorJpaRepositoryV2 cobradores, EstadoJpaRepositoryV2 estados,
             CategoriaDao categorias, CondicionVentaDao condicionesVenta, MetodoPagoDao metodosPago,
             DetallePagoJpaRepositoryV2 detallesPago, HttpSession session, DataSource dataSource,
             MontoEnLetrasService montoEnLetras, DetalleTimbradoDao detallesTimbrado,
-            AuditoriaComprobanteService auditoria) {
+            AuditoriaComprobanteService auditoria, ServicioService servicios) {
         this.comprobantes = comprobantes;
         this.cobradores = cobradores;
         this.estados = estados;
@@ -91,6 +93,23 @@ public class ComprobanteAccionControllerV2 {
         this.montoEnLetras = montoEnLetras;
         this.detallesTimbrado = detallesTimbrado;
         this.auditoria = auditoria;
+        this.servicios = servicios;
+    }
+
+    @GetMapping("/cuenta-edicion")
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR','ROOT','SUPERVISOR')")
+    @ResponseBody
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> cuentaEdicion(@RequestParam String cuentaCorriente) {
+        UsuarioSistema usuarioSesion = usuarioSesion();
+        Servicio servicio = buscarServicioEdicion(cuentaCorriente, usuarioSesion);
+        var respuesta = new HashMap<String, Object>();
+        respuesta.put("cuentaCorriente", servicio.getCuentaCorriente());
+        respuesta.put("documento", servicio.getUsuario().getNumeroDocumento());
+        respuesta.put("razonSocial", nombreCompleto(servicio));
+        respuesta.put("codigoCategoria", servicio.getCategoria().getCodigoCategoria());
+        respuesta.put("tarifa", servicio.getCategoria().getTarifa());
+        return ResponseEntity.ok(respuesta);
     }
 
     @PostMapping("/detalle")
@@ -108,9 +127,9 @@ public class ComprobanteAccionControllerV2 {
         try {
             Comprobante comprobante = buscarAutorizado(solicitud);
             String rutaReporte = switch (formato.toLowerCase()) {
-                case "58mm" -> "reportes/comprobanteTicket.jrxml";
-                case "80mm" -> "reportes/comprobanteTicket80mm.jrxml";
-                case "a4" -> "reportes/comprobanteA4.jrxml";
+                case "58mm" -> "reportes/comprobanteTicket.jasper";
+                case "80mm" -> "reportes/comprobanteTicket80mm.jasper";
+                case "a4" -> "reportes/comprobanteA4.jasper";
                 default -> null;
             };
             if (rutaReporte == null) {
@@ -127,7 +146,7 @@ public class ComprobanteAccionControllerV2 {
             parametros.put("ejemplar", primeraImpresion ? "ORIGINAL" : "COPIA - REIMPRESIÓN");
             try (InputStream jasper = new ClassPathResource(rutaReporte).getInputStream();
                     var conexion = dataSource.getConnection()) {
-                JasperReport reporte = JasperCompileManager.compileReport(jasper);
+                JasperReport reporte = (JasperReport) JRLoader.loadObject(jasper);
                 var impresion = JasperFillManager.fillReport(reporte, parametros, conexion);
                 byte[] pdf = JasperExportManager.exportReportToPdf(impresion);
                 auditoria.registrarImpresion(comprobante.getComprobantePK(),
@@ -152,7 +171,7 @@ public class ComprobanteAccionControllerV2 {
     }
 
     @PutMapping("/editar")
-    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR','ROOT')")
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR','ROOT','SUPERVISOR')")
     @ResponseBody
     @Transactional
     public ResponseEntity<Map<String, String>> editar(@RequestBody @Valid ComprobanteAccionV2 solicitud) {
@@ -166,6 +185,32 @@ public class ComprobanteAccionControllerV2 {
         }
         UsuarioSistema usuario = usuarioSesion();
         Comprobante comprobante = buscarAutorizado(solicitud);
+        ComprobantePK claveAnterior = comprobante.getComprobantePK();
+        String cuentaAnterior = comprobante.getServicio().getCuentaCorriente();
+        String cuentaSolicitada = limpiar(solicitud.getCuentaCorriente());
+        if (cuentaSolicitada == null) {
+            cuentaSolicitada = cuentaAnterior;
+        }
+        boolean cambiaCuenta = !Objects.equals(cuentaAnterior, cuentaSolicitada);
+        if (cambiaCuenta && !esFacturaManual(comprobante)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje",
+                    "La cuenta corriente solo puede modificarse cuando el tipo de comprobante es FACTURA MANUAL."));
+        }
+        Servicio servicioDestino = cambiaCuenta ? buscarServicioEdicion(cuentaSolicitada, usuario) : comprobante.getServicio();
+        Integer numeroNuevo = solicitud.getNuevoNumeroComprobante() == null
+                ? claveAnterior.getNumeroComprobante() : solicitud.getNuevoNumeroComprobante();
+        boolean cambiaNumero = !Objects.equals(claveAnterior.getNumeroComprobante(), numeroNuevo);
+        if (cambiaNumero && !esFacturaManual(comprobante)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje",
+                    "El número solo puede modificarse cuando el tipo de comprobante es FACTURA MANUAL."));
+        }
+        ComprobantePK claveNueva = new ComprobantePK(numeroNuevo,
+                claveAnterior.getPuntoExpedicionPK(), claveAnterior.getCodigoTipoComprobante(),
+                claveAnterior.getCodigoSerie());
+        if (cambiaNumero && comprobantes.existsById(claveNueva)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje",
+                    "Ya existe un comprobante con el nuevo número para la misma sucursal, punto, tipo y serie."));
+        }
         if (esAutoimpresor(comprobante)) {
             auditoria.registrar("INTENTO_MODIFICACION", comprobante.getComprobantePK(),
                     usuario.getCodigoUsuarioSistema(), "Edición rechazada por inalterabilidad fiscal");
@@ -189,7 +234,8 @@ public class ComprobanteAccionControllerV2 {
                 || !Objects.equals(cobrador.getSucursal().getCodigoSucursal(), usuario.getSucursal().getCodigoSucursal())) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "Seleccione un cobrador activo de su sucursal."));
         }
-        Categoria categoria = categorias.findById(solicitud.getCodigoCategoria()).orElse(null);
+        Categoria categoria = cambiaCuenta ? servicioDestino.getCategoria()
+                : categorias.findById(solicitud.getCodigoCategoria()).orElse(null);
         if (categoria == null || categoria.getSucursal() == null
                 || !Objects.equals(categoria.getSucursal().getCodigoSucursal(), usuario.getSucursal().getCodigoSucursal())) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "La categoria seleccionada no pertenece a su sucursal."));
@@ -219,7 +265,12 @@ public class ComprobanteAccionControllerV2 {
         if (totalPagos.compareTo(solicitud.getTotalImporte()) != 0) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "La suma de los medios de pago debe coincidir con el importe total."));
         }
-        comprobante.setRazonSocial(limpiar(solicitud.getRazonSocial()));
+        String datosAnteriores = auditoria.capturarFoto(comprobante.getComprobantePK());
+        if (cambiaCuenta) {
+            comprobante.setServicio(servicioDestino);
+            comprobante.setUsuario(servicioDestino.getUsuario());
+        }
+        comprobante.setRazonSocial(cambiaCuenta ? nombreCompleto(servicioDestino) : limpiar(solicitud.getRazonSocial()));
         comprobante.setFechaPago(solicitud.getFechaPago());
         comprobante.setPagoHasta(solicitud.getPagoDesde());
         comprobante.setPeriodoPago(limpiar(solicitud.getPeriodoPago()));
@@ -234,9 +285,25 @@ public class ComprobanteAccionControllerV2 {
         comprobante.setCategoria(categoria);
         comprobante.setCondicionVenta(condicionVenta);
         comprobante.setObs(limpiar(solicitud.getObservacion()));
-        comprobantes.save(comprobante);
         actualizarDetallePago(comprobante, solicitud.getPagos(), metodosSeleccionados);
-        return ResponseEntity.ok(Map.of("mensaje", "Comprobante actualizado correctamente."));
+        comprobantes.saveAndFlush(comprobante);
+        detallesPago.flush();
+        if (cambiaNumero) {
+            int actualizados = comprobantes.actualizarNumero(claveAnterior.getNumeroComprobante(), numeroNuevo,
+                    claveAnterior.getPuntoExpedicionPK().getCodigoPuntoExpedicion(),
+                    claveAnterior.getPuntoExpedicionPK().getCodigoSucursal(),
+                    claveAnterior.getCodigoTipoComprobante(), claveAnterior.getCodigoSerie());
+            if (actualizados != 1) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "No fue posible actualizar el número del comprobante.");
+            }
+            auditoria.renumerarHistorial(claveAnterior, numeroNuevo);
+        }
+        auditoria.registrarModificacion(claveNueva,
+                usuario.getCodigoUsuarioSistema(), "Modificación desde la gestión de comprobantes",
+                datosAnteriores);
+        return ResponseEntity.ok(Map.of("mensaje", "Comprobante actualizado correctamente.",
+                "numeroComprobante", String.valueOf(numeroNuevo)));
     }
 
     @PutMapping("/anular")
@@ -269,6 +336,41 @@ public class ComprobanteAccionControllerV2 {
                 new PuntoExpedicionPK(solicitud.getCodigoSucursal(), solicitud.getCodigoPuntoExpedicion()),
                 solicitud.getCodigoTipoComprobante(), solicitud.getCodigoSerie());
         return comprobantes.findById(clave).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    private boolean esFacturaManual(Comprobante comprobante) {
+        if (comprobante.getTipoComprobante() == null
+                || comprobante.getTipoComprobante().getNombreTipoComprobante() == null) {
+            return false;
+        }
+        return "FACTURA MANUAL".equalsIgnoreCase(
+                comprobante.getTipoComprobante().getNombreTipoComprobante().trim().replaceAll("\\s+", " "));
+    }
+
+    private Servicio buscarServicioEdicion(String cuentaCorriente, UsuarioSistema usuarioSesion) {
+        String cuenta = limpiar(cuentaCorriente);
+        if (cuenta == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingrese una cuenta corriente.");
+        }
+        Servicio servicio = servicios.encontrar(cuenta);
+        if (servicio == null || servicio.getSucursal() == null
+                || servicio.getUsuario() == null || servicio.getCategoria() == null
+                || !Objects.equals(servicio.getSucursal().getCodigoSucursal(),
+                        usuarioSesion.getSucursal().getCodigoSucursal())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La cuenta corriente no existe o no pertenece a su sucursal.");
+        }
+        if (servicio.getEstado() == null || !Objects.equals(servicio.getEstado().getCodigoEstado(), 1)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cuenta corriente no esta activa.");
+        }
+        return servicio;
+    }
+
+    private String nombreCompleto(Servicio servicio) {
+        String nombre = servicio.getUsuario().getNombre() == null ? "" : servicio.getUsuario().getNombre().trim();
+        String apellido = servicio.getUsuario().getApellido() == null ? "" : servicio.getUsuario().getApellido().trim();
+        String completo = (nombre + " " + apellido).trim();
+        return completo.isEmpty() ? servicio.getUsuario().getNumeroDocumento() : completo;
     }
 
     private UsuarioSistema usuarioSesion() {

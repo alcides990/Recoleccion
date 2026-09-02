@@ -63,7 +63,8 @@
                         <div class="col-md-3">
                             <label class="form-label" for="numeroComprobante">N.º de factura</label>
                             <input class="form-control" type="text" autofocus name="numeroComprobante"
-                                   id="numeroComprobante" th:value="${numeroComprobante}">
+                                   id="numeroComprobante" th:value="${numeroComprobante}"
+                                   inputmode="numeric" maxlength="7" autocomplete="off" required>
                             <span class="factura-error" role="alert" th:if="${#fields.hasErrors('comprobantePK')}"
                                   th:errors="${comprobantePK.numeroComprobante}">Error</span>
                         </div>
@@ -85,7 +86,10 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label" for="fechaPago">Fecha de pago</label>
-                            <input class="form-control" type="text" name="fechaPago" id="fechaPago" autocomplete="off">
+                            <input class="form-control" type="text" name="fechaPago" id="fechaPago"
+                                   autocomplete="off" inputmode="numeric" maxlength="10"
+                                   placeholder="aaaa-mm-dd" aria-describedby="ayudaFechaPago" required>
+                            <small id="ayudaFechaPago" class="form-text text-muted">Formato: año-mes-día.</small>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label" for="tipoComprobante">Tipo de comprobante</label>
@@ -200,7 +204,7 @@
                 </div>
 
                 <div class="factura-acciones">
-                    <button type="submit" id="guardar" name="guardar" class="btn factura-guardar">
+                    <button type="button" id="guardar" name="guardar" class="btn factura-guardar">
                         <i class="fa-solid fa-floppy-disk"></i> Guardar factura
                     </button>
                 </div>
@@ -291,7 +295,12 @@
                                 $('#puntoExpedicion').on('change.factura', function () {
                                     cargarTimbradosDelPunto();
                                 });
-                                $('#tipoComprobante, #detalleTimbrado').on('change.factura', function (event) {
+                                $('#tipoComprobante').on('change.factura', function (event) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    cargarTimbradosDelPunto();
+                                });
+                                $('#detalleTimbrado').on('change.factura', function (event) {
                                     event.preventDefault();
                                     event.stopPropagation();
                                     generarNumeroComprobante();
@@ -313,14 +322,19 @@
 
                                 function cargarTimbradosDelPunto() {
                                     const punto = $('#puntoExpedicion').val();
+                                    const tipoComprobante = $('#tipoComprobante').val();
                                     const selector = $('#detalleTimbrado').empty()
                                             .append('<option value="">Cargando...</option>').prop('disabled', true);
                                     $('#numeroComprobante').val('');
-                                    $.getJSON('/api/movil/facturacion/detalles-timbrado', {codigoPuntoExpedicion: punto})
+                                    $.getJSON('/api/movil/facturacion/detalles-timbrado', {
+                                        codigoPuntoExpedicion: punto,
+                                        codigoTipoComprobante: tipoComprobante
+                                    })
                                         .done(function (datos) {
                                             selector.empty();
                                             if (!datos.length) {
-                                                selector.append('<option value="">Sin timbrado vigente para este punto</option>');
+                                                selector.append('<option value="">Sin timbrado vigente para este punto y tipo</option>');
+                                                generarNumeroComprobante();
                                                 return;
                                             }
                                             datos.forEach(function (item) {
@@ -333,6 +347,7 @@
                                         })
                                         .fail(function () {
                                             selector.empty().append('<option value="">No se pudo cargar el timbrado</option>');
+                                            generarNumeroComprobante();
                                         });
                                 }
 
@@ -346,9 +361,12 @@
 //                                        cargarDatosComprobante(datos, url);
 //                                    }
 //                                });
-                                $("#numeroComprobante").keyup(() => {
-                                    let numeroComprobante = parseInt($("#numeroComprobante").val());
-                                    $("#numeroComprobante").val(numeroComprobante.toString().padStart(7, 0));
+                                $("#numeroComprobante").on('input', function () {
+                                    if ($(this).prop('readonly')) return;
+                                    $(this).val($(this).val().replace(/\D/g, '').slice(0, 7));
+                                }).on('blur', function () {
+                                    if ($(this).prop('readonly') || !$(this).val()) return;
+                                    $(this).val($(this).val().padStart(7, '0'));
                                 });
         </script>
     </body>

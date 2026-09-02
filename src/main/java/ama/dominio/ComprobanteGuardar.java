@@ -1,5 +1,6 @@
 package ama.dominio;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class ComprobanteGuardar {
     private Integer codigoCondicionVenta;
     private String periodoPago;
     private LocalDate pagoHasta;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaPago;
     private Integer cantidadPago;
     private Integer cantidadDeuda;

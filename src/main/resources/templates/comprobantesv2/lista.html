@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head th:replace="~{layout/layout :: heat}"></head>
     <link rel="stylesheet" th:href="@{/css/comprobantes/factura-manual.css}">
     <link rel="stylesheet" href="/css/comprobantesv2/estilo.css">
@@ -10,7 +11,8 @@
         <main id="comprobantesV2" class="container-fluid">
             <div class="card-header d-flex justify-content-between align-items-center gap-2">
                 <h3 class="form-title mb-0">Comprobantes</h3>
-                <a class="btn btn-outline-secondary" th:href="@{/comprobantes-v2/auditoria}">
+                <a class="btn btn-outline-secondary" th:href="@{/comprobantes-v2/auditoria}"
+                   sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')">
                     <i class="fa-solid fa-clock-rotate-left"></i> Ver auditoría
                 </a>
             </div>
@@ -68,10 +70,19 @@
                             <strong id="editarIdentificadorV2"></strong>
                         </div>
                         <div class="alert alert-info py-2 mb-3">
-                            La numeraci&#243;n, sucursal, punto de expedici&#243;n, serie, tipo y cuenta corriente identifican al comprobante y se muestran solo para control.
+                            El n&#250;mero y la cuenta corriente pueden modificarse &#250;nicamente en una FACTURA MANUAL. Los dem&#225;s datos identificadores se muestran solo para control.
                         </div>
                         <div class="row g-3">
-                            <div class="col-md-3"><label for="editarCuentaV2">Cuenta corriente</label><input id="editarCuentaV2" class="form-control" readonly></div>
+                            <div class="col-md-3">
+                                <label for="editarNumeroComprobanteV2">N&#250;mero de comprobante</label>
+                                <input id="editarNumeroComprobanteV2" class="form-control" type="number" min="1" max="9999999" step="1" readonly required>
+                                <small id="ayudaNumeroComprobanteV2" class="form-text text-muted"></small>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="editarCuentaV2">Cuenta corriente</label>
+                                <input id="editarCuentaV2" class="form-control" maxlength="45" readonly required>
+                                <small id="ayudaCuentaV2" class="form-text text-muted"></small>
+                            </div>
                             <div class="col-md-3"><label for="editarDocumentoV2">RUC / CI</label><input id="editarDocumentoV2" class="form-control" readonly></div>
                             <div class="col-md-6"><label for="editarRazonSocialV2">Raz&#243;n social</label><input id="editarRazonSocialV2" class="form-control" maxlength="255" required></div>
                             <div class="col-md-4">

@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -72,6 +73,12 @@ public class ServicioController {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private UbicacionServicioService ubicacionServicioService;
+    @Autowired
+    private GoogleMapsUbicacionService googleMapsUbicacionService;
+    @Autowired
+    private AuditoriaEntidadService auditoriaEntidad;
+    @Autowired
+    private EliminacionEntidadService eliminacionEntidadService;
     private ReportGenerator reportGenerator;
 
     @GetMapping("/listar")
@@ -286,11 +293,14 @@ public class ServicioController {
     }
 
     @PostMapping("/guardar/{accion}")
+    @PreAuthorize("#accion != 'editar' || hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')")
+    @Transactional
     public ResponseEntity<?> guardar(@RequestBody Servicio servicio, @PathVariable String accion) {
         // TimeZone.setDefault(TimeZone.getTimeZone("America/Asuncion"));
         String mensaje = "Registro guardado correctamente ";
         // Verificar si la cuenta corriente ya se encuentra registrada
         Servicio servicioEncontrada = servicioServicio.encontrar(servicio.getCuentaCorriente());
+        Map<String, Object> datosAntes = auditoriaEntidad.cuenta(servicioEncontrada);
         if (servicioEncontrada != null && !accion.equals("editar")) {
             String nombreUsuario = servicioEncontrada.getUsuario().getNombre() + " " + servicioEncontrada.getUsuario().getApellido();
             mensaje = "La cuenta ya se encuentra registrada a nombre de: " + nombreUsuario;
@@ -300,6 +310,11 @@ public class ServicioController {
             mensaje = "Registro modificado correctamente";
             if (servicio.getOcupado() == null) {
                 servicio.setOcupado(servicioEncontrada.getOcupado());
+            }
+            // Compatibilidad con clientes antiguos: si el campo no fue enviado,
+            // conservar el dato existente en lugar de reemplazarlo por NULL.
+            if (servicio.getObservacion() == null) {
+                servicio.setObservacion(servicioEncontrada.getObservacion());
             }
         }
         String cuentaCorriente[] = servicio.getCuentaCorriente().split("-");
@@ -313,6 +328,10 @@ public class ServicioController {
         servicio.setManzana(manzana);
         try {
             servicioServicio.guardar(servicio);
+            auditoriaEntidad.registrar("CUENTA",
+                    "editar".equals(accion) ? "MODIFICACION" : "ALTA",
+                    servicio.getCuentaCorriente(), datosAntes,
+                    auditoriaEntidad.cuenta(servicio), null);
             return ResponseEntity.ok("" + mensaje);
         } catch (DataAccessException e) {
             mensaje = "Ocurrio un error";
@@ -518,6 +537,19 @@ public class ServicioController {
         }
     }
 
+    @PostMapping("/ubicacion/extraer")
+    @ResponseBody
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> extraerUbicacionGoogleMaps(
+            @RequestBody UbicacionPegadaSolicitud solicitud) {
+        try {
+            return ResponseEntity.ok(googleMapsUbicacionService.extraer(
+                    solicitud == null ? null : solicitud.valor()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     private Servicio validarCuentaSucursal(String cuentaCorriente) {
         Servicio servicio = servicioServicio.encontrar(cuentaCorriente);
         if (servicio == null || !servicio.getSucursal().getCodigoSucursal()
@@ -533,9 +565,10 @@ public class ServicioController {
     public record ExoneracionSolicitud(String cuentaCorriente, LocalDate fechaDesdeNueva, String motivo) {}
     public record UbicacionSolicitud(String cuentaCorriente, BigDecimal latitud,
             BigDecimal longitud, BigDecimal precisionMetros, String metodo) {}
+    public record UbicacionPegadaSolicitud(String valor) {}
 
     @PostMapping("/editar")
-    @PreAuthorize("hasAnyAuthority('ROOT','ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')")
     public ResponseEntity<?> editar(@RequestBody Servicio servicio) {
         var servicioEncontrado = servicioServicio.encontrar(servicio.getCuentaCorriente());
         if (servicioEncontrado == null) {
@@ -545,20 +578,26 @@ public class ServicioController {
     }
 
     @DeleteMapping("/eliminar")
-    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR')")
+    @PreAuthorize("hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')")
     public ResponseEntity<?> eliminar(@RequestParam("id") String cuentaCorriente) {
         try {
             var respuesta = servicioServicio.encontrar(cuentaCorriente);
             if (respuesta == null) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Registro no encontrado!!");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta no encontrada.");
             }
-            servicioServicio.eliminar(respuesta);
-            return ResponseEntity.ok("Registro eliminado correctamente ");
-        } catch (Exception e) {
+            if (!respuesta.getSucursal().getCodigoSucursal()
+                    .equals(getSucursalSession().getCodigoSucursal())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No puede eliminar una cuenta de otra sucursal.");
+            }
+            Map<String, Object> datosAntes = auditoriaEntidad.cuenta(respuesta);
+            eliminacionEntidadService.eliminarCuenta(respuesta, datosAntes);
+            return ResponseEntity.ok("Cuenta eliminada correctamente.");
+        } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Error al eliminar Cuenta: " + cuentaCorriente +" "+  e.getMessage());
+                    .body("No se puede eliminar la cuenta " + cuentaCorriente
+                            + " porque tiene comprobantes u otros registros relacionados.");
         }
-
     }
 
     @PostMapping("/extractoCuenta")

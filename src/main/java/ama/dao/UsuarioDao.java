@@ -55,6 +55,7 @@ public interface UsuarioDao extends JpaRepository<Usuario, Integer> {
              AND (LOWER(u.numeroDocumento) LIKE LOWER(CONCAT('%', :filtro, '%'))
                OR LOWER(CONCAT(u.nombre, ' ', COALESCE(u.apellido, ''))) LIKE LOWER(CONCAT('%', :filtro, '%'))
                OR LOWER(COALESCE(u.celular, '')) LIKE LOWER(CONCAT('%', :filtro, '%'))
+               OR LOWER(COALESCE(u.correo, '')) LIKE LOWER(CONCAT('%', :filtro, '%'))
                OR LOWER(COALESCE(u.barrio, '')) LIKE LOWER(CONCAT('%', :filtro, '%'))
                OR LOWER(COALESCE(u.direccion, '')) LIKE LOWER(CONCAT('%', :filtro, '%')))
            """, countQuery = """
@@ -63,6 +64,7 @@ public interface UsuarioDao extends JpaRepository<Usuario, Integer> {
              AND (LOWER(u.numeroDocumento) LIKE LOWER(CONCAT('%', :filtro, '%'))
                OR LOWER(CONCAT(u.nombre, ' ', COALESCE(u.apellido, ''))) LIKE LOWER(CONCAT('%', :filtro, '%'))
                OR LOWER(COALESCE(u.celular, '')) LIKE LOWER(CONCAT('%', :filtro, '%'))
+               OR LOWER(COALESCE(u.correo, '')) LIKE LOWER(CONCAT('%', :filtro, '%'))
                OR LOWER(COALESCE(u.barrio, '')) LIKE LOWER(CONCAT('%', :filtro, '%'))
                OR LOWER(COALESCE(u.direccion, '')) LIKE LOWER(CONCAT('%', :filtro, '%')))
            """)

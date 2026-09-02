@@ -31,7 +31,7 @@ public class DetalleTimbrado implements Serializable {
     private PuntoExpedicion puntoExpedicion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "codigo_serie", nullable = false)
+    @JoinColumn(name = "codigo_serie")
     private Serie serie;
 
     @ManyToOne(fetch = FetchType.LAZY)
