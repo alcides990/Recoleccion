@@ -17,7 +17,7 @@
                     <i class="fa-solid fa-user-plus usuario-form-icon" aria-hidden="true"></i>
                 </header>
 
-                <form th:action="@{/usuario/guardar}" method="post" th:object="${usuario}">
+                <form id="formUsuario" th:action="@{/usuario/guardar}" method="post" th:object="${usuario}">
                     <input type="hidden" name="codigoUsuario" th:value="*{codigoUsuario}">
 
                     <div class="usuario-form-body">
@@ -115,7 +115,7 @@
                         <a th:href="@{/usuario/listar}" class="btn btn-light">
                             <i class="fa-solid fa-arrow-left"></i> Cancelar
                         </a>
-                        <button type="submit" name="guardar" class="btn btn-primario">
+                        <button id="guardarUsuario" type="submit" name="guardar" class="btn btn-primario">
                             <i class="fa-solid fa-floppy-disk"></i>
                             <span th:text="${usuario.codigoUsuario == null ? 'Guardar usuario' : 'Guardar cambios'}">Guardar usuario</span>
                         </button>
@@ -135,6 +135,18 @@
             tabulador('#correo', '#barrio');
             tabulador('#barrio', '#direccion');
             tabulador('#direccion', '#observacion');
+
+            const formularioUsuario = document.getElementById('formUsuario');
+            const botonGuardarUsuario = document.getElementById('guardarUsuario');
+            formularioUsuario.addEventListener('submit', function (evento) {
+                if (formularioUsuario.dataset.enviando === 'true') {
+                    evento.preventDefault();
+                    return;
+                }
+                formularioUsuario.dataset.enviando = 'true';
+                botonGuardarUsuario.disabled = true;
+                botonGuardarUsuario.querySelector('span').textContent = 'Guardando...';
+            });
         </script>
     </body>
 </html>

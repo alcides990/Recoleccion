@@ -103,8 +103,8 @@ public class UsuarioController {
             @RequestParam(defaultValue = "0") int start,
             @RequestParam(defaultValue = "10") int length,
             @RequestParam(name = "search[value]", required = false) String busqueda,
-            @RequestParam(name = "order[0][column]", defaultValue = "2") int columna,
-            @RequestParam(name = "order[0][dir]", defaultValue = "asc") String direccion) {
+            @RequestParam(name = "order[0][column]", defaultValue = "0") int columna,
+            @RequestParam(name = "order[0][dir]", defaultValue = "desc") String direccion) {
         int limite = Math.min(Math.max(length, 1), 100);
         Integer codigoSucursal = getUserSession().getSucursal().getCodigoSucursal();
         Sort.Direction sentido = "desc".equalsIgnoreCase(direccion) ? Sort.Direction.DESC : Sort.Direction.ASC;

@@ -12,7 +12,7 @@ $(function () {
         searchDelay: 300,
         pageLength: 10,
         lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
-        order: [[2, 'asc']],
+        order: [[0, 'desc']],
         dom: 'lfrtip',
         ajax: {
             url: '/usuario/tabla',
