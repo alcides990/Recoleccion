@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.example</groupId>
     <artifactId>recoleccion</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <name>recoleccion01</name>
     <description>Sistema de Cobranzas de servicio de recoleccion de residuos solido</description>
     <packaging>jar</packaging>

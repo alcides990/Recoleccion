@@ -17,7 +17,7 @@ public interface UsuarioService {
 
     public long contarPorSucursal(Integer codigoSucursal);
     
-    public List<Usuario> Buscar(String filtro);
+    public List<Usuario> Buscar(String filtro, Integer codigoSucursal);
     
     public void guardar(Usuario usuario);
 

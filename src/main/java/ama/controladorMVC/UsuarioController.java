@@ -180,7 +180,12 @@ public class UsuarioController {
     @GetMapping(value = "/buscar/{filtro}", produces = {"application/json"})
     public @ResponseBody
     List<UsuarioDTO> buscarusuario(@PathVariable String filtro) {
-        var usuarios = servicioUsuario.Buscar(filtro);
+        UsuarioSistema usuarioSesion = getUserSession();
+        if (usuarioSesion == null || usuarioSesion.getSucursal() == null) {
+            return List.of();
+        }
+        var usuarios = servicioUsuario.Buscar(
+                filtro, usuarioSesion.getSucursal().getCodigoSucursal());
         return usuarios.stream()
                 .map(usuario -> modelMapper
                 .map(usuario, UsuarioDTO.class))

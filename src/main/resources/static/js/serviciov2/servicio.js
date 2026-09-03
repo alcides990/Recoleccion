@@ -19,7 +19,7 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
               }
           });
           var accion = "";
-          var campos = ["#cuentaCorriente", "#fechaInicio", "#buscarUsuario", "#numeroDocumento", "#direccion", "#observacion"];
+          var campos = ["#cuentaCorriente", "#fechaInicio", "#buscarUsuario", "#numeroDocumento", "#codigoUsuario", "#direccion", "#observacion"];
 
           const formatoNumero = new Intl.NumberFormat('es-PY', {maximumFractionDigits: 0});
           const formatoFecha = fecha => {
@@ -104,6 +104,16 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
           });
           $('#frm-servicio').submit(function (event) {
               event.preventDefault();
+              const codigoUsuario = String($("#codigoUsuario").val() || '').trim();
+              if (!codigoUsuario) {
+                  mostrarAlerta({
+                      mensaje: 'Seleccione un usuario registrado de la lista antes de guardar el servicio.',
+                      tipo: 'warning',
+                      time: 8000
+                  });
+                  $("#buscarUsuario").trigger('focus');
+                  return;
+              }
               var servicio = {
                   cuentaCorriente: $("#cuentaCorriente").val(),
                   direccion: $("#direccion").val(),
@@ -111,7 +121,7 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
                   fechaInicio: $("#fechaInicio").val(),
                   ocupado: $("#ocupado").val(),
                   usuario: {
-                      codigoUsuario: $("#codigoUsuario").val()
+                      codigoUsuario: codigoUsuario
                   },
                   categoria: {
                       codigoCategoria: $("#categoria").val()

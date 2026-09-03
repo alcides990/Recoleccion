@@ -1,5 +1,10 @@
 $(document).ready(function () {
 
+    $("#buscarUsuario").on("input", function () {
+        $("#codigoUsuario").val("");
+        $("#numeroDocumento").val("");
+    });
+
     $("#buscarUsuario").autocomplete({
         source: function (request, response) {
             let token = $("#token").val();

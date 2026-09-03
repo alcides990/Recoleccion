@@ -77,8 +77,8 @@ public class ImplUsuario implements UsuarioService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Usuario> Buscar(String filtro) {
-        return usuarioDao.buscarUsuario(filtro);
+    public List<Usuario> Buscar(String filtro, Integer codigoSucursal) {
+        return usuarioDao.buscarUsuario(filtro, codigoSucursal);
     }
 
 }

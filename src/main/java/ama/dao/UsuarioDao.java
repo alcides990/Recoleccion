@@ -19,9 +19,12 @@ public interface UsuarioDao extends JpaRepository<Usuario, Integer> {
            SELECT u FROM Usuario u 
            JOIN fetch u.sucursal AS s
            JOIN fetch s.ciudad ciud
-           WHERE u.numeroDocumento LIKE %?1% OR concat( u.nombre, ' ', u.apellido) LIKE %?1% 
+           WHERE s.codigoSucursal = ?2
+             AND (LOWER(u.numeroDocumento) LIKE LOWER(CONCAT('%', ?1, '%'))
+               OR LOWER(CONCAT(u.nombre, ' ', COALESCE(u.apellido, ''))) LIKE LOWER(CONCAT('%', ?1, '%')))
+           ORDER BY u.nombre, u.apellido, u.codigoUsuario
            """)
-    public List<Usuario> buscarUsuario(String filtro);
+    public List<Usuario> buscarUsuario(String filtro, Integer codigoSucursal);
 
     //Filtrar usuario por nombre y apellidos o numero de documento con paginacion
     @Query(value = """

@@ -2,6 +2,7 @@ package ama.controladorMVC;
 
 import ama.dominio.Empresa;
 import ama.dominio.Sucursal;
+import ama.dominio.UsuarioSistema;
 import ama.validador.Mayuscula;
 import ama.validador.Vadidador;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import ama.servicio.SucursalService;
 import ama.servicio.CiudadService;
+import jakarta.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Objects;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Controller
@@ -36,12 +44,19 @@ public class SucursalController {
     private SucursalService servicioSucursal;
     @Autowired
     private CiudadService servicioCiudad;
+    @Autowired
+    private HttpSession httpSession;
 
     @GetMapping("/listar")
-    public String listaSucursal(Model modelo) {
+    public String listaSucursal(@RequestParam(required = false) Integer codigoSucursal, Model modelo) {
         modelo.addAttribute("titulo", "Sucursal");
-        var sucursales = servicioSucursal.listar();
-        modelo.addAttribute("sucursales", sucursales);
+        Sucursal sucursal = resolverSucursal(codigoSucursal);
+        modelo.addAttribute("sucursales", List.of(sucursal));
+        modelo.addAttribute("sucursalSeleccionada", sucursal);
+        modelo.addAttribute("esRoot", esRoot());
+        if (esRoot()) {
+            modelo.addAttribute("sucursalesDisponibles", servicioSucursal.listar());
+        }
 
         return "sucursal/sucursal";
     }
@@ -88,5 +103,28 @@ public class SucursalController {
         servicioSucursal.eliminar(sucursal);
         flash.addFlashAttribute("info", "Sucursal eliminada correctamente!!");
         return "redirect:/sucursal/listar";
+    }
+
+    private Sucursal resolverSucursal(Integer codigoSolicitado) {
+        UsuarioSistema usuario = (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
+        if (usuario == null || usuario.getSucursal() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        Integer codigo = esRoot() && codigoSolicitado != null
+                ? codigoSolicitado : usuario.getSucursal().getCodigoSucursal();
+        Sucursal sucursal = servicioSucursal.encontrar(new Sucursal(codigo));
+        if (sucursal == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sucursal no encontrada");
+        }
+        if (!esRoot() && !Objects.equals(codigo, usuario.getSucursal().getCodigoSucursal())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        return sucursal;
+    }
+
+    private boolean esRoot() {
+        var autenticacion = SecurityContextHolder.getContext().getAuthentication();
+        return autenticacion != null && autenticacion.getAuthorities().stream()
+                .anyMatch(autoridad -> "ROOT".equals(autoridad.getAuthority()));
     }
 }

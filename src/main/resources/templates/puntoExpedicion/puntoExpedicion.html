@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head  th:replace="~{layout/layout :: heat}"> </head>
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
@@ -12,7 +13,20 @@
                     <span th:text="${info}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <a  th:href="@{/puntoExpedicion/agregar}" class="btn btn-primario btn-sm mb-3"><i class="fas fa-plus fa-xl "></i> Agregar</a>
+                <form th:if="${esRoot}" th:action="@{/puntoExpedicion/listar}" method="get"
+                      class="row g-2 align-items-end mb-3">
+                    <div class="col-md-6 col-lg-4">
+                        <label for="filtroSucursalPunto" class="form-label">Sucursal</label>
+                        <select id="filtroSucursalPunto" name="codigoSucursal" class="form-select">
+                            <option th:each="opcion : ${sucursalesDisponibles}"
+                                    th:value="${opcion.codigoSucursal}"
+                                    th:text="|${opcion.codigoSucursal} - ${opcion.nombreSucursal}|"
+                                    th:selected="${opcion.codigoSucursal == sucursalSeleccionada.codigoSucursal}"></option>
+                        </select>
+                    </div>
+                    <div class="col-auto"><button type="submit" class="btn btn-primario">Filtrar</button></div>
+                </form>
+                <a sec:authorize="hasAuthority('ROOT')" th:href="@{/puntoExpedicion/agregar}" class="btn btn-primario btn-sm mb-3"><i class="fas fa-plus fa-xl "></i> Agregar</a>
                 <div id="tabla" class="table-responsive-sm">
                     <table class="table table-border table-striped table-colapse table-hover table-lg " >
                         <thead class="bg-color">
@@ -21,7 +35,7 @@
                                 <th>PuntoExpedicion</th>
                                 <th>Sucursal</th>
                                 <th>Estado</th>
-                                <th>Acciones</th>
+                                <th sec:authorize="hasAuthority('ROOT')">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="table-secondary">
@@ -30,7 +44,7 @@
                                 <td th:text="${puntoExpedicion.nombrePuntoExpedicion}">   </td>
                                 <td th:text="${puntoExpedicion.sucursal.nombreSucursal} +' '+${puntoExpedicion.sucursal.ciudad.nombreCiudad}" >   </td>
                                 <td th:text="${puntoExpedicion.estado.estado}" >   </td>
-                                <td >
+                                <td sec:authorize="hasAuthority('ROOT')">
                                     <a th:href="@{/puntoExpedicion/editar/} + ${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}+'/'+ ${puntoExpedicion.puntoExpedicionPK.codigoSucursal}" 
                                        class="btn btn-info btn-sm">
                                         <i class="fa-regular fa-pen-to-square"></i>

@@ -317,6 +317,26 @@ public class ServicioController {
                 servicio.setObservacion(servicioEncontrada.getObservacion());
             }
         }
+        if (servicio.getUsuario() == null || servicio.getUsuario().getCodigoUsuario() == null) {
+            return ResponseEntity.badRequest().body(
+                    "Seleccione un usuario registrado antes de guardar el servicio.");
+        }
+        Usuario usuarioRegistrado = servicioUsuario.encontrar(
+                new Usuario(servicio.getUsuario().getCodigoUsuario()));
+        if (usuarioRegistrado == null) {
+            return ResponseEntity.badRequest().body(
+                    "El usuario seleccionado no existe. Busque y seleccione un usuario registrado.");
+        }
+        if (servicio.getSucursal() == null || servicio.getSucursal().getCodigoSucursal() == null) {
+            return ResponseEntity.badRequest().body("Seleccione una sucursal valida para el servicio.");
+        }
+        if (usuarioRegistrado.getSucursal() == null
+                || !usuarioRegistrado.getSucursal().getCodigoSucursal()
+                        .equals(servicio.getSucursal().getCodigoSucursal())) {
+            return ResponseEntity.badRequest().body(
+                    "El usuario seleccionado no pertenece a la sucursal del servicio.");
+        }
+        servicio.setUsuario(usuarioRegistrado);
         String cuentaCorriente[] = servicio.getCuentaCorriente().split("-");
         Integer numeroManzana = Integer.parseInt(cuentaCorriente[1]);
         Integer codigoSucursal = servicio.getSucursal().getCodigoSucursal();
