@@ -289,9 +289,33 @@ form select:hover:not(:disabled),
 }
 
 /* Controles compactos de DataTables, alineados con el resto del sistema. */
+.dataTables_wrapper .dataTables_length {
+    float: left;
+}
+
+.dt-container .dt-length {
+    float: left;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    width: auto;
+    margin-bottom: .75rem;
+    text-align: right;
+}
+
+.dt-container .dt-search {
+    float: right;
+    width: auto;
+    margin-bottom: .75rem;
+    text-align: right;
+}
+
 .dataTables_wrapper .dataTables_length label,
-.dataTables_wrapper .dataTables_filter label {
-    display: flex;
+.dataTables_wrapper .dataTables_filter label,
+.dt-container .dt-length label,
+.dt-container .dt-search label {
+    display: inline-flex;
     align-items: center;
     gap: .45rem;
     margin-bottom: .75rem;
@@ -310,9 +334,23 @@ form select:hover:not(:disabled),
     background-color: #fff;
 }
 
-.dataTables_wrapper .dataTables_filter input {
+.dt-container .dt-length select {
+    min-width: 4.5rem;
     min-height: 2.25rem;
-    margin-left: 0;
+    margin: 0 .15rem;
+    padding: .3rem 1.8rem .3rem .55rem;
+    border: 1px solid rgba(108, 117, 125, .38);
+    border-radius: .5rem;
+    background-color: #fff;
+}
+
+.dataTables_wrapper .dataTables_filter input,
+.dt-container .dt-search input {
+    display: inline-block !important;
+    width: 18rem !important;
+    max-width: 100%;
+    min-height: 2.25rem;
+    margin-left: .45rem;
     padding: .35rem .65rem;
     border: 1px solid rgba(108, 117, 125, .38);
     border-radius: .5rem;

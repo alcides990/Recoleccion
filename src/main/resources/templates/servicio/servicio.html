@@ -15,15 +15,12 @@
                     <h3>Cuentas</h3>
                     <p>Administre los servicios, titulares, categorías y estados de cuenta.</p>
                 </div>
-                <span class="form-view-icon"><i class="fa-solid fa-address-card"></i></span>
+                <a class="btn servicio-list-agregar" name="btnAgrerar" id="btnAgrerar" data-toggle="modal"
+                   data-target="#servicioModal">
+                    <i class="fa-solid fa-plus"></i> Agregar
+                </a>
             </header>
             <div class="d-md-flex py-2">
-                <div class="col-sm-2">
-                    <a class="btn btn-primario btn-sm mb-2 " name="btnAgrerar" id="btnAgrerar" data-toggle="modal"
-                       data-target="#servicioModal">
-                        <i class="fa-solid fa-plus fa-lg"></i> Agregar
-                    </a>
-                </div>
                 <div class="input-group my-1" th:if="${versionDos != true}">
                     <input name="txtBuscar" id="txtBuscarServicio" type="search" class="col p-2" autofocus="true"
                            placeholder="Buscar por cta. corriente/ nombre/ ruc" aria-label="Buscar"

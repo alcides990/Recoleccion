@@ -1,10 +1,9 @@
 package ama.controladorMVC;
 
 import ama.dominio.Ciudad;
+import ama.servicio.CiudadService;
 import ama.validador.Mayuscula;
-import ama.validador.Vadidador;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
@@ -12,24 +11,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ama.servicio.CiudadService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@Slf4j
 @Controller
 @RequestMapping("/ciudad")
+@RequiredArgsConstructor
 public class CiudadController {
 
-    @Autowired
-    private Vadidador validar;
+    private final CiudadService ciudadService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(String.class, new Mayuscula());
     }
-
-    @Autowired
-    private CiudadService ciudadService;
 
     @GetMapping("/listar")
     public String listaCiudad(Model model) {
@@ -41,17 +35,16 @@ public class CiudadController {
 
     @GetMapping("/agregar")
     public String agregar(Model modelo) {
-        Ciudad ciudad = new Ciudad();
-        modelo.addAttribute("ciudad", ciudad);
+        modelo.addAttribute("ciudad", new Ciudad());
         modelo.addAttribute("titulo", "Ciudad");
         return "ciudad/modificarCiudad";
     }
 
     @PostMapping("/guardar")
     public String guardar(Ciudad ciudad, RedirectAttributes flash) {
-        String mensaje = "Ciudad modificada corectamente!!";
+        String mensaje = "Ciudad modificada correctamente.";
         if (ciudad.getCodigoCiudad() == null) {
-            mensaje = "Ciudad agregada corectamente!!";
+            mensaje = "Ciudad agregada correctamente.";
             Integer codigoCiudad = ciudadService.getCodigoCiudad() + 1;
             ciudad.setCodigoCiudad(codigoCiudad);
         }

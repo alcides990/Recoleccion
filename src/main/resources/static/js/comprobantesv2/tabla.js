@@ -3,8 +3,8 @@ $(function () {
         const api = new $.fn.dataTable.Api(settings);
         const etiquetas = settings.oLanguage.oPaginate;
         const renderizar = function (contenedor, items) {
-            items.forEach(function (item) {
-                if (Array.isArray(item)) {
+            $.each(items, function (_, item) {
+                if ($.isArray(item)) {
                     renderizar(contenedor, item);
                     return;
                 }
@@ -48,12 +48,13 @@ $(function () {
 
     const token = $('#token').val();
     const roles = String($('#roles').text() || '');
-    const puedeEditar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR') || roles.includes('SUPERVISOR');
+    const puedeAdministrar = roles.includes('ROOT') || roles.includes('ADMINISTRADOR');
+    const puedeEditar = puedeAdministrar || roles.includes('SUPERVISOR');
     let accionActual = null;
     let cargandoEdicion = false;
     let comprobantePendienteImpresion = null;
     const claveFormatoImpresion = 'formatoComprobanteV2';
-    const formatosImpresion = ['58mm', '80mm', 'a4'];
+    const formatosImpresion = ['58mm', '80mm', 'A4'];
 
     const escapar = function (valor) {
         return $('<div>').text(valor ?? '').html();
@@ -63,6 +64,22 @@ $(function () {
     };
     const calcularSubtotal = function (cantidadPago, tarifa) {
         return Number(cantidadPago || 0) * Number(tarifa || 0);
+    };
+    const obtenerCantidadPago = function () {
+        const campo = $('#editarCantidadPagoV2');
+        const valor = $.trim(campo.val());
+        if (valor === '') {
+            mostrarMensaje('warning', 'Cantidad de pago no puede estar vacío.');
+            campo.trigger('focus');
+            return null;
+        }
+        const cantidad = Number(valor);
+        if (!Number.isInteger(cantidad) || cantidad < 0) {
+            mostrarMensaje('warning', 'Ingrese una cantidad de pago válida.');
+            campo.trigger('focus');
+            return null;
+        }
+        return cantidad;
     };
     const actualizarSubtotalEdicion = function () {
         $('#editarSubtotalV2').val(calcularSubtotal(
@@ -74,21 +91,20 @@ $(function () {
         return partes.length === 3 ? partes[2] + '/' + partes[1] + '/' + partes[0] : valor;
     };
     const identificador = function (detalle) {
-        return detalle.tipoComprobante + ' · ' + detalle.puntoExpedicion + ' · Serie '
-                + detalle.serie + ' · N.º ' + String(detalle.numeroComprobante).padStart(7, '0');
+        return detalle.tipoComprobante + ' · ' + detalle.numeroFiscal + ' · Serie ' + detalle.serie;
     };
     const mostrarMensaje = function (tipo, mensaje) {
-        const contenedor = $('#mensajeComprobantesV2').empty().appendTo(document.body);
+        const contenedor = $('#mensajeComprobantesV2').empty().appendTo('body');
         $('<div>', {class: 'alert alert-' + tipo + ' alert-dismissible fade show mb-0', role: 'alert'})
                 .text(mensaje)
                 .append($('<button>', {type: 'button', class: 'btn-close', 'data-bs-dismiss': 'alert', 'aria-label': 'Cerrar'}))
                 .appendTo(contenedor);
     };
     const abrirModal = function (id) {
-        window.bootstrap.Modal.getOrCreateInstance(document.getElementById(id)).show();
+        $('#' + id).modal('show');
     };
     const cerrarModal = function (id) {
-        window.bootstrap.Modal.getOrCreateInstance(document.getElementById(id)).hide();
+        $('#' + id).modal('hide');
     };
     const actualizarTotalPagos = function () {
         let total = 0;
@@ -156,41 +172,32 @@ $(function () {
                 .appendTo('#tablaPagosEdicionV2 tbody');
         actualizarTotalPagos();
     };
-    const solicitar = async function (url, metodo, datos) {
-        const respuesta = await fetch(url, {
-            method: metodo,
-            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
-            body: JSON.stringify(datos)
-        });
-        const contenido = await respuesta.text();
-        let cuerpo = null;
-        try {
-            cuerpo = contenido ? JSON.parse(contenido) : null;
-        } catch (error) {
-            cuerpo = contenido;
-        }
-        if (!respuesta.ok) {
-            throw new Error(cuerpo?.mensaje || cuerpo?.message || cuerpo || 'No fue posible completar la operación.');
-        }
-        return cuerpo;
+    const obtenerMensajeError = function (respuesta, mensajePredeterminado) {
+        const cuerpo = respuesta.responseJSON || respuesta.responseText;
+        return cuerpo?.mensaje || cuerpo?.message || cuerpo || mensajePredeterminado;
     };
-    const consultarCuentaEdicion = async function (cuentaCorriente) {
-        const respuesta = await fetch('/comprobantes-v2/cuenta-edicion?cuentaCorriente='
-                + encodeURIComponent(cuentaCorriente), {
-            method: 'GET',
-            headers: {'Accept': 'application/json', 'X-CSRF-TOKEN': token}
+    const solicitar = function (url, metodo, datos) {
+        return $.ajax({
+            url: url,
+            type: metodo,
+            headers: {'X-CSRF-TOKEN': token},
+            data: JSON.stringify(datos),
+            dataType: 'json',
+            contentType: 'application/json'
+        }).catch(function (respuesta) {
+            throw new Error(obtenerMensajeError(respuesta, 'No fue posible completar la operación.'));
         });
-        const contenido = await respuesta.text();
-        let cuerpo = null;
-        try {
-            cuerpo = contenido ? JSON.parse(contenido) : null;
-        } catch (error) {
-            cuerpo = contenido;
-        }
-        if (!respuesta.ok) {
-            throw new Error(cuerpo?.mensaje || cuerpo?.message || cuerpo || 'No fue posible recuperar la cuenta corriente.');
-        }
-        return cuerpo;
+    };
+    const consultarCuentaEdicion = function (cuentaCorriente) {
+        return $.ajax({
+            url: '/comprobantes-v2/cuenta-edicion',
+            type: 'GET',
+            headers: {'X-CSRF-TOKEN': token},
+            data: {cuentaCorriente: cuentaCorriente},
+            dataType: 'json'
+        }).catch(function (respuesta) {
+            throw new Error(obtenerMensajeError(respuesta, 'No fue posible recuperar la cuenta corriente.'));
+        });
     };
     const clavesBoton = function (boton) {
         return {
@@ -202,12 +209,12 @@ $(function () {
         };
     };
     const urlTicket = function (claves, formato) {
-        return '/comprobantes-v2/ticket?' + new URLSearchParams({...claves, formato: formato}).toString();
+        return '/comprobantes-v2/ticket?' + $.param($.extend({}, claves, {formato: formato}));
     };
     const formatoRecordado = function () {
         try {
             const formato = localStorage.getItem(claveFormatoImpresion);
-            return formatosImpresion.includes(formato) ? formato : '58mm';
+            return $.inArray(formato, formatosImpresion) >= 0 ? formato : '58mm';
         } catch (error) {
             return '58mm';
         }
@@ -223,7 +230,7 @@ $(function () {
         const destino = urlTicket(claves, formato);
         if (window.AndroidPrinter && typeof window.AndroidPrinter.imprimirPdf === 'function'
                 && window.AndroidPrinter.disponible()) {
-            window.AndroidPrinter.imprimirPdf(new URL(destino, window.location.origin).href);
+            window.AndroidPrinter.imprimirPdf(window.location.origin + destino);
         } else {
             window.open(destino, '_blank', 'noopener');
         }
@@ -234,7 +241,7 @@ $(function () {
                     + '</div><div>' + escapar(valor) + '</div></div></div>';
         };
         const pagos = detalle.pagos && detalle.pagos.length
-                ? '<ul class="list-group list-group-flush">' + detalle.pagos.map(function (pago) {
+                ? '<ul class="list-group list-group-flush">' + $.map(detalle.pagos, function (pago) {
                     return '<li class="list-group-item d-flex justify-content-between px-0"><span>'
                             + escapar(pago.metodoPago) + '</span><strong>₲ ' + formatearImporte(pago.importe) + '</strong></li>';
                 }).join('') + '</ul>'
@@ -262,44 +269,114 @@ $(function () {
                 + escapar(detalle.observacion || 'Sin observación') + '</div></div></div>'
                 + '<div class="col-12"><h6 class="mt-2">Métodos de pago</h6>' + pagos + '</div></div>');
     };
-
-    const pintarDetalleLegado = function (detalle) {
-        const campo = function (etiqueta, valor, columna) {
-            return '<div class="' + (columna || 'col-md-3') + '"><label>' + escapar(etiqueta)
-                    + '</label><input class="form-control" readonly type="text" value="' + escapar(valor) + '"></div>';
-        };
-        const filaValor = function (etiqueta, valor) {
-            return '<div class="row"><div class="col-4"><label>' + escapar(etiqueta)
-                    + ':</label></div><div class="col"><input type="text" readonly value="'
-                    + escapar(valor) + '" class="form-control"></div></div>';
-        };
-        const filaImporte = function (etiqueta, valor) {
-            return filaValor(etiqueta, 'Gs. ' + formatearImporte(valor));
-        };
-        const metodosPago = detalle.pagos && detalle.pagos.length
-                ? detalle.pagos.map(function (pago) { return filaImporte(pago.metodoPago, pago.importe); }).join('')
-                : '<div class="row"><div class="col"><input type="text" readonly value="Sin detalle de pagos" class="form-control"></div></div>';
-        $('#contenidoDetalleComprobanteV2').html(
-                campo('Cuenta corriente', detalle.cuentaCorriente, 'col-sm-3')
-                + campo('RUC/CI', detalle.documento, 'col-sm-3')
-                + campo('Razon social', detalle.receptor, 'col-md-6')
-                + campo('Punto expedicion', detalle.puntoExpedicion, 'col-md-3')
-                + campo('Serie', detalle.serie, 'col-md-2')
-                + campo('Numero comprobante', String(detalle.numeroComprobante).padStart(7, '0'), 'col-md-3')
-                + campo('Tipo comprobante', detalle.tipoComprobante, 'col-md-4')
-                + campo('Estado', detalle.estado, 'col-md-3')
-                + campo('Fecha pago', formatearFecha(detalle.fechaPago), 'col-md-3')
-                + '<div class="row m-3"><div class="col-lg-6"><h5>Detalle Pago</h5>'
-                + filaValor('Periodo pago', detalle.periodoPago)
-                + filaValor('Cantidad pago', detalle.cantidadPago)
-                + filaImporte('Tarifa', detalle.tarifa)
-                + filaImporte('Subtotal', calcularSubtotal(detalle.cantidadPago, detalle.tarifa))
-                + filaImporte('Saldo a favor', detalle.saldo)
-                + filaImporte('Recargo', detalle.recargo)
-                + filaImporte('Total importe', detalle.importe)
-                + '<div><h5>Metodo Pago</h5>' + metodosPago + '</div></div>'
-                + '<div class="form-floating col-lg-6"><textarea class="form-control" readonly placeholder="Observacion">'
-                + escapar(detalle.observacion || 'Sin observacion') + '</textarea><label>Observacion</label></div></div>');
+    const esFacturaManual = function (detalle) {
+        return String(detalle.tipoComprobante || '').trim().replace(/\s+/g, ' ').toUpperCase() === 'FACTURA MANUAL';
+    };
+    const configurarIdentificadoresEdicion = function (detalle) {
+        const permiteCambiarCuenta = esFacturaManual(detalle);
+        $('#editarNumeroComprobanteV2').val(detalle.numeroComprobante).prop('readonly', !permiteCambiarCuenta);
+        $('#ayudaNumeroComprobanteV2').text(permiteCambiarCuenta
+                ? 'Puede cambiar el número antes de guardar.'
+                : 'El número no se puede cambiar para este tipo de comprobante.');
+        $('#editarCuentaV2').val(detalle.cuentaCorriente || '').prop('readonly', !permiteCambiarCuenta);
+        $('#ayudaCuentaV2').text(permiteCambiarCuenta
+                ? 'Ingrese la cuenta y salga del campo para recuperar sus datos.'
+                : 'La cuenta no se puede cambiar para este tipo de comprobante.');
+    };
+    const cargarPagosEdicion = function (pagos) {
+        $('#tablaPagosEdicionV2 tbody').empty();
+        $.each(pagos || [], function (_, pago) {
+            agregarPagoTabla(pago);
+        });
+        $('#editarImportePagoV2').val('');
+        actualizarTotalPagos();
+    };
+    const cargarFormularioEdicion = function (detalle) {
+        cargandoEdicion = true;
+        $('#editarIdentificadorV2').text(identificador(detalle));
+        configurarIdentificadoresEdicion(detalle);
+        $('#editarDocumentoV2').val(detalle.documento || '');
+        $('#editarCodigoUsuarioV2').val(detalle.codigoUsuario || '');
+        $('#editarRazonSocialV2').val(detalle.receptor || '');
+        $('#editarFechaPagoV2').val(detalle.fechaPago || '');
+        $('#editarPagoDesdeV2').val(detalle.pagoDesde || '');
+        $('#editarPeriodoV2').val(detalle.periodoPago || '');
+        $('#editarCantidadDeudaV2').val(detalle.cantidadDeuda ?? 0);
+        $('#editarCantidadPagoV2').val(detalle.cantidadPago ?? 0);
+        $('#editarTarifaV2').val(detalle.tarifa ?? 0);
+        actualizarSubtotalEdicion();
+        $('#editarRecargoV2').val(detalle.recargo ?? 0);
+        $('#editarImporteV2').val(detalle.importe ?? 0);
+        $('#editarSaldoV2').val(detalle.saldo ?? 0);
+        $('#editarEstadoV2').val(String(detalle.codigoEstado || ''));
+        $('#editarCobradorV2').val(String(detalle.codigoCobrador || ''));
+        $('#editarCategoriaV2').val(String(detalle.codigoCategoria || '')).trigger('change');
+        $('#editarCondicionVentaV2').val(String(detalle.codigoCondicionVenta || ''));
+        cargarPagosEdicion(detalle.pagos);
+        $('#configModal').addClass('d-none');
+        $('#mostrarEdicionPagosV2').html('<i class="fa-regular fa-pen-to-square"></i> Editar detalle de pago');
+        $('#editarObservacionV2').val(detalle.observacion || '');
+        cargandoEdicion = false;
+    };
+    const obtenerPagosEdicion = function () {
+        return $('#tablaPagosEdicionV2 tbody tr').map(function () {
+            return {
+                codigoMetodoPago: Number($(this).attr('data-codigo')),
+                importe: Number($(this).attr('data-importe'))
+            };
+        }).get();
+    };
+    const validarTotalPagos = function (pagos, importeTotal, cantidadPago) {
+        const estadoActivo = Number($('#editarEstadoV2').val()) === 1;
+        if (estadoActivo && cantidadPago === 0) {
+            throw new Error('Un comprobante activo debe tener una cantidad de pago mayor que cero.');
+        }
+        if (estadoActivo && !pagos.length) {
+            throw new Error('Agregue al menos un medio de pago para activar el comprobante.');
+        }
+        if (!pagos.length) return;
+        let totalPagos = 0;
+        $.each(pagos, function (_, pago) {
+            totalPagos += pago.importe;
+        });
+        if (Math.abs(totalPagos - importeTotal) > 0.001) {
+            throw new Error('La suma del detalle de pago debe coincidir con el importe total.');
+        }
+    };
+    const crearSolicitudEdicion = function (pagos, importeTotal, cantidadPago) {
+        return $.extend({}, accionActual, {
+            nuevoNumeroComprobante: Number($('#editarNumeroComprobanteV2').val()),
+            cuentaCorriente: $('#editarCuentaV2').val().trim(),
+            codigoUsuario: Number($('#editarCodigoUsuarioV2').val()) || null,
+            razonSocial: $('#editarRazonSocialV2').val(),
+            fechaPago: $('#editarFechaPagoV2').val(),
+            pagoDesde: $('#editarPagoDesdeV2').val() || null,
+            periodoPago: $('#editarPeriodoV2').val(),
+            cantidadDeuda: Number($('#editarCantidadDeudaV2').val() || 0),
+            cantidadPago: cantidadPago,
+            tarifa: Number($('#editarTarifaV2').val()),
+            recargo: Number($('#editarRecargoV2').val()),
+            totalImporte: importeTotal,
+            saldo: Number($('#editarSaldoV2').val()),
+            codigoEstado: Number($('#editarEstadoV2').val()),
+            codigoCobrador: Number($('#editarCobradorV2').val()),
+            codigoCategoria: Number($('#editarCategoriaV2').val()),
+            codigoCondicionVenta: Number($('#editarCondicionVentaV2').val()),
+            pagos: pagos,
+            observacion: $('#editarObservacionV2').val()
+        });
+    };
+    const camposEditables = function () {
+        return $('#formEditarComprobanteV2')
+                .find('input, select, textarea')
+                .filter(':visible:not(:disabled):not([readonly]):not([type="hidden"])');
+    };
+    const enfocarSiguienteCampo = function (campoActual) {
+        const campos = camposEditables();
+        const indiceActual = campos.index(campoActual);
+        if (indiceActual >= 0 && indiceActual < campos.length - 1) {
+            campos.eq(indiceActual + 1).trigger('focus');
+        }
     };
 
     const tabla = $('#tablaComprobantesV2').DataTable({
@@ -334,7 +411,9 @@ $(function () {
         columns: [
             {data: 'tipoComprobante'},
             {data: 'puntoExpedicion'},
-            {data: 'numeroComprobante', render: function (numero) { return String(numero).padStart(7, '0'); }},
+            {data: 'numeroComprobante', render: function (numero) {
+                return String(numero).padStart(7, '0');
+            }},
             {data: 'cuentaCorriente'},
             {data: 'receptor'},
             {data: 'fechaPago', render: formatearFecha},
@@ -351,7 +430,8 @@ $(function () {
                             + '" data-numero="' + fila.numeroComprobante + '"';
                     const anulado = String(fila.estado || '').toUpperCase() === 'ANULADO';
                     const deshabilitado = anulado ? ' disabled' : '';
-                    const editar = puedeEditar ? '<button type="button" class="btn-primario p-1 accion-v2" data-accion="editar" ' + datos + deshabilitado
+                    const editarDeshabilitado = anulado && !puedeAdministrar ? ' disabled' : '';
+                    const editar = puedeEditar ? '<button type="button" class="btn-primario p-1 accion-v2" data-accion="editar" ' + datos + editarDeshabilitado
                             + ' title="Editar comprobante" aria-label="Editar comprobante"><i class="fa-regular fa-pen-to-square"></i></button> ' : '';
                     return '<button type="button" class="btn-primario p-1 accion-v2" data-accion="imprimir" ' + datos
                             + ' title="Imprimir comprobante" aria-label="Imprimir comprobante"><i class="fa-solid fa-print"></i></button> '
@@ -379,44 +459,7 @@ $(function () {
                 pintarDetalle(detalle);
                 abrirModal('detalleComprobanteV2');
             } else if (accion === 'editar') {
-                cargandoEdicion = true;
-                $('#editarIdentificadorV2').text(identificador(detalle));
-                const esFacturaManual = String(detalle.tipoComprobante || '').trim().replace(/\s+/g, ' ').toUpperCase() === 'FACTURA MANUAL';
-                $('#editarNumeroComprobanteV2').val(detalle.numeroComprobante)
-                        .prop('readonly', !esFacturaManual);
-                $('#ayudaNumeroComprobanteV2').text(esFacturaManual
-                        ? 'Puede cambiar el número antes de guardar.'
-                        : 'El número no se puede cambiar para este tipo de comprobante.');
-                $('#editarCuentaV2').val(detalle.cuentaCorriente || '')
-                        .prop('readonly', !esFacturaManual);
-                $('#ayudaCuentaV2').text(esFacturaManual
-                        ? 'Ingrese la cuenta y salga del campo para recuperar sus datos.'
-                        : 'La cuenta no se puede cambiar para este tipo de comprobante.');
-                $('#editarDocumentoV2').val(detalle.documento || '');
-                $('#editarRazonSocialV2').val(detalle.receptor || '');
-                $('#editarFechaPagoV2').val(detalle.fechaPago || '');
-                $('#editarPagoDesdeV2').val(detalle.pagoDesde || '');
-                $('#editarPeriodoV2').val(detalle.periodoPago || '');
-                $('#editarCantidadDeudaV2').val(detalle.cantidadDeuda ?? 0);
-                $('#editarCantidadPagoV2').val(detalle.cantidadPago ?? 0);
-                $('#editarTarifaV2').val(detalle.tarifa ?? 0);
-                actualizarSubtotalEdicion();
-                $('#editarRecargoV2').val(detalle.recargo ?? 0);
-                $('#editarImporteV2').val(detalle.importe ?? 0);
-                $('#editarSaldoV2').val(detalle.saldo ?? 0);
-                $('#editarEstadoV2').val(String(detalle.codigoEstado || ''));
-                $('#editarCobradorV2').val(String(detalle.codigoCobrador || ''));
-                $('#editarCategoriaV2').val(String(detalle.codigoCategoria || ''));
-                $('#editarCategoriaV2').trigger('change');
-                $('#editarCondicionVentaV2').val(String(detalle.codigoCondicionVenta || ''));
-                $('#tablaPagosEdicionV2 tbody').empty();
-                (detalle.pagos || []).forEach(agregarPagoTabla);
-                $('#editarImportePagoV2').val('');
-                actualizarTotalPagos();
-                cargandoEdicion = false;
-                $('#configModal').addClass('d-none');
-                $('#mostrarEdicionPagosV2').html('<i class="fa-regular fa-pen-to-square"></i> Editar detalle de pago');
-                $('#editarObservacionV2').val(detalle.observacion || '');
+                cargarFormularioEdicion(detalle);
                 abrirModal('editarComprobanteV2');
             } else if (accion === 'anular') {
                 $('#anularIdentificadorV2').text(identificador(detalle));
@@ -449,43 +492,32 @@ $(function () {
         imprimirComprobante(claves, formato);
     });
 
-    $('#formEditarComprobanteV2').on('submit', async function (evento) {
+    $('#formEditarComprobanteV2').on('submit', function (evento) {
+        evento.preventDefault();
+    });
+    $('#formEditarComprobanteV2').on('keydown', 'input, select, textarea', function (evento) {
+        if (evento.key !== 'Enter') return;
+        evento.preventDefault();
+        if ($(this).is('#editarImportePagoV2')) {
+            $('#agregarPagoComprobanteV2').trigger('click');
+            return;
+        }
+        enfocarSiguienteCampo(this);
+    });
+    $('#guardarEdicionComprobanteV2').on('click', async function (evento) {
         evento.preventDefault();
         if (!accionActual) return;
-        const boton = $('#guardarEdicionComprobanteV2').prop('disabled', true);
+        const cantidadPago = obtenerCantidadPago();
+        if (cantidadPago === null) return;
+        const formulario = $('#formEditarComprobanteV2').get(0);
+        if (!formulario.reportValidity()) return;
+        const boton = $(this).prop('disabled', true);
         try {
-            const pagos = $('#tablaPagosEdicionV2 tbody tr').map(function () {
-                return {
-                    codigoMetodoPago: Number($(this).attr('data-codigo')),
-                    importe: Number($(this).attr('data-importe'))
-                };
-            }).get();
-            const totalPagos = pagos.reduce(function (total, pago) { return total + pago.importe; }, 0);
+            const pagos = obtenerPagosEdicion();
             const importeTotal = Number($('#editarImporteV2').val());
-            if (Math.abs(totalPagos - importeTotal) > 0.001) {
-                throw new Error('La suma del detalle de pago debe coincidir con el importe total.');
-            }
-            const respuesta = await solicitar('/comprobantes-v2/editar', 'PUT', {
-                ...accionActual,
-                nuevoNumeroComprobante: Number($('#editarNumeroComprobanteV2').val()),
-                cuentaCorriente: $('#editarCuentaV2').val().trim(),
-                razonSocial: $('#editarRazonSocialV2').val(),
-                fechaPago: $('#editarFechaPagoV2').val(),
-                pagoDesde: $('#editarPagoDesdeV2').val() || null,
-                periodoPago: $('#editarPeriodoV2').val(),
-                cantidadDeuda: Number($('#editarCantidadDeudaV2').val() || 0),
-                cantidadPago: Number($('#editarCantidadPagoV2').val()),
-                tarifa: Number($('#editarTarifaV2').val()),
-                recargo: Number($('#editarRecargoV2').val()),
-                totalImporte: importeTotal,
-                saldo: Number($('#editarSaldoV2').val()),
-                codigoEstado: Number($('#editarEstadoV2').val()),
-                codigoCobrador: Number($('#editarCobradorV2').val()),
-                codigoCategoria: Number($('#editarCategoriaV2').val()),
-                codigoCondicionVenta: Number($('#editarCondicionVentaV2').val()),
-                pagos: pagos,
-                observacion: $('#editarObservacionV2').val()
-            });
+            validarTotalPagos(pagos, importeTotal, cantidadPago);
+            const respuesta = await solicitar('/comprobantes-v2/editar', 'PUT',
+                    crearSolicitudEdicion(pagos, importeTotal, cantidadPago));
             cerrarModal('editarComprobanteV2');
             mostrarMensaje('success', respuesta.mensaje);
             tabla.ajax.reload(null, false);
@@ -535,6 +567,7 @@ $(function () {
         try {
             const detalle = await consultarCuentaEdicion(cuenta);
             campo.val(detalle.cuentaCorriente || cuenta);
+            $('#editarCodigoUsuarioV2').val(detalle.codigoUsuario || '');
             $('#editarDocumentoV2').val(detalle.documento || '');
             $('#editarRazonSocialV2').val(detalle.razonSocial || '');
             cargandoEdicion = true;
@@ -550,13 +583,42 @@ $(function () {
             campo.prop('disabled', false);
         }
     });
-    $('#editarCantidadPagoV2,#editarRecargoV2').on('input', recalcularImporteEdicion);
-    $('#editarImportePagoV2').on('keypress', function (evento) {
-        if (evento.key === 'Enter') {
-            evento.preventDefault();
-            $('#agregarPagoComprobanteV2').trigger('click');
+    $('#editarRazonSocialV2').on('input', function () {
+        $('#editarCodigoUsuarioV2').val('');
+        $('#editarDocumentoV2').val('');
+    });
+    $('#editarRazonSocialV2').autocomplete({
+        minLength: 1,
+        appendTo: '#editarComprobanteV2',
+        source: function (request, response) {
+            $.ajax({
+                headers: {'X-CSRF-TOKEN': token},
+                url: '/usuario/buscar/' + encodeURIComponent(request.term),
+                dataType: 'json',
+                success: function (usuarios) {
+                    response($.map(usuarios, function (usuario) {
+                        const nombre = usuario.nombre + ' ' + (usuario.apellido || '');
+                        return {
+                            label: usuario.numeroDocumento + ' ' + nombre,
+                            value: nombre.trim(),
+                            codigoUsuario: usuario.codigoUsuario,
+                            numeroDocumento: usuario.numeroDocumento
+                        };
+                    }));
+                },
+                error: function () {
+                    response([]);
+                }
+            });
+        },
+        select: function (event, ui) {
+            event.preventDefault();
+            $(this).val(ui.item.value);
+            $('#editarCodigoUsuarioV2').val(ui.item.codigoUsuario);
+            $('#editarDocumentoV2').val(ui.item.numeroDocumento);
         }
     });
+    $('#editarCantidadPagoV2,#editarRecargoV2').on('input', recalcularImporteEdicion);
     $('#tablaPagosEdicionV2').on('click', '.quitar-pago-v2', function () {
         $(this).closest('tr').remove();
         actualizarTotalPagos();
@@ -567,10 +629,8 @@ $(function () {
         if (!accionActual) return;
         const boton = $('#confirmarAnulacionV2').prop('disabled', true);
         try {
-            const respuesta = await solicitar('/comprobantes-v2/anular', 'PUT', {
-                ...accionActual,
-                observacion: $('#motivoAnulacionV2').val()
-            });
+            const respuesta = await solicitar('/comprobantes-v2/anular', 'PUT',
+                    $.extend({}, accionActual, {observacion: $('#motivoAnulacionV2').val()}));
             cerrarModal('anularComprobanteV2');
             mostrarMensaje('success', respuesta.mensaje);
             tabla.ajax.reload(null, false);

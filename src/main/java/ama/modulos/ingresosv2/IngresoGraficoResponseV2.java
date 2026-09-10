@@ -10,6 +10,7 @@ public class IngresoGraficoResponseV2 {
     private String periodo;
     private List<IngresoPeriodoV2> ingresos;
     private List<IngresoCobradorV2> ingresosPorCobrador;
+    private List<IngresoMedioPeriodoProjectionV2> ingresosPorMedioPago;
     private Double total;
     private Double promedio;
     private Double maximo;

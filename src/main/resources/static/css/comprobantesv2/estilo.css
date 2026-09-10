@@ -73,6 +73,11 @@
     -webkit-overflow-scrolling: touch;
 }
 
+#comprobantesV2 .dataTables_scrollBody > table > thead,
+#comprobantesV2 .dt-scroll-body > table > thead {
+    display: none !important;
+}
+
 #comprobantesV2 .dataTables_scrollHead table,
 #comprobantesV2 .dataTables_scrollBody table {
     min-width: 56rem;

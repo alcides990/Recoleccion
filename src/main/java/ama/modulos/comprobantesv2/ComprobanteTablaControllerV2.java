@@ -2,6 +2,7 @@ package ama.modulos.comprobantesv2;
 
 import ama.dominio.UsuarioSistema;
 import ama.dominio.Comprobante;
+import ama.dominio.ComprobantePK;
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -82,6 +83,27 @@ public class ComprobanteTablaControllerV2 {
         Specification<Comprobante> alcanceSucursal = (root, query, cb) -> cb.equal(root.get("comprobantePK").get("puntoExpedicionPK").get("codigoSucursal"), filtro.getSucursal());
         return ResponseEntity.ok(new DataTableResponseV2<>(draw, comprobantes.count(alcanceSucursal), pagina.getTotalElements(), pagina.getContent().stream().map(this::fila).toList()));
     }
-    private ComprobanteFilaV2 fila(Comprobante c) { return new ComprobanteFilaV2(c.getComprobantePK().getPuntoExpedicionPK().getCodigoSucursal(), c.getComprobantePK().getPuntoExpedicionPK().getCodigoPuntoExpedicion(), c.getComprobantePK().getCodigoTipoComprobante(), c.getComprobantePK().getCodigoSerie(), c.getComprobantePK().getNumeroComprobante(), c.getTipoComprobante().getNombreTipoComprobante(), c.getPuntoExpedicion().getNombrePuntoExpedicion(), c.getServicio().getCuentaCorriente(), c.getRazonSocial(), c.getFechaPago(), BigDecimal.valueOf(c.getTarifa()), c.getCantidadPago(), BigDecimal.valueOf(c.getRecargo()), BigDecimal.valueOf(c.getTotalImporte()), BigDecimal.valueOf(c.getSaldo()), c.getEstado().getEstado()); }
+    private ComprobanteFilaV2 fila(Comprobante comprobante) {
+        ComprobantePK clave = comprobante.getComprobantePK();
+        return new ComprobanteFilaV2(
+                clave.getPuntoExpedicionPK().getCodigoSucursal(),
+                clave.getPuntoExpedicionPK().getCodigoPuntoExpedicion(),
+                clave.getCodigoTipoComprobante(),
+                clave.getCodigoSerie(),
+                clave.getNumeroComprobante(),
+                FormateadorNumeroComprobante.numeroFiscal(comprobante),
+                FormateadorNumeroComprobante.serieFiscal(comprobante),
+                comprobante.getTipoComprobante().getNombreTipoComprobante(),
+                comprobante.getPuntoExpedicion().getNombrePuntoExpedicion(),
+                comprobante.getServicio().getCuentaCorriente(),
+                comprobante.getRazonSocial(),
+                comprobante.getFechaPago(),
+                BigDecimal.valueOf(comprobante.getTarifa()),
+                comprobante.getCantidadPago(),
+                BigDecimal.valueOf(comprobante.getRecargo()),
+                BigDecimal.valueOf(comprobante.getTotalImporte()),
+                BigDecimal.valueOf(comprobante.getSaldo()),
+                comprobante.getEstado().getEstado());
+    }
     private String orden(int columna) { return switch (columna) { case 0 -> "tipoComprobante.nombreTipoComprobante"; case 1 -> "puntoExpedicion.nombrePuntoExpedicion"; case 2 -> "comprobantePK.numeroComprobante"; case 3 -> "servicio.cuentaCorriente"; case 4 -> "razonSocial"; case 6 -> "totalImporte"; case 7 -> "estado.estado"; default -> "fechaPago"; }; }
 }

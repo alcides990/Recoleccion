@@ -95,4 +95,21 @@ class RecorridoCobradorServiceTest {
 
         assertEquals("El dispositivo está desactivado por ROOT", error.getMessage());
     }
+
+    @Test
+    void noIniciaRecorridoSinTelefonoActivoVinculado() {
+        when(jdbcTemplate.queryForList(anyString(), eq(1L), eq(1)))
+                .thenReturn(List.of(Map.of(
+                        "codigoRecorrido", 1L,
+                        "codigoCobrador", 7,
+                        "estado", "PENDIENTE")));
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(7), eq(1)))
+                .thenReturn(0);
+
+        IllegalStateException error = assertThrows(IllegalStateException.class,
+                () -> servicio.iniciar(1L, 10, 1, "WEB"));
+
+        assertEquals("El cobrador no tiene un teléfono activo vinculado",
+                error.getMessage());
+    }
 }

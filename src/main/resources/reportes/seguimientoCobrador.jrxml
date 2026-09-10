@@ -25,7 +25,7 @@ JOIN usuarios usu ON usu.codigo_usuario = comp.codigo_usuario
 JOIN cobradores cob ON cob.codigo_cobrador = comp.codigo_cobrador
 JOIN series ser ON ser.codigo_serie = comp.codigo_serie
 WHERE comp.codigo_sucursal = $P{codigoSucursal}
-  AND comp.codigo_cobrador = $P{codigoCobrador}
+  AND ($P{codigoCobrador} = 0 OR comp.codigo_cobrador = $P{codigoCobrador})
   AND ($P{codigoSerie} = 0 OR comp.codigo_serie = $P{codigoSerie})
   AND comp.fecha_pago BETWEEN $P{desde} AND $P{hasta}
   AND comp.codigo_estado IN (1, 3)

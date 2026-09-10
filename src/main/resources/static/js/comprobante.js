@@ -368,7 +368,13 @@ $('#guardar').off('click.guardarComprobante').on('click.guardarComprobante', fun
     let codigoCobrador = $("#cobrador").val();
     let codigoComision = $("#comision").val();
     let cantidadDeuda = $("#cantidadDeuda").val();
-    let cantidadPago = Number($("#cantidadPago").val());
+    const valorCantidadPago = $.trim($("#cantidadPago").val());
+    if (valorCantidadPago === '') {
+        mostrarAlerta({mensaje: 'Cantidad de pago no puede estar vacío.', url: '/comprobante/guardar', tipo: 'danger'});
+        $("#cantidadPago").trigger('focus');
+        return;
+    }
+    let cantidadPago = Number(valorCantidadPago);
     if (!Number.isInteger(cantidadPago) || cantidadPago < 0) {
         mostrarAlerta({mensaje: 'Ingrese una cantidad de pago válida.', url: '/comprobante/guardar', tipo: 'danger'});
         $("#cantidadPago").focus();

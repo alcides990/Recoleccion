@@ -25,33 +25,57 @@ $(function () {
             cuerpo.append($('<span>', {class: 'resumen-vacio'}).text('Sin ingresos en el período.'));
             return;
         }
+        const grupos = new Map();
+        const mediosOrdenados = [];
         datos.forEach(function (item) {
             const cobrador = item.cobrador || 'Sin cobrador';
             const medio = item.medioPago || 'Sin especificar';
-            cuerpo.append($('<div>', {class: 'resumen-linea'})
-                    .append($('<span>', {class: 'resumen-linea-nombre'}).text(cobrador + ' · ' + medio))
-                    .append($('<span>', {class: 'resumen-linea-cantidad'}).text(
-                        Number(item.cantidad || 0).toLocaleString('es-PY')))
-                    .append($('<strong>', {class: 'resumen-linea-importe'}).text(moneda(item.importe))));
-        });
-    }
-
-    function llenarResumenGeneralMedios(datos) {
-        const cuerpo = $('#resumenGeneralPorMedio').empty();
-        if (!datos.length) {
-            cuerpo.append($('<span>', {class: 'resumen-vacio'}).text('Sin ingresos en el período.'));
-        } else {
-            datos.forEach(function (item) {
-                cuerpo.append($('<div>', {class: 'resumen-medio-item'})
-                        .append($('<span>').text(item.nombre || 'Sin especificar'))
-                        .append($('<small>').text(Number(item.cantidad || 0).toLocaleString('es-PY')))
-                        .append($('<strong>').text(moneda(item.importe))));
+            if (!mediosOrdenados.includes(medio)) {
+                mediosOrdenados.push(medio);
+            }
+            if (!grupos.has(cobrador)) {
+                grupos.set(cobrador, {cobrador: cobrador, medios: new Map()});
+            }
+            const grupo = grupos.get(cobrador);
+            grupo.medios.set(medio, {
+                cantidad: Number(item.cantidad || 0),
+                importe: Number(item.importe || 0)
             });
-        }
-        const cantidad = datos.reduce((total, item) => total + Number(item.cantidad || 0), 0);
-        const importe = datos.reduce((total, item) => total + Number(item.importe || 0), 0);
-        $('#cantidadGeneralPorMedio').text(cantidad.toLocaleString('es-PY'));
-        $('#importeGeneralPorMedio').text(moneda(importe));
+        });
+
+        const columnas = ['minmax(6.8rem, 1fr)'].concat(mediosOrdenados.map(() => 'minmax(5.1rem, .72fr)')).join(' ');
+        const totales = new Map(mediosOrdenados.map(medio => [medio, {cantidad: 0, importe: 0}]));
+        cuerpo.css('--resumen-detalle-columnas', columnas);
+        cuerpo.append($('<div>', {class: 'resumen-detalle-cabecera'})
+                .append($('<span>').text('Cobrador')));
+        const cabecera = cuerpo.find('.resumen-detalle-cabecera');
+        mediosOrdenados.forEach(medio => cabecera.append($('<span>').text(medio)));
+
+        [...grupos.values()].forEach(function (grupo) {
+            const filaDetalle = $('<div>', {class: 'resumen-linea resumen-linea-compacta'})
+                    .append($('<span>', {class: 'resumen-linea-nombre'}).text(grupo.cobrador));
+            mediosOrdenados.forEach(function (medio) {
+                const item = grupo.medios.get(medio);
+                if (item) {
+                    const total = totales.get(medio);
+                    total.cantidad += item.cantidad;
+                    total.importe += item.importe;
+                }
+                filaDetalle.append($('<span>', {class: 'resumen-celda-medio'})
+                        .append($('<small>').text(item ? item.cantidad.toLocaleString('es-PY') : '-'))
+                        .append($('<strong>').text(item ? moneda(item.importe) : '-')));
+            });
+            cuerpo.append(filaDetalle);
+        });
+        const filaTotales = $('<div>', {class: 'resumen-detalle-totales'})
+                .append($('<span>').text('Totales'));
+        mediosOrdenados.forEach(function (medio) {
+            const total = totales.get(medio);
+            filaTotales.append($('<span>', {class: 'resumen-celda-medio'})
+                    .append($('<small>').text(total.cantidad.toLocaleString('es-PY')))
+                    .append($('<strong>').text(moneda(total.importe))));
+        });
+        cuerpo.append(filaTotales);
     }
 
     function consultar() {
@@ -69,7 +93,6 @@ $(function () {
                     $('#resumenCantidad').text(Number(respuesta.comprobantes || 0).toLocaleString('es-PY'));
                     llenar($('#resumenPorCobrador'), respuesta.porCobrador || []);
                     llenarDetalleCobrador(respuesta.detallePorCobrador || []);
-                    llenarResumenGeneralMedios(respuesta.porMedioPago || []);
                 })
                 .fail(function () {
                     mensaje.html('<div class="alert alert-danger">No fue posible obtener el resumen de ingresos.</div>');

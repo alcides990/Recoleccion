@@ -20,6 +20,7 @@ public class ComprobanteAccionV2 {
     @NotNull private Integer numeroComprobante;
     @Min(1) @Max(9999999) private Integer nuevoNumeroComprobante;
     @Size(max = 45) private String cuentaCorriente;
+    private Integer codigoUsuario;
     private LocalDate fechaPago;
     private LocalDate pagoDesde;
     private Integer codigoEstado;

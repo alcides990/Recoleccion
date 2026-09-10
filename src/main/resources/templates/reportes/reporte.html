@@ -85,6 +85,17 @@
                         <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
                     </button>
                 </div>
+                <div class="col-md-6 col-xl-4">
+                    <button class="reporte-opcion" type="button" data-bs-toggle="modal" data-bs-target="#egresos-modal"
+                            data-bs-placement="top" title="Ver reporte de egresos">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Egresos</strong>
+                            <small>Gastos registrados entre las fechas seleccionadas.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </button>
+                </div>
             </section>
 
             <section class="row g-3 reportes-resumen" aria-label="Resumen de registros">
@@ -120,6 +131,52 @@
                 </div>
             </section>
         </main>
+
+        <div class="modal fade" id="egresos-modal" tabindex="-1" aria-labelledby="tituloEgresos"
+             data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content reporte-modal">
+                    <div class="modal-header">
+                        <h3 class="form-title modal-title" id="tituloEgresos">Reporte de egresos</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="mensaje-alerta" id="contenedor-alertas-egresos"></div>
+                    <form id="frm-egresos" action="/egresos/reporte" method="post">
+                        <div class="modal-body reporte-modal-body">
+                            <p class="reporte-modal-descripcion">Seleccione el período de gastos que desea incluir.</p>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="egresos-formato">Formato</label>
+                                    <select class="form-select" id="egresos-formato" name="formato" required>
+                                        <option value="RESUMIDO">Resumido por gasto</option>
+                                        <option value="DETALLADO">Detallado por producto/servicio</option>
+                                        <option value="POR_PRODUCTO">Agrupado por producto/servicio</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="egresos-categoria">Categoría de producto</label>
+                                    <select class="form-select" id="egresos-categoria" name="categoriaId">
+                                        <option value="">Todas</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="egresos-desde">Desde</label>
+                                    <input class="form-control" id="egresos-desde" name="desde" type="text" placeholder="Desde" autocomplete="off" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="egresos-hasta">Hasta</label>
+                                    <input class="form-control" id="egresos-hasta" name="hasta" type="text" placeholder="Hasta" autocomplete="off" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer reporte-modal-footer">
+                            <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn reporte-btn-primario"><i class="fa-regular fa-file-pdf"></i> Generar PDF</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         <div class="modal fade" id="usuarios-servicio-modal" tabindex="-1"
              aria-labelledby="tituloUsuariosServicio" data-bs-backdrop="static" aria-hidden="true">
@@ -299,6 +356,7 @@
                                 <div class="col-sm-6 seguimiento-cobrador-campo" style="display: none;">
                                     <label class="form-label" for="ingresos-cobrador">Cobrador</label>
                                     <select class="form-select" name="codigoCobrador" id="ingresos-cobrador">
+                                        <option value="0">Todos los cobradores</option>
                                         <option th:each="cobrador : ${cobradores}" th:value="${cobrador.codigoCobrador}"
                                                 th:text="${cobrador.nombreCompleto}"></option>
                                     </select>
@@ -372,12 +430,19 @@
         <footer th:replace="~{layout/layout :: footer}"></footer>
         <script src="/js/validarFormulario.js"></script>
         <script type="module">
-            import { tabulador, tabular, getReporte, datePickerInit } from '/js/modulos.js';
+            import { tabulador, tabular, getReporte } from '/js/modulos.js';
+            import { datePickerInit } from '/js/utils.js';
 
             datePickerInit('#ingresos-desde');
             datePickerInit('#ingresos-hasta');
             datePickerInit('#comisiones-desde');
             datePickerInit('#comisiones-hasta');
+            datePickerInit('#egresos-desde');
+            datePickerInit('#egresos-hasta');
+            $.getJSON('/egresos/catalogos/CATEGORIA_PRODUCTO').done(categorias => {
+                const selector = $('#egresos-categoria').empty().append($('<option>').val('').text('Todas'));
+                categorias.forEach(categoria => selector.append($('<option>').val(categoria.id).text(categoria.nombre)));
+            });
             setDateIngresos();
             function setDateIngresos(){
                  let fecha = new Date();
@@ -389,12 +454,13 @@
                 $('#ingresos-hasta').val(fechaFormateada);
                 $('#comisiones-desde').val(fechaFormateada);
                 $('#comisiones-hasta').val(fechaFormateada);
+                $('#egresos-desde').val(fechaFormateada);
+                $('#egresos-hasta').val(fechaFormateada);
             }
 
             function actualizarSeguimientoCobrador() {
                 const seguimiento = $('#grupo').val() === 'seguimiento';
                 $('.seguimiento-cobrador-campo').stop(true, true).toggle(seguimiento);
-                $('#ingresos-cobrador').prop('required', seguimiento);
             }
             $('#grupo').on('change', actualizarSeguimientoCobrador);
             $('#ingresos-modal').on('shown.bs.modal', actualizarSeguimientoCobrador);
@@ -443,6 +509,15 @@
                 const formulario = event.currentTarget;
                 getReporte(Object.fromEntries(new FormData(formulario).entries()),
                         '/reporte/usuarios-servicio', '#contenedor-alertas-usuarios-servicio',
+                        $(formulario).find('button[type="submit"]'));
+            });
+
+            $('#frm-egresos').on('submit', (event) => {
+                event.preventDefault();
+                const formulario = event.currentTarget;
+                const datos = Object.fromEntries(new FormData(formulario).entries());
+                getReporte(datos,
+                        '/egresos/reporte', '#contenedor-alertas-egresos',
                         $(formulario).find('button[type="submit"]'));
             });
 

@@ -4,7 +4,7 @@
     <head th:replace="~{layout/layout :: heat}"></head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIINfQ3ynhICz3JkFQ6q8E1f5c8jcq0qWJk=" crossorigin="">
-    <link rel="stylesheet" href="/css/recorridos/recorridos.css?v=20260819-5">
+    <link rel="stylesheet" href="/css/recorridos/recorridos.css?v=20260904-2">
     <body sec:authorize="hasAuthority('ROOT')">
         <header th:replace="~{layout/layout :: header}"></header>
         <aside th:replace="~{layout/layout :: aside}"></aside>
@@ -20,24 +20,6 @@
             </header>
 
             <div id="recorridoAlerta" class="alert d-none" role="alert"></div>
-
-            <section id="seguimientoGpsPanel" class="recorrido-seguimiento d-none" aria-live="polite">
-                <div class="recorrido-seguimiento-icono"><i class="fa-solid fa-location-crosshairs"></i></div>
-                <div class="recorrido-seguimiento-datos">
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <strong id="seguimientoGpsTitulo">Seguimiento GPS</strong>
-                        <span id="seguimientoGpsConexion" class="badge bg-secondary">Sin conexión</span>
-                    </div>
-                    <small id="seguimientoGpsDetalle">Preparando el dispositivo…</small>
-                    <span id="seguimientoGpsUltimo" class="d-block">Sin posiciones capturadas</span>
-                </div>
-                <div class="recorrido-seguimiento-acciones">
-                    <span id="seguimientoGpsPendientes" class="badge bg-warning text-dark">0 pendientes</span>
-                    <button id="detenerSeguimientoGps" type="button" class="btn btn-outline-danger btn-sm">
-                        <i class="fa-solid fa-stop"></i> Detener GPS
-                    </button>
-                </div>
-            </section>
 
             <section class="recorrido-panel recorrido-nuevo">
                 <div class="recorrido-panel-titulo">
@@ -154,6 +136,6 @@
         <footer th:replace="~{layout/layout :: footer}"></footer>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
                 integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-        <script src="/js/recorridos/recorridos.js"></script>
+        <script src="/js/recorridos/recorridos.js?v=20260904-4"></script>
     </body>
 </html>

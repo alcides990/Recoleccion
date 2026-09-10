@@ -17,14 +17,7 @@
                 <input type="hidden" name="codigoUsuario" id="codigoUsuario" th:value="${usuario.codigoUsuario}">
 
                 <section class="factura-seccion">
-                    <div class="factura-seccion-titulo">
-                        <span class="factura-seccion-icon"><i class="fa-solid fa-user"></i></span>
-                        <div>
-                            <h4>Datos del cliente</h4>
-                            <p>Busque la cuenta corriente para cargar automáticamente los datos.</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
+                    <div class="row g-2">
                         <div class="col-md-3">
                             <label class="form-label" for="cuentaCorriente">Cuenta corriente</label>
                             <input onkeyup="formatearCuentaCorriente(event)" class="form-control" type="search"
@@ -43,23 +36,24 @@
                                         th:text="${categoria.nombreCategoria ?: ''} + ' ' + ${categoria.tarifa ?: ''}"></option>
                             </select>
                         </div>
-                        <div class="col-12">
+                        <div class="col-7">
                             <label class="form-label" for="razonSocial">Nombre o razón social</label>
                             <input class="form-control" type="text" id="razonSocial" placeholder="Buscar por nombre, RUC"
                                    th:value="${usuario.nombre ?: ''}" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label" for="cobrador">Cobrador</label>
+                            <select class="form-select" id="cobrador" name="cobrador">
+                                <option th:each="cobrador : ${cobrador}"
+                                        th:value="${cobrador.codigoCobrador}"
+                                        th:text="${cobrador.nombre ?: ''}"></option>
+                            </select>
                         </div>
                     </div>
                 </section>
 
                 <section class="factura-seccion">
-                    <div class="factura-seccion-titulo">
-                        <span class="factura-seccion-icon"><i class="fa-solid fa-file-invoice"></i></span>
-                        <div>
-                            <h4>Datos del comprobante</h4>
-                            <p>Complete los datos necesarios para la emisión de la factura.</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
+                    <div class="row g-2">
                         <div class="col-md-3">
                             <label class="form-label" for="numeroComprobante">N.º de factura</label>
                             <input class="form-control" type="text" autofocus name="numeroComprobante"
@@ -113,25 +107,17 @@
                                         th:text="${comision.nombreComision}"></option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="cobrador">Cobrador</label>
-                            <select class="form-select" id="cobrador" name="cobrador">
-                                <option th:each="cobrador : ${cobrador}"
-                                        th:value="${cobrador.codigoCobrador}"
-                                        th:text="${cobrador.nombre ?: ''}"></option>
-                            </select>
-                        </div>
+
                     </div>
                 </section>
 
-                <div class="row g-3">
+                <div class="row g-2">
                     <div class="col-xl-8">
                         <section class="factura-seccion factura-detalle-pago h-100">
                             <div class="factura-seccion-titulo">
                                 <span class="factura-seccion-icon"><i class="fa-solid fa-calculator"></i></span>
                                 <div>
                                     <h4>Detalle de pago</h4>
-                                    <p>Importes asociados a la cuenta corriente seleccionada.</p>
                                 </div>
                             </div>
                             <input type="hidden" name="tarifa" id="tarifa" th:value="${categoria.tarifa}">
@@ -185,7 +171,6 @@
                                 <span class="factura-seccion-icon"><i class="fa-solid fa-wallet"></i></span>
                                 <div>
                                     <h4>Forma de pago</h4>
-                                    <p>Seleccione un método o distribuya el importe.</p>
                                 </div>
                             </div>
                             <label class="form-label" for="metodoPago">Método de pago</label>
@@ -306,7 +291,8 @@
                                     generarNumeroComprobante();
                                 });
                                 $('#tipoComprobante, #detalleTimbrado').on('keydown.factura', function (event) {
-                                    if (event.key === 'Enter') event.preventDefault();
+                                    if (event.key === 'Enter')
+                                        event.preventDefault();
                                 });
                                 $("#metodoPagoSelect").on('change', () => tabular("#importe"));
                                 $("#cancelar").on('click', () => limpiarMetodosPago());
@@ -318,7 +304,7 @@
 
                                 datePickerInit("#fechaPago");
                                 $("#fechaPago").datepicker("setDate", new Date());
-                                
+
 
                                 function cargarTimbradosDelPunto() {
                                     const punto = $('#puntoExpedicion').val();
@@ -330,25 +316,25 @@
                                         codigoPuntoExpedicion: punto,
                                         codigoTipoComprobante: tipoComprobante
                                     })
-                                        .done(function (datos) {
-                                            selector.empty();
-                                            if (!datos.length) {
-                                                selector.append('<option value="">Sin timbrado vigente para este punto y tipo</option>');
+                                            .done(function (datos) {
+                                                selector.empty();
+                                                if (!datos.length) {
+                                                    selector.append('<option value="">Sin timbrado vigente para este punto y tipo</option>');
+                                                    generarNumeroComprobante();
+                                                    return;
+                                                }
+                                                datos.forEach(function (item) {
+                                                    selector.append($('<option>', {value: item.codigoTimbrado, text: item.nombre})
+                                                            .attr('data-serie', item.codigoSerie)
+                                                            .attr('data-modo-emision', item.modoEmision));
+                                                });
+                                                selector.prop('disabled', false);
                                                 generarNumeroComprobante();
-                                                return;
-                                            }
-                                            datos.forEach(function (item) {
-                                                selector.append($('<option>', {value: item.codigoTimbrado, text: item.nombre})
-                                                    .attr('data-serie', item.codigoSerie)
-                                                    .attr('data-modo-emision', item.modoEmision));
+                                            })
+                                            .fail(function () {
+                                                selector.empty().append('<option value="">No se pudo cargar el timbrado</option>');
+                                                generarNumeroComprobante();
                                             });
-                                            selector.prop('disabled', false);
-                                            generarNumeroComprobante();
-                                        })
-                                        .fail(function () {
-                                            selector.empty().append('<option value="">No se pudo cargar el timbrado</option>');
-                                            generarNumeroComprobante();
-                                        });
                                 }
 
 //                                $("#cuentaCorriente").on('keypress', (e) => {
@@ -362,10 +348,12 @@
 //                                    }
 //                                });
                                 $("#numeroComprobante").on('input', function () {
-                                    if ($(this).prop('readonly')) return;
+                                    if ($(this).prop('readonly'))
+                                        return;
                                     $(this).val($(this).val().replace(/\D/g, '').slice(0, 7));
                                 }).on('blur', function () {
-                                    if ($(this).prop('readonly') || !$(this).val()) return;
+                                    if ($(this).prop('readonly') || !$(this).val())
+                                        return;
                                     $(this).val($(this).val().padStart(7, '0'));
                                 });
         </script>

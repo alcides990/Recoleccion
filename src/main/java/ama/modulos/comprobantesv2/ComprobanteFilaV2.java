@@ -12,6 +12,8 @@ public class ComprobanteFilaV2 {
     private Integer codigoTipoComprobante;
     private Integer codigoSerie;
     private Integer numeroComprobante;
+    private String numeroFiscal;
+    private String serie;
     private String tipoComprobante;
     private String puntoExpedicion;
     private String cuentaCorriente;

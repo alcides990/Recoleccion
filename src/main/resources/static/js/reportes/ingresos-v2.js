@@ -6,7 +6,9 @@ $(function () {
     const colores = ['#6c757d', '#bca007', '#495057', '#8d99ae', '#6b705c', '#9467bd', '#d77a61'];
     let periodo = 'dia';
     let graficoPeriodo;
+    let graficoMedioPago;
     let graficoCobrador;
+
 
     function formatoGuaranies(valor) {
         return 'Gs. ' + Number(valor || 0).toLocaleString('es-PY', {
@@ -54,6 +56,54 @@ $(function () {
                     tooltip: {
                         callbacks: {
                             label: contextoTooltip => ' ' + formatoGuaranies(contextoTooltip.raw)
+                        }
+                    }
+                },
+                scales: {
+                    x: {grid: {display: false}},
+                    y: {
+                        beginAtZero: true,
+                        ticks: {callback: valor => formatoGuaranies(valor)},
+                        grid: {color: 'rgba(108, 117, 125, .14)'}
+                    }
+                }
+            }
+        });
+    }
+
+    function crearGraficoMedioPago(datos, medios) {
+        const periodos = [...new Set([...datos.map(item => Number(item.periodo)),
+            ...medios.map(item => Number(item.periodo))])].sort((a, b) => a - b);
+        const codigos = [...new Set(medios.map(item => Number(item.codigoMedio)))].sort((a, b) => a - b);
+        const datasets = codigos.map(codigo => {
+            const filas = medios.filter(item => Number(item.codigoMedio) === codigo);
+            const importes = new Map(filas.map(item => [Number(item.periodo), Number(item.importe || 0)]));
+            return {
+                label: filas[0].nombre,
+                data: periodos.map(valor => importes.get(valor) || 0),
+                backgroundColor: colores[Math.abs(codigo) % colores.length],
+                borderRadius: 4,
+                maxBarThickness: 32
+            };
+        });
+        const contexto = document.getElementById('graficoIngresosMedioPago');
+        if (graficoMedioPago) {
+            graficoMedioPago.destroy();
+        }
+        graficoMedioPago = new Chart(contexto, {
+            type: 'bar',
+            data: {
+                labels: periodos.map(etiquetaPeriodo),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {position: 'bottom'},
+                    tooltip: {
+                        callbacks: {
+                            label: contextoTooltip => contextoTooltip.dataset.label + ': ' + formatoGuaranies(contextoTooltip.raw)
                         }
                     }
                 },
@@ -123,8 +173,12 @@ $(function () {
             const cobradores = respuesta.ingresosPorCobrador || [];
             $('#sinIngresosV2').toggleClass('d-none', ingresos.length > 0);
             $('#sinCobradoresIngresosV2').toggleClass('d-none', cobradores.length > 0);
-            crearGraficoPeriodo(ingresos);
+
             crearGraficoCobrador(cobradores);
+            const medios = respuesta.ingresosPorMedioPago || [];
+            $('#sinMediosIngresosV2').toggleClass('d-none', medios.length > 0);
+            crearGraficoPeriodo(ingresos);
+            crearGraficoMedioPago(ingresos, medios);
             actualizarResumen(respuesta);
         }).fail(mostrarError);
     }

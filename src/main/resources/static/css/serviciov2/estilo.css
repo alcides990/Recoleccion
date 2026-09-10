@@ -6,6 +6,26 @@
     box-shadow: 0 1.25rem 3rem rgba(26, 35, 44, .22);
 }
 
+.servicio-list-agregar {
+    flex: 0 0 auto;
+    padding: .62rem 1rem;
+    border: 1px solid rgba(255, 255, 255, .45);
+    background: #fff;
+    color: #394047;
+    font-weight: 700;
+}
+
+body .form-view-header .servicio-list-agregar i {
+    margin-right: .35rem;
+    color: #394047;
+}
+
+.servicio-list-agregar:hover,
+.servicio-list-agregar:focus {
+    background: #f7f8fa;
+    color: #1f2933;
+}
+
 #historialServicioModal .servicio-historial-modal { overflow: hidden; border: 0; border-radius: .85rem; box-shadow: 0 1.2rem 3rem rgba(26,35,44,.24); }
 #historialServicioModal .servicio-v2-header { padding: 1.05rem 1.35rem; background: var(--btn-color); color: #fff; }
 #historialServicioModal .servicio-v2-header .btn-close { filter: brightness(0) invert(1); }

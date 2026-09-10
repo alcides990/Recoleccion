@@ -108,10 +108,13 @@ public class IngresoReporteControllerV2 {
             }
         }
 
+        var mediosPago = comprobantes.ingresosPorMedioPago(sucursal,
+                "anio".equals(periodo) ? null : anioConsulta,
+                "dia".equals(periodo) ? mesConsulta : null, periodo);
         double total = ingresos.stream().mapToDouble(i -> i.getImporte() == null ? 0D : i.getImporte()).sum();
         double promedio = ingresos.isEmpty() ? 0D : total / ingresos.size();
         double maximo = ingresos.stream().mapToDouble(i -> i.getImporte() == null ? 0D : i.getImporte()).max().orElse(0D);
-        return ResponseEntity.ok(new IngresoGraficoResponseV2(periodo, ingresos, cobradores, total, promedio, maximo));
+        return ResponseEntity.ok(new IngresoGraficoResponseV2(periodo, ingresos, cobradores, mediosPago, total, promedio, maximo));
     }
 
     private UsuarioSistema usuarioSesion() {

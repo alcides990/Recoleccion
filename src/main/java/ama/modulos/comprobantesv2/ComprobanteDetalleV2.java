@@ -14,7 +14,9 @@ public class ComprobanteDetalleV2 {
     private String puntoExpedicion;
     private String serie;
     private Integer numeroComprobante;
+    private String numeroFiscal;
     private String cuentaCorriente;
+    private Integer codigoUsuario;
     private String receptor;
     private String documento;
     private LocalDateTime fechaEmision;

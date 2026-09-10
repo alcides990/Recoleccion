@@ -36,7 +36,35 @@ public class RecorridoCobradorService {
             """,sucursal);}
 
     @Transactional
-    public Map<String,Object> asignarDispositivo(String id,Integer cobrador,Integer sucursal){validarIdDispositivo(id);if(cobrador!=null){Integer n=jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cobradores WHERE codigo_cobrador=? AND codigo_sucursal=? AND codigo_estado=1",Integer.class,cobrador,sucursal);if(n==null||n==0)throw new IllegalArgumentException("El cobrador no existe o no está activo");}int changed=jdbcTemplate.update("UPDATE dispositivos_cobrador SET codigo_cobrador=? WHERE id_dispositivo=? AND codigo_sucursal=? AND activo=1",cobrador,id,sucursal);if(changed==0)throw new IllegalArgumentException("El dispositivo no existe o está desactivado");return estadoDispositivo(id,sucursal);}
+    public Map<String, Object> asignarDispositivo(String idDispositivo,
+            Integer codigoCobrador, Integer codigoSucursal) {
+        validarIdDispositivo(idDispositivo);
+        if (codigoCobrador != null) {
+            validarCobradorActivo(codigoCobrador, codigoSucursal);
+        }
+
+        int modificados = jdbcTemplate.update("""
+                UPDATE dispositivos_cobrador
+                SET codigo_cobrador = ?
+                WHERE id_dispositivo = ? AND codigo_sucursal = ? AND activo = 1
+                """, codigoCobrador, idDispositivo, codigoSucursal);
+        if (modificados == 0) {
+            throw new IllegalArgumentException(
+                    "El dispositivo no existe o está desactivado");
+        }
+        return estadoDispositivo(idDispositivo, codigoSucursal);
+    }
+
+    private void validarCobradorActivo(Integer codigoCobrador, Integer codigoSucursal) {
+        Integer coincidencias = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM cobradores
+                WHERE codigo_cobrador = ? AND codigo_sucursal = ? AND codigo_estado = 1
+                """, Integer.class, codigoCobrador, codigoSucursal);
+        if (coincidencias == null || coincidencias == 0) {
+            throw new IllegalArgumentException(
+                    "El cobrador no existe o no está activo");
+        }
+    }
 
     @Transactional
     public Map<String, Object> cambiarEstadoDispositivo(String id, boolean activo,
@@ -54,18 +82,118 @@ public class RecorridoCobradorService {
     }
 
     @Transactional
-    public Map<String,Object> recorridoActivoDispositivo(String id,Integer sucursal){Map<String,Object> device=estadoDispositivo(id,sucursal);jdbcTemplate.update("UPDATE dispositivos_cobrador SET ultima_conexion=CURRENT_TIMESTAMP WHERE id_dispositivo=?",id);Object collector=device.get("codigoCobrador");if(collector==null)return Map.of("activo",false,"vinculado",false);List<Map<String,Object>> rows=jdbcTemplate.queryForList("""
-            SELECT r.codigo_recorrido AS codigoRecorrido,CONCAT(c.nombre,' ',COALESCE(c.apellido,'')) AS cobrador
-            FROM recorridos_cobrador r JOIN cobradores c ON c.codigo_cobrador=r.codigo_cobrador
-            WHERE r.codigo_cobrador=? AND r.estado='ACTIVO' ORDER BY r.fecha_inicio DESC LIMIT 1
-            """,collector);if(rows.isEmpty())return Map.of("activo",false,"vinculado",true);Map<String,Object> result=new java.util.LinkedHashMap<>(rows.get(0));result.put("activo",true);result.put("vinculado",true);return result;}
+    public Map<String, Object> recorridoActivoDispositivo(String idDispositivo,
+            Integer codigoSucursal) {
+        Map<String, Object> dispositivo = estadoDispositivo(
+                idDispositivo, codigoSucursal);
+        jdbcTemplate.update("""
+                UPDATE dispositivos_cobrador
+                SET ultima_conexion = CURRENT_TIMESTAMP
+                WHERE id_dispositivo = ?
+                """, idDispositivo);
+
+        Object codigoCobrador = dispositivo.get("codigoCobrador");
+        if (codigoCobrador == null) {
+            return Map.of("activo", false, "vinculado", false);
+        }
+
+        List<Map<String, Object>> recorridos = jdbcTemplate.queryForList("""
+                SELECT r.codigo_recorrido AS codigoRecorrido,
+                       CONCAT(c.nombre, ' ', COALESCE(c.apellido, '')) AS cobrador
+                FROM recorridos_cobrador r
+                JOIN cobradores c ON c.codigo_cobrador = r.codigo_cobrador
+                WHERE r.codigo_cobrador = ? AND r.estado = 'ACTIVO'
+                ORDER BY r.fecha_inicio DESC
+                LIMIT 1
+                """, codigoCobrador);
+        if (recorridos.isEmpty()) {
+            return Map.of("activo", false, "vinculado", true);
+        }
+
+        Map<String, Object> resultado = new LinkedHashMap<>(recorridos.get(0));
+        resultado.put("activo", true);
+        resultado.put("vinculado", true);
+        return resultado;
+    }
 
     @Transactional
-    public boolean registrarPuntoDispositivo(String id,Long recorrido,String sync,BigDecimal lat,BigDecimal lon,BigDecimal precision,BigDecimal velocidad,LocalDateTime fecha,Integer sucursal){Map<String,Object> device=estadoDispositivo(id,sucursal);Object collector=device.get("codigoCobrador");if(collector==null)throw new IllegalStateException("El dispositivo no está vinculado a un cobrador");Integer valid=jdbcTemplate.queryForObject("SELECT COUNT(*) FROM recorridos_cobrador WHERE codigo_recorrido=? AND codigo_cobrador=? AND estado='ACTIVO'",Integer.class,recorrido,collector);if(valid==null||valid==0)throw new IllegalStateException("El recorrido ya no está activo para este dispositivo");boolean inserted=registrarPunto(recorrido,sync,lat,lon,precision,velocidad,fecha,sucursal,"APP");if(inserted)jdbcTemplate.update("UPDATE puntos_recorrido_cobrador SET id_dispositivo=? WHERE id_sincronizacion=?",id,sync);return inserted;}
+    public boolean registrarPuntoDispositivo(String idDispositivo, Long codigoRecorrido,
+            String idSincronizacion, BigDecimal latitud, BigDecimal longitud,
+            BigDecimal precision, BigDecimal velocidad, LocalDateTime fecha,
+            Integer codigoSucursal) {
+        Map<String, Object> dispositivo = estadoDispositivo(
+                idDispositivo, codigoSucursal);
+        Object codigoCobrador = dispositivo.get("codigoCobrador");
+        if (codigoCobrador == null) {
+            throw new IllegalStateException(
+                    "El dispositivo no está vinculado a un cobrador");
+        }
 
-    private Map<String,Object> estadoDispositivo(String id,Integer sucursal){Map<String,Object> dispositivo=consultarDispositivo(id,sucursal);Object activo=dispositivo.get("activo");if(!(Boolean.TRUE.equals(activo)||(activo instanceof Number numero&&numero.intValue()==1)))throw new IllegalStateException("El dispositivo está desactivado por ROOT");return dispositivo;}
-    private Map<String,Object> consultarDispositivo(String id,Integer sucursal){validarIdDispositivo(id);List<Map<String,Object>> rows=jdbcTemplate.queryForList("SELECT id_dispositivo AS idDispositivo,codigo_cobrador AS codigoCobrador,nombre_dispositivo AS nombreDispositivo,activo FROM dispositivos_cobrador WHERE id_dispositivo=? AND codigo_sucursal=?",id,sucursal);if(rows.isEmpty())throw new IllegalArgumentException("Dispositivo no registrado en esta sucursal");return rows.get(0);}
-    private void validarIdDispositivo(String id){if(id==null||!id.matches("[A-Za-z0-9._-]{8,64}"))throw new IllegalArgumentException("Identificador de dispositivo inválido");}
+        Integer recorridosValidos = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM recorridos_cobrador
+                WHERE codigo_recorrido = ? AND codigo_cobrador = ? AND estado = 'ACTIVO'
+                """, Integer.class, codigoRecorrido, codigoCobrador);
+        if (recorridosValidos == null || recorridosValidos == 0) {
+            throw new IllegalStateException(
+                    "El recorrido ya no está activo para este dispositivo");
+        }
+
+        boolean registrado = registrarPunto(codigoRecorrido, idSincronizacion,
+                latitud, longitud, precision, velocidad, fecha, codigoSucursal, "APP");
+        if (registrado) {
+            jdbcTemplate.update("""
+                    UPDATE puntos_recorrido_cobrador
+                    SET id_dispositivo = ?
+                    WHERE id_sincronizacion = ?
+                    """, idDispositivo, idSincronizacion);
+        }
+        return registrado;
+    }
+
+    private Map<String, Object> estadoDispositivo(String idDispositivo,
+            Integer codigoSucursal) {
+        Map<String, Object> dispositivo = consultarDispositivo(
+                idDispositivo, codigoSucursal);
+        if (!estaActivo(dispositivo.get("activo"))) {
+            throw new IllegalStateException(
+                    "El dispositivo está desactivado por ROOT");
+        }
+        return dispositivo;
+    }
+
+    private boolean estaActivo(Object valor) {
+        if (Boolean.TRUE.equals(valor)) {
+            return true;
+        }
+        return valor instanceof Number
+                && ((Number) valor).intValue() == 1;
+    }
+
+    private Map<String, Object> consultarDispositivo(String idDispositivo,
+            Integer codigoSucursal) {
+        validarIdDispositivo(idDispositivo);
+        List<Map<String, Object>> dispositivos = jdbcTemplate.queryForList("""
+                SELECT id_dispositivo AS idDispositivo,
+                       codigo_cobrador AS codigoCobrador,
+                       nombre_dispositivo AS nombreDispositivo,
+                       activo
+                FROM dispositivos_cobrador
+                WHERE id_dispositivo = ? AND codigo_sucursal = ?
+                """, idDispositivo, codigoSucursal);
+        if (dispositivos.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Dispositivo no registrado en esta sucursal");
+        }
+        return dispositivos.get(0);
+    }
+
+    private void validarIdDispositivo(String idDispositivo) {
+        if (idDispositivo == null
+                || !idDispositivo.matches("[A-Za-z0-9._-]{8,64}")) {
+            throw new IllegalArgumentException(
+                    "Identificador de dispositivo inválido");
+        }
+    }
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> listar(Integer codigoSucursal) {
@@ -283,6 +411,7 @@ public class RecorridoCobradorService {
             throw new IllegalStateException("Solo se puede iniciar un recorrido pendiente");
         }
         Integer codigoCobrador = ((Number) recorrido.get("codigoCobrador")).intValue();
+        validarTelefonoVinculado(codigoCobrador, codigoSucursal);
         Integer activos = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*) FROM recorridos_cobrador
                 WHERE codigo_cobrador = ? AND estado = 'ACTIVO'
@@ -298,6 +427,17 @@ public class RecorridoCobradorService {
                 WHERE codigo_recorrido = ? AND estado = 'PENDIENTE'
                 """, codigoUsuarioSistema, normalizarOrigen(origen), codigoRecorrido);
         return consultarUno(codigoRecorrido, codigoSucursal);
+    }
+
+    private void validarTelefonoVinculado(Integer codigoCobrador, Integer codigoSucursal) {
+        Integer telefonosActivos = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM dispositivos_cobrador
+                WHERE codigo_cobrador = ? AND codigo_sucursal = ? AND activo = 1
+                """, Integer.class, codigoCobrador, codigoSucursal);
+        if (telefonosActivos == null || telefonosActivos == 0) {
+            throw new IllegalStateException(
+                    "El cobrador no tiene un teléfono activo vinculado");
+        }
     }
 
     @Transactional

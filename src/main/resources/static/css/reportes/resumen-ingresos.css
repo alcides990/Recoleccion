@@ -5,27 +5,55 @@
 #resumenIngresos .resumen-filtros label { margin-bottom: .3rem; color: #4d555c; font-size: .8rem; font-weight: 700; }
 #resumenIngresos .resumen-consultar { min-height: 2.45rem; background: var(--btn-color); color: #fff; font-weight: 700; }
 #resumenIngresos .resumen-card { overflow: hidden; border: 1px solid rgba(108,117,125,.2); border-radius: .6rem; background: #fff; }
-#resumenIngresos .resumen-card h4 { margin: 0; padding: .5rem .7rem; background: var(--btn-color); color: #fff; font-size: .82rem; font-weight: 800; }
-#resumenIngresos .resumen-subtitulo-card { margin: .25rem 0 0; padding: .4rem .7rem; border-top: 2px solid rgba(108,117,125,.25); background: #e9ecef; color: #3f474e; font-size: .76rem; font-weight: 800; }
-#resumenIngresos .resumen-encabezado-linea { display: grid; grid-template-columns: minmax(6rem, 1fr) 1.8rem 6.8rem; gap: .18rem; padding: .28rem .75rem; border-bottom: 1px solid rgba(108,117,125,.2); background: #f1f3f5; color: #626b73; font-size: .64rem; font-weight: 800; text-transform: uppercase; }
-#resumenIngresos .resumen-encabezado-linea > span:nth-child(2) { text-align: center; }
-#resumenIngresos .resumen-encabezado-linea > span:last-child { text-align: right; }
-#resumenIngresos .resumen-medios-lista { display: block; padding: .25rem .4rem; }
-#resumenIngresos .resumen-medio-item { display: grid; grid-template-columns: minmax(6rem, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; min-height: 1.8rem; padding: .28rem .35rem; border-bottom: 1px solid rgba(108,117,125,.13); }
-#resumenIngresos .resumen-medio-item:nth-child(even) { background: #f8f9fa; }
-#resumenIngresos .resumen-medio-item span { overflow: hidden; color: #4b535a; font-size: .76rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-#resumenIngresos .resumen-medio-item small { color: #737c84; font-size: .7rem; text-align: center; }
-#resumenIngresos .resumen-medio-item strong { color: #343a40; font-size: .8rem; text-align: right; white-space: nowrap; }
-#resumenIngresos .resumen-total-general { display: grid; grid-template-columns: minmax(6rem, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; padding: .38rem .75rem; border-top: .15rem solid var(--btn-color); background: #e9ecef; color: #343a40; font-size: .76rem; font-weight: 700; }
-#resumenIngresos .resumen-total-general > strong { text-align: right; white-space: nowrap; }
-#resumenIngresos .resumen-total-cobrador { display: grid; grid-template-columns: minmax(0, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; padding: .38rem .8rem; border-top: .15rem solid var(--btn-color); background: #e9ecef; color: #343a40; font-size: .76rem; font-weight: 800; }
+#resumenIngresos .resumen-card h4 { margin: 0; padding: .38rem .55rem; background: var(--btn-color); color: #fff; font-size: .82rem; font-weight: 800; }
+#resumenIngresos .resumen-total-cobrador { display: grid; grid-template-columns: minmax(0, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; padding: .28rem .55rem; border-top: .15rem solid var(--btn-color); background: #e9ecef; color: #343a40; font-size: .76rem; font-weight: 800; }
 #resumenIngresos .resumen-total-cobrador > strong { text-align: right; white-space: nowrap; }
-#resumenIngresos .resumen-lista { padding: .25rem .45rem; }
-#resumenIngresos .resumen-linea { display: grid; grid-template-columns: minmax(0, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; min-height: 1.8rem; padding: .28rem .35rem; border-bottom: 1px solid rgba(108,117,125,.13); font-size: .76rem; }
+#resumenIngresos .resumen-lista { padding: .15rem .28rem; }
+#resumenIngresos .resumen-linea { display: grid; grid-template-columns: minmax(0, 1fr) 1.8rem 6.8rem; gap: .18rem; align-items: center; min-height: 1.58rem; padding: .18rem .25rem; border-bottom: 1px solid rgba(108,117,125,.13); font-size: .76rem; }
 #resumenIngresos .resumen-linea:nth-child(even) { background: #f8f9fa; }
 #resumenIngresos .resumen-linea-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #resumenIngresos .resumen-linea-cantidad { color: #737c84; font-size: .7rem; text-align: center; white-space: nowrap; }
 #resumenIngresos .resumen-linea-importe { text-align: right; white-space: nowrap; }
+#resumenIngresos .resumen-detalle-cabecera,
+#resumenIngresos .resumen-linea-compacta,
+#resumenIngresos .resumen-detalle-totales {
+    display: grid;
+    grid-template-columns: var(--resumen-detalle-columnas, minmax(6.8rem, 1fr) minmax(5.1rem, .72fr) minmax(5.1rem, .72fr));
+    gap: .18rem;
+    align-items: center;
+}
+#resumenIngresos .resumen-detalle-cabecera {
+    padding: .2rem .25rem;
+    border-bottom: 1px solid rgba(108,117,125,.2);
+    color: #626b73;
+    font-size: .62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+#resumenIngresos .resumen-detalle-cabecera span:not(:first-child) { text-align: right; }
+#resumenIngresos .resumen-linea-compacta {
+    min-height: 1.72rem;
+    grid-template-columns: var(--resumen-detalle-columnas, minmax(6.8rem, 1fr) minmax(5.1rem, .72fr) minmax(5.1rem, .72fr));
+}
+#resumenIngresos .resumen-detalle-totales {
+    padding: .25rem .25rem;
+    border-top: .15rem solid var(--btn-color);
+    background: #e9ecef;
+    color: #343a40;
+    font-size: .72rem;
+    font-weight: 800;
+}
+#resumenIngresos .resumen-detalle-totales > span:first-child { text-transform: uppercase; }
+#resumenIngresos .resumen-celda-medio {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .25rem;
+    align-items: baseline;
+    min-width: 0;
+    text-align: right;
+}
+#resumenIngresos .resumen-celda-medio small { color: #737c84; font-size: .64rem; white-space: nowrap; }
+#resumenIngresos .resumen-celda-medio strong { color: #30363b; font-size: .7rem; white-space: nowrap; }
 #resumenIngresos .resumen-vacio { display: block; padding: 1rem; color: #737c84; font-size: .8rem; text-align: center; }
 
 @media (max-width: 991.98px) {
@@ -34,8 +62,9 @@
 }
 
 @media (max-width: 575.98px) {
-    #resumenIngresos .resumen-total-general { grid-template-columns: 1fr auto; }
-    #resumenIngresos .resumen-total-general > strong { grid-column: 1 / -1; text-align: right; }
     #resumenIngresos .resumen-linea { grid-template-columns: minmax(0, 1fr) auto; }
+    #resumenIngresos .resumen-detalle-cabecera,
+    #resumenIngresos .resumen-linea-compacta,
+    #resumenIngresos .resumen-detalle-totales { grid-template-columns: var(--resumen-detalle-columnas, minmax(6.8rem, 1fr) minmax(5.1rem, .72fr) minmax(5.1rem, .72fr)); }
     #resumenIngresos .resumen-linea-importe { grid-column: 1 / -1; }
 }

@@ -32,7 +32,7 @@
                 <table id="tablaComprobantesV2" class="table table-striped table-hover align-middle small w-100">
                     <thead>
                         <tr>
-                            <th>Tipo</th><th>Punto</th><th>Numero</th><th>Cuenta</th><th>Usuario</th>
+                            <th>Tipo</th><th>Punto</th><th>N&#250;mero</th><th>Cuenta</th><th>Usuario</th>
                             <th>Fecha</th><th>Importe</th><th>Estado</th><th class="text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -69,9 +69,6 @@
                             <span>Comprobante seleccionado</span>
                             <strong id="editarIdentificadorV2"></strong>
                         </div>
-                        <div class="alert alert-info py-2 mb-3">
-                            El n&#250;mero y la cuenta corriente pueden modificarse &#250;nicamente en una FACTURA MANUAL. Los dem&#225;s datos identificadores se muestran solo para control.
-                        </div>
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label for="editarNumeroComprobanteV2">N&#250;mero de comprobante</label>
@@ -84,7 +81,13 @@
                                 <small id="ayudaCuentaV2" class="form-text text-muted"></small>
                             </div>
                             <div class="col-md-3"><label for="editarDocumentoV2">RUC / CI</label><input id="editarDocumentoV2" class="form-control" readonly></div>
-                            <div class="col-md-6"><label for="editarRazonSocialV2">Raz&#243;n social</label><input id="editarRazonSocialV2" class="form-control" maxlength="255" required></div>
+                            <div class="col-md-6">
+                                <label for="editarRazonSocialV2">Raz&#243;n social</label>
+                                <input id="editarCodigoUsuarioV2" type="hidden">
+                                <input id="editarRazonSocialV2" class="form-control" maxlength="255"
+                                       placeholder="Busque por RUC/CI o nombre" autocomplete="off" required>
+                                <small class="form-text text-muted">Seleccione una sugerencia para cambiar el usuario del comprobante.</small>
+                            </div>
                             <div class="col-md-4">
                                 <label for="editarFechaPagoV2">Fecha de pago</label>
                                 <div class="editar-v2-input-wrap">
@@ -200,7 +203,7 @@
                     </div>
                     <div class="modal-footer editar-v2-footer">
                         <button type="button" class="btn editar-v2-cancelar" data-bs-dismiss="modal">Cancelar</button>
-                        <button id="guardarEdicionComprobanteV2" type="submit" class="btn editar-v2-guardar">
+                        <button id="guardarEdicionComprobanteV2" type="button" class="btn editar-v2-guardar">
                             <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
                         </button>
                     </div>

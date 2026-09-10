@@ -4,8 +4,6 @@ import ama.dominio.UsuarioSistema;
 import ama.servicio.CobradorService;
 import ama.servicio.RecorridoCobradorService;
 import jakarta.servlet.http.HttpSession;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +54,28 @@ public class RecorridoCobradorController {
         return recorridoService.listar(codigoSucursal());
     }
 
-    @GetMapping("/dispositivos") @ResponseBody public List<Map<String,Object>> dispositivos(){return recorridoService.listarDispositivos(codigoSucursal());}
-    @PostMapping("/dispositivos/{id}/asignar") @ResponseBody public ResponseEntity<?> asignar(@PathVariable String id,@RequestBody AsignarDispositivoSolicitud r){try{return ResponseEntity.ok(recorridoService.asignarDispositivo(id,r.codigoCobrador(),codigoSucursal()));}catch(Exception e){return ResponseEntity.badRequest().body(Map.of("mensaje",e.getMessage()));}}
+    @GetMapping("/dispositivos")
+    @ResponseBody
+    public List<Map<String, Object>> dispositivos() {
+        return recorridoService.listarDispositivos(codigoSucursal());
+    }
+
+    @PostMapping("/dispositivos/{id}/asignar")
+    @ResponseBody
+    public ResponseEntity<?> asignar(@PathVariable String id,
+            @RequestBody AsignarDispositivoSolicitud solicitud) {
+        if (solicitud == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "mensaje", "Debe indicar el cobrador"));
+        }
+        try {
+            return ResponseEntity.ok(recorridoService.asignarDispositivo(
+                    id, solicitud.codigoCobrador(), codigoSucursal()));
+        } catch (IllegalArgumentException | IllegalStateException excepcion) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "mensaje", excepcion.getMessage()));
+        }
+    }
     @PostMapping("/dispositivos/{id}/estado") @ResponseBody
     public ResponseEntity<?> cambiarEstadoDispositivo(@PathVariable String id,
             @RequestBody EstadoDispositivoSolicitud solicitud) {
@@ -132,25 +150,6 @@ public class RecorridoCobradorController {
         }
     }
 
-    @PostMapping("/{codigoRecorrido}/puntos")
-    @ResponseBody
-    public ResponseEntity<?> registrarPunto(@PathVariable Long codigoRecorrido,
-            @RequestBody PuntoRecorridoSolicitud solicitud,
-            @RequestHeader(name = "X-Origen-Cliente", defaultValue = "APP") String origen) {
-        try {
-            boolean registrado = recorridoService.registrarPunto(codigoRecorrido,
-                    solicitud.idSincronizacion(),
-                    solicitud.latitud(), solicitud.longitud(),
-                    solicitud.precisionMetros(), solicitud.velocidadMetrosSegundo(),
-                    solicitud.fechaDispositivo(), codigoSucursal(), origen);
-            return ResponseEntity.ok(Map.of(
-                    "mensaje", registrado ? "Punto registrado" : "Punto ya sincronizado",
-                    "registrado", registrado));
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     private UsuarioSistema usuarioActual() {
         return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
     }
@@ -162,8 +161,4 @@ public class RecorridoCobradorController {
     public record CrearRecorridoSolicitud(Integer codigoCobrador, String observacion) {}
     public record AsignarDispositivoSolicitud(Integer codigoCobrador) {}
     public record EstadoDispositivoSolicitud(Boolean activo) {}
-    public record PuntoRecorridoSolicitud(String idSincronizacion,
-            BigDecimal latitud, BigDecimal longitud,
-            BigDecimal precisionMetros, BigDecimal velocidadMetrosSegundo,
-            LocalDateTime fechaDispositivo) {}
 }

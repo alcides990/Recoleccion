@@ -1,4 +1,5 @@
 import {datePickerInit} from '/js/modulos.js';
+import {tabuladorFormulario} from '/js/utils.js';
 
 $(function () {
     datePickerInit('#suspensionFecha');
@@ -19,6 +20,10 @@ $(function () {
         $(panel).removeClass('d-none');
         modal.show();
     }
+
+    $('#historialServicioModal').on('shown.bs.modal', function () {
+        tabuladorFormulario('#formSuspension, #formExoneracion');
+    });
 
     async function api(url, opciones = {}) {
         const respuesta = await fetch(url, opciones);

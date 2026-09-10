@@ -14,11 +14,13 @@ import ama.dao.CategoriaDao;
 import ama.dao.CondicionVentaDao;
 import ama.dao.MetodoPagoDao;
 import ama.dao.DetalleTimbradoDao;
+import ama.dao.UsuarioDao;
 import ama.dominio.DetalleTimbradoPK;
 import ama.servicio.AuditoriaComprobanteService;
 import ama.servicio.ServicioService;
 import ama.dominio.PuntoExpedicionPK;
 import ama.dominio.UsuarioSistema;
+import ama.dominio.Usuario;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
@@ -42,6 +44,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,13 +77,14 @@ public class ComprobanteAccionControllerV2 {
     private final DetalleTimbradoDao detallesTimbrado;
     private final AuditoriaComprobanteService auditoria;
     private final ServicioService servicios;
+    private final UsuarioDao usuarios;
 
     public ComprobanteAccionControllerV2(ComprobanteJpaRepositoryV2 comprobantes,
             CobradorJpaRepositoryV2 cobradores, EstadoJpaRepositoryV2 estados,
             CategoriaDao categorias, CondicionVentaDao condicionesVenta, MetodoPagoDao metodosPago,
             DetallePagoJpaRepositoryV2 detallesPago, HttpSession session, DataSource dataSource,
             MontoEnLetrasService montoEnLetras, DetalleTimbradoDao detallesTimbrado,
-            AuditoriaComprobanteService auditoria, ServicioService servicios) {
+            AuditoriaComprobanteService auditoria, ServicioService servicios, UsuarioDao usuarios) {
         this.comprobantes = comprobantes;
         this.cobradores = cobradores;
         this.estados = estados;
@@ -94,6 +98,7 @@ public class ComprobanteAccionControllerV2 {
         this.detallesTimbrado = detallesTimbrado;
         this.auditoria = auditoria;
         this.servicios = servicios;
+        this.usuarios = usuarios;
     }
 
     @GetMapping("/cuenta-edicion")
@@ -105,6 +110,7 @@ public class ComprobanteAccionControllerV2 {
         Servicio servicio = buscarServicioEdicion(cuentaCorriente, usuarioSesion);
         var respuesta = new HashMap<String, Object>();
         respuesta.put("cuentaCorriente", servicio.getCuentaCorriente());
+        respuesta.put("codigoUsuario", servicio.getUsuario().getCodigoUsuario());
         respuesta.put("documento", servicio.getUsuario().getNumeroDocumento());
         respuesta.put("razonSocial", nombreCompleto(servicio));
         respuesta.put("codigoCategoria", servicio.getCategoria().getCodigoCategoria());
@@ -180,7 +186,7 @@ public class ComprobanteAccionControllerV2 {
                 || solicitud.getCodigoCondicionVenta() == null || solicitud.getCantidadPago() == null
                 || solicitud.getRecargo() == null
                 || solicitud.getTotalImporte() == null || solicitud.getSaldo() == null
-                || solicitud.getPagos() == null || solicitud.getPagos().isEmpty()) {
+                || solicitud.getPagos() == null) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "Complete todos los campos obligatorios del comprobante."));
         }
         UsuarioSistema usuario = usuarioSesion();
@@ -217,16 +223,31 @@ public class ComprobanteAccionControllerV2 {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje",
                     "Un comprobante autoimpreso emitido es inalterable. Utilice anulación o nota de crédito/débito."));
         }
-        if (esAnulado(comprobante)) {
+        boolean comprobanteAnulado = esAnulado(comprobante);
+        if (comprobanteAnulado && !puedeEditarAnulados()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje", "No se puede editar un comprobante anulado."));
         }
         Estado estado = estados.findById(solicitud.getCodigoEstado()).orElse(null);
         if (estado == null) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "El estado seleccionado no es válido."));
         }
-        if (!Objects.equals(estado.getCodigoEstado(), 1)) {
+        boolean estadoActivo = Objects.equals(estado.getCodigoEstado(), 1);
+        boolean estadoAnulado = Objects.equals(estado.getCodigoEstado(), 3);
+        if (comprobanteAnulado && !estadoActivo && !estadoAnulado) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje",
+                    "Seleccione ACTIVO o ANULADO para el comprobante."));
+        }
+        if (!comprobanteAnulado && !estadoActivo) {
             return ResponseEntity.badRequest().body(Map.of("mensaje",
                     "Para cambiar el estado a ANULADO utilice la acción Anular; así también se revierte la fecha desde."));
+        }
+        if (estadoActivo && solicitud.getCantidadPago() == 0) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje",
+                    "Un comprobante activo debe tener una cantidad de pago mayor que cero."));
+        }
+        if (estadoActivo && solicitud.getPagos().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje",
+                    "Agregue al menos un medio de pago para activar el comprobante."));
         }
         Cobrador cobrador = cobradores.findById(solicitud.getCodigoCobrador()).orElse(null);
         if (cobrador == null || cobrador.getSucursal() == null
@@ -244,6 +265,7 @@ public class ComprobanteAccionControllerV2 {
         if (condicionVenta == null) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "La condicion de venta seleccionada no es valida."));
         }
+        Usuario usuarioComprobante = buscarUsuarioEdicion(solicitud.getCodigoUsuario(), comprobante, usuario);
         var codigosMetodo = new HashSet<Integer>();
         var metodosSeleccionados = new ArrayList<MetodoPago>();
         BigDecimal totalPagos = BigDecimal.ZERO;
@@ -262,15 +284,16 @@ public class ComprobanteAccionControllerV2 {
             metodosSeleccionados.add(metodo);
             totalPagos = totalPagos.add(pago.getImporte());
         }
-        if (totalPagos.compareTo(solicitud.getTotalImporte()) != 0) {
+        if (!solicitud.getPagos().isEmpty()
+                && totalPagos.compareTo(solicitud.getTotalImporte()) != 0) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", "La suma de los medios de pago debe coincidir con el importe total."));
         }
         String datosAnteriores = auditoria.capturarFoto(comprobante.getComprobantePK());
         if (cambiaCuenta) {
             comprobante.setServicio(servicioDestino);
-            comprobante.setUsuario(servicioDestino.getUsuario());
         }
-        comprobante.setRazonSocial(cambiaCuenta ? nombreCompleto(servicioDestino) : limpiar(solicitud.getRazonSocial()));
+        comprobante.setUsuario(usuarioComprobante);
+        comprobante.setRazonSocial(nombreCompleto(usuarioComprobante));
         comprobante.setFechaPago(solicitud.getFechaPago());
         comprobante.setPagoHasta(solicitud.getPagoDesde());
         comprobante.setPeriodoPago(limpiar(solicitud.getPeriodoPago()));
@@ -367,10 +390,29 @@ public class ComprobanteAccionControllerV2 {
     }
 
     private String nombreCompleto(Servicio servicio) {
-        String nombre = servicio.getUsuario().getNombre() == null ? "" : servicio.getUsuario().getNombre().trim();
-        String apellido = servicio.getUsuario().getApellido() == null ? "" : servicio.getUsuario().getApellido().trim();
+        return nombreCompleto(servicio.getUsuario());
+    }
+
+    private String nombreCompleto(Usuario usuario) {
+        String nombre = usuario.getNombre() == null ? "" : usuario.getNombre().trim();
+        String apellido = usuario.getApellido() == null ? "" : usuario.getApellido().trim();
         String completo = (nombre + " " + apellido).trim();
-        return completo.isEmpty() ? servicio.getUsuario().getNumeroDocumento() : completo;
+        return completo.isEmpty() ? usuario.getNumeroDocumento() : completo;
+    }
+
+    private Usuario buscarUsuarioEdicion(Integer codigoUsuario, Comprobante comprobante,
+            UsuarioSistema usuarioSesion) {
+        if (codigoUsuario == null || Objects.equals(codigoUsuario, comprobante.getUsuario().getCodigoUsuario())) {
+            return comprobante.getUsuario();
+        }
+        Usuario usuario = usuarios.findById(codigoUsuario).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario seleccionado no existe."));
+        if (usuario.getSucursal() == null || !Objects.equals(usuario.getSucursal().getCodigoSucursal(),
+                usuarioSesion.getSucursal().getCodigoSucursal())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El usuario seleccionado no pertenece a su sucursal.");
+        }
+        return usuario;
     }
 
     private UsuarioSistema usuarioSesion() {
@@ -387,9 +429,10 @@ public class ComprobanteAccionControllerV2 {
                         p.getMetodoPago().getCodigoMetodoPago(), p.getMetodoPago().getMetodoPago(),
                         BigDecimal.valueOf(p.getImporte()))).toList();
         return new ComprobanteDetalleV2(c.getTipoComprobante().getNombreTipoComprobante(),
-                c.getPuntoExpedicion().getNombrePuntoExpedicion(), c.getSerie().getSerie(),
-                c.getComprobantePK().getNumeroComprobante(), c.getServicio().getCuentaCorriente(),
-                c.getRazonSocial(), c.getUsuario().getNumeroDocumento(), c.getFechaEmision(), c.getFechaPago(),
+                c.getPuntoExpedicion().getNombrePuntoExpedicion(), FormateadorNumeroComprobante.serieFiscal(c),
+                c.getComprobantePK().getNumeroComprobante(), FormateadorNumeroComprobante.numeroFiscal(c),
+                c.getServicio().getCuentaCorriente(),
+                c.getUsuario().getCodigoUsuario(), c.getRazonSocial(), c.getUsuario().getNumeroDocumento(), c.getFechaEmision(), c.getFechaPago(),
                 c.getPagoHasta(), c.getPeriodoPago(), c.getCantidadDeuda(), c.getCantidadPago(),
                 BigDecimal.valueOf(c.getTarifa()), BigDecimal.valueOf(c.getRecargo()),
                 BigDecimal.valueOf(c.getTotalImporte()), BigDecimal.valueOf(c.getSaldo()), c.getEstado().getEstado(),
@@ -437,6 +480,13 @@ public class ComprobanteAccionControllerV2 {
 
     private boolean esAnulado(Comprobante comprobante) {
         return comprobante.getEstado() != null && Objects.equals(comprobante.getEstado().getCodigoEstado(), 3);
+    }
+
+    private boolean puedeEditarAnulados() {
+        var autenticacion = SecurityContextHolder.getContext().getAuthentication();
+        return autenticacion != null && autenticacion.getAuthorities().stream()
+                .map(autoridad -> autoridad.getAuthority())
+                .anyMatch(autoridad -> "ROOT".equals(autoridad) || "ADMINISTRADOR".equals(autoridad));
     }
 
     private boolean esUltimoActivo(Comprobante comprobante) {

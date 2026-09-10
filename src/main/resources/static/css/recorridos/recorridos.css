@@ -1,3 +1,61 @@
+/* Estructura mínima de Leaflet disponible localmente. El mapa no debe depender
+   de que el CDN permita descargar leaflet.css en el navegador de producción. */
+.leaflet-container { overflow:hidden; background:#ddd; outline-offset:1px; }
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer { position:absolute; top:0; left:0; }
+.leaflet-container .leaflet-overlay-pane svg { max-width:none !important; max-height:none !important; }
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile { width:auto; max-width:none !important; max-height:none !important; padding:0; }
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow { user-select:none; -webkit-user-drag:none; }
+.leaflet-tile { visibility:hidden; filter:inherit; }
+.leaflet-tile-loaded { visibility:inherit; }
+.leaflet-zoom-animated { transform-origin:0 0; }
+.leaflet-pane { z-index:400; }
+.leaflet-tile-pane { z-index:200; }
+.leaflet-overlay-pane { z-index:400; }
+.leaflet-shadow-pane { z-index:500; }
+.leaflet-marker-pane { z-index:600; }
+.leaflet-tooltip-pane { z-index:650; }
+.leaflet-popup-pane { z-index:700; }
+.leaflet-map-pane canvas { z-index:100; }
+.leaflet-map-pane svg { z-index:200; }
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container { pointer-events:none; }
+.leaflet-pane > svg path.leaflet-interactive { pointer-events:auto; }
+.leaflet-top,
+.leaflet-bottom { position:absolute; z-index:1000; pointer-events:none; }
+.leaflet-top { top:0; }
+.leaflet-right { right:0; }
+.leaflet-bottom { bottom:0; }
+.leaflet-left { left:0; }
+.leaflet-control { position:relative; z-index:800; float:left; clear:both; pointer-events:auto; }
+.leaflet-right .leaflet-control { float:right; }
+.leaflet-top .leaflet-control { margin-top:10px; }
+.leaflet-bottom .leaflet-control { margin-bottom:10px; }
+.leaflet-left .leaflet-control { margin-left:10px; }
+.leaflet-right .leaflet-control { margin-right:10px; }
+.leaflet-bar { border-radius:4px; box-shadow:0 1px 5px rgba(0,0,0,.65); }
+.leaflet-bar a { display:block; width:26px; height:26px; border-bottom:1px solid #ccc; background:#fff; color:#000; font-weight:700; line-height:26px; text-align:center; text-decoration:none; }
+.leaflet-bar a:first-child { border-radius:4px 4px 0 0; }
+.leaflet-bar a:last-child { border-bottom:0; border-radius:0 0 4px 4px; }
+.leaflet-container .leaflet-control-attribution { margin:0; padding:0 5px; background:rgba(255,255,255,.8); color:#333; font-size:.62rem; line-height:1.4; }
+
 .recorrido-pagina { padding-bottom:1.5rem; }
 .recorrido-encabezado { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; padding:1.15rem 1.35rem; border-radius:.75rem; background:var(--btn-color); color:#fff; }
 .recorrido-encabezado span { font-size:.68rem; font-weight:700; letter-spacing:.08em; opacity:.8; text-transform:uppercase; }
@@ -10,13 +68,6 @@
 .recorrido-panel-titulo strong { color:#394047; }
 .recorrido-panel-titulo small { margin-top:.12rem; color:#68737d; }
 .recorrido-panel .form-label { color:#555d64; font-size:.73rem; font-weight:700; text-transform:uppercase; }
-.recorrido-seguimiento { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; padding:1rem 1.15rem; border:1px solid rgba(25,135,84,.25); border-radius:.75rem; background:#effaf4; box-shadow:0 .3rem 1rem rgba(25,135,84,.08); }
-.recorrido-seguimiento-icono { display:grid; flex:0 0 2.8rem; width:2.8rem; height:2.8rem; place-items:center; border-radius:50%; background:#198754; color:#fff; font-size:1.15rem; animation:recorrido-pulso 1.8s infinite; }
-.recorrido-seguimiento-datos { flex:1; min-width:0; }
-.recorrido-seguimiento-datos strong { color:#205b3d; }
-.recorrido-seguimiento-datos small, .recorrido-seguimiento-datos > span { color:#5e6c64; }
-.recorrido-seguimiento-acciones { display:flex; align-items:center; gap:.75rem; }
-@keyframes recorrido-pulso { 0%,100% { box-shadow:0 0 0 0 rgba(25,135,84,.28); } 50% { box-shadow:0 0 0 .55rem rgba(25,135,84,0); } }
 .recorrido-panel thead { background:#eef1f3; }
 .recorrido-modal { overflow:hidden; border:0; border-radius:.85rem; box-shadow:0 1.2rem 3rem rgba(26,35,44,.24); }
 .recorrido-modal .modal-header { padding:1.05rem 1.35rem; background:var(--btn-color); color:#fff; }
@@ -47,8 +98,6 @@
     .recorrido-encabezado, .recorrido-panel-titulo { align-items:stretch; flex-direction:column; }
     .recorrido-encabezado > i { display:none; }
     .recorrido-panel { padding:.75rem; }
-    .recorrido-seguimiento { align-items:flex-start; flex-wrap:wrap; }
-    .recorrido-seguimiento-acciones { justify-content:space-between; width:100%; padding-left:3.8rem; }
     .recorrido-modal .modal-dialog { margin:.55rem; }
     .recorrido-mapa-toolbar { align-items:stretch; flex-direction:column; }
     .recorrido-mapa-toolbar .btn { width:100%; }

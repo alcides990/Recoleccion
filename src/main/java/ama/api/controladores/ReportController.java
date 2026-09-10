@@ -295,17 +295,21 @@ public class ReportController {
             parametro.put("codigoComision", codigoComision);
             parametro.put("comisionSeleccionada", comision.getNombreComision());
         } else if (grupo.equals("seguimiento")) {
-            Cobrador cobrador = servicioCobrador.encontrar(new Cobrador(codigoCobrador));
-            if (cobrador == null) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("mensaje", "Seleccione un cobrador válido."));
+            String nombreCobrador = "Todos los cobradores";
+            if (codigoCobrador != 0) {
+                Cobrador cobrador = servicioCobrador.encontrar(new Cobrador(codigoCobrador));
+                if (cobrador == null) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body(Map.of("mensaje", "Seleccione un cobrador válido."));
+                }
+                nombreCobrador = cobrador.getNombreCompleto();
             }
-            nombre = "Seguimiento de cobranza - " + cobrador.getNombreCompleto();
-            ruta = "reportes/seguimientoCobrador.jasper";
+            nombre = "Seguimiento de cobranza - " + nombreCobrador;
+            ruta = "reportes/seguimientoCobrador.jrxml";
             parametro.put("codigoSucursal", getSucursalSession().getCodigoSucursal());
             parametro.put("codigoCobrador", codigoCobrador);
             parametro.put("codigoSerie", codigoSerie);
-            parametro.put("cobrador", cobrador.getNombreCompleto());
+            parametro.put("cobrador", nombreCobrador);
         } else {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("mensaje", "Tipo de reporte no válido."));

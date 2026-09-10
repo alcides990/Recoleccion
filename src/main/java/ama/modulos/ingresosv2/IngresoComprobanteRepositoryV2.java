@@ -115,6 +115,29 @@ public interface IngresoComprobanteRepositoryV2 extends JpaRepository<Comprobant
             @Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
 
     @Query(value = """
+            select case :periodo when 'dia' then day(c.fecha_pago)
+                       when 'mes' then month(c.fecha_pago) else year(c.fecha_pago) end as periodo,
+                   mp.codigo_metodo_pago as codigoMedio,
+                   mp.metodo_pago as nombre, sum(dp.importe) as importe
+            from detalle_pago dp
+            join metodos_pago mp on mp.codigo_metodo_pago = dp.codigo_metodo_pago
+            join comprobantes c on c.numero_comprobante = dp.numero_comprobante
+              and c.codigo_sucursal = dp.codigo_sucursal
+              and c.codigo_punto_expedicion = dp.codigo_punto_expedicion
+              and c.codigo_tipo_comprobante = dp.codigo_tipo_comprobante
+              and c.codigo_serie = dp.codigo_serie
+            where c.codigo_sucursal = :sucursal and c.codigo_estado = 1
+              and (:anio is null or year(c.fecha_pago) = :anio)
+              and (:mes is null or month(c.fecha_pago) = :mes)
+            group by case :periodo when 'dia' then day(c.fecha_pago)
+                       when 'mes' then month(c.fecha_pago) else year(c.fecha_pago) end,
+                     mp.codigo_metodo_pago, mp.metodo_pago
+            order by periodo, mp.codigo_metodo_pago
+            """, nativeQuery = true)
+    List<IngresoMedioPeriodoProjectionV2> ingresosPorMedioPago(@Param("sucursal") Integer sucursal,
+            @Param("anio") Integer anio, @Param("mes") Integer mes, @Param("periodo") String periodo);
+
+    @Query(value = """
             select cob.codigo_cobrador as codigoCobrador,
                    trim(concat(coalesce(cob.nombre, ''), ' ', coalesce(cob.apellido, ''))) as cobrador,
                    mp.metodo_pago as medioPago, sum(dp.importe) as importe, count(*) as cantidad

@@ -1,5 +1,6 @@
 import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador, tabular, datePickerInit}
            from  '/js/modulos.js';
+import {tabuladorFormulario} from '/js/utils.js';
 
           if (document.getElementById('tabla-servicio').dataset.serverSide !== 'true') {
               import('/js/buscarServicios.js');
@@ -63,7 +64,16 @@ import {consultar, guardar, eliminarRegistro, limpiar, mostrarAlerta, tabulador,
           });
 
           $("#servicioModal").on('shown.bs.modal', function () {
+              tabuladorFormulario('#frm-servicio');
               tabular("#cuentaCorriente");
+          });
+
+          $("#historialServicioModal").on('shown.bs.modal', function () {
+              tabuladorFormulario('#formSuspension, #formExoneracion');
+          });
+
+          $("#ubicacionServicioModal").on('shown.bs.modal', function () {
+              tabuladorFormulario('#formUbicacionServicio');
           });
 
           $("#btnAgrerar").click(function (event) {

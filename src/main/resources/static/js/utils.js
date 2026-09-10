@@ -29,7 +29,7 @@ export function abilitar(campos = []) {
 }
 
 export function tabulador(campoActual, campoDestino) {
-    $(campoActual).on('keydown', (e) => {
+    $(campoActual).off('keydown.tabulador').on('keydown.tabulador', (e) => {
         if (e.keyCode === 13) {
             e.preventDefault();
             $(campoDestino).focus();
@@ -44,6 +44,24 @@ export function tabulador(campoActual, campoDestino) {
                 }
             }
         }
+    });
+}
+
+export function tabuladorFormulario(formulario) {
+    $(formulario).each((_, form) => {
+        const campos = $(form).find([
+            'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"])',
+            'select',
+            'textarea',
+            'button[type="submit"]'
+        ].join(',')).filter(':visible:not(:disabled):not([readonly])');
+
+        campos.each((indice, campo) => {
+            const siguiente = campos.get(indice + 1);
+            if (siguiente) {
+                tabulador(campo, siguiente);
+            }
+        });
     });
 }
 

@@ -37,7 +37,7 @@
                                     <label class="form-label" for="numeroDocumento">Número de documento</label>
                                     <input type="text" name="numeroDocumento" id="numeroDocumento"
                                            th:value="*{numeroDocumento}" class="form-control"
-                                           placeholder="RUC o CI" autocomplete="off" required>
+                                           placeholder="RUC o CI" autocomplete="off">
                                 </div>
                                 <div class="col-md-6 col-lg-3">
                                     <label class="form-label" for="nombre">Nombre</label>
@@ -47,7 +47,7 @@
                                 <div class="col-md-6 col-lg-3">
                                     <label class="form-label" for="apellido">Apellido</label>
                                     <input type="text" name="apellido" id="apellido" th:value="*{apellido}"
-                                           class="form-control" placeholder="Apellido" required>
+                                           class="form-control" placeholder="Apellido">
                                 </div>
                             </div>
                         </section>
@@ -136,16 +136,16 @@
             tabulador('#barrio', '#direccion');
             tabulador('#direccion', '#observacion');
 
-            const formularioUsuario = document.getElementById('formUsuario');
-            const botonGuardarUsuario = document.getElementById('guardarUsuario');
-            formularioUsuario.addEventListener('submit', function (evento) {
-                if (formularioUsuario.dataset.enviando === 'true') {
+            const $formularioUsuario = $('#formUsuario');
+            const $botonGuardarUsuario = $('#guardarUsuario');
+            $formularioUsuario.on('submit', function (evento) {
+                if ($formularioUsuario.data('enviando') === true) {
                     evento.preventDefault();
                     return;
                 }
-                formularioUsuario.dataset.enviando = 'true';
-                botonGuardarUsuario.disabled = true;
-                botonGuardarUsuario.querySelector('span').textContent = 'Guardando...';
+                $formularioUsuario.data('enviando', true);
+                $botonGuardarUsuario.prop('disabled', true);
+                $botonGuardarUsuario.find('span').text('Guardando...');
             });
         </script>
     </body>

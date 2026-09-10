@@ -2,17 +2,10 @@ $(function () {
     const token = $('#token').val();
     const modalDetalle = new bootstrap.Modal(document.getElementById('detalleRecorridoModal'));
     const escapar = valor => $('<div>').text(valor ?? '').html();
-    const CLAVE_COLA_GPS = 'recoleccion.recorridos.colaGps.v1';
-    const CLAVE_SEGUIMIENTO_GPS = 'recoleccion.recorridos.seguimientoGps.v1';
-    const INTERVALO_MINIMO_MS = 15000;
-    const DISTANCIA_MINIMA_METROS = 20;
-    let idVigilanciaGps = null;
-    let sincronizandoGps = false;
-    let ultimaCapturaGps = null;
-    let seguimientoGps = leerLocal(CLAVE_SEGUIMIENTO_GPS, null);
     let recorridoDetalleActual = null;
     let paginaPuntosActual = 0;
     let mapaRecorrido = null;
+    let capaMosaicosRecorrido = null;
     let capaTrazoRecorrido = null;
     let capaPuntosRecorrido = null;
     let capaPermanenciasRecorrido = null;
@@ -20,44 +13,8 @@ $(function () {
     let marcadorPuntoSeleccionado = null;
     let ultimosPuntosMapa = [];
     let ultimasPermanenciasMapa = [];
-
-    function leerLocal(clave, valorPredeterminado) {
-        try {
-            const valor = localStorage.getItem(clave);
-            return valor ? JSON.parse(valor) : valorPredeterminado;
-        } catch (_) {
-            return valorPredeterminado;
-        }
-    }
-
-    function guardarLocal(clave, valor) {
-        localStorage.setItem(clave, JSON.stringify(valor));
-    }
-
-    function colaGps() {
-        const cola = leerLocal(CLAVE_COLA_GPS, []);
-        return Array.isArray(cola) ? cola : [];
-    }
-
-    function guardarColaGps(cola) {
-        guardarLocal(CLAVE_COLA_GPS, cola);
-    }
-
-    function nuevoUuid() {
-        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-            return window.crypto.randomUUID();
-        }
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, caracter => {
-            const aleatorio = Math.random() * 16 | 0;
-            return (caracter === 'x' ? aleatorio : (aleatorio & 0x3 | 0x8)).toString(16);
-        });
-    }
-
-    function fechaLocalIso(timestamp) {
-        const fecha = new Date(timestamp || Date.now());
-        const local = new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000);
-        return local.toISOString().slice(0, 23);
-    }
+    let detalleRecorridoVisible = false;
+    let ajusteMapaPendiente = null;
 
     function distanciaMetros(anterior, actual) {
         if (!anterior) return Number.POSITIVE_INFINITY;
@@ -72,168 +29,6 @@ $(function () {
         return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    function cantidadPendiente(codigoRecorrido) {
-        return colaGps().filter(punto => String(punto.codigoRecorrido)
-                    === String(codigoRecorrido)).length;
-    }
-
-    function refrescarSeguimientoGps(mensaje) {
-        const cola = colaGps();
-        const pendientes = seguimientoGps
-                ? cola.filter(punto => String(punto.codigoRecorrido)
-                    === String(seguimientoGps.codigoRecorrido)).length
-                : cola.length;
-        $('#seguimientoGpsPendientes').text(pendientes + ' pendiente' + (pendientes === 1 ? '' : 's'));
-        $('#seguimientoGpsConexion')
-                .toggleClass('bg-success', navigator.onLine)
-                .toggleClass('bg-secondary', !navigator.onLine)
-                .text(navigator.onLine ? 'En línea' : 'Sin conexión');
-        if (!seguimientoGps && !cola.length) {
-            $('#seguimientoGpsPanel').addClass('d-none');
-            return;
-        }
-        $('#seguimientoGpsPanel').removeClass('d-none');
-        if (seguimientoGps) {
-            $('#seguimientoGpsTitulo').text('GPS activo · Recorrido #'
-                    + seguimientoGps.codigoRecorrido);
-            $('#seguimientoGpsDetalle').text(seguimientoGps.cobrador || 'Capturando recorrido');
-            $('#detenerSeguimientoGps').removeClass('d-none');
-        } else {
-            $('#seguimientoGpsTitulo').text('Puntos pendientes de sincronización');
-            $('#seguimientoGpsDetalle').text('Se enviarán automáticamente al recuperar la conexión.');
-            $('#detenerSeguimientoGps').addClass('d-none');
-        }
-        if (mensaje) $('#seguimientoGpsUltimo').text(mensaje);
-    }
-
-    function detenerVigilanciaGps() {
-        if (idVigilanciaGps !== null && navigator.geolocation) {
-            navigator.geolocation.clearWatch(idVigilanciaGps);
-        }
-        idVigilanciaGps = null;
-    }
-
-    function detenerSeguimientoGps(mensaje = 'Seguimiento detenido en este dispositivo.') {
-        detenerVigilanciaGps();
-        seguimientoGps = null;
-        localStorage.removeItem(CLAVE_SEGUIMIENTO_GPS);
-        ultimaCapturaGps = null;
-        refrescarSeguimientoGps(mensaje);
-    }
-
-    function capturarPosicionGps(posicion) {
-        if (!seguimientoGps) return;
-        const actual = {
-            latitud: Number(posicion.coords.latitude),
-            longitud: Number(posicion.coords.longitude),
-            timestamp: Number(posicion.timestamp || Date.now())
-        };
-        const tiempoTranscurrido = ultimaCapturaGps
-                ? actual.timestamp - ultimaCapturaGps.timestamp : Number.POSITIVE_INFINITY;
-        if (tiempoTranscurrido < INTERVALO_MINIMO_MS
-                && distanciaMetros(ultimaCapturaGps, actual) < DISTANCIA_MINIMA_METROS) return;
-
-        const cola = colaGps();
-        if (cola.length >= 5000) {
-            alerta('La cola GPS alcanzó su límite. Conecte el dispositivo a Internet antes de continuar.');
-            detenerVigilanciaGps();
-            return;
-        }
-        cola.push({
-            codigoRecorrido: seguimientoGps.codigoRecorrido,
-            idSincronizacion: nuevoUuid(),
-            latitud: actual.latitud,
-            longitud: actual.longitud,
-            precisionMetros: Number.isFinite(posicion.coords.accuracy)
-                    ? Number(posicion.coords.accuracy.toFixed(2)) : null,
-            velocidadMetrosSegundo: Number.isFinite(posicion.coords.speed)
-                    && posicion.coords.speed >= 0
-                    ? Number(posicion.coords.speed.toFixed(2)) : null,
-            fechaDispositivo: fechaLocalIso(actual.timestamp)
-        });
-        guardarColaGps(cola);
-        ultimaCapturaGps = actual;
-        refrescarSeguimientoGps('Última posición: '
-                + actual.latitud.toFixed(7) + ', ' + actual.longitud.toFixed(7)
-                + ' · ' + new Date(actual.timestamp).toLocaleTimeString('es-PY'));
-        sincronizarColaGps();
-    }
-
-    function errorPosicionGps(error) {
-        const mensajes = {
-            1: 'Permiso de ubicación denegado. Habilítelo para registrar el recorrido.',
-            2: 'El dispositivo no pudo determinar la ubicación.',
-            3: 'Se agotó el tiempo para obtener la ubicación.'
-        };
-        alerta(mensajes[error.code] || 'No se pudo obtener la ubicación GPS.');
-        refrescarSeguimientoGps(mensajes[error.code]);
-    }
-
-    function activarVigilanciaGps() {
-        detenerVigilanciaGps();
-        if (!navigator.geolocation) {
-            alerta('Este dispositivo no dispone de geolocalización.');
-            detenerSeguimientoGps('Geolocalización no disponible.');
-            return;
-        }
-        idVigilanciaGps = navigator.geolocation.watchPosition(
-                capturarPosicionGps, errorPosicionGps,
-                {enableHighAccuracy: true, timeout: 30000, maximumAge: 5000});
-    }
-
-    function iniciarSeguimientoGps(codigoRecorrido, cobrador) {
-        if (!window.isSecureContext && location.hostname !== 'localhost') {
-            alerta('El GPS requiere que el sistema se abra mediante HTTPS.');
-            return;
-        }
-        if (seguimientoGps && String(seguimientoGps.codigoRecorrido) !== String(codigoRecorrido)
-                && !window.confirm('Ya existe otro seguimiento activo en este dispositivo. ¿Desea reemplazarlo?')) {
-            return;
-        }
-        seguimientoGps = {codigoRecorrido: codigoRecorrido, cobrador: cobrador || '',
-            fechaInicio: new Date().toISOString()};
-        guardarLocal(CLAVE_SEGUIMIENTO_GPS, seguimientoGps);
-        refrescarSeguimientoGps('Solicitando la primera posición…');
-        activarVigilanciaGps();
-    }
-
-    async function sincronizarColaGps() {
-        if (sincronizandoGps || !navigator.onLine) {
-            refrescarSeguimientoGps();
-            return;
-        }
-        sincronizandoGps = true;
-        try {
-            let cola = colaGps();
-            while (cola.length && navigator.onLine) {
-                const punto = cola[0];
-                try {
-                    await api('/recorridos/' + encodeURIComponent(punto.codigoRecorrido) + '/puntos', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token,
-                            'X-Origen-Cliente': 'APP'},
-                        body: JSON.stringify({
-                            idSincronizacion: punto.idSincronizacion,
-                            latitud: punto.latitud,
-                            longitud: punto.longitud,
-                            precisionMetros: punto.precisionMetros,
-                            velocidadMetrosSegundo: punto.velocidadMetrosSegundo,
-                            fechaDispositivo: punto.fechaDispositivo
-                        })
-                    });
-                    cola.shift();
-                    guardarColaGps(cola);
-                } catch (error) {
-                    refrescarSeguimientoGps('Sincronización pendiente: ' + error.message);
-                    break;
-                }
-            }
-            if (!cola.length) refrescarSeguimientoGps('Todos los puntos están sincronizados.');
-        } finally {
-            sincronizandoGps = false;
-        }
-    }
-
     function alerta(mensaje, tipo = 'danger') {
         $('#recorridoAlerta').removeClass('d-none alert-danger alert-success alert-info')
                 .addClass('alert-' + tipo).text(mensaje);
@@ -246,16 +41,36 @@ $(function () {
     }
 
     async function api(url, opciones = {}) {
-        const respuesta = await fetch(url, opciones);
-        if (!respuesta.ok) {
-            const tipo = respuesta.headers.get('content-type') || '';
-            if (tipo.includes('json')) {
-                const error = await respuesta.json();
-                throw new Error(error.message || error.detail || 'No se pudo completar la operación');
+        return new Promise(function (resolve, reject) {
+            const encabezados = opciones.headers || {};
+            const configuracion = {
+                url: url,
+                type: opciones.method || 'GET',
+                headers: encabezados,
+                dataType: 'json'
+            };
+            if (opciones.body !== undefined) {
+                configuracion.data = opciones.body;
+                configuracion.contentType = encabezados['Content-Type'] || 'application/json';
+                configuracion.processData = false;
             }
-            throw new Error(await respuesta.text() || 'No se pudo completar la operación');
+            $.ajax(configuracion).done(resolve).fail(function (respuesta) {
+                reject(new Error(mensajeErrorAjax(respuesta)));
+            });
+        });
+    }
+
+    function mensajeErrorAjax(respuesta) {
+        let contenido = respuesta.responseJSON;
+        if (!contenido && respuesta.responseText) {
+            try {
+                contenido = JSON.parse(respuesta.responseText);
+            } catch (_) {
+                return respuesta.responseText;
+            }
         }
-        return respuesta.json();
+        return contenido?.mensaje || contenido?.message || contenido?.detail
+                || 'No se pudo completar la operación';
     }
 
     function badgeEstado(estado) {
@@ -334,7 +149,30 @@ $(function () {
             dispositivos.forEach(d => $('.dispositivo-cobrador[data-id="' + d.idDispositivo + '"]').val(d.codigoCobrador || ''));
         } catch (error) { cuerpo.html('<tr><td colspan="6" class="text-danger text-center py-4">' + escapar(error.message) + '</td></tr>'); }
     }
-    $(document).on('click','.guardar-dispositivo',async function(){const id=$(this).data('id');const value=$('.dispositivo-cobrador[data-id="'+id+'"]').val();try{await api('/recorridos/dispositivos/'+encodeURIComponent(id)+'/asignar',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':token},body:JSON.stringify({codigoCobrador:value?Number(value):null})});alerta('Teléfono vinculado correctamente.','success');cargarDispositivos();}catch(error){alerta(error.message);}});
+    $(document).on('click', '.guardar-dispositivo', async function () {
+        const boton = $(this);
+        const idDispositivo = boton.data('id');
+        const codigoCobrador = $('.dispositivo-cobrador[data-id="'
+                + idDispositivo + '"]').val();
+        boton.prop('disabled', true);
+        try {
+            await api('/recorridos/dispositivos/' + encodeURIComponent(idDispositivo)
+                    + '/asignar', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
+                        body: JSON.stringify({
+                            codigoCobrador: codigoCobrador ? Number(codigoCobrador) : null
+                        })
+                    });
+            alerta(codigoCobrador
+                    ? 'Teléfono vinculado correctamente.'
+                    : 'Teléfono desvinculado correctamente.', 'success');
+            await cargarDispositivos();
+        } catch (error) {
+            alerta(error.message);
+            boton.prop('disabled', false);
+        }
+    });
     $(document).on('click', '.cambiar-estado-dispositivo', async function () {
         const boton = $(this);
         const id = boton.data('id');
@@ -384,19 +222,12 @@ $(function () {
         const texto = accion === 'iniciar' ? 'iniciar' : 'finalizar';
         if (!window.confirm('¿Desea ' + texto + ' este recorrido?')) return;
         try {
-            if (accion === 'finalizar') {
-                await sincronizarColaGps();
-                const pendientes = cantidadPendiente(codigo);
-                if (pendientes > 0) {
-                    alerta('No se puede finalizar: quedan ' + pendientes
-                            + ' punto(s) pendientes de sincronización.');
-                    return;
-                }
-            }
-            const actualizado = await api('/recorridos/' + encodeURIComponent(codigo) + '/' + accion, {
+            await api('/recorridos/' + encodeURIComponent(codigo) + '/' + accion, {
                 method: 'POST', headers: {'X-CSRF-TOKEN': token}
             });
-            alerta('Recorrido ' + (accion === 'iniciar' ? 'iniciado' : 'finalizado') + ' correctamente.', 'success');
+            alerta(accion === 'iniciar'
+                    ? 'Recorrido iniciado. El teléfono vinculado ya puede enviar ubicaciones.'
+                    : 'Recorrido finalizado correctamente.', 'success');
             await cargarRecorridos();
         } catch (error) {
             alerta(error.message);
@@ -409,16 +240,6 @@ $(function () {
     $(document).on('click', '.finalizar-recorrido', function () {
         cambiarEstado($(this).data('id'), 'finalizar');
     });
-    $(document).on('click', '.seguir-gps', function () {
-        iniciarSeguimientoGps($(this).data('id'), $(this).data('cobrador'));
-        cargarRecorridos();
-    });
-    $('#detenerSeguimientoGps').on('click', function () {
-        detenerSeguimientoGps();
-        sincronizarColaGps();
-        cargarRecorridos();
-    });
-
     function asegurarMapaRecorrido() {
         if (mapaRecorrido) return true;
         if (!window.L) {
@@ -426,24 +247,41 @@ $(function () {
                     .text('No se pudo cargar el componente del mapa. Compruebe la conexión a Internet.');
             return false;
         }
-        const elementoMapa = document.getElementById('recorridoMapa');
-        const tilesUrl = elementoMapa.dataset.tilesUrl
+        const elementoMapa = $('#recorridoMapa');
+        const tilesUrl = elementoMapa.data('tiles-url')
                 || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-        const attribution = elementoMapa.dataset.attribution
+        const attribution = elementoMapa.data('attribution')
                 || '&copy; OpenStreetMap contributors';
 
-        mapaRecorrido = L.map('recorridoMapa', {zoomControl: true, preferCanvas: true})
+        mapaRecorrido = L.map(elementoMapa.get(0), {zoomControl: true, preferCanvas: true})
                 .setView([-23.4425, -58.4438], 6);
-        L.tileLayer(tilesUrl, {
+        capaMosaicosRecorrido = L.tileLayer(tilesUrl, {
             maxZoom: 19,
-            keepBuffer: 4,
-            updateWhenIdle: false,
+            keepBuffer: 1,
+            updateWhenZooming: false,
             attribution: attribution
         }).addTo(mapaRecorrido);
         capaTrazoRecorrido = L.layerGroup().addTo(mapaRecorrido);
         capaPuntosRecorrido = L.layerGroup().addTo(mapaRecorrido);
         capaPermanenciasRecorrido = L.layerGroup().addTo(mapaRecorrido);
         return true;
+    }
+
+    function ajustarMapaRecorrido(coordenadas) {
+        if (!mapaRecorrido || !detalleRecorridoVisible) return;
+        window.clearTimeout(ajusteMapaPendiente);
+        ajusteMapaPendiente = window.setTimeout(function () {
+            mapaRecorrido.invalidateSize({animate: false, pan: false});
+            if (!coordenadas.length) {
+                mapaRecorrido.setView([-23.4425, -58.4438], 6, {animate: false});
+            } else if (coordenadas.length === 1) {
+                mapaRecorrido.setView(coordenadas[0], 17, {animate: false});
+            } else {
+                mapaRecorrido.fitBounds(L.latLngBounds(coordenadas), {
+                    padding: [28, 28], maxZoom: 18, animate: false
+                });
+            }
+        }, 50);
     }
 
     function formatoDuracion(segundos) {
@@ -468,7 +306,7 @@ $(function () {
                     && Number.isFinite(Number(p.longitud)));
         $('#recorridoSinPuntos').toggleClass('d-none', validos.length > 0);
         $('#recorridoCantidadPermanencias').text((permanencias || []).length);
-        if (!document.getElementById('detalleRecorridoModal').classList.contains('show')) return;
+        if (!detalleRecorridoVisible) return;
         if (!asegurarMapaRecorrido()) return;
 
         capaTrazoRecorrido.clearLayers();
@@ -493,7 +331,7 @@ $(function () {
             $('#recorridoDuracion').text('—');
         }
         if (!validos.length) {
-            mapaRecorrido.setView([-23.4425, -58.4438], 6);
+            ajustarMapaRecorrido([]);
             return;
         }
 
@@ -540,12 +378,7 @@ $(function () {
             marcadoresPermanencia[indice] = marcador;
         });
 
-        if (coordenadas.length === 1) {
-            mapaRecorrido.setView(coordenadas[0], 17);
-        } else {
-            mapaRecorrido.fitBounds(L.latLngBounds(coordenadas), {padding: [28, 28], maxZoom: 18});
-        }
-        window.setTimeout(() => mapaRecorrido.invalidateSize(), 120);
+        ajustarMapaRecorrido(coordenadas);
     }
 
     function pintarPermanencias(permanencias) {
@@ -645,16 +478,18 @@ $(function () {
         try {
             await actualizarDetalleGeografico();
             await cargarPaginaPuntos();
+            if (capaMosaicosRecorrido) capaMosaicosRecorrido.redraw();
         } catch (error) {
             $('#detalleRecorridoAlerta').removeClass('d-none').text(error.message);
         }
     });
-    document.getElementById('detalleRecorridoModal').addEventListener('shown.bs.modal', function () {
+    $('#detalleRecorridoModal').on('shown.bs.modal', function () {
+        detalleRecorridoVisible = true;
         if (!asegurarMapaRecorrido()) return;
-        window.setTimeout(() => {
-            mapaRecorrido.invalidateSize({pan: false});
-            dibujarMapaRecorrido(ultimosPuntosMapa, ultimasPermanenciasMapa);
-        }, 80);
+        dibujarMapaRecorrido(ultimosPuntosMapa, ultimasPermanenciasMapa);
+    }).on('hidden.bs.modal', function () {
+        detalleRecorridoVisible = false;
+        window.clearTimeout(ajusteMapaPendiente);
     });
 
     async function cargarPaginaPuntos() {
@@ -690,15 +525,6 @@ $(function () {
     $('#puntosPaginaSiguiente').on('click',function(){paginaPuntosActual++;cargarPaginaPuntos();});
 
     $('#actualizarRecorridos').on('click', cargarRecorridos);
-    window.addEventListener('online', sincronizarColaGps);
-    window.addEventListener('offline', () => refrescarSeguimientoGps('Sin conexión; los puntos quedan guardados en el dispositivo.'));
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) sincronizarColaGps();
-    });
-    setInterval(sincronizarColaGps, 15000);
-    refrescarSeguimientoGps();
-    if (seguimientoGps) detenerSeguimientoGps('La ubicación ahora se obtiene del teléfono vinculado al cobrador.');
-    sincronizarColaGps();
     cargarRecorridos();
     cargarDispositivos();
 });
