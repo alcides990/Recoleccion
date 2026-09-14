@@ -165,7 +165,7 @@
                     <div class="mensaje-alerta" id="contenedor-alertas-rg90"></div>
                     <form id="frm-rg90-ventas" th:action="@{/reporte/rg90/ventas}" method="post">
                         <div class="modal-body reporte-modal-body">
-                            <p class="reporte-modal-descripcion">Genera un archivo CSV zipeado, sin cabecera, para importar ventas en Marangatu.</p>
+                            <p class="reporte-modal-descripcion">Genera un archivo CSV, sin cabecera, para importar ventas en Marangatu.</p>
                             <div class="row g-3">
                                 <div class="col-sm-6">
                                     <label class="form-label" for="rg90-periodo">Período</label>
@@ -180,18 +180,12 @@
                                                 th:text="${tipoComprobante.nombreTipoComprobante}"></option>
                                     </select>
                                 </div>
-                                <div class="col-sm-6">
-                                    <label class="form-label" for="rg90-identificador">Identificador</label>
-                                    <input class="form-control text-uppercase" id="rg90-identificador"
-                                           name="identificador" type="text" maxlength="5" value="V0001"
-                                           pattern="[A-Za-z0-9]{1,5}" required>
-                                </div>
                             </div>
                         </div>
                         <div class="modal-footer reporte-modal-footer">
                             <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn reporte-btn-primario">
-                                <i class="fa-solid fa-file-arrow-down"></i> Descargar ZIP
+                                <i class="fa-solid fa-file-arrow-down"></i> Descargar CSV
                             </button>
                         </div>
                     </form>
@@ -622,7 +616,7 @@
                     const nombre = decodeURIComponent(
                             disposicion.match(/filename\*=UTF-8''([^;]+)/)?.[1]
                             || disposicion.match(/filename="?([^";]+)"?/)?.[1]
-                            || 'rg90-ventas.zip');
+                            || 'rg90-ventas.csv');
                     const url = URL.createObjectURL(archivo);
                     const enlace = document.createElement('a');
                     enlace.href = url;

@@ -2,17 +2,12 @@ package ama.modulos.rg90;
 
 import ama.dominio.Sucursal;
 import ama.dominio.Comprobante;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +17,15 @@ public class Rg90ExportService {
     private static final int MAXIMO_FILAS = 5000;
     private static final DateTimeFormatter FECHA_RG90 = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final Rg90ComprobanteRepository comprobantes;
+    private final Rg90SecuenciaRepository secuencias;
 
-    public Rg90ExportService(Rg90ComprobanteRepository comprobantes) {
+    public Rg90ExportService(Rg90ComprobanteRepository comprobantes, Rg90SecuenciaRepository secuencias) {
         this.comprobantes = comprobantes;
+        this.secuencias = secuencias;
     }
 
-    @Transactional(readOnly = true)
-    public Rg90Archivo exportarVentas(Sucursal sucursal, YearMonth periodo, String identificador,
-            Integer codigoTipoComprobante) {
+    @Transactional
+    public Rg90Archivo exportarVentas(Sucursal sucursal, YearMonth periodo, Integer codigoTipoComprobante) {
         if (sucursal == null || sucursal.getEmpresa() == null || sucursal.getEmpresa().getRuc() == null) {
             throw new IllegalArgumentException("La sucursal no tiene empresa/RUC configurado.");
         }
@@ -37,7 +33,6 @@ public class Rg90ExportService {
         if (ruc.isBlank()) {
             throw new IllegalArgumentException("El RUC de la empresa no es válido.");
         }
-        String lote = normalizarIdentificador(identificador);
         LocalDate desde = periodo.atDay(1);
         LocalDate hasta = periodo.atEndOfMonth();
         Integer tipoComprobante = codigoTipoComprobante == null ? 0 : codigoTipoComprobante;
@@ -53,10 +48,11 @@ public class Rg90ExportService {
                     + " comprobantes. RG90 permite máximo " + MAXIMO_FILAS + " filas por archivo.");
         }
 
+        String lote = siguienteLote(ruc, periodo, tipoComprobante);
         String base = ruc + "_REG_" + String.format("%02d%04d", periodo.getMonthValue(), periodo.getYear())
                 + "_" + lote;
         String contenido = construirCsv(filas);
-        return new Rg90Archivo(base + ".zip", zip(base + ".csv", contenido));
+        return new Rg90Archivo(base + ".csv", contenido.getBytes(StandardCharsets.UTF_8));
     }
 
     private Rg90VentaFila filaVenta(Comprobante comprobante) {
@@ -76,11 +72,12 @@ public class Rg90ExportService {
         }
         String condicion = comprobante.getCondicionVenta() == null
                 ? "" : comprobante.getCondicionVenta().getCondicionVenta();
+        boolean sinDocumento = sinDocumentoValido(tipoDocumento, numeroDocumento);
 
         return new Rg90VentaFila(
-                codigoIdentificacion(tipoDocumento, numeroDocumento),
-                identificacionSinDv(numeroDocumento),
-                limpiarTexto(razonSocial, 250),
+                sinDocumento ? "15" : codigoIdentificacion(tipoDocumento, numeroDocumento),
+                sinDocumento ? "X" : identificacionSinDv(numeroDocumento),
+                sinDocumento ? "SIN NOMBRE" : limpiarTexto(razonSocial, 250),
                 codigoComprobante(tipoComprobante),
                 comprobante.getFechaPago(),
                 soloDigitos(timbrado),
@@ -158,24 +155,15 @@ public class Rg90ExportService {
         return String.format("%03d", Integer.parseInt(limpio));
     }
 
-    private byte[] zip(String nombreCsv, String contenido) {
-        try {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            try (ZipOutputStream zip = new ZipOutputStream(bytes, StandardCharsets.UTF_8)) {
-                zip.setLevel(Deflater.BEST_COMPRESSION);
-                zip.putNextEntry(new ZipEntry(nombreCsv));
-                zip.write(contenido.getBytes(StandardCharsets.UTF_8));
-                zip.closeEntry();
-            }
-            return bytes.toByteArray();
-        } catch (IOException ex) {
-            throw new IllegalStateException("No fue posible generar el archivo RG90.", ex);
-        }
-    }
-
-    private String normalizarIdentificador(String identificador) {
-        String limpio = soloAlfanumerico(identificador).toUpperCase(Locale.ROOT);
-        return limpio.isBlank() ? "V0001" : limpiarTexto(limpio, 5);
+    private String siguienteLote(String ruc, YearMonth periodo, Integer tipoComprobante) {
+        String clave = ruc + "|" + periodo + "|" + (tipoComprobante == null ? 0 : tipoComprobante);
+        Rg90Secuencia secuencia = secuencias.findByClave(clave)
+                .orElseGet(() -> new Rg90Secuencia(clave, 1));
+        int lote = secuencia.getSiguienteLote() == null || secuencia.getSiguienteLote() < 1
+                ? 1 : secuencia.getSiguienteLote();
+        secuencia.setSiguienteLote(lote + 1);
+        secuencias.save(secuencia);
+        return "V" + lote;
     }
 
     private String rucSinDv(String ruc) {
@@ -213,6 +201,18 @@ public class Rg90ExportService {
         }
         String documento = soloAlfanumerico(numeroDocumento);
         return documento.isBlank() ? "15" : "12";
+    }
+
+    private boolean sinDocumentoValido(String tipoDocumento, String numeroDocumento) {
+        String documento = soloAlfanumerico(numeroDocumento);
+        if (documento.isBlank() || documento.equalsIgnoreCase("X") || documento.equalsIgnoreCase("SN")) {
+            return true;
+        }
+        String tipo = normalizar(tipoDocumento);
+        if (tipo.contains("RUC") || tipo.contains("CED") || tipo.contains("C.I") || tipo.contains("CI")) {
+            return soloDigitos(numeroDocumento).isBlank();
+        }
+        return false;
     }
 
     private String codigoComprobante(String tipoComprobante) {

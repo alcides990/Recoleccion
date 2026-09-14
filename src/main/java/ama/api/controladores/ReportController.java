@@ -368,17 +368,15 @@ public class ReportController {
     @PostMapping("/rg90/ventas")
     public ResponseEntity<?> exportarRg90Ventas(
             @RequestParam("periodo") String periodo,
-            @RequestParam(name = "identificador", defaultValue = "V0001") String identificador,
             @RequestParam(name = "codigoTipoComprobante", defaultValue = "0") Integer codigoTipoComprobante) {
         try {
             YearMonth mes = YearMonth.parse(periodo);
-            Rg90Archivo archivo = rg90ExportService.exportarVentas(getSucursalSession(), mes, identificador,
-                    codigoTipoComprobante);
+            Rg90Archivo archivo = rg90ExportService.exportarVentas(getSucursalSession(), mes, codigoTipoComprobante);
             return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType("application/zip"))
+                    .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
                     .contentLength(archivo.contenido().length)
                     .header(HttpHeaders.CONTENT_DISPOSITION,
-                            ContentDisposition.attachment().filename(archivo.nombreZip()).build().toString())
+                            ContentDisposition.attachment().filename(archivo.nombreArchivo()).build().toString())
                     .body(archivo.contenido());
         } catch (DateTimeParseException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
