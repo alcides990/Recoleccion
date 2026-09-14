@@ -7,7 +7,7 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container"> 
-            <h3 class="card-header">Datos de las Categorias</h3>
+            <header class="form-view-header"><div><h3>Datos de la categoría</h3><p>Configure el nombre, tarifa y estado de la categoría.</p></div><span class="form-view-icon"><i class="fa-solid fa-tags"></i></span></header>
             <a th:href="@{/categoria/listar}" class="btn btn-primario"> <i class="fa-solid fa-angles-left"></i>Regresar</a>
             <div class="mensaje-alerta" id="contenedor-alertas"></div>
             <form  id="frm-categoria" th:action="@{/categoria/guardar}" method="post" th:object="${categoria}">

@@ -4,8 +4,8 @@
 
     </head>
     <body>
-        <nav id="paginador" th:fragment="paginador" class="sticky-start">
-            <ul class="pagination ">
+        <nav id="paginador" th:fragment="paginador" class="">
+            <ul class="pagination " th:object="${page}">
                 <li class="page-item" th:class="${page.first? 'page-item disabled': 'page-item'}">
                     <span class="page-link" th:if="${page.first}">Primera</span>
                     <a class="page-link" th:if="${not page.first}" th:href="@{${page.url}(page=0)}">Primera</a>
@@ -13,33 +13,35 @@
 
                 <li class="page-item" th:class="${not page.hasPrevious? 'page-item disabled': 'page-item'}">
                     <span class="page-link" th:if="${not page.hasPrevious}">&laquo;</span>
-                    <a class="page-link" th:if="${page.hasPrevious}" th:href="@{${page.url}(page=${page.paginaActual-2},cantidadRegistro=${cantidadRegistro})}" >&laquo;</a>
+                    <a class="page-link" th:if="${page.hasPrevious}" th:href="@{${page.url}(page=${page.paginaActual-2},cantidadRegistro=*{cantidadRegistro})}" >&laquo;</a>
                 </li>
 
                 <li class="page-item" th:each="item : ${page.paginas}" th:class="${item.actual? 'page-item active': 'page-item'}">
                     <span class="page-link" th:if="${item.actual}" th:text="${item.numero}"></span>
-                    <a class="page-link" th:if="${not item.actual}" th:href="@{${page.url}(page=${item.numero-1},cantidadRegistro=${cantidadRegistro})}" th:text="${item.numero}"></a>
+                    <a class="page-link" th:if="${not item.actual}" th:href="@{${page.url}(page=${item.numero-1},cantidadRegistro=*{cantidadRegistro})}" th:text="${item.numero}"></a>
                 </li>
 
 
                 <li class="page-item" th:class="${not page.hasNext? 'page-item disabled': 'page-item'}">
                     <span class="page-link" th:if="${not page.hasNext}">&raquo;</span>
-                    <a class="page-link" th:if="${page.hasNext}" th:href="@{${page.url}(page=${page.paginaActual},cantidadRegistro=${cantidadRegistro})}">&raquo;</a>
+                    <a class="page-link" th:if="${page.hasNext}" th:href="@{${page.url}(page=${page.paginaActual},cantidadRegistro=*{cantidadRegistro})}">&raquo;</a>
                 </li>
 
                 <li class="page-item" th:class="${page.last? 'page-item disabled': 'page-item'}">
                     <span class="page-link" th:if="${page.last}">&Uacute;ltima</span>
-                    <a class="page-link" th:if="${not page.last}" th:href="@{${page.url}(page=${page.totalPaginas-1},cantidadRegistro=${cantidadRegistro})}">&Uacute;ltima</a>
+                    <a class="page-link" th:if="${not page.last}" th:href="@{${page.url}(page=${page.totalPaginas-1},cantidadRegistro=*{cantidadRegistro})}">&Uacute;ltima</a>
                 </li>
                 <li class="page-item">
 
-                    <select class="page-link" name="cantidadRegistro" id="cantidadRegistro">
-                        <option value="10" th:text="10" th:selected="${cantidadRegistro == 10}"></option>
-                        <option value="20" th:text="20" th:selected="${cantidadRegistro == 20}"></option>
-                        <option value="50" th:text="50" th:selected="${cantidadRegistro == 50}"></option>
+                    <select  class="page-link" name="cantidadRegistro" id="cantidadRegistro">
+                        <option th:value="${10}" th:text="10" th:selected="*{cantidadRegistro == 10}"></option>
+                        <option th:value="${20}"  th:text="20" th:selected="*{cantidadRegistro == 20}"></option>
+                        <option th:value="${50}"  th:text="50" th:selected="*{cantidadRegistro == 50}"></option>
+                        <option th:value="${100}"  th:text="100" th:selected="*{cantidadRegistro == 100}"></option>
                     </select>
                 </li>
             </ul>
+
 
         </nav>
 

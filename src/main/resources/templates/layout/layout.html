@@ -1,138 +1,224 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<head th:fragment="heat">
-    <title th:text="${titulo}"></title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, shrink-to-fit=no" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="/css/estilo.css" />
-    <!-- Agrega esta línea para cargar los estilos de los iconos -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+    <head th:fragment="heat">
+        <title th:text="${titulo}"></title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, shrink-to-fit=no" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/css/estilo.css" />
+        <!-- Agrega esta línea para cargar los estilos de los iconos -->
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
 
-    <!-- Agrega esta línea para cargar los recursos de los iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="/css/jquery.dataTables.min.css" />
-</head>
+        <!-- Agrega esta línea para cargar los recursos de los iconos -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <link rel="stylesheet" href="/css/jquery.dataTables.min.css" />
+        <link rel="stylesheet" href="/css/diseno-global.css?v=20260910-1" />
+        <link rel="stylesheet" href="/css/menu-layout.css?v=20260908-1" />
+    </head>
 
-<body>
+    <body>
 
-    <header th:fragment="header">
-        <button id="menu-toggle">
-            <div class="barra"></div>
-            <div class="barra"></div>
-            <div class="barra"></div>
-        </button>
+        <header th:fragment="header">
+            <button id="menu-toggle">
+                <div class="barra"></div>
+                <div class="barra"></div>
+                <div class="barra"></div>
+            </button>
 
 
-    </header>
+        </header>
 
-    <aside id="menu_aside" th:fragment="aside" class="menu_aside">
-        <ul>
-            <li><a href="/"> <i class="fa-solid fa-house fa-xl"></i> INICIO </a>
-            </li>
-            <hr />
-            <ul> <i class="fas fa-donate fa-xl"></i> COBRANZA
-                <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-signature "></i> Factura
-                        Manual </a></li>
-                <li id="factura-electronica"><a th:href="@{/comprobante/facturaElectronica}">
-                        <i class="fa-solid fa-file-lines"></i> Factura Electronica</a></li>
-                <li id="facturas" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"><a
-                        th:href="@{/comprobante/listar}"> <i class="fa-solid fa-folder-open"></i>
-                        FACTURAS</a></li>
+        <aside id="menu_aside" th:fragment="aside" class="menu_aside">
+            <ul>
+                <li><a href="/"> <i class="fa-solid fa-house-chimney"></i> INICIO </a>
+                </li>
+                <hr />
+                <ul><span class="menu-seccion"><i class="fa-solid fa-hand-holding-dollar"></i> COBRANZA</span>
+                    <li><a th:href="@{/comprobante/facturaManual}"> <i class="fa-solid fa-file-circle-plus"></i> Registrar/Emitir Comprobante
+                           </a></li>
+                    <li id="facturas" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"><a
+                            th:href="@{/comprobantes-v2}"> <i class="fa-solid fa-receipt"></i>
+                            Comprobantes</a></li>
+                </ul>
+
+                <hr />
+                <ul sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"><span class="menu-seccion"><i class="fa-solid fa-money-bill-transfer"></i> EGRESOS</span>
+                    <li><a th:href="@{/egresos}"><i class="fa-solid fa-file-invoice-dollar"></i> Gastos</a></li>
+                    <li><a th:href="@{/egresos/catalogos/PRODUCTO/lista}"><i class="fa-solid fa-gear"></i> Productos y Servicios</a></li>
+                    <li><a th:href="@{/egresos/catalogos/CATEGORIA_PRODUCTO/lista}"><i class="fa-solid fa-tags"></i> Categorías de productos</a></li>
+                    <li><a th:href="@{/egresos/catalogos/TIPO/lista}"><i class="fa-solid fa-list"></i> Tipos de Gastos</a></li>
+                    <li><a th:href="@{/egresos/catalogos/PROVEEDOR/lista}"><i class="fa-solid fa-truck"></i> Proveedores</a></li>
+                </ul>
+                <hr />
+                <ul><span class="menu-seccion"><i class="fa-solid fa-database"></i> DATOS BÁSICOS</span>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')"><a th:href="@{/usuarioSistema/listar}"><i
+                                class="fa-solid fa-user-shield"></i> Usuario Sistema</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR', 'SUPERVISOR')"> <a th:href="@{/parametro/listar}"><i
+                                class="fa-solid fa-sliders"></i> Parámetros</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR', 'SUPERVISOR')"> <a th:href="@{/timbrado/listar}"><i
+                                class="fa-solid fa-stamp"></i> Timbrados</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/puntoExpedicion/listar}"><i
+                                class="fa-solid fa-cash-register"></i> Puntos de expedición</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/tipoComprobante/listar}"><i
+                                class="fa-solid fa-file-circle-check"></i> Tipos de comprobante</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/sucursal/listar}"><i
+                                class="fa-solid fa-building"></i> Sucursales</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"><a th:href="@{/auditoria-entidades}"><i
+                                class="fa-solid fa-clock-rotate-left"></i> Auditoría operativa</a></li>
+                    <li sec:authorize="hasAnyAuthority('ROOT')"><a th:href="@{/ciudad/listar}"><i
+                                class="fa-solid fa-city"></i> Ciudades</a></li>
+                </ul>
+                <hr />
+                <li> <a th:href="@{/servicio/listar-v2}"><i class="fa-solid fa-address-card"></i> CUENTAS</a></li>
+                <hr />
+                <li><a th:href="@{/usuario/listar}"> <i class="fa-solid fa-user-group"></i> USUARIOS</a></li>
+                <hr />
+                <li> <a th:href="@{/cobrador/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SECRETARIO','SUPERVISOR')"> <i
+                            class="fa-solid fa-money-bill-transfer"></i> COBRADORES</a></li>
+                <hr />
+                <li sec:authorize="hasAuthority('ROOT')"><a th:href="@{/recorridos}">
+                        <i class="fa-solid fa-route"></i> RECORRIDOS</a></li>
+                <hr sec:authorize="hasAuthority('ROOT')" />
+                <li><a th:href="@{/categoria/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"> <i
+                            class="fa-solid fa-tags"></i> CATEGORÍAS</a></li>
+                <hr />
+                <li> <a th:href="@{/zona/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')"><i
+                   class="fa-solid fa-map"></i> ZONAS</a></li>
+                <hr />
+                <li>
+                    <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR','SECRETARIO')" th:href="@{/reporte}">
+                        <i class="fa-solid fa-chart-column"></i> REPORTES
+                    </a>
+                </li>
+                <hr />
+                <li>
+                    <a th:href="@{/documentacion}">
+                        <i class="fa-solid fa-circle-question"></i> AYUDA Y DOCUMENTACIÓN
+                    </a>
+                </li>
+                <hr />
             </ul>
-
-            <hr />
-            <ul><i class="fa-solid fa-file-alt fa-xl"></i> DATOS BASICOS
-                <li sec:authorize="hasAnyAuthority('ROOT','ADMIN')"> <a th:href="@{/parametro/listar}"><i
-                            class="fa-solid fa-sliders-h fa-lg"></i> Parametros</a></li>
-                <li sec:authorize="hasAnyAuthority('ROOT','ADMIN')"><a th:href="@{/usuarioSistema/listar}"><i
-                            class="fas fa-users-cog fa-lg"></i> </i>Usuario Sistema</a></li>
-                <li sec:authorize="hasAnyAuthority('ROOT')"><a th:href="@{/puntoExpedicion/listar}"><i
-                            class="fa-solid fa-cash-register fa-lg"></i> Puntos Expdiciones</a></li>
-                <li sec:authorize="hasAnyAuthority('ROOT','ADMIN')"><a th:href="@{/sucursal/listar}"><i
-                            class="fa-solid fa-code-branch fa-lg"></i> Sucursales</a></li>
-                <li sec:authorize="hasAnyAuthority('ROOT')"><a th:href="@{/ciudad/listar}"><i
-                            class="fa-solid fa-code-branch fa-lg"></i> Ciudades</a></li>
-            </ul>
-            <hr />
-            <li> <a th:href="@{/servicio/listar}"><i class="fa-solid fa-users fa-xl"></i> CUENTAS</a></li>
-            <hr />
-            <li><a th:href="@{/usuario/listar}"> <i class="fa-solid fa-users-gear fa-xl"></i> USUARIOS</a></li>
-            <hr />
-            <li> <a th:href="@{/cobrador/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"> <i
-                        class="fa-solid fa-people-group fa-xl"></i> COBRADORES</a></li>
-            <hr />
-            <li><a th:href="@{/categoria/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"> <i
-                        class="fa-solid fa-list-alt fa-xl"></i> CATEGORIAS</a></li>
-            <hr />
-            <li> <a th:href="@{/zona/listar}" sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')"><i <i
-                        class="fa-solid fa-route fa-xl"></i> ZONAS</a></li>
-            <hr />
-            <li>
-                <a sec:authorize="hasAnyAuthority('ROOT','ADMIN','SECRETARIO')" th:href="@{/reporte}">
-                    <i class="fa-solid fa-chart-pie fa-xl"></i> REPORTES
+            <button id="btn-user" class="user-session" type="button"
+                    aria-controls="user-session" aria-expanded="false">
+                <span class="user-session-avatar"><i class="fa-solid fa-user"></i></span>
+                <span class="user-session-resumen">
+                    <strong sec:authentication="name"></strong>
+                    <small>Mi cuenta</small>
+                </span>
+                <i class="fa-solid fa-chevron-up user-session-chevron"></i>
+            </button>
+            <div id="user-session" role="menu" aria-label="Opciones del usuario">
+                <div class="user-session-cabecera">
+                    <span class="user-session-avatar"><i class="fa-solid fa-user"></i></span>
+                    <span>
+                        <strong sec:authentication="name"></strong>
+                        <small>Sesión activa</small>
+                    </span>
+                </div>
+                <a class="user-session-accion"
+                   th:href="@{/usuarioSistema/editarClave/}+''+${session.usuarioSistema.codigoUsuarioSistema}"
+                   role="menuitem">
+                    <i class="fa-solid fa-key"></i>
+                    <span><strong>Editar clave</strong><small>Cambiar contraseña de acceso</small></span>
                 </a>
-            </li>
-            <hr />
-        </ul>
-        <button id="btn-user" class="user-session">
-            <i class="fas fa-user-circle"></i>
+                <form id="logoutForm" th:action="@{/logout}" method="post">
+                    <button class="user-session-accion user-session-salir" type="submit" role="menuitem">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span><strong>Cerrar sesión</strong><small>Salir de forma segura</small></span>
+                    </button>
+                </form>
+            </div>
 
-        </button>
-        <div id="user-session">
-            <p sec:authentication="name"></p>
-            <a th:href="@{/usuarioSistema/editarClave/}+''+${session.usuarioSistema.codigoUsuarioSistema}">Editar
-                Clave</a>
-            <form id="logoutForm" th:action="@{/logout}" method="post">
-                <button class="dropdown-item" onclick="document.getElementById('logoutForm').submit();"
-                    type="submit">Cerrar Sesion</button>
-            </form>
+        </aside>
+        <footer th:fragment="footer">
+            <!--incluir jquery-->
+            <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+            <!--incluir jquery ui-->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
 
-        </div>
+            <!--incluir jquery dataTable-->
+            <script src="/js/jquery.dataTables.min.js"></script>
+            <script src="/js/menu-lateral.js?v=20260908-1"></script>
+            <!--incluir bootstrap-->
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.min.js"></script>
 
-    </aside>
-    <footer th:fragment="footer">
-        <!--incluir jquery-->
-        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-        <!--incluir jquery ui-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+            <script>
+                        function ajustarControlesDataTables() {
+                            $('.dataTables_wrapper, .dt-container').each(function () {
+                                const $wrapper = $(this);
+                                const $length = $wrapper.find('> .dataTables_length, > .dt-length');
+                                const $filter = $wrapper.find('> .dataTables_filter, > .dt-search');
+                                const $input = $filter.find('input');
 
-        <!--incluir jquery dataTable-->
-        <script src="/js/jquery.dataTables.min.js"></script>
-        <!--incluir bootstrap-->
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+                                $length.css({
+                                    float: 'left'
+                                });
+                                $filter.css({
+                                    float: 'right',
+                                    width: 'auto',
+                                    marginBottom: '.75rem',
+                                    textAlign: 'right'
+                                });
+                                $input.css({
+                                    display: 'inline-block',
+                                    width: '18rem',
+                                    maxWidth: '100%',
+                                    marginLeft: '.45rem'
+                                });
+                            });
+                        }
 
-        <script src="/js/ABM.js"></script>
-        <script>
-            $(document).ready(function () {
+                        $(document).on('init.dt draw.dt', function () {
+                            ajustarControlesDataTables();
+                        });
 
-                $('#menu-toggle').click(function () {
-                    $(this).toggleClass('active');
-                    $('#menu_aside').toggleClass('active');
-                });
+                        $(document).ready(function () {
 
-                $('#btn-user').click(function () {
-                    $('#user-session').slideToggle(300);
-                });
+                            $('#btn-user').click(function () {
+                                const $menuUsuario = $('#user-session');
+                                $menuUsuario.stop(true, true).slideToggle(180);
+                                $(this).attr('aria-expanded', $menuUsuario.is(':visible'));
+                            });
 
-                $('.menu_aside ul ul').click(function () {
-                    $(this).find('li').slideToggle(300);
-                });
+                            $(document).on('click', function (event) {
+                                if (!$(event.target).closest('#btn-user, #user-session').length) {
+                                    $('#user-session').stop(true, true).slideUp(150);
+                                    $('#btn-user').attr('aria-expanded', 'false');
+                                }
+                            }).on('keydown', function (event) {
+                                if (event.key === 'Escape') {
+                                    $('#user-session').stop(true, true).slideUp(150);
+                                    $('#btn-user').attr('aria-expanded', 'false').trigger('focus');
+                                }
+                            });
 
-            });
+                            $('.menu_aside ul ul').click(function () {
+                                $(this).find('li').slideToggle(300);
+                            });
 
-        </script>
-        <input type="hidden" id="token" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            ajustarControlesDataTables();
 
-        <p class="footer">&copy; ALCMA Inc 2023
-            | Roles: <span sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"></span>
-        </p>
+                        });
 
-    </footer>
+            </script>
+            <script type="module">
+                        import {tabuladorFormulario} from '/js/utils.js';
+
+                        $(document).ready(function () {
+                            tabuladorFormulario('form');
+                        });
+            </script>
+            <input type="hidden" id="token" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <p class="footer">&copy; ALCMA Inc <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span>
+                | Roles: <span id="roles"sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"></span>
+            </p>
+
+        </footer>
 
 
-</body>
+    </body>
 
 </html>

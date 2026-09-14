@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: heat}"></head>
+<link rel="stylesheet" href="/css/detalleTimbrado/detalle-timbrado.css">
+<body>
+<header th:replace="~{layout/layout :: header}"></header>
+<aside th:replace="~{layout/layout :: aside}"></aside>
+
+<main class="container detalle-timbrado-page py-3">
+    <div class="detalle-timbrado-card">
+        <header class="detalle-timbrado-header form-view-header">
+            <div>
+                <span class="detalle-timbrado-kicker">Facturación</span>
+                <h3 th:text="${edicion ? 'Editar detalle de timbrado' : 'Agregar detalle de timbrado'}">Detalle de timbrado</h3>
+                <p>Asocie un timbrado con un punto de expedición y, cuando corresponda, su serie habilitada.</p>
+            </div>
+            <span class="detalle-timbrado-icon"><i class="fa-solid fa-file-invoice"></i></span>
+        </header>
+
+        <form th:action="@{/detalleTimbrado/guardar}" method="post">
+            <div class="detalle-timbrado-body">
+                <section class="detalle-timbrado-section">
+                    <h4><i class="fa-solid fa-link"></i> Asociación del comprobante</h4>
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label" for="sucursal">Sucursal</label>
+                            <select id="sucursal" name="codigoSucursal" class="form-select" required th:disabled="${edicion}">
+                                <option value="">Seleccione...</option>
+                                <option th:each="s : ${sucursales}" th:value="${s.codigoSucursal}"
+                                        th:text="${s.nombreSucursal}"
+                                        th:selected="${edicion and s.codigoSucursal == detalle.detalleTimbradoPK.codigoSucursal}"></option>
+                            </select>
+                            <input th:if="${edicion}" type="hidden" name="codigoSucursal" th:value="${detalle.detalleTimbradoPK.codigoSucursal}">
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label" for="punto">Punto de expedición</label>
+                            <select id="punto" name="codigoPuntoExpedicion" class="form-select" required th:disabled="${edicion}">
+                                <option value="">Seleccione...</option>
+                                <option th:each="p : ${puntos}" th:value="${p.puntoExpedicionPK.codigoPuntoExpedicion}"
+                                        th:attr="data-sucursal=${p.puntoExpedicionPK.codigoSucursal}"
+                                        th:text="${p.nombrePuntoExpedicion}"
+                                        th:selected="${edicion and p.puntoExpedicionPK.codigoPuntoExpedicion == detalle.detalleTimbradoPK.codigoPuntoExpedicion and p.puntoExpedicionPK.codigoSucursal == detalle.detalleTimbradoPK.codigoSucursal}"></option>
+                            </select>
+                            <input th:if="${edicion}" type="hidden" name="codigoPuntoExpedicion" th:value="${detalle.detalleTimbradoPK.codigoPuntoExpedicion}">
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label" for="timbrado">Timbrado</label>
+                            <select id="timbrado" name="codigoTimbrado" class="form-select" required th:disabled="${edicion}">
+                                <option value="">Seleccione...</option>
+                                <option th:each="t : ${timbrados}" th:value="${t.codigoTimbrado}"
+                                        th:text="${t.numeroTimbrado}"
+                                        th:selected="${edicion and t.codigoTimbrado == detalle.detalleTimbradoPK.codigoTimbrado}"></option>
+                            </select>
+                            <input th:if="${edicion}" type="hidden" name="codigoTimbrado" th:value="${detalle.detalleTimbradoPK.codigoTimbrado}">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="detalle-timbrado-section mt-3">
+                    <h4><i class="fa-solid fa-sliders"></i> Configuración</h4>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="serie">Serie <span class="text-muted">(opcional en autoimpresor)</span></label>
+                            <select id="serie" name="codigoSerie" class="form-select">
+                                <option value="" th:selected="${!edicion or detalle.serie == null}">Sin serie</option>
+                                <option th:each="s : ${series}" th:if="${s.codigoSerie != 0}"
+                                        th:value="${s.codigoSerie}" th:text="${s.serie}"
+                                        th:selected="${edicion and detalle.serie != null and s.codigoSerie == detalle.serie.codigoSerie}"></option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="estado">Estado</label>
+                            <select id="estado" name="codigoEstado" class="form-select" required>
+                                <option th:each="e : ${estados}" th:value="${e.codigoEstado}" th:text="${e.estado}"
+                                        th:selected="${edicion ? e.codigoEstado == detalle.estado.codigoEstado : e.codigoEstado == 1}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label" for="modoEmision">Modo de emisión</label>
+                            <select id="modoEmision" name="modoEmision" class="form-select" required>
+                                <option value="MANUAL" th:selected="${!edicion or detalle.modoEmision == 'MANUAL'}">Manual / preimpreso</option>
+                                <option value="AUTOIMPRESOR" th:selected="${edicion and detalle.modoEmision == 'AUTOIMPRESOR'}">Autoimpresor</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label" for="numeroDesde">Numeración desde</label>
+                            <input id="numeroDesde" name="numeroDesde" class="form-control" type="number"
+                                   min="1" max="9999999" required
+                                   th:value="${edicion ? detalle.numeroDesde : 1}">
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label" for="numeroHasta">Numeración hasta</label>
+                            <input id="numeroHasta" name="numeroHasta" class="form-control" type="number"
+                                   min="1" max="9999999" required
+                                   th:value="${edicion ? detalle.numeroHasta : 9999999}">
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted">Active Autoimpresor solamente con el timbrado y rango autorizados por la DNIT.</small>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="detalle-timbrado-footer">
+                <a th:href="@{/detalleTimbrado/listar}" class="btn btn-light"><i class="fa-solid fa-arrow-left"></i> Cancelar</a>
+                <button class="btn btn-primario" type="submit"><i class="fas fa-save"></i> Guardar</button>
+            </footer>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{layout/layout :: footer}"></footer>
+<script>
+    (function () {
+        const sucursal = document.getElementById('sucursal');
+        const punto = document.getElementById('punto');
+        const opciones = Array.from(punto.querySelectorAll('option[data-sucursal]'));
+        const modoEmision = document.getElementById('modoEmision');
+        const serie = document.getElementById('serie');
+        function filtrarPuntos() {
+            const seleccionada = sucursal.value;
+            opciones.forEach(opcion => opcion.hidden = opcion.dataset.sucursal !== seleccionada);
+            const actual = punto.options[punto.selectedIndex];
+            if (!punto.disabled && actual && actual.dataset.sucursal !== seleccionada) punto.value = '';
+            punto.disabled = sucursal.disabled || !seleccionada;
+        }
+        sucursal.addEventListener('change', filtrarPuntos);
+        function actualizarSerieObligatoria() {
+            const autoimpresor = modoEmision.value === 'AUTOIMPRESOR';
+            serie.required = !autoimpresor;
+            if (!autoimpresor && !serie.value) {
+                serie.setCustomValidity('Seleccione una serie para el modo manual.');
+            } else {
+                serie.setCustomValidity('');
+            }
+        }
+        modoEmision.addEventListener('change', actualizarSerieObligatoria);
+        serie.addEventListener('change', actualizarSerieObligatoria);
+        filtrarPuntos();
+        actualizarSerieObligatoria();
+    }());
+</script>
+</body>
+</html>

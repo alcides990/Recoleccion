@@ -1,55 +1,67 @@
 <!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" href="/css/sucursal/formulario.css">
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
 
-<head th:replace="~{layout/layout :: heat}"> </head>
+        <main class="container sucursal-form-page">
+            <header class="form-view-header"><div><h3>Datos de la sucursal</h3><p>Registre o actualice la ubicación operativa.</p></div><span class="form-view-icon"><i class="fa-solid fa-building"></i></span></header>
 
-<body>
-    <header th:replace="~{layout/layout :: header}"> </header>
-    <aside th:replace="~{layout/layout :: aside}"> </aside>
-    <div class="container">
-        <h3>Datos de Sucursal</h3>
-        <a th:href="@{/sucursal/listar}" class="btn btn-primary">Regresar</a>
-        <form th:action="@{/sucursal/guardar}" method="post" th:object="${sucursal}">
-            <div class=" row d-flex m-5">
-                <div class="col-3">
-                    <input type="hidden" name="codigoSucursal" th:value="*{codigoSucursal}" />
-                    <label for="nombreSucursal">Sucursal </label>
-                    <input type="text" name="nombreSucursal" id="sucursal" th:value="*{nombreSucursal}"
-                        class="form-control" />
-                </div>
-                <div class="col-3">
-                    <label for="celular">Celular </label>
-                    <input type="text" name="celular" th:value="*{celular}" class="form-control" />
-                </div>
-                <div class="col-3">
-                    <label for="telefono">Telefono </label>
-                    <input type="text" name="telefono" th:value="*{telefono}" class="form-control" />
-                </div>
-                <div class="col-3">
-                    <label for="direccion">Direccion </label>
-                    <input type="text" name="direccion" th:value="*{direccion}" class="form-control" />
-                </div>
-                <div class="col-3">
-                    <label for="ciudad">Ciudad</label>
-                    <select th:field="*{ciudad}" class="form-control" name="ciudad">
-                        <option th:each="ciudad : ${ciudades}" th:value="${ciudad.codigoCiudad}"
-                            th:text="${ciudad.nombreCiudad}" />
-                    </select>
-                </div>
+            <div class="sucursal-form-toolbar">
+                <a th:href="@{/sucursal/listar}" class="btn btn-primario">
+                    <i class="fa-solid fa-arrow-left"></i> Regresar
+                </a>
             </div>
-            <input type="submit" name="guardar" value="Guardar" class="btn btn-success" />
-        </form>
-    </div>
-    <footer th:replace="~{layout/layout :: footer}"> </footer>
-    <script>
-        $(document).ready(function () {
-            var endpoint = window.location.pathname.replace(/[0-9]/g, '');
-            if (endpoint == "/sucursal/editar/") {
-                $("#sucursal").prop("readonly", true);
-            }
-        })
-    </script>
-</body>
 
+            <form id="formSucursal" class="sucursal-form-card" th:action="@{/sucursal/guardar}" method="post" th:object="${sucursal}">
+                <input type="hidden" name="codigoSucursal" th:value="*{codigoSucursal}" />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="sucursal">Sucursal</label>
+                        <input type="text" name="nombreSucursal" id="sucursal" th:value="*{nombreSucursal}"
+                               class="form-control" placeholder="Ejemplo: 001"
+                               th:readonly="${#authorization.expression('hasAuthority(''ADMINISTRADOR'') and !hasAuthority(''ROOT'')')}" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="ciudad">Ciudad</label>
+                        <select th:field="*{ciudad}" id="ciudad" class="form-control" name="ciudad">
+                            <option th:each="ciudad : ${ciudades}" th:value="${ciudad.codigoCiudad}"
+                                    th:text="${ciudad.nombreCiudad}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="celular">Celular</label>
+                        <input type="text" name="celular" id="celular" th:value="*{celular}" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="telefono">Telefono</label>
+                        <input type="text" name="telefono" id="telefono" th:value="*{telefono}" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="direccion">Direccion</label>
+                        <input type="text" name="direccion" id="direccion" th:value="*{direccion}" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="sucursal-form-actions">
+                    <input type="submit" name="guardar" value="Guardar" class="btn btn-primario" />
+                </div>
+            </form>
+        </main>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script>
+            $(document).ready(function () {
+                var endpoint = window.location.pathname.replace(/[0-9]/g, '');
+//            if (endpoint == "/sucursal/editar/") {
+//                $("#sucursal").prop("readonly", true);
+//            }
+            });
+        </script>
+    </body>
 </html>

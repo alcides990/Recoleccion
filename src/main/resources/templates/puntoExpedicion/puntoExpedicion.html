@@ -1,28 +1,41 @@
 <!DOCTYPE html>
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head  th:replace="~{layout/layout :: heat}"> </head>
     <body>
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container card ">
-            <div><h4>Puntos de expedicion</h4></div> 
+        <div class="container">
+            <div class="card-header"><h3 class="form-title">Puntos de expedicion</h3></div> 
             <div class="">
                 <div th:if="${info}" class="mensaje-alerta alert alert-success">
                     <span th:text="${info}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <a th:href="@{/puntoExpedicion/agregar}" class="btn btn-primario btn-sm mb-3"><i class="fas fa-plus fa-xl "></i> PuntoExpedicion</a>
-                <div class="table-responsive-sm">
+                <form th:if="${esRoot}" th:action="@{/puntoExpedicion/listar}" method="get"
+                      class="row g-2 align-items-end mb-3">
+                    <div class="col-md-6 col-lg-4">
+                        <label for="filtroSucursalPunto" class="form-label">Sucursal</label>
+                        <select id="filtroSucursalPunto" name="codigoSucursal" class="form-select">
+                            <option th:each="opcion : ${sucursalesDisponibles}"
+                                    th:value="${opcion.codigoSucursal}"
+                                    th:text="|${opcion.codigoSucursal} - ${opcion.nombreSucursal}|"
+                                    th:selected="${opcion.codigoSucursal == sucursalSeleccionada.codigoSucursal}"></option>
+                        </select>
+                    </div>
+                    <div class="col-auto"><button type="submit" class="btn btn-primario">Filtrar</button></div>
+                </form>
+                <a sec:authorize="hasAuthority('ROOT')" th:href="@{/puntoExpedicion/agregar}" class="btn btn-primario btn-sm mb-3"><i class="fas fa-plus fa-xl "></i> Agregar</a>
+                <div id="tabla" class="table-responsive-sm">
                     <table class="table table-border table-striped table-colapse table-hover table-lg " >
-                        <thead class="table-dark">
+                        <thead class="bg-color">
                             <tr>
                                 <th>Codigo PuntoExpedicion</th>
                                 <th>PuntoExpedicion</th>
                                 <th>Sucursal</th>
                                 <th>Estado</th>
-                                <th>Editar</th>
-                                <th>Eliminar</th>
+                                <th sec:authorize="hasAuthority('ROOT')">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="table-secondary">
@@ -31,10 +44,14 @@
                                 <td th:text="${puntoExpedicion.nombrePuntoExpedicion}">   </td>
                                 <td th:text="${puntoExpedicion.sucursal.nombreSucursal} +' '+${puntoExpedicion.sucursal.ciudad.nombreCiudad}" >   </td>
                                 <td th:text="${puntoExpedicion.estado.estado}" >   </td>
-                                <td><a th:href="@{/puntoExpedicion/editar/} + ${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}+'/'+ ${puntoExpedicion.puntoExpedicionPK.codigoSucursal}" 
-                                       class="btn btn-info btn-sm"th:text="Editar"/></td>
-                                <td><a th:href="@{/puntoExpedicion/eliminar/} + ${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}+'/'+ ${puntoExpedicion.puntoExpedicionPK.codigoSucursal}"
-                                       class="btn btn-danger btn-sm "th:text="Eliminar"/></td>
+                                <td sec:authorize="hasAuthority('ROOT')">
+                                    <a th:href="@{/puntoExpedicion/editar/} + ${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}+'/'+ ${puntoExpedicion.puntoExpedicionPK.codigoSucursal}" 
+                                       class="btn btn-info btn-sm">
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                    </a>
+                                    <a th:href="@{/puntoExpedicion/eliminar/} + ${puntoExpedicion.puntoExpedicionPK.codigoPuntoExpedicion}+'/'+ ${puntoExpedicion.puntoExpedicionPK.codigoSucursal}"
+                                       class="btn btn-danger eliminar btn-sm">  <i class="fa-solid fa-trash-can"></i></a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

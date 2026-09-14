@@ -1,30 +1,60 @@
 <!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-    <head  th:replace="~{layout/layout :: heat}"> </head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" th:href="@{/css/usuarioSistema/editar-clave.css}">
     <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container "> 
-            <div class="card-header">  <h3>Datos Usuario de Sistema</h3></div>
-            <a th:href="@{/usuarioSistema/listar}" class="btn btn-primario">Regresar</a>
-            <form th:action="@{/usuarioSistema/editarClave}" method="post" th:object="${usuarioSistema}">
-                <div class="row d-flex m-3">
-                    <div class="col-md-6 ">
-                        <input type="hidden" name="codigoUsuarioSistema"  th:value="*{codigoUsuarioSistema}" />
-                        <label class="form-label" for="usuarioSistema">Usuario </label>
-                        <input class="form-control" type="text" readonly="" name="nombre"  th:value="*{nombre}" autofocus=""  placeholder="Ingrese nombre de usuario" required=""/>
-                        <label class="form-label" for="clave">Clave </label>
-                        <input class="form-control" type="password" id="clave" name="clave"  th:value="*{clave}" autofocus=""  placeholder="Ingrese su clave" required=""/>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
 
+        <main id="editarClaveUsuario" class="container-fluid">
+            <header class="form-view-header"><div><h3>Actualizar contraseña</h3><p>Defina una nueva contraseña para proteger su cuenta.</p></div><span class="form-view-icon"><i class="fa-solid fa-shield-halved"></i></span></header>
+
+            <section class="editar-clave-card">
+                <div class="editar-clave-intro">
+                    <div class="editar-clave-icon" aria-hidden="true">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h4>Proteja su cuenta</h4>
+                    <p>Defina una nueva contraseña para continuar usando el sistema de forma segura.</p>
+                    <div class="editar-clave-nota">
+                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                        <span>Al guardar deberá iniciar sesión nuevamente.</span>
                     </div>
                 </div>
-                <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3"/>
-            </form>
-        </div>
-        </div>
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
-      
+
+                <form class="editar-clave-form" th:action="@{/usuarioSistema/editarClave}" method="post" th:object="${usuarioSistema}">
+                    <input type="hidden" name="codigoUsuarioSistema" th:value="*{codigoUsuarioSistema}">
+
+                    <div class="editar-clave-field">
+                        <label for="usuarioSistema">Usuario</label>
+                        <div class="editar-clave-input-wrap">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                            <input id="usuarioSistema" class="form-control" type="text" name="nombre"
+                                   th:value="*{nombre}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="editar-clave-field">
+                        <label for="clave">Nueva contraseña</label>
+                        <div class="editar-clave-input-wrap">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            <input id="clave" class="form-control" type="password" name="clave"
+                                   placeholder="Ingrese una nueva contraseña" autocomplete="new-password" autofocus required>
+                        </div>
+                    </div>
+
+                    <div class="editar-clave-actions">
+                        <a th:href="@{/usuarioSistema/listar}" class="btn editar-clave-cancelar">
+                            <i class="fa-solid fa-arrow-left"></i> Regresar
+                        </a>
+                        <button type="submit" class="btn editar-clave-guardar">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar clave
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
     </body>
 </html>

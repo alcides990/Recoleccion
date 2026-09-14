@@ -31,8 +31,8 @@ public class ImplComision implements ComisionService{
     }
 
     @Override
-    public void encontrar(Comision comision) {
-       comisionDao.findById(comision.getCodigoComision()).orElse(null);
+    public Comision encontrar(Comision comision) {
+       return comisionDao.findById(comision.getCodigoComision()).orElse(null);
     }
     
 }

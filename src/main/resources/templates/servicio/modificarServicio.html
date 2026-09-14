@@ -7,7 +7,7 @@
         <header  th:replace="~{layout/layout :: header}"> </header>
         <aside  th:replace="~{layout/layout :: aside}"> </aside>
         <div class="container"> 
-            <div class="card-header"> <h3>Datos de Cuenta</h3></div>
+            <header class="form-view-header"><div><h3>Datos de la cuenta</h3><p>Configure el servicio, categoría, ubicación y estado.</p></div><span class="form-view-icon"><i class="fa-solid fa-address-card"></i></span></header>
             <a th:href="@{/servicio/listar}" class="btn btn-primario">Regresar</a>
             <form name="frm-servicio" id="frm-servicio" th:action="@{/servicio/guardar}" method="post" th:object="${servicio}">
                 <input type="text" hidden="true" name="accion" th:value="${accion}">
@@ -18,13 +18,31 @@
                     </div>
 
                     <div class="col-md-4"> 
-                        <label for="categoria">Categoria</label>
-                        <select th:object="${categoria}" class="form-control" name="categoria" >
+                        <label for="categoriaModificar">Categoría</label>
+                        <select th:object="${categoria}" class="form-control" id="categoriaModificar" name="categoria" >
                             <option th:each="categoria : ${categorias}" 
                                     th:value="${categoria.codigoCategoria}"
                                     th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} "
                                     th:selected="${categoria}== ${servicio.categoria}"/>
                         </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="filtroCategoriaModificar">Filtrar categorías</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="search" id="filtroCategoriaModificar" class="form-control"
+                                   data-filtro-categorias="#categoriaModificar"
+                                   data-resultado-filtro="#resultadoFiltroCategoriaModificar"
+                                   placeholder="Filtrar por nombre, código o tarifa"
+                                   aria-label="Filtrar categorías">
+                            <button type="button" class="btn btn-outline-secondary"
+                                    data-limpiar-filtro-categorias="#filtroCategoriaModificar"
+                                    title="Limpiar filtro" aria-label="Limpiar filtro de categorías">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <small id="resultadoFiltroCategoriaModificar" class="text-muted"></small>
                     </div>
 
                     <div class="form-group col-md-2">
@@ -63,6 +81,14 @@
                         </select>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="form-group col-12">
+                        <label class="form-label" for="observacion">Observación</label>
+                        <textarea name="observacion" id="observacion" class="form-control" rows="3"
+                                  maxlength="150" th:text="*{observacion}"
+                                  placeholder="Información adicional de la cuenta"></textarea>
+                    </div>
+                </div>
                 <br/>
                 <input type="submit" name="guardar" value="Guardar" class="btn-guardar"/> 
             </form>
@@ -73,5 +99,6 @@
     </body>
     <script src="/js/buscarUsuario.js"></script>
     <script src="/js/validarFormulario.js"></script>
+    <script src="/js/categoria-select-filter.js"></script>
 
 </html>

@@ -28,6 +28,24 @@ public class ImplUsuario implements UsuarioService {
         return usuarioDao.getUsuarios(pageable, filtro);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Usuario> listarPorSucursal(Pageable pageable, Integer codigoSucursal) {
+        return usuarioDao.listarPorSucursal(pageable, codigoSucursal);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Usuario> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro) {
+        return usuarioDao.buscarPorSucursal(pageable, codigoSucursal, filtro);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public long contarPorSucursal(Integer codigoSucursal) {
+        return usuarioDao.contarPorSucursal(codigoSucursal);
+    }
+
     @Transactional
     @Override
     public void guardar(Usuario usuario) {
@@ -38,6 +56,7 @@ public class ImplUsuario implements UsuarioService {
     @Override
     public void eliminar(Usuario usuario) {
         usuarioDao.delete(usuario);
+        usuarioDao.flush();
     }
 
     @Transactional(readOnly = true)
@@ -58,8 +77,8 @@ public class ImplUsuario implements UsuarioService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Usuario> Buscar(String filtro) {
-        return usuarioDao.buscarUsuario(filtro);
+    public List<Usuario> Buscar(String filtro, Integer codigoSucursal) {
+        return usuarioDao.buscarUsuario(filtro, codigoSucursal);
     }
 
 }

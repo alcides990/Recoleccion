@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="comisionesPorCobrador" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenNoDataType="AllSectionsNoDetail">
+    <parameter name="codigoSucursal" class="java.lang.Integer"/>
+    <parameter name="codigoComision" class="java.lang.Integer"/>
+    <parameter name="comisionSeleccionada" class="java.lang.String"/>
+    <parameter name="desde" class="java.lang.String"/>
+    <parameter name="hasta" class="java.lang.String"/>
+    <queryString language="SQL"><![CDATA[
+SELECT cob.codigo_cobrador AS codigoCobrador,
+       TRIM(CONCAT_WS(' ', cob.nombre, cob.apellido)) AS cobrador,
+       COALESCE(com.nombre_comision, CONCAT(com.comision, '%')) AS nombreComision,
+       CAST(COALESCE(com.comision, 0) AS DECIMAL(5,2)) AS porcentajeComision,
+       COUNT(*) AS cantidadComprobantes,
+       CAST(SUM(COALESCE(comp.total_importe, 0)) AS DECIMAL(18,2)) AS totalCobrado,
+       CAST(ROUND(SUM(COALESCE(comp.total_importe, 0)) * COALESCE(com.comision, 0) / 100, 0) AS DECIMAL(18,2)) AS importeComision
+  FROM comprobantes comp
+  JOIN cobradores cob ON cob.codigo_cobrador = comp.codigo_cobrador
+                     AND cob.codigo_sucursal = comp.codigo_sucursal
+  JOIN comisiones com ON com.codigo_comision = comp.codigo_comision
+ WHERE comp.codigo_sucursal = $P{codigoSucursal}
+   AND comp.codigo_comision = $P{codigoComision}
+   AND comp.codigo_estado = 1
+   AND DATE(comp.fecha_pago) BETWEEN $P{desde} AND $P{hasta}
+ GROUP BY cob.codigo_cobrador, cob.nombre, cob.apellido,
+          com.codigo_comision, com.nombre_comision, com.comision
+ ORDER BY cobrador, porcentajeComision
+    ]]></queryString>
+    <field name="codigoCobrador" class="java.lang.Integer"/>
+    <field name="cobrador" class="java.lang.String"/>
+    <field name="nombreComision" class="java.lang.String"/>
+    <field name="porcentajeComision" class="java.math.BigDecimal"/>
+    <field name="cantidadComprobantes" class="java.lang.Long"/>
+    <field name="totalCobrado" class="java.math.BigDecimal"/>
+    <field name="importeComision" class="java.math.BigDecimal"/>
+    <variable name="totalComprobantes" class="java.lang.Long" calculation="Sum"><variableExpression><![CDATA[$F{cantidadComprobantes}]]></variableExpression></variable>
+    <variable name="totalCobradoGeneral" class="java.math.BigDecimal" calculation="Sum"><variableExpression><![CDATA[$F{totalCobrado}]]></variableExpression></variable>
+    <variable name="totalComisionGeneral" class="java.math.BigDecimal" calculation="Sum"><variableExpression><![CDATA[$F{importeComision}]]></variableExpression></variable>
+    <title>
+        <band height="78">
+            <staticText><reportElement x="0" y="0" width="555" height="22"/><textElement textAlignment="Center"><font size="15" isBold="true"/></textElement><text><![CDATA[REPORTE DE COMISIONES POR COBRADOR]]></text></staticText>
+            <textField><reportElement x="0" y="25" width="555" height="16"/><textElement textAlignment="Center"><font size="10" isBold="true"/></textElement><textFieldExpression><![CDATA["Comision: " + $P{comisionSeleccionada}]]></textFieldExpression></textField>
+            <textField><reportElement x="0" y="43" width="555" height="16"/><textElement textAlignment="Center"><font size="9"/></textElement><textFieldExpression><![CDATA["Periodo: " + $P{desde} + " al " + $P{hasta}]]></textFieldExpression></textField>
+            <textField pattern="dd/MM/yyyy HH:mm"><reportElement x="390" y="60" width="165" height="12"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression></textField>
+            <line><reportElement x="0" y="74" width="555" height="1"/></line>
+        </band>
+    </title>
+    <columnHeader>
+        <band height="32">
+            <staticText><reportElement x="0" y="5" width="205" height="20"/><textElement><font size="9" isBold="true"/></textElement><text><![CDATA[COBRADOR]]></text></staticText>
+            <staticText><reportElement x="205" y="5" width="65" height="20"/><textElement textAlignment="Center"><font size="9" isBold="true"/></textElement><text><![CDATA[FACTURAS]]></text></staticText>
+            <staticText><reportElement x="270" y="5" width="105" height="20"/><textElement textAlignment="Right"><font size="9" isBold="true"/></textElement><text><![CDATA[TOTAL COBRADO]]></text></staticText>
+            <staticText><reportElement x="375" y="5" width="75" height="20"/><textElement textAlignment="Center"><font size="9" isBold="true"/></textElement><text><![CDATA[COMISION]]></text></staticText>
+            <staticText><reportElement x="450" y="5" width="105" height="20"/><textElement textAlignment="Right"><font size="9" isBold="true"/></textElement><text><![CDATA[IMP. COMISION]]></text></staticText>
+            <line><reportElement x="0" y="29" width="555" height="1"/></line>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="25">
+            <textField textAdjust="ScaleFont"><reportElement x="0" y="2" width="205" height="20"/><textElement><font size="9"/></textElement><textFieldExpression><![CDATA[$F{cobrador}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="205" y="2" width="65" height="20"/><textElement textAlignment="Center"><font size="9"/></textElement><textFieldExpression><![CDATA[$F{cantidadComprobantes}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="270" y="2" width="105" height="20"/><textElement textAlignment="Right"><font size="9"/></textElement><textFieldExpression><![CDATA[$F{totalCobrado}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.##'%'"><reportElement x="375" y="2" width="75" height="20"/><textElement textAlignment="Center"><font size="9"/></textElement><textFieldExpression><![CDATA[$F{porcentajeComision}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="450" y="2" width="105" height="20"/><textElement textAlignment="Right"><font size="9" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{importeComision}]]></textFieldExpression></textField>
+        </band>
+    </detail>
+    <summary>
+        <band height="48">
+            <line><reportElement x="0" y="5" width="555" height="1"/></line>
+            <staticText><reportElement x="0" y="12" width="205" height="20"/><textElement><font size="10" isBold="true"/></textElement><text><![CDATA[TOTALES GENERALES]]></text></staticText>
+            <textField pattern="#,##0"><reportElement x="205" y="12" width="65" height="20"/><textElement textAlignment="Center"><font size="10" isBold="true"/></textElement><textFieldExpression><![CDATA[$V{totalComprobantes}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="270" y="12" width="105" height="20"/><textElement textAlignment="Right"><font size="10" isBold="true"/></textElement><textFieldExpression><![CDATA[$V{totalCobradoGeneral}]]></textFieldExpression></textField>
+            <textField pattern="#,##0"><reportElement x="450" y="12" width="105" height="20"/><textElement textAlignment="Right"><font size="10" isBold="true"/></textElement><textFieldExpression><![CDATA[$V{totalComisionGeneral}]]></textFieldExpression></textField>
+        </band>
+    </summary>
+</jasperReport>

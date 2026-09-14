@@ -1,0 +1,40 @@
+.manzana-page { max-width: 1050px; }
+.manzana-card { overflow: hidden; border: 1px solid rgba(108,117,125,.18); border-radius: .85rem; background: #fff; box-shadow: 0 .7rem 2rem rgba(26,35,44,.1); }
+.manzana-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; background: var(--btn-color); color: #fff; }
+.manzana-kicker { display: block; margin-bottom: .15rem; font-size: .7rem; font-weight: 700; letter-spacing: .08em; opacity: .8; text-transform: uppercase; }
+.manzana-header h3, .manzana-header p { margin: 0; }
+.manzana-header h3 { font-size: 1.4rem; font-weight: 700; }
+.manzana-header p { margin-top: .3rem; opacity: .82; }
+.manzana-header-icon { display: grid; width: 3.5rem; height: 3.5rem; place-items: center; border: 1px solid rgba(255,255,255,.25); border-radius: 50%; background: rgba(255,255,255,.12); font-size: 1.6rem; }
+.manzana-body { padding: 1.3rem; background: #f7f8fa; }
+.manzana-contexto, .manzana-form, .manzana-tabla-card { margin: 0 0 1rem; padding: 1.1rem; border: 1px solid rgba(108,117,125,.16); border-radius: .65rem; background: #fff; }
+.manzana-contexto small, .manzana-contexto strong { display: block; }
+.manzana-contexto small { color: #737b82; font-size: .7rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.manzana-contexto strong { margin-top: .15rem; color: #343b42; }
+.manzana-form .form-label, .manzana-modal .form-label { color: #555d64; font-size: .73rem; font-weight: 700; letter-spacing: .025em; text-transform: uppercase; }
+.manzana-form .form-control, .manzana-modal .form-control, .manzana-modal .form-select { min-height: 2.7rem; border-color: rgba(108,117,125,.32); border-radius: .5rem; box-shadow: none; }
+.manzana-form .form-control:focus, .manzana-modal .form-select:focus { border-color: var(--btn-color); box-shadow: 0 0 0 .18rem rgba(108,117,125,.16); }
+.manzana-form .form-text { display: block; margin-top: .3rem; color: #747d85; }
+.manzana-guardar { min-height: 2.7rem; }
+.manzana-tabla-card { padding: 0; overflow: hidden; margin-bottom: 0; }
+.manzana-tabla-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.1rem; border-bottom: 1px solid rgba(108,117,125,.16); }
+.manzana-tabla-header h4, .manzana-tabla-header p { margin: 0; }
+.manzana-tabla-header h4 { color: #394047; font-size: 1rem; font-weight: 700; }
+.manzana-tabla-header p { margin-top: .15rem; color: #737b82; font-size: .84rem; }
+.manzana-contador { min-width: 2rem; border-radius: 1rem; background: var(--btn-color); color: #fff; }
+#tablaManzana thead th { border-bottom: 0; background: rgba(108,117,125,.1); color: #555d64; font-size: .72rem; letter-spacing: .03em; text-transform: uppercase; }
+.manzana-numero { display: inline-grid; min-width: 2.2rem; min-height: 2.2rem; place-items: center; border-radius: 50%; background: rgba(13,110,253,.09); color: #365a7c; font-weight: 700; }
+.manzana-footer { display: flex; padding: 1rem 1.3rem; border-top: 1px solid rgba(108,117,125,.18); }
+.manzana-modal { overflow: hidden; border: 0; border-radius: .75rem; }
+.manzana-modal-header { background: var(--btn-color); color: #fff; }
+.manzana-modal-header .btn-close { filter: brightness(0) invert(1); }
+.manzana-modal-body { padding: 1.25rem; background: #f7f8fa; }
+.manzana-modal-nota { margin-top: 1rem; padding: .8rem; border-radius: .5rem; background: rgba(13,110,253,.07); color: #53606b; font-size: .86rem; }
+.manzana-modal-nota i { margin-right: .35rem; color: var(--btn-color); }
+.manzana-modal-footer { background: #fff; }
+@media (max-width: 767.98px) {
+    .manzana-page { padding-right: .65rem; padding-left: .65rem; }
+    .manzana-header, .manzana-body { padding: 1rem; }
+    .manzana-header p, .manzana-header-icon { display: none; }
+    .manzana-contexto, .manzana-form { padding: 1rem; }
+}

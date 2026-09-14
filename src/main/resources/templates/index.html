@@ -2,24 +2,148 @@
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
       xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head  th:replace="~{layout/layout :: heat}"> </head>
+    <link rel="stylesheet" th:href="@{/css/reportes/ingresos-v2.css}">
 
-</head>
-<body> 
-     
-    <header  th:replace="~{layout/layout :: header}"> </header>
-    
+    <body>
+        <header th:replace="~{layout/layout :: header}"></header>
         <aside th:replace="~{layout/layout :: aside}"></aside>
 
-    <div th:if="${info}" class="mensaje-alerta alert alert-success">
-        <span th:text="${info}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${error}" class="mensaje-alerta alert alert-danger">
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+        <main sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')" id="ingresosV2" class="container-fluid">
+            <div th:if="${info}" class="mensaje-alerta alert alert-success">
+                <span th:text="${info}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            <div th:if="${error}" class="mensaje-alerta alert alert-danger">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
 
-    <footer th:replace="~{layout/layout :: footer}"></footer>
-</body>
+            <div class="card-header ingresos-v2-main-header">
+                <a class="btn ingresos-v2-comparativo-link" th:href="@{/reporte/ingresos-v2/comparativo}">
+                    <i class="fa-solid fa-chart-simple"></i> Comparativo
+                </a>
+            </div>
+
+            <div id="mensajeIngresosV2" class="mt-2" aria-live="polite"></div>
+
+            <section class="ingresos-v2-panel">
+                <div class="row g-4">
+                    <div class="col-xl-8">
+                        <section class="ingresos-v2-card h-100">
+                            <div class="ingresos-v2-card-header">
+                                <div>
+                                    <h4>Ingresos por período</h4>
+                                    <p>Comprobantes activos emitidos en su sucursal.</p>
+                                </div>
+                                <i class="fa-solid fa-chart-column ingresos-v2-icon" aria-hidden="true"></i>
+                            </div>
+
+                            <div class="ingresos-v2-tabs" role="tablist" aria-label="Período del gráfico">
+                                <button type="button" class="btn ingresos-v2-tab active" data-periodo="dia">
+                                    <i class="fa-regular fa-calendar-days"></i> Día
+                                </button>
+                                <button type="button" class="btn ingresos-v2-tab" data-periodo="mes">
+                                    <i class="fa-regular fa-calendar"></i> Mes
+                                </button>
+                                <button type="button" class="btn ingresos-v2-tab" data-periodo="anio">
+                                    <i class="fa-solid fa-calendar-days"></i> Año
+                                </button>
+                            </div>
+
+                            <div class="row g-3 ingresos-v2-filtros">
+                                <div id="bloqueMesIngresosV2" class="col-sm-6">
+                                    <label for="ingresoMes">Mes</label>
+                                    <select id="ingresoMes" class="form-select">
+                                        <option value="1" th:selected="${mesActual == 1}">Enero</option>
+                                        <option value="2" th:selected="${mesActual == 2}">Febrero</option>
+                                        <option value="3" th:selected="${mesActual == 3}">Marzo</option>
+                                        <option value="4" th:selected="${mesActual == 4}">Abril</option>
+                                        <option value="5" th:selected="${mesActual == 5}">Mayo</option>
+                                        <option value="6" th:selected="${mesActual == 6}">Junio</option>
+                                        <option value="7" th:selected="${mesActual == 7}">Julio</option>
+                                        <option value="8" th:selected="${mesActual == 8}">Agosto</option>
+                                        <option value="9" th:selected="${mesActual == 9}">Septiembre</option>
+                                        <option value="10" th:selected="${mesActual == 10}">Octubre</option>
+                                        <option value="11" th:selected="${mesActual == 11}">Noviembre</option>
+                                        <option value="12" th:selected="${mesActual == 12}">Diciembre</option>
+                                    </select>
+                                </div>
+                                <div id="bloqueAnioIngresosV2" class="col-sm-6">
+                                    <label for="ingresoAnio">Año</label>
+                                    <select id="ingresoAnio" class="form-select">
+                                        <option th:each="anio : ${aniosIngresos}"
+                                                th:value="${anio}"
+                                                th:text="${anio}"
+                                                th:selected="${anio == anioActual}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="ingresos-v2-chart-wrap">
+                                <canvas id="graficoIngresosPeriodo" aria-label="Gráfico de ingresos por período"></canvas>
+                                <p id="sinIngresosV2" class="ingresos-v2-sin-datos d-none">No existen comprobantes activos para el período seleccionado.</p>
+                            </div>
+
+                            <div class="row g-3 ingresos-v2-resumen">
+                                <div class="col-md-4">
+                                    <div class="ingresos-v2-metrica">
+                                        <span>Total facturado</span>
+                                        <strong id="totalIngresosV2">Gs. 0</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ingresos-v2-metrica">
+                                        <span>Promedio por período</span>
+                                        <strong id="promedioIngresosV2">Gs. 0</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ingresos-v2-metrica">
+                                        <span>Mayor ingreso</span>
+                                        <strong id="maximoIngresosV2">Gs. 0</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="col-xl-4">
+                        <section class="ingresos-v2-card ingresos-v2-torta h-100">
+                            <div class="ingresos-v2-card-header">
+                                <div>
+                                    <h4>Distribución por cobrador</h4>
+                                    <p>Participación de cada cobrador en los ingresos.</p>
+                                </div>
+                                <i class="fa-solid fa-chart-pie ingresos-v2-icon" aria-hidden="true"></i>
+                            </div>
+                            <div class="ingresos-v2-torta-wrap">
+                                <canvas id="graficoIngresosCobrador" aria-label="Gráfico circular de ingresos por cobrador"></canvas>
+                                <p id="sinCobradoresIngresosV2" class="ingresos-v2-sin-datos d-none">No existen datos para mostrar.</p>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-lg-8">
+                        <section class="ingresos-v2-card">
+                            <div class="ingresos-v2-card-header">
+                                <div>
+                                    <h4>Ingresos por medios de pago</h4>
+                                    <p>Comparación por día, mes o año con los filtros seleccionados arriba.</p>
+                                </div>
+                                <i class="fa-solid fa-chart-column ingresos-v2-icon" aria-hidden="true"></i>
+                            </div>
+                            <div class="ingresos-v2-chart-wrap">
+                                <canvas id="graficoIngresosMedioPago" aria-label="Comparativa de ingresos por medio de pago y período"></canvas>
+                                <p id="sinMediosIngresosV2" class="ingresos-v2-sin-datos d-none">No existen pagos registrados para el período seleccionado.</p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+        <script th:src="@{/js/reportes/ingresos-v2.js}"></script>
+    </body>
 
 </html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" th:href="@{/css/comprobantes/factura-manual.css}">
+    <link rel="stylesheet" href="/css/comprobantesv2/estilo.css">
+    <body>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
+
+        <main id="comprobantesV2" class="container-fluid">
+            <div class="card-header d-flex justify-content-between align-items-center gap-2">
+                <h3 class="form-title mb-0">Comprobantes</h3>
+                <a class="btn btn-outline-secondary" th:href="@{/comprobantes-v2/auditoria}"
+                   sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Ver auditoría
+                </a>
+            </div>
+
+            <div id="mensajeComprobantesV2" aria-live="polite"></div>
+
+            <section class="v2-filtros row g-2 my-2">
+                <div class="col-md-2"><label class="v2-filter-label" for="fNumero">Comprobante</label><input id="fNumero" class="form-control" inputmode="numeric" placeholder="Nro. comprobante"></div>
+                <div class="col-md-2"><label class="v2-filter-label" for="fCuenta">Cuenta corriente</label><input id="fCuenta" class="form-control" placeholder="Cuenta corriente"></div>
+                <div class="col-md-2"><label class="v2-filter-label" for="fDocumento">Documento</label><input id="fDocumento" class="form-control" placeholder="RUC / CI"></div>
+                <div class="col-md-2"><label class="v2-filter-label" for="fNombre">USUARIO</label><input id="fNombre" class="form-control" placeholder="Nombre o razon social"></div>
+                <div class="col-md-2"><label class="v2-filter-label" for="fDesde">Desde</label><input id="fDesde" type="text" class="form-control"></div>
+                <div class="col-md-2"><label class="v2-filter-label" for="fHasta">Hasta</label><input id="fHasta" type="text" class="form-control"></div>
+            </section>
+
+            <div class="v2-tabla-card card border-0 shadow-sm p-3">
+                <table id="tablaComprobantesV2" class="table table-striped table-hover align-middle small w-100">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th><th>Punto</th><th>N&#250;mero</th><th>Cuenta</th><th>Usuario</th>
+                            <th>Fecha</th><th>Importe</th><th>Estado</th><th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </main>
+
+        <div class="modal fade" id="detalleComprobanteV2" tabindex="-1" aria-labelledby="tituloDetalleComprobanteV2" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                <div class="modal-content detalle-v2-modal">
+                    <div class="modal-header">
+                        <h3 id="tituloDetalleComprobanteV2" class="form-title">Detalle de comprobante</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div id="contenidoDetalleComprobanteV2" class="detalle-v2-body"></div>
+                    <div class="modal-footer detalle-v2-footer">
+                        <button type="button" class="btn detalle-v2-cerrar" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-xmark"></i> Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editarComprobanteV2" tabindex="-1" aria-labelledby="tituloEditarComprobanteV2" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
+                <form id="formEditarComprobanteV2" class="modal-content editar-v2-modal">
+                    <div class="modal-header">
+                        <h3 id="tituloEditarComprobanteV2" class="form-title">Editar comprobante</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body editar-v2-body">
+                        <div class="editar-v2-identificador">
+                            <span>Comprobante seleccionado</span>
+                            <strong id="editarIdentificadorV2"></strong>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="editarNumeroComprobanteV2">N&#250;mero de comprobante</label>
+                                <input id="editarNumeroComprobanteV2" class="form-control" type="number" min="1" max="9999999" step="1" readonly required>
+                                <small id="ayudaNumeroComprobanteV2" class="form-text text-muted"></small>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="editarCuentaV2">Cuenta corriente</label>
+                                <input id="editarCuentaV2" class="form-control" maxlength="45" readonly required>
+                                <small id="ayudaCuentaV2" class="form-text text-muted"></small>
+                            </div>
+                            <div class="col-md-3"><label for="editarDocumentoV2">RUC / CI</label><input id="editarDocumentoV2" class="form-control" readonly></div>
+                            <div class="col-md-6">
+                                <label for="editarRazonSocialV2">Raz&#243;n social</label>
+                                <input id="editarCodigoUsuarioV2" type="hidden">
+                                <input id="editarRazonSocialV2" class="form-control" maxlength="255"
+                                       placeholder="Busque por RUC/CI o nombre" autocomplete="off" required>
+                                <small class="form-text text-muted">Seleccione una sugerencia para cambiar el usuario del comprobante.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editarFechaPagoV2">Fecha de pago</label>
+                                <div class="editar-v2-input-wrap">
+                                    <i class="fa-regular fa-calendar-days" aria-hidden="true"></i>
+                                    <input id="editarFechaPagoV2" class="form-control" type="text" autocomplete="off" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4"><label for="editarPagoDesdeV2">Pago desde</label><input id="editarPagoDesdeV2" class="form-control" type="text" autocomplete="off"></div>
+                            <div class="col-md-4"><label for="editarPeriodoV2">Per&#237;odo de pago</label><input id="editarPeriodoV2" class="form-control" maxlength="100"></div>
+                            <div class="col-md-3"><label for="editarCantidadDeudaV2">Cantidad de deuda</label><input id="editarCantidadDeudaV2" class="form-control" type="number" readonly="" step="1"></div>
+                            <div class="col-md-3"><label for="editarCantidadPagoV2">Cantidad de pagos</label><input id="editarCantidadPagoV2" class="form-control" type="number" min="0" step="1" required></div>
+                            <div class="col-md-3"><label for="editarTarifaV2">Tarifa</label><input id="editarTarifaV2" class="form-control" type="number" min="0" step="0.01" disabled></div>
+                            <div class="col-md-3"><label for="editarSubtotalV2">Subtotal</label><input id="editarSubtotalV2" class="form-control" type="number" step="0.01" ></div>
+                            <div class="col-md-3"><label for="editarRecargoV2">Recargo</label><input id="editarRecargoV2" class="form-control" type="number" min="0" step="0.01" required></div>
+                            <div class="col-md-3"><label for="editarImporteV2">Importe total</label><input id="editarImporteV2" class="form-control" type="number" min="0" step="0.01" required></div>
+                            <div class="col-md-3"><label for="editarSaldoV2">Saldo a favor</label><input id="editarSaldoV2" class="form-control" type="number" min="0" step="0.01"  required></div>
+                            <div class="col-md-3">
+                                <label for="editarCategoriaV2">Categor&#237;a</label>
+                                <select id="editarCategoriaV2" class="form-select" required>
+                                    <option th:each="categoria : ${categoriasEdicion}"
+                                            th:value="${categoria.codigoCategoria}"
+                                            th:data-tarifa="${categoria.tarifa}"
+                                            th:text="${categoria.nombreCategoria + ' — Gs. ' + #numbers.formatDecimal(categoria.tarifa, 0, 'POINT', 0, 'COMMA')}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="editarCondicionVentaV2">Condici&#243;n de venta</label>
+                                <select id="editarCondicionVentaV2" class="form-select" required>
+                                    <option th:each="condicion : ${condicionesVentaEdicion}" th:value="${condicion.codigoCondicionVenta}" th:text="${condicion.condicionVenta}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="editarEstadoV2">Estado</label>
+                                <div class="editar-v2-input-wrap">
+                                    <i class="fa-solid fa-toggle-on" aria-hidden="true"></i>
+                                    <select id="editarEstadoV2" class="form-select" required>
+                                        <option th:each="estado : ${estadosEdicion}"
+                                                th:value="${estado.codigoEstado}"
+                                                th:text="${estado.estado}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editarCobradorV2">Cobrador</label>
+                                <div class="editar-v2-input-wrap">
+                                    <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+                                    <select id="editarCobradorV2" class="form-select" required>
+                                        <option th:each="cobrador : ${cobradoresEdicion}"
+                                                th:value="${cobrador.codigoCobrador}"
+                                                th:text="${cobrador.nombreCompleto}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="detalle-pago-resumen-v2">
+                                    <div>
+                                        <span>Forma de pago</span>
+                                        <strong id="resumenPagosEdicionV2">Sin detalle cargado</strong>
+                                    </div>
+                                    <button id="mostrarEdicionPagosV2" type="button" class="btn btn-outline-secondary">
+                                        <i class="fa-regular fa-pen-to-square"></i> Editar detalle de pago
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-12 d-none" id="configModal">
+                                <div class="factura-seccion-titulo mb-3">
+                                    <span class="factura-seccion-icon"><i class="fa-solid fa-wallet"></i></span>
+                                    <div><h4>Forma de pago</h4><p>Seleccione un m&#233;todo o distribuya el importe.</p></div>
+                                </div>
+                                <section class="factura-config-carga">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="editarMetodoPagoSelectV2">M&#233;todo de pago</label>
+                                            <select class="form-select" id="editarMetodoPagoSelectV2">
+                                                <option th:each="metodo : ${metodosPagoEdicion}"
+                                                        th:value="${metodo.codigoMetodoPago}"
+                                                        th:text="${metodo.metodoPago}"></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="editarImportePagoV2">Importe</label>
+                                            <div class="factura-agregar-pago">
+                                                <input class="form-control" type="number" min="0.01" step="0.01"
+                                                       id="editarImportePagoV2" placeholder="Ingrese importe">
+                                                <button id="agregarPagoComprobanteV2" type="button" class="btn factura-agregar" title="Agregar medio de pago">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                                <section class="factura-config-listado">
+                                    <div class="factura-config-listado-titulo">
+                                        <div><h4>Detalle de pago</h4><p>Verifique los medios cargados antes de guardar.</p></div>
+                                    </div>
+                                    <div class="table-responsive factura-tabla-pagos">
+                                        <table id="tablaPagosEdicionV2" class="table table-striped table-hover align-middle mb-0">
+                                            <thead><tr><th>#</th><th>M&#233;todo de pago</th><th>Importe</th><th>Acciones</th></tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                                <div class="factura-config-total">
+                                    <div><label for="totalPagosEdicionV2">Total distribuido</label><small>Suma de los medios agregados.</small></div>
+                                    <input readonly class="form-control" type="text" id="totalPagosEdicionV2">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="editarObservacionV2">Observación</label>
+                                <textarea id="editarObservacionV2" class="form-control" placeholder="Ingrese una observación" rows="4" maxlength="500"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer editar-v2-footer">
+                        <button type="button" class="btn editar-v2-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="guardarEdicionComprobanteV2" type="button" class="btn editar-v2-guardar">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal fade" id="anularComprobanteV2" tabindex="-1" aria-labelledby="tituloAnularComprobanteV2" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <form id="formAnularComprobanteV2" class="modal-content anular-v2-modal">
+                    <div class="modal-header">
+                        <h3 id="tituloAnularComprobanteV2" class="form-title">Anular comprobante</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="anular-v2-body">
+                        <div class="anular-v2-advertencia">
+                            <span class="anular-v2-icon" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                            <div>
+                                <h4>Confirme la anulación</h4>
+                                <p>Esta acción no se puede deshacer. El comprobante dejará de estar vigente.</p>
+                            </div>
+                        </div>
+                        <div class="anular-v2-identificador">
+                            <span>Comprobante seleccionado</span>
+                            <strong id="anularIdentificadorV2"></strong>
+                        </div>
+                        <div class="anular-v2-motivo">
+                            <label for="motivoAnulacionV2">Motivo de anulación</label>
+                            <textarea id="motivoAnulacionV2" class="form-control" placeholder="Explique el motivo de la anulación" rows="4" maxlength="500" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer anular-v2-footer">
+                        <button type="button" class="btn anular-v2-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="confirmarAnulacionV2" type="submit" class="btn anular-v2-confirmar">
+                            <i class="fa-solid fa-ban"></i> Anular comprobante
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal fade" id="formatoImpresionComprobanteV2" tabindex="-1"
+             aria-labelledby="tituloFormatoImpresionV2" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="tituloFormatoImpresionV2" class="form-title">Formato de impresión</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label" for="formatoComprobanteV2">Papel de impresión</label>
+                        <select class="form-select" id="formatoComprobanteV2" name="formatoComprobanteV2">
+                            <option value="58mm">Ticket térmico 58 mm</option>
+                            <option value="80mm">Ticket térmico 80 mm</option>
+                            <option value="a4">Comprobante A4</option>
+                        </select>
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="recordarFormatoComprobanteV2" checked>
+                            <label class="form-check-label" for="recordarFormatoComprobanteV2">Recordar este formato para próximas impresiones</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="confirmarFormatoImpresionV2">
+                            <i class="fa-solid fa-print"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="/js/comprobantesv2/tabla.js"></script>
+        <script type="module">
+            import {datePickerInit} from '/js/modulos.js';
+            
+            datePickerInit($("#fDesde"));
+            datePickerInit($("#fHasta"));
+            datePickerInit($("#editarFechaPagoV2"));
+            datePickerInit($("#editarPagoDesdeV2"));
+        </script>
+    </body>
+</html>

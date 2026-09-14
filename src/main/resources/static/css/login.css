@@ -1,0 +1,211 @@
+body.login-page {
+    min-height: 100vh;
+    color: #30363b;
+    background: #e5e8ec;
+}
+
+.login-page .login-layout {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem 1.2rem;
+}
+
+.login-page .login-card {
+    display: grid;
+    width: min(100%, 54rem);
+    grid-template-columns: minmax(15rem, .88fr) minmax(19rem, 1.12fr);
+    overflow: hidden;
+    border: 1px solid rgba(108, 117, 125, .2);
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 1rem 2.6rem rgba(33, 37, 41, .2);
+}
+
+.login-page .login-brand {
+    display: flex;
+    min-height: 29rem;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2.6rem;
+    background-color: var(--btn-color);
+    color: #fff;
+}
+
+.login-page .login-brand-icon {
+    display: grid;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 1.55rem;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .4);
+    border-radius: .8rem;
+    background: rgba(255, 255, 255, .13);
+    font-size: 1.45rem;
+}
+
+.login-page .login-brand-label {
+    margin: 0 0 .3rem;
+    color: rgba(255, 255, 255, .74);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.login-page .login-brand h1 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(1.7rem, 4vw, 2.25rem);
+    font-weight: 800;
+}
+
+.login-page .login-brand-text {
+    max-width: 16rem;
+    margin: .8rem 0 0;
+    color: rgba(255, 255, 255, .83);
+    font-size: .92rem;
+    line-height: 1.6;
+}
+
+.login-page .login-form-panel {
+    padding: 2.6rem;
+}
+
+.login-page .login-heading {
+    margin-bottom: 1.65rem;
+}
+
+.login-page .login-heading h2 {
+    margin: 0;
+    color: #343a40;
+    font-size: 1.55rem;
+    font-weight: 800;
+}
+
+.login-page .login-heading p {
+    margin: .35rem 0 0;
+    color: #6c757d;
+    font-size: .9rem;
+}
+
+.login-page .mensaje-alerta {
+    position: static;
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin: 0 0 1rem;
+    padding: .72rem .82rem;
+    border-radius: .55rem;
+    font-size: .86rem;
+    text-align: left;
+}
+
+.login-page .mensaje-alerta .btn-close {
+    margin-left: auto;
+    padding: .4rem;
+}
+
+.login-page .login-field {
+    margin-bottom: 1.1rem;
+}
+
+.login-page .login-field label {
+    display: block;
+    margin: 0 0 .4rem .08rem;
+    color: #4d555c;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.login-page .login-input-wrap {
+    position: relative;
+}
+
+.login-page .login-input-wrap > i {
+    position: absolute;
+    top: 50%;
+    left: .9rem;
+    z-index: 1;
+    color: #7a838c;
+    transform: translateY(-50%);
+}
+
+.login-page .login-input-wrap .form-control {
+    min-height: 2.8rem;
+    padding-left: 2.55rem;
+    border-color: rgba(108, 117, 125, .36);
+    border-radius: .55rem;
+    font-size: .95rem;
+}
+
+.login-page .login-input-wrap .form-control:focus {
+    border-color: var(--btn-color);
+    box-shadow: 0 0 0 .16rem rgba(108, 117, 125, .18);
+}
+
+.login-page .login-submit {
+    display: flex;
+    min-height: 2.85rem;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    margin-top: .45rem;
+    border: 0;
+    border-radius: .55rem;
+    background: var(--btn-color);
+    color: #fff;
+    font-weight: 700;
+    transition: background-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+
+.login-page .login-submit:hover,
+.login-page .login-submit:focus {
+    background: #565f67;
+    color: #fff;
+    box-shadow: 0 .35rem .75rem rgba(33, 37, 41, .2);
+    transform: translateY(-1px);
+}
+
+.login-page .login-copyright {
+    margin: 1.1rem 0 0;
+    color: #6c757d;
+    font-size: .78rem;
+}
+
+.login-page footer > .footer {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+    .login-page .login-layout {
+        justify-content: flex-start;
+        padding-top: 1.4rem;
+    }
+
+    .login-page .login-card {
+        grid-template-columns: 1fr;
+    }
+
+    .login-page .login-brand {
+        min-height: auto;
+        padding: 1.7rem 1.6rem;
+    }
+
+    .login-page .login-brand-icon {
+        width: 2.7rem;
+        height: 2.7rem;
+        margin-bottom: .9rem;
+        font-size: 1.2rem;
+    }
+
+    .login-page .login-brand-text {
+        margin-top: .45rem;
+    }
+
+    .login-page .login-form-panel {
+        padding: 1.7rem 1.45rem;
+    }
+}

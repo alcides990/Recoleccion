@@ -18,7 +18,6 @@ public class Cobrador implements Serializable {
     private Integer codigoCobrador;
     @NotEmpty
     private String nombre;
-    @NotEmpty
     private String apellido;
     private String celular;
     private String direccion;

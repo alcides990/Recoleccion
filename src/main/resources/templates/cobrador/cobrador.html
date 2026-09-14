@@ -1,70 +1,61 @@
 <!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:th="http://www.thymeleaf.org">
-    <head  th:replace="~{layout/layout :: heat}"> </head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" href="/css/cobrador/formulario.css">
     <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container ">
-            <h3 class="card-header">Cobradores</h3>
-            <a th:href="@{/cobrador/agregar}" class="btn btn-primario btn-sm mb-3">
-                <i class="fa-solid fa-plus fa-xl"></i>
-                Agregar </a>
-            <div class="mensaje-alerta" id="contenedor-alertas"></div>
-            <div th:if="${info}" class="mensaje-alerta alert alert-success">
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
+
+        <main id="listaCobradores" class="container-fluid py-3">
+            <section class="cobrador-list-header">
+                <div>
+                    <span class="cobrador-list-kicker">Equipo de cobranza</span>
+                    <h3>Cobradores</h3>
+                    <p>Administre los cobradores asignados a su sucursal.</p>
+                </div>
+                <a th:href="@{/cobrador/agregar}" class="btn cobrador-list-agregar">
+                    <i class="fa-solid fa-user-plus"></i> Agregar cobrador
+                </a>
+            </section>
+
+            <div id="contenedor-alertas" class="mensaje-alerta mt-3" aria-live="polite"></div>
+            <div th:if="${info}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                <i class="fa-solid fa-circle-check me-1"></i>
                 <span th:text="${info}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <div class="table-responsive-md ">
-                <table id="tabla" class="table table-dark table-border table-striped table-colapse table-hover table-md" >
-                    <thead>
-                        <tr>
-                            <th>Codigo</th>
-                            <th>Nombre</th>
-                            <th>Apellido</th>
-                            <th>Celular</th>
-                            <th>Direccion</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-secondary">
-                        <tr th:each="cobrador : ${cobradores}">
-                            <td th:text="${cobrador.codigoCobrador}">  </td>
-                            <td th:text="${cobrador.nombre}">   </td>
-                            <td th:text="${cobrador.apellido}" >   </td>
-                            <td th:text="${cobrador.celular}"></td>
-                            <td th:text="${cobrador.direccion}"></td>
-                            <td th:text="${cobrador.estado.estado}"></td>
-                            <td>
-                                <a th:href="@{/cobrador/editar/} + ${cobrador.codigoCobrador}" 
-                                   class="btn btn-info btn-sm me-2"/>
-                                <i class="fa-solid fa-pen-to-square"></i>
-                                <a id="eliminar" data-url="/cobrador/eliminar/" th:data-id="${cobrador.codigoCobrador}"
-                                   class="btn btn-danger eliminar btn-sm" >
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
             </div>
 
-        </div>
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
-        <script>
-            //Lamara al metodo eliminar al hacer click en el boton eliminar
-            $(document).ready(function () {
-//                Llamar al metodo eliminar al cargar documento 
-                eliminar('Seguro que desea eliminar este cobrador');
-//                Cargar idioma español a la tabla paginado con Jquerry data
-                $('#tabla').DataTable({
-                    language: {
-                        url: '/i18n/es-ES.json'
-                    }
-                });
-            });
+            <section class="cobrador-list-card">
+                <div class="cobrador-list-summary">
+                    <div>
+                        <h4>Cobradores registrados</h4>
+                        <p>Busque por nombre, celular, dirección o estado.</p>
+                    </div>
+                    <span id="cobradorTotal" class="badge cobrador-list-count">0</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="tablaCobradores" class="table table-striped table-hover align-middle w-100">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Cobrador</th>
+                                <th>Celular</th>
+                                <th>Dirección</th>
+                                <th>Estado</th>
+                                <th>Sucursal - Ciudad</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="/js/cobrador/tabla.js"></script>
+        <script type="module">
+            import {eliminar} from '/js/modulos.js';
+            eliminar('¿Seguro que desea eliminar este cobrador?');
         </script>
     </body>
-
 </html>

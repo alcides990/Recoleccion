@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" th:href="@{/css/reportes/formulario.css}">
+    <link rel="stylesheet" th:href="@{/css/reportes/ingresos-v2.css}">
+    <body>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
+
+        <main id="ingresosV2" class="container-fluid">
+            <div class="card-header">
+                <h3 class="form-title">Comparativo de cobranza</h3>
+            </div>
+
+            <section class="ingresos-v2-panel">
+                <div class="ingresos-v2-card comparativo-card">
+                    <div class="row g-3 ingresos-v2-filtros align-items-end">
+                        <div class="col-md-3 col-xl-2">
+                            <label for="comparativoTipo">Período</label>
+                            <select id="comparativoTipo" class="form-select">
+                                <option value="mes">Mensual</option>
+                                <option value="anio">Anual</option>
+                                <option value="rango">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-xl-2">
+                            <label for="comparativoMetrica">Métrica</label>
+                            <select id="comparativoMetrica" class="form-select">
+                                <option value="importe">Monto</option>
+                                <option value="cantidad">Cantidad de facturas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-xl-2">
+                            <label for="comparativoAgrupacion">Agrupar por</label>
+                            <select id="comparativoAgrupacion" class="form-select">
+                                <option value="ZONA">Zona</option>
+                                <option value="COBRADOR">Cobrador</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-xl-2">
+                            <label for="comparativoEntidad">Mostrar</label>
+                            <select id="comparativoEntidad" class="form-select">
+                                <option value="">Total general</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-xl-2">
+                            <label for="comparativoColorA">Color A</label>
+                            <input id="comparativoColorA" class="form-control form-control-color comparativo-color" type="color" value="#6c757d">
+                        </div>
+                        <div class="col-md-3 col-xl-2">
+                            <label for="comparativoColorB">Color B</label>
+                            <input id="comparativoColorB" class="form-control form-control-color comparativo-color" type="color" value="#bca007">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 ingresos-v2-filtros comparativo-periodos comparativo-periodos-mes">
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="comparativoMesA">Período A</label>
+                            <input id="comparativoMesA" class="form-control" type="month">
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="comparativoMesB">Período B</label>
+                            <input id="comparativoMesB" class="form-control" type="month">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 ingresos-v2-filtros comparativo-periodos comparativo-periodos-anio d-none">
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="comparativoAnioA">Año A</label>
+                            <input id="comparativoAnioA" class="form-control" type="number" min="2000" max="2100">
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="comparativoAnioB">Año B</label>
+                            <input id="comparativoAnioB" class="form-control" type="number" min="2000" max="2100">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 ingresos-v2-filtros comparativo-periodos comparativo-periodos-rango d-none">
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="comparativoDesdeA">Desde A</label>
+                            <input id="comparativoDesdeA" class="form-control" type="text" autocomplete="off">
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="comparativoHastaA">Hasta A</label>
+                            <input id="comparativoHastaA" class="form-control" type="text" autocomplete="off">
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="comparativoDesdeB">Desde B</label>
+                            <input id="comparativoDesdeB" class="form-control" type="text" autocomplete="off">
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="comparativoHastaB">Hasta B</label>
+                            <input id="comparativoHastaB" class="form-control" type="text" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div id="mensajeComparativoIngresos" class="mt-2" aria-live="polite"></div>
+
+                    <div class="ingresos-v2-chart-wrap comparativo-chart-wrap">
+                        <canvas id="graficoComparativoIngresos" aria-label="Gráfico comparativo de cobranza"></canvas>
+                        <p id="sinComparativoIngresos" class="ingresos-v2-sin-datos d-none">No existen comprobantes activos para los períodos seleccionados.</p>
+                    </div>
+
+                    <div class="row g-3 ingresos-v2-resumen">
+                        <div class="col-md-4">
+                            <div class="ingresos-v2-metrica">
+                                <span id="comparativoEtiquetaTotalA">Total período A</span>
+                                <strong id="comparativoTotalA">Gs. 0</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="ingresos-v2-metrica">
+                                <span id="comparativoEtiquetaTotalB">Total período B</span>
+                                <strong id="comparativoTotalB">Gs. 0</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="ingresos-v2-metrica">
+                                <span>Diferencia</span>
+                                <strong id="comparativoDiferencia">Gs. 0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ingresos-v2-card comparativo-tabla-card">
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle comparativo-tabla">
+                            <thead>
+                                <tr>
+                                    <th id="comparativoColumnaGrupo">Zona</th>
+                                    <th id="comparativoTablaA" class="text-end">Período A</th>
+                                    <th id="comparativoTablaB" class="text-end">Período B</th>
+                                    <th class="text-end">Diferencia</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparativoTablaCuerpo"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+        <script type="module" th:src="@{/js/reportes/comparativo-ingresos.js}"></script>
+    </body>
+</html>

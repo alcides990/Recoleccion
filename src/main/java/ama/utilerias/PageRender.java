@@ -11,7 +11,7 @@ public class PageRender<T> {
 
     private int totalPaginas;
 
-    private int numElementosPorPagina;
+    private int cantidadRegistro;
 
     private int paginaActual;
 
@@ -22,24 +22,24 @@ public class PageRender<T> {
         this.page = page;
         this.paginas = new ArrayList<PageItem>();
 
-        numElementosPorPagina = page.getSize();
+        cantidadRegistro = page.getSize();
         totalPaginas = page.getTotalPages();
         paginaActual = page.getNumber() + 1;
 
         int desde, hasta;
-        if (totalPaginas <= numElementosPorPagina) {
+        if (totalPaginas <= cantidadRegistro) {
             desde = 1;
             hasta = totalPaginas;
         } else {
-            if (paginaActual <= numElementosPorPagina / 2) {
+            if (paginaActual <= cantidadRegistro / 2) {
                 desde = 1;
-                hasta = numElementosPorPagina;
-            } else if (paginaActual >= totalPaginas - numElementosPorPagina / 2) {
-                desde = totalPaginas - numElementosPorPagina + 1;
-                hasta = numElementosPorPagina;
+                hasta = cantidadRegistro;
+            } else if (paginaActual >= totalPaginas - cantidadRegistro / 2) {
+                desde = totalPaginas - cantidadRegistro + 1;
+                hasta = cantidadRegistro;
             } else {
-                desde = paginaActual - numElementosPorPagina / 2;
-                hasta = numElementosPorPagina;
+                desde = paginaActual - cantidadRegistro / 2;
+                hasta = cantidadRegistro;
             }
         }
 
@@ -58,6 +58,10 @@ public class PageRender<T> {
 
     public int getPaginaActual() {
         return paginaActual;
+    }
+
+    public int getCantidadRegistro() {
+        return cantidadRegistro;
     }
 
     public List<PageItem> getPaginas() {
@@ -79,4 +83,5 @@ public class PageRender<T> {
     public boolean isHasPrevious() {
         return page.hasPrevious();
     }
+   
 }

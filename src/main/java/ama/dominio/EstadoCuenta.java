@@ -2,7 +2,8 @@ package ama.dominio;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.Period;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class EstadoCuenta implements Serializable {
     private static final long serialVersionUID = 1L;
     private double tarifa;
     private int cantidadDeuda;
+    private boolean cantidadDeudaDefinida;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate pagoHasta;
     private double recargo;
@@ -35,11 +37,11 @@ public class EstadoCuenta implements Serializable {
     }
 
     public int getCantidadDeuda() {
-        LocalDate crrrePeriodo = parametro != null ? parametro.getCierrePeriodo() : null;
-        if (pagoHasta != null) {
-            int anos = Period.between(pagoHasta, crrrePeriodo).getYears();
-            int meses = Period.between(pagoHasta, crrrePeriodo).getMonths();
-            this.cantidadDeuda = (anos * 12) + meses;
+        if (!cantidadDeudaDefinida && pagoHasta != null) {
+            // Se comparan meses completos, sin considerar el día actual. pagoHasta
+            // representa el próximo período a pagar: octubre contra agosto = -2.
+            this.cantidadDeuda = Math.toIntExact(ChronoUnit.MONTHS.between(
+                    YearMonth.from(pagoHasta), YearMonth.now()));
         }
 
         return cantidadDeuda;
@@ -47,6 +49,7 @@ public class EstadoCuenta implements Serializable {
 
     public void setCantidadDeuda(int cantidadDeuda) {
         this.cantidadDeuda = cantidadDeuda;
+        this.cantidadDeudaDefinida = true;
     }
 
     public double getTarifa() {

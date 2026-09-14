@@ -27,7 +27,7 @@ public class Categoria implements Serializable {
     private String nombreCategoria;
 
     @NotNull(message = "Tarifa no puede estar vacio")
-    @Min(value = 1, message = "El monto de la tarifa debe ser mayor a cero")
+    @Min(value = 0, message = "El monto de la tarifa no puede ser negativo")
     private Double tarifa;
     
     @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
@@ -37,13 +37,12 @@ public class Categoria implements Serializable {
     private Sucursal sucursal;
 
     public Categoria() {
+        
     }
-
+    public Categoria(Integer  codigoCategoria) {
+        this.codigoCategoria=codigoCategoria;
+    }
     
-    
-    @Transient
-    private String nombreEstado;
-
     public String getNombreCategoria() {
         return nombreCategoria;
     }
@@ -72,7 +71,7 @@ public class Categoria implements Serializable {
 
     @Override
     public String toString() {
-        return "Categoria{" + "codigoCategoria=" + codigoCategoria + ", nombreCategoria=" + nombreCategoria + ", tarifa=" + tarifa + ", nombreEstado=" + nombreEstado + '}';
+        return "Categoria{" + "codigoCategoria=" + codigoCategoria + ", nombreCategoria=" + nombreCategoria + ", tarifa=" + tarifa  + '}';
     }
     
     

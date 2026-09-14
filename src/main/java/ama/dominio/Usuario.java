@@ -2,6 +2,8 @@ package ama.dominio;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 import lombok.Data;
@@ -25,7 +27,10 @@ public class Usuario implements Serializable {
     private String nombre;
     private String apellido;
     private String celular;
-    private String telefono;
+    @Email(message = "Ingrese un correo electrónico válido")
+    @Size(max = 150, message = "El correo no puede superar 150 caracteres")
+    @Column(name = "correo", length = 150)
+    private String correo;
     private String barrio;
     private String direccion;
     private String observacion;
@@ -53,7 +58,7 @@ public class Usuario implements Serializable {
 
     @Override
     public String toString() {
-        return "Usuario{" + "codigoUsuario=" + codigoUsuario + ", numeroDocumento=" + numeroDocumento + ", nombre=" + nombre + ", apellido=" + apellido  + ", celular=" + celular + ", telefono=" + telefono + ", barrio=" + barrio + ", direccion=" + direccion + ", observacion=" + observacion +  '}';
+        return "Usuario{" + "codigoUsuario=" + codigoUsuario + ", numeroDocumento=" + numeroDocumento + ", nombre=" + nombre + ", apellido=" + apellido  + ", celular=" + celular + ", correo=" + correo + ", barrio=" + barrio + ", direccion=" + direccion + ", observacion=" + observacion +  '}';
     }
 
     

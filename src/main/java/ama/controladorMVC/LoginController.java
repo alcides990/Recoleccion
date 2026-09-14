@@ -1,8 +1,11 @@
 package ama.controladorMVC;
 
 import ama.dominio.UsuarioSistema;
+import ama.modulos.ingresosv2.IngresoComprobanteRepositoryV2;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.util.List;
 import java.security.Principal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -14,8 +17,26 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LoginController {
 
+    private final IngresoComprobanteRepositoryV2 comprobantes;
+
+    public LoginController(IngresoComprobanteRepositoryV2 comprobantes) {
+        this.comprobantes = comprobantes;
+    }
+
     @GetMapping("/")
-    public String inicio() {
+    public String inicio(Model model, HttpSession session) {
+        LocalDate hoy = LocalDate.now();
+        UsuarioSistema usuario = (UsuarioSistema) session.getAttribute("usuarioSistema");
+        List<Integer> anios = List.of(hoy.getYear());
+        if (usuario != null && usuario.getSucursal() != null) {
+            anios = comprobantes.aniosDisponibles(usuario.getSucursal().getCodigoSucursal());
+            if (anios.isEmpty()) {
+                anios = List.of(hoy.getYear());
+            }
+        }
+        model.addAttribute("aniosIngresos", anios);
+        model.addAttribute("anioActual", hoy.getYear());
+        model.addAttribute("mesActual", hoy.getMonthValue());
         return "index";
     }
 
@@ -25,6 +46,7 @@ public class LoginController {
             @RequestParam(required = false, name = "logout") String logout,
             Model model, Principal principal, RedirectAttributes flash,
             HttpServletRequest request) {
+        model.addAttribute("titulo", "Iniciar sesión");
         if (principal != null) {
             flash.addFlashAttribute("info", "Ya ha inciado sesión anteriormente");
             return "redirect:/";
@@ -47,10 +69,6 @@ public class LoginController {
             model.addAttribute("error", mensaje);
         }
 
-        if (logout
-                != null) {
-            model.addAttribute("info", "Ha cerrado secion con exito!!");
-        }
 
         return "login";
     }

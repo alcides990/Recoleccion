@@ -1,43 +1,77 @@
 <!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-    <head  th:replace="~{layout/layout :: heat}"> </head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" th:href="@{/css/zona/formulario.css}">
     <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container "> 
-            <div class="card-header">  <h3>Datos Zona</h3></div>
-            <a th:href="@{/zona/listar}" class="btn btn-primario">Regresar</a>
-            <form th:action="@{/zona/guardar}" method="post" th:object="${zona}">
-                <div class="row d-flex m-3">
-                    <div class="col-md-6 ">
-                        <input type="hidden" name="codigoZona"  th:value="*{codigoZona}" />
-                        <label class="form-label" for="nombreZona">Zona </label>
-                        <input class="form-control" type="text" name="nombreZona"  th:value="*{nombreZona}" autofocus=""  placeholder="Ingrese nombre de zona" required="true"/>
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
 
+        <main id="formularioZona" class="container-fluid">
+            <header class="form-view-header"><div><h3>Datos de la zona</h3><p>Configure el nombre y cobrador responsable.</p></div><span class="form-view-icon"><i class="fa-solid fa-map"></i></span></header>
+
+            <section class="zona-form-card">
+                <div class="zona-form-intro">
+                    <div class="zona-form-icon" aria-hidden="true">
+                        <i class="fa-solid fa-route"></i>
                     </div>
-                    <div class="col-sm-4"> 
-                        <label class="form-label" for="cobrador">Cobrador</label>
-                        <select th:field="*{cobrador}" class="form-control" name="sucursal" >
-                            <option th:each="cobrador : ${cobradores}" 
-                                    th:value="${cobrador.codigoCobrador}"
-                                    th:text="${cobrador.nombre}+' '+${cobrador.apellido}"  />
-                        </select>
-                    </div>
-                    <div class="col-sm-4"> 
-                        <label class="form-label" for="sucursal">Sucursal</label>
-                        <select th:field="*{sucursal}" class="form-control" name="sucursal" >
-                            <option th:each="sucursal : ${sucursales}" 
-                                    th:value="${sucursal.codigoSucursal}"
-                                    th:text="${sucursal.nombreSucursal}+' '+${sucursal.ciudad.nombreCiudad}"  />
-                        </select>
-                    </div>
+                    <h4>Configuración de zona</h4>
+                    <p>Asigne el nombre y cobrador responsable</p>
                 </div>
-                <input type="submit" name="guardar" value="Guardar" class="btn btn-guardar m-3"/>
-            </form>
-        </div>
-        </div>
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+
+                <form class="zona-form" th:action="@{/zona/guardar}" method="post" th:object="${zona}">
+                    <input type="hidden" name="codigoZona" th:value="*{codigoZona}">
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="nombreZona">Nombre de zona</label>
+                            <div class="zona-input-wrap">
+                                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                                <input id="nombreZona" class="form-control" type="text" name="nombreZona"
+                                       th:value="*{nombreZona}" autofocus placeholder="Ingrese nombre de zona" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="cobrador">Cobrador</label>
+                            <div class="zona-input-wrap">
+                                <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+                                <select id="cobrador" th:field="*{cobrador}" class="form-select" name="sucursal">
+                                    <option th:each="cobrador : ${cobradores}"
+                                            th:value="${cobrador.codigoCobrador}"
+                                            th:text="${cobrador.nombre} + ' ' + ${cobrador.apellido}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="sucursal">Sucursal</label>
+                            <div class="zona-input-wrap" th:if="${esRoot}">
+                                <i class="fa-solid fa-building" aria-hidden="true"></i>
+                                <select id="sucursal" th:field="*{sucursal}" class="form-select" name="sucursal">
+                                    <option th:each="sucursal : ${sucursales}"
+                                            th:value="${sucursal.codigoSucursal}"
+                                            th:text="${sucursal.nombreSucursal} + ' ' + ${sucursal.ciudad.nombreCiudad}"></option>
+                                </select>
+                            </div>
+                            <div class="zona-input-wrap" th:if="${!esRoot}">
+                                <i class="fa-solid fa-building" aria-hidden="true"></i>
+                                <input id="sucursal" class="form-control" type="text"
+                                       th:value="${sucursalSesion.nombreSucursal} + ' ' + ${sucursalSesion.ciudad.nombreCiudad}"
+                                       readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="zona-form-actions">
+                        <a th:href="@{/zona/listar}" class="btn zona-btn-cancelar">
+                            <i class="fa-solid fa-arrow-left"></i> Regresar
+                        </a>
+                        <button type="submit" name="guardar" class="btn zona-btn-guardar">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar zona
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
     </body>
 </html>

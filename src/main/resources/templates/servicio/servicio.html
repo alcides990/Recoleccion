@@ -1,240 +1,364 @@
 <!DOCTYPE html>
 <html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<head th:replace="~{layout/layout :: heat}"> </head>
+    <head th:replace="~{layout/layout :: heat}"> </head>
+    <link rel="stylesheet" href="/css/serviciov2/estilo.css?v=20260819-1">
 
-<body>
-    <header th:replace="~{layout/layout :: header}"> </header>
-    <aside th:replace="~{layout/layout :: aside}"> </aside>
-    <div class="container-fluid">
+    <body>
+        <header th:replace="~{layout/layout :: header}"> </header>
+        <aside th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container-fluid">
 
-        <div class="card-header">
-            <h3>Cuentas</h3>
-        </div>
-        <div class="d-md-flex py-2">
-            <div class="col-sm-2">
-                <a class="btn btn-primario btn-sm mb-2 " name="btnAgrerar" id="btnAgrerar" data-toggle="modal"
-                    data-target="#servicioModal">
-                    <i class="fa-solid fa-plus fa-lg"></i> Agregar
+            <header class="form-view-header">
+                <div>
+                    <h3>Cuentas</h3>
+                    <p>Administre los servicios, titulares, categorías y estados de cuenta.</p>
+                </div>
+                <a class="btn servicio-list-agregar" name="btnAgrerar" id="btnAgrerar" data-toggle="modal"
+                   data-target="#servicioModal">
+                    <i class="fa-solid fa-plus"></i> Agregar
                 </a>
+            </header>
+            <div class="d-md-flex py-2">
+                <div class="input-group my-1" th:if="${versionDos != true}">
+                    <input name="txtBuscar" id="txtBuscarServicio" type="search" class="col p-2" autofocus="true"
+                           placeholder="Buscar por cta. corriente/ nombre/ ruc" aria-label="Buscar"
+                           aria-describedby="search-addon" />
+                </div>
             </div>
-            <div class="input-group my-1">
-                <input name="txtBuscar" id="txtBuscarServicio" type="search" class="col" autofocus="true"
-                    placeholder="Buscar por cta. corriente o nombre" aria-label="Buscar"
-                    aria-describedby="search-addon" />
+            <div class="mensaje-alerta" id="contenedor-alertas"> </div>
+            <div class="table-responsive-xl">
+                <table id="tabla-servicio" class="table table-border table-striped table-colapse table-hover"
+                       th:data-server-side="${versionDos}">
+
+                    <thead class="bg-color">
+                        <tr>
+                            <th>Cuentacorriente</th>
+                            <th>Usuario</th>
+                            <th>Fecha Inicio</th>
+                            <th>Ocupación</th>
+                            <th>Cagtegoria</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody" class="table-secondary  ">
+                        <tr th:if="${versionDos != true}" th:each="servicio : ${servicios}">
+                            <td th:text="${servicio.cuentaCorriente}"> </td>
+                            <td th:text="${servicio.usuario.nombre} +' '+${servicio.usuario.apellido ?: ''}"> </td>
+                            <td th:text="${servicio.fechaInicio}"></td>
+                            <td><span class="badge"
+                                      th:classappend="${servicio.ocupado == 'OCUPADO' ? 'bg-success' : (servicio.ocupado == 'BALDIO' ? 'bg-warning text-dark' : 'bg-secondary')}"
+                                      th:text="${servicio.ocupado == 'BALDIO' ? 'Baldío' : (servicio.ocupado == 'DESOCUPADO' ? 'Desocupado' : 'Ocupado')}"></span></td>
+                            <td th:text="${servicio.categoria.tarifa}+'-'+${servicio.categoria.nombreCategoria}"></td>
+                            <td th:text="${servicio.estado.estado}"></td>
+                            <td class="text-center"><button type="button" class="btn btn-primario btn-sm estado-cuenta"
+                                                       th:data-id="${servicio.cuentaCorriente}">
+                                    Estado Cuenta
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm ubicacion-servicio"
+                                        th:data-id="${servicio.cuentaCorriente}" title="Ubicación del servicio">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </button>
+                                <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR')"
+                                   th:href="@{/auditoria-entidades(entidad='CUENTA',identificador=${servicio.cuentaCorriente})}"
+                                   class="btn btn-outline-secondary btn-sm" title="Ver historial de modificaciones">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </a>
+                                <a sec:authorize="hasAnyAuthority('ADMINISTRADOR','ROOT', 'SUPERVISOR')" id="editar"
+                                   th:data-id="${servicio.cuentaCorriente}" class="btn btn-info btn-sm"
+                                   data-bs-toggle="modal" data-bs-target="#servicioModal">
+                                    <i class="fa-regular fa-pen-to-square fa-lg"></i>
+                                </a>
+                                <a sec:authorize="hasAnyAuthority('ROOT','ADMINISTRADOR','SUPERVISOR')"
+                                   id="eliminar" data-url="/servicio/eliminar" th:data-id="${servicio.cuentaCorriente}"
+                                   class="btn btn-danger eliminar btn-sm">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div th:if="${versionDos != true}">
+                    <nav th:replace="~{layout/paginador :: paginador}"> </nav>
+                </div>
             </div>
         </div>
-        <div class="mensaje-alerta" id="contenedor-alertas"> </div>
-        <div class="table-responsive-xl">
-            <table id="tabla-servicio" class="table  table-dark table-border table-striped table-colapse table-hover">
 
-                <thead class="thead-dark">
-                    <tr>
-                        <th class="sticky-start ">Cuentacorriente</th>
-                        <th>Usuario</th>
-                        <th>Fecha Inicio</th>
-                        <th>cagtegoria</th>
-                        <th>Estado</th>
-                        <th>EstadoCuenta</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody" class="table-secondary  ">
-                    <tr th:each="servicio : ${servicios}">
-                        <td class="sticky-start" th:text="${servicio.cuentaCorriente}"> </td>
-                        <td th:text="${servicio.usuario.nombre} +' '+${servicio.usuario.apellido}"> </td>
-                        <td th:text="${servicio.fechaInicio}"></td>
-                        <td th:text="${servicio.categoria.tarifa}+'-'+${servicio.categoria.nombreCategoria}"></td>
-                        <td th:text="${servicio.estado.estado}"></td>
-                        <td><a th:href="@{/servicio/estadoCuenta/} + ${servicio.cuentaCorriente}"
-                                class="btn btn-primario btn-sm" th:text="EstadoCuenta" /> </td>
-                        <td>
-                            <a th:href="@{/comprobante/facturar/} + ${servicio.cuentaCorriente}"
-                                class="btn btn-primario btn-sm" th:text="Facturar">
-                            </a>
-                            <a sec:authorize="hasAnyAuthority('ADMIN','ROOT')" id="editar"
-                                th:data-id="${servicio.cuentaCorriente}" class="btn btn-info btn-sm"
-                                data-bs-toggle="modal" data-bs-target="#servicioModal">
-                                <i class="fa-regular fa-pen-to-square fa-lg"></i>
-                            </a>
-                            <a id="eliminar" data-url="/servicio/eliminar/" th:data-id="${servicio.cuentaCorriente}"
-                                class="btn btn-danger eliminar btn-sm">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <nav th:replace="~{layout/paginador :: paginador}"> </nav>
+        <div class="modal fade" id="estadoCuentaModal" tabindex="-1" aria-labelledby="estadoCuentaModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-color">
+                        <h5 class="modal-title" id="estadoCuentaModalLabel">Estado de Cuenta</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="estadoCuentaError" class="alert alert-danger d-none"></div>
+                        <div id="estadoCuentaContenido">
+                            <div class="row mb-3">
+                                <div class="col-md-4"><strong>Cuenta corriente:</strong><br><span id="resumenCuenta"></span></div>
+                                <div class="col-md-8"><strong>Usuario:</strong><br><span id="resumenUsuario"></span></div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Último pago</label><input id="resumenUltimoPago" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Pago desde</label><input id="resumenPagoDesde" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Cantidad de períodos</label><input id="resumenCantidadPeriodos" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Tarifa</label><input id="resumenTarifa" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Subtotal</label><input id="resumenSubtotal" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Saldo</label><input id="resumenSaldo" class="form-control" readonly></div>
+                                <div class="col-md-4"><label class="form-label">Recargo</label><input id="resumenRecargo" class="form-control" readonly></div>
+                                <div class="col-md-4 ms-auto"><label class="form-label fw-bold">Total</label><input id="resumenTotal" class="form-control fw-bold" readonly></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a id="verEstadoCuentaCompleto" class="btn btn-primario">Ver estado completo</a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="historialServicioModal" tabindex="-1" aria-labelledby="historialServicioTitulo" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content servicio-historial-modal">
+                    <div class="modal-header servicio-v2-header">
+                        <div><span class="servicio-v2-kicker">Gestión de cuentas</span><h5 class="modal-title" id="historialServicioTitulo">Historial</h5></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="historialServicioAlerta" class="alert alert-danger d-none"></div>
+                        <div id="historialServicioCarga" class="text-center py-5 d-none"><div class="spinner-border" role="status"></div><p class="mt-2 mb-0">Cargando historial…</p></div>
+                        <section id="panelSuspensiones" class="d-none">
+                            <form id="formSuspension" class="historial-form mb-3"><div class="row g-2 align-items-end">
+                                <div class="col-md-3"><label class="form-label" for="suspensionFecha">Fecha desde</label><input id="suspensionFecha" type="text" class="form-control" autocomplete="off" required></div>
+                                <div class="col-md-6"><label class="form-label" for="suspensionMotivo">Motivo</label><input id="suspensionMotivo" class="form-control" maxlength="500" required></div>
+                                <div class="col-md-3 d-grid"><button class="btn btn-primario" type="submit"><i class="fa-solid fa-pause"></i> Suspender</button></div>
+                            </div></form>
+                            <div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Desde</th><th>Hasta</th><th>Períodos pendientes</th><th>Motivo</th><th>Registrado por</th><th></th></tr></thead><tbody id="suspensionesCuerpo"></tbody></table></div>
+                        </section>
+                        <section id="panelExoneraciones" class="d-none">
+                            <form id="formExoneracion" class="historial-form mb-3"><div class="row g-2 align-items-end">
+                                <div class="col-md-3"><label class="form-label" for="exoneracionFecha">Nueva fecha desde</label><input id="exoneracionFecha" type="text" class="form-control" autocomplete="off" required></div>
+                                <div class="col-md-6"><label class="form-label" for="exoneracionMotivo">Motivo</label><input id="exoneracionMotivo" class="form-control" maxlength="500" required></div>
+                                <div class="col-md-3 d-grid"><button class="btn btn-warning" type="submit"><i class="fa-solid fa-calendar-minus"></i> Exonerar</button></div>
+                            </div></form>
+                            <div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Fecha anterior</th><th>Nueva fecha</th><th>Períodos</th><th>Motivo</th><th>Registrado por</th></tr></thead><tbody id="exoneracionesCuerpo"></tbody></table></div>
+                        </section>
+                        <section id="panelPagos" class="d-none">
+                            <div class="extracto-toolbar mb-3"><div><strong>Extracto completo</strong><small>Incluye todos los comprobantes registrados de esta cuenta.</small></div><button id="btnExtractoPdf" type="button" class="btn btn-danger"><i class="fa-solid fa-file-pdf"></i> <span>Generar extracto PDF</span></button></div>
+                            <div id="extractoEstado" class="alert d-none" role="status" aria-live="polite"></div>
+                            <div class="table-responsive"><table id="tablaHistorialPagos" class="table table-hover w-100"><thead><tr><th>Comprobante</th><th>Fecha</th><th>Período</th><th>Meses</th><th>Importe</th><th>Estado</th></tr></thead></table></div>
+                        </section>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="ubicacionServicioModal" tabindex="-1"
+             aria-labelledby="ubicacionServicioTitulo" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content ubicacion-servicio-modal">
+                    <div class="modal-header servicio-v2-header">
+                        <div>
+                            <span class="servicio-v2-kicker">Geolocalización</span>
+                            <h5 class="modal-title" id="ubicacionServicioTitulo">Ubicación del servicio</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="ubicacionServicioAlerta" class="alert d-none" role="alert"></div>
+                        <form id="formUbicacionServicio" class="ubicacion-servicio-form">
+                            <input type="hidden" id="ubicacionMetodo" value="MANUAL">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12">
+                                    <label class="form-label" for="ubicacionCuenta">Cuenta corriente</label>
+                                    <input id="ubicacionCuenta" class="form-control" readonly>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="ubicacionGoogleMaps">Ubicación copiada de Google Maps</label>
+                                    <div class="input-group">
+                                        <input id="ubicacionGoogleMaps" class="form-control" type="text"
+                                               maxlength="2048" autocomplete="off"
+                                               placeholder="Pegue las coordenadas o el enlace de Google Maps">
+                                        <button id="usarUbicacionGoogleMaps" type="button" class="btn btn-outline-primary">
+                                            <i class="fa-solid fa-paste"></i> Pegar y usar
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">También puede pegar con Ctrl+V y luego presionar Pegar y usar.</small>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="ubicacionLatitud">Latitud</label>
+                                    <input id="ubicacionLatitud" class="form-control" type="number"
+                                           min="-90" max="90" step="0.0000001" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="ubicacionLongitud">Longitud</label>
+                                    <input id="ubicacionLongitud" class="form-control" type="number"
+                                           min="-180" max="180" step="0.0000001" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label" for="ubicacionPrecision">Precisión (m)</label>
+                                    <input id="ubicacionPrecision" class="form-control" type="number"
+                                           min="0" step="0.01" readonly>
+                                </div>
+                                <div class="col-md-6 d-grid">
+                                    <button id="obtenerUbicacionActual" type="button" class="btn btn-outline-primary">
+                                        <i class="fa-solid fa-crosshairs"></i> Usar ubicación actual
+                                    </button>
+                                </div>
+                                <div class="col-md-6 d-grid">
+                                    <a id="abrirUbicacionMapa" class="btn btn-outline-success disabled"
+                                       target="_blank" rel="noopener" aria-disabled="true">
+                                        <i class="fa-solid fa-map-location-dot"></i> Abrir en el mapa
+                                    </a>
+                                </div>
+                            </div>
+                            <p class="ubicacion-servicio-ayuda">
+                                Puede pegar una ubicación de Google Maps, capturar el GPS del dispositivo o escribir las coordenadas manualmente.
+                                La captura automática requiere permiso de ubicación y HTTPS.
+                            </p>
+                        </form>
+
+                        <section class="ubicacion-historial mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left"></i> Historial de modificaciones</h6>
+                                <small id="ubicacionActualizada" class="text-muted"></small>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead><tr><th>Fecha</th><th>Anterior</th><th>Nueva</th><th>Método</th><th>Usuario</th></tr></thead>
+                                    <tbody id="ubicacionHistorialCuerpo"></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                        <button id="guardarUbicacionServicio" type="submit" form="formUbicacionServicio"
+                                class="btn btn-primario">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar ubicación
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Ventana modal -->
         <div class="modal fade" id="servicioModal" tabindex="-1" aria-labelledby="confirmacionModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content bg-color">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmacionModalLabel">Datos de Servicio</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+             aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                <div class="modal-content servicio-v2-modal">
+                    <div class="modal-header servicio-v2-header">
+                        <div>
+                            <span class="servicio-v2-kicker">Gestión de cuentas</span>
+                            <h5 class="modal-title" id="confirmacionModalLabel">Datos del servicio</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form name="frm-servicio" id="frm-servicio" action="/servicio/guardar" method="post">
-                        <div class="container-md row d-md-flex align-content-center justify-content-start">
-                            <input type="text" hidden="true" name="accion" id="accion">
-                            <div class="form-label col-md-3">
-                                <label class="form-label" for="cuentaCorriente">Cuentacorriente </label>
-                                <input onkeyup="formaterarCuentaCorriente()" type="text" id="cuentaCorriente"
-                                    name="cuentaCorriente" class="form-control " />
-                            </div>
-
-                            <input type="text" hidden="true" id="codigoUsuario" name="codigoUsuario" />
-                            <div class="form-group col-md-3">
-                                <label class="form-label" for="numeroDocumento">NumeroDocumento </label>
-                                <input type="text" id="numeroDocumento" name="numeroDocumento" disabled="true"
-                                    class="form-control" required="campo ogligatorio" />
-                            </div>
-                            <div class=" form-group col-md-6">
-                                <div>
-                                    <label class="form-label" for="buscarUsuario">Usuario </label>
+                        <div class="modal-body servicio-v2-body">
+                            <input type="hidden" name="accion" id="accion">
+                            <input type="hidden" id="codigoUsuario" name="codigoUsuario">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label" for="cuentaCorriente">Cuenta corriente</label>
+                                    <input type="text" id="cuentaCorriente" onkeyup="formatearCuentaCorriente(event)"
+                                           name="cuentaCorriente" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="numeroDocumento">RUC / CI</label>
+                                    <input type="text" id="numeroDocumento" name="numeroDocumento"
+                                           class="form-control" readonly required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label" for="buscarUsuario">Usuario</label>
                                     <input class="form-control" type="text" name="buscarUsuario" id="buscarUsuario"
-                                        placeholder="Busca por: ruc/ci o nombres" required="true" />
+                                           placeholder="Buscar por RUC, CI o nombre" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="fechaInicio">Fecha de inicio</label>
+                                    <input type="text" name="fechaInicio" id="fechaInicio" th:value="${fechaInicio}"
+                                           autocomplete="off" class="form-control" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="ocupado">Ocupación</label>
+                                    <select id="ocupado" class="form-select"><option value="OCUPADO">Ocupado</option><option value="DESOCUPADO">Desocupado</option><option value="BALDIO">Baldío</option></select>
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label" for="categoria">Categoría</label>
+                                    <select th:object="${categoria}" class="form-select" id="categoria" name="categoria">
+                                        <option th:each="categoria : ${categorias}" th:value="${categoria.codigoCategoria}"
+                                                th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa}" />
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="filtroCategoriaServicio">Filtrar categorías</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                        <input type="search" id="filtroCategoriaServicio" class="form-control"
+                                               data-filtro-categorias="#categoria"
+                                               data-resultado-filtro="#resultadoFiltroCategoriaServicio"
+                                               placeholder="Filtrar por nombre, código o tarifa"
+                                               aria-label="Filtrar categorías">
+                                        <button type="button" id="limpiarFiltroCategoriaServicio"
+                                                class="btn btn-outline-secondary"
+                                                data-limpiar-filtro-categorias="#filtroCategoriaServicio"
+                                                title="Limpiar filtro" aria-label="Limpiar filtro de categorías">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <small id="resultadoFiltroCategoriaServicio" class="text-muted"></small>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="direccion">Dirección</label>
+                                    <input type="text" name="direccion" id="direccion" class="form-control"
+                                           placeholder="Dirección del servicio">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="observacion">Observación</label>
+                                    <textarea name="observacion" id="observacion" class="form-control" rows="3"
+                                              maxlength="150"
+                                              placeholder="Información adicional de la cuenta"></textarea>
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label" for="sucursal">Sucursal</label>
+                                    <select th:object="${sucursal}" class="form-select" name="sucursal" id="sucursal">
+                                        <option th:each="sucursal : ${sucursales}" th:value="${sucursal.codigoSucursal}"
+                                                th:text="${sucursal.nombreSucursal} +'-' +${sucursal.ciudad.nombreCiudad}" />
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="estado">Estado</label>
+                                    <select th:object="${estado}" class="form-select" name="estado" id="estado">
+                                        <option th:each="estado : ${estado}" th:value="${estado.codigoEstado}"
+                                                th:text="${estado.estado}" />
+                                    </select>
                                 </div>
                             </div>
-
-                            <div class="form-group col-md-3">
-                                <label class="form-label" for="fechaInicio">Fecha Inicio </label>
-                                <input type="text" name="fechaInicio" id="fechaInicio" th:value="${fechaInicio}"
-                                    autocomplete="off" class="form-control" required="campo ogligatorio" />
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="categoria">Categoria</label>
-                                <select th:object="${categoria}" class="form-control" id="categoria" name="categoria">
-                                    <option th:each="categoria : ${categorias}" th:value="${categoria.codigoCategoria}"
-                                        th:text="${categoria.nombreCategoria}+' '+${categoria.tarifa} " />
-                                </select>
-                            </div>
-
-                            <div class="form-group col-md-4">
-                                <label class="form-label" for="sucursal">Sucursal</label>
-                                <select th:object="${sucursal}" class="form-control" name="sucursal" id="sucursal">
-                                    <option th:each="sucursal : ${sucursales}" th:value="${sucursal.codigoSucursal}"
-                                        th:text="${sucursal.nombreSucursal} +'-' +${sucursal.ciudad.nombreCiudad }" />
-                                </select>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label class="form-label" for="estado">Estado</label>
-                                <select th:object="${estado}" class="form-control" name="estado" id="estado">
-                                    <option th:each="estado : ${estado} " th:value="${estado.codigoEstado}"
-                                        th:text="${estado.estado}" />
-                                </select>
-                            </div>
-                            <br />
                         </div>
-                        <input type="submit" name="guardar" value="Guardar" class="btn-guardar offset-1 m-3" />
+                        <div class="modal-footer servicio-v2-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" name="guardar" class="btn btn-primario">
+                                <i class="fa-solid fa-floppy-disk"></i> Guardar servicio
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
 
 
-    </div>
-    <footer th:replace="~{layout/layout :: footer}"> </footer>
-    <script src="/js/buscarServicios.js"></script>
-    <script src="/js/datepicker-es.js"></script>
-    <script src="/js/buscarUsuario.js"></script>
-    <script src="/js/validarFormulario.js" async="true"></script>
-    <script>
-        $(document).ready(function () {
-            eliminar('Seguro que desea eliminar esta cuenta');// Se carga la funcion eliminar  
-            //Cargar idioma español a la tabla paginado con Jquerry data
-            $('#tabla').DataTable({
-                language: {
-                    url: '/i18n/es-ES.json'
-                }
-            });
-            //Definir nombres de los campos
-            var cuentaCorriente = "#cuentaCorriente";
-            var fechaInicio = "#fechaInicio";
-            var buscarUsuario = "#buscarUsuario";
-            var numeroDocumento = "#numeroDocumento";
-            var buscarUsuario = "#buscarUsuario";
-            var accion = "";
+        <footer th:replace="~{layout/layout :: footer}"> </footer>
 
-            var campos = [cuentaCorriente, fechaInicio, buscarUsuario, numeroDocumento];
-
-            $("#servicioModal").on('shown.bs.modal', function () {
-                tabular(cuentaCorriente);
-            });
-            // Abrir ventana categoria al presionar agregar categoria
-            $("#btnAgrerar").click(function (event) {
-                event.preventDefault();
-                limpiar(campos);
-                $("#accion").val("agregar");
-                $("#servicioModal").modal('show');
-            });
-            // Tabular campos
-            tabulador(cuentaCorriente, buscarUsuario);
-            tabulador(buscarUsuario, fechaInicio);
-            //Cargar Datos al Abrir ventana modal para editar
-            $(document).on('click', '#editar', function (event) {
-                $(cuentaCorriente).prop("readonly", true);
-                $(fechaInicio).prop("disabled", true);
-                var url = '/servicio/editar';
-                var servicio = { cuentaCorriente: $(this).data('id') };
-
-                consultar(servicio, url)
-                    .then(function (respuesta) {
-                        $(cuentaCorriente).val(respuesta.cuentaCorriente);
-                        $(fechaInicio).val(respuesta.fechaInicio);
-                        $(numeroDocumento).val(respuesta.numeroDocumento);
-                        $("#codigoUsuario").val(respuesta.usuario.codigoUsuario);
-                        $(numeroDocumento).val(respuesta.usuario.numeroDocumento);
-                        $(buscarUsuario).val(respuesta.usuario.nombre + ' ' + respuesta.usuario.apellido);
-                        $("#categoria").val(respuesta.categoria.codigoCategoria);
-                        $("#estado").val(respuesta.estado.codigoEstado);
-                        $("#accion").val("editar");
-                    });
-            });
-            //Recuperar los datos al enviar formulario
-            $('#frm-servicio').submit(function (event) {
-                event.preventDefault();
-                var servicio = {
-                    cuentaCorriente: $("#cuentaCorriente").val(),
-                    fechaInicio: $("#fechaInicio").val(),
-                    usuario: {
-                        codigoUsuario: $("#codigoUsuario").val()
-                    },
-                    categoria: {
-                        codigoCategoria: $("#categoria").val()
-                    },
-                    sucursal: {
-                        codigoSucursal: $("#sucursal").val()
-                    },
-                    estado: {
-                        codigoEstado: $("#estado").val()
-                    }
-                };
-                accion = $("#accion").val();
-                var contentType = 'application/json';
-                var url = "/servicio/guardar/" + accion;
-                guardar(servicio, url, contentType).then((data) => {
-                    limpiar(campos);
-                    $("#servicioModal").modal('hide');
-                    mostrarAlerta({
-                        mensaje: data,
-                        url: url,
-                        tipo: 'success',
-                        redirigir: false,
-                        recargar: true
-                    });
-                });;
-
-
-            });
-        });
-    </script>
-</body>
+        <script src="/js/buscarUsuario.js"></script>
+        <script src="/js/validarFormulario.js" async="true"></script>
+        <script src="/js/categoria-select-filter.js"></script>
+        <script type="module" src="/js/serviciov2/servicio.js"></script>
+        <script th:if="${versionDos}" src="/js/serviciov2/tabla.js"></script>
+    </body>
 
 </html>

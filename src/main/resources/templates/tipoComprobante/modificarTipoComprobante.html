@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head  th:replace="~{layout/layout :: heat}"> </head>
+    <body>
+        <header  th:replace="~{layout/layout :: header}"> </header>
+        <aside  th:replace="~{layout/layout :: aside}"> </aside>
+        <div class="container "> 
+            <header class="form-view-header"><div><h3>Datos del tipo de comprobante</h3><p>Registre o actualice la denominación del comprobante.</p></div><span class="form-view-icon"><i class="fa-solid fa-file-circle-check"></i></span></header>
+            <a th:href="@{/tipoComprobante/listar}" class="btn btn-primario">Regresar</a>
+            <form th:action="@{/tipoComprobante/guardar}" method="post" th:object="${tipoComprobante}">
+                <div class="row d-flex m-3">
+                    <div class="col-md-6 ">
+                        <div >
+                            <label class="form-label" for="tipoComprobante">ID </label>
+                            <input class="form-control" type="text" readonly="" name="codigoTipoComprobante"  th:value="*{codigoTipoComprobante}" />
+                        </div>
+                        <label class="form-label" for="tipoComprobante">TipoComprobante </label>
+                        <input class="form-control" type="text" name="nombreTipoComprobante"  th:value="*{nombreTipoComprobante}" autofocus=""  placeholder="Ingrese nombre de tipoComprobante" required="true"/>
+
+                    </div>
+
+
+                </div>
+                <input type="submit" name="guardar" value="Guardar" class="btn btn-primario m-3"/>
+            </form>
+        </div>
+        </div>
+        <footer  th:replace="~{layout/layout :: footer}"> </footer>
+    </body>
+</html>

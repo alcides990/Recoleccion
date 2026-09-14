@@ -16,8 +16,10 @@ public class DetallePago implements Serializable {
 
     @EmbeddedId
     DetallePagoPK detallePagoPK;
-
     Double importe;
-
+    
+    @JoinColumn(name = "codigo_metodo_pago", referencedColumnName = "codigo_metodo_pago", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private MetodoPago metodoPago;
    
 }

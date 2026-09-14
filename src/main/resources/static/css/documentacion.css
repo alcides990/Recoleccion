@@ -1,0 +1,19 @@
+.documentacion-contenedor { padding: 2rem; }
+.documentacion-encabezado { align-items: center; background: linear-gradient(135deg, #123c69 0%, #176b87 100%); border-radius: 16px; color: #fff; display: flex; justify-content: space-between; margin-bottom: 1.5rem; overflow: hidden; padding: 2rem; }
+.documentacion-encabezado h1 { color: #fff; font-size: clamp(1.65rem, 3vw, 2.25rem); margin: .35rem 0 .6rem; }
+.documentacion-encabezado p { margin: 0; max-width: 680px; opacity: .9; }
+.documentacion-etiqueta { font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.documentacion-icono { font-size: 4.5rem; margin-left: 2rem; opacity: .22; }
+.documentacion-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); }
+.documentacion-tarjeta { background: #fff; border: 1px solid #dde5ec; border-radius: 14px; box-shadow: 0 8px 24px rgba(23, 50, 73, .08); display: flex; gap: 1rem; padding: 1.5rem; }
+.documentacion-tarjeta-icono { align-items: center; background: #e9f4f7; border-radius: 12px; color: #176b87; display: flex; flex: 0 0 52px; font-size: 1.35rem; height: 52px; justify-content: center; }
+.documentacion-tarjeta-contenido { display: flex; flex: 1; flex-direction: column; }
+.documentacion-tarjeta h2 { color: #173249; font-size: 1.2rem; margin: 0 0 .55rem; }
+.documentacion-tarjeta p { color: #526575; line-height: 1.55; margin: 0 0 1.25rem; }
+.documentacion-acciones { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: auto; }
+.documentacion-boton { align-items: center; border-radius: 8px; display: inline-flex; font-size: .9rem; font-weight: 600; gap: .45rem; padding: .7rem .9rem; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
+.documentacion-boton:hover { box-shadow: 0 4px 12px rgba(23, 50, 73, .16); transform: translateY(-1px); }
+.documentacion-boton-primario { background: #176b87; color: #fff; }
+.documentacion-boton-secundario { background: #eef3f6; color: #173249; }
+.documentacion-restringido { color: #8a5a00; font-size: .76rem; font-weight: 700; margin-bottom: .45rem; text-transform: uppercase; }
+@media (max-width: 640px) { .documentacion-contenedor { padding: 1rem; } .documentacion-encabezado { padding: 1.5rem; } .documentacion-icono { display: none; } .documentacion-tarjeta { flex-direction: column; } }

@@ -1,7 +1,6 @@
 package ama.controladorMVC;
 
 import ama.dominio.*;
-import ama.errores.ClaseError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -38,8 +37,12 @@ public class ManzanaController {
     private CiudadService servicioCiudad;
 
     @GetMapping("/listar")
-    public ResponseEntity<?> listaDetalleZonaPorZona(@RequestBody Manzana manzana) {
-        return ResponseEntity.ok(manzanaService.listar(manzana.getZona()));
+    public ResponseEntity<?> listaDetalleZonaPorZona(@RequestParam Integer codigoZona) {
+        Zona zona = zonaService.encontrar(new Zona(codigoZona));
+        if (zona == null || !esSucursalDeSesion(zona.getSucursal())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Zona no encontrada en su sucursal");
+        }
+        return ResponseEntity.ok(manzanaService.listar(zona));
     }
 
     @GetMapping("/editar")
@@ -54,9 +57,15 @@ public class ManzanaController {
     @GetMapping("/agregar/{codigoZona}")
     public String agregarManzana(Zona zona, Model model) {
         Zona resultadoZona = zonaService.encontrar(zona);
+        if (resultadoZona == null || !esSucursalDeSesion(resultadoZona.getSucursal())) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Zona no encontrada en su sucursal");
+        }
         model.addAttribute("zona", resultadoZona);
 
-        model.addAttribute("zonas", zonaService.listar());
+        model.addAttribute("zonas", zonaService.listar().stream()
+                .filter(item -> esSucursalDeSesion(item.getSucursal()))
+                .toList());
         model.addAttribute("cobrador", resultadoZona.getCobrador());
 
         model.addAttribute("manzana", new Manzana());
@@ -69,8 +78,15 @@ public class ManzanaController {
 
     @PostMapping("/guardar")
     public ResponseEntity<String> guardar(Manzana manzana, ManzanaPK manzanaPK, Model model) {
-
-        manzanaPK.setCodigoSucursal(manzana.getSucursal().getCodigoSucursal());
+        if (manzanaPK.getNumeroManzana() < 1) {
+            return ResponseEntity.badRequest().body("Número de manzana debe ser mayor a cero");
+        }
+        Zona zona = zonaService.encontrar(manzana.getZona());
+        if (zona == null || !esSucursalDeSesion(zona.getSucursal())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La zona no pertenece a su sucursal");
+        }
+        Sucursal sucursalSesion = getUserSession().getSucursal();
+        manzanaPK.setCodigoSucursal(sucursalSesion.getCodigoSucursal());
         Manzana manzanaRecuperada = manzanaService.encontrar(manzanaPK);
 
         if (manzanaRecuperada != null) {
@@ -81,6 +97,8 @@ public class ManzanaController {
 
         try {
             manzana.setManzanaPK(manzanaPK);
+            manzana.setZona(zona);
+            manzana.setSucursal(sucursalSesion);
             manzanaService.guardar(manzana);
             return ResponseEntity.ok("Manzana agregada correctamente!!");
 
@@ -95,16 +113,26 @@ public class ManzanaController {
     public String modificar(Manzana manzana, ManzanaPK manzanaPK, RedirectAttributes flash,
             @RequestParam Integer zonaVieja
     ) {
-        manzanaPK.setCodigoSucursal(manzana.getSucursal().getCodigoSucursal());
+        Sucursal sucursalSesion = getUserSession().getSucursal();
+        manzanaPK.setCodigoSucursal(sucursalSesion.getCodigoSucursal());
         Manzana manzanaRecuperada = manzanaService.encontrar(manzanaPK);
         String mensaje;
         if (manzanaRecuperada == null) {
             mensaje = "Manzana N° " + manzanaPK.getNumeroManzana() + " no se encueantra registrada en la base de datos ";
             flash.addFlashAttribute("mensaje", mensaje);
+            return "redirect:/manzana/agregar/" + zonaVieja;
+        }
+
+        Zona zonaNueva = zonaService.encontrar(manzana.getZona());
+        if (zonaNueva == null || !esSucursalDeSesion(zonaNueva.getSucursal())) {
+            flash.addFlashAttribute("mensaje", "La zona seleccionada no pertenece a su sucursal");
+            return "redirect:/manzana/agregar/" + zonaVieja;
         }
 
         try {
             manzana.setManzanaPK(manzanaPK);
+            manzana.setZona(zonaNueva);
+            manzana.setSucursal(sucursalSesion);
             manzanaService.guardar(manzana);
             mensaje = "Manzana Modificada correctamente!!";
             flash.addFlashAttribute("mensaje", mensaje);
@@ -117,21 +145,30 @@ public class ManzanaController {
 
     }
 
-    @PreAuthorize("hasAnyAuthority({'ROOT','ADMIN'})")
+    @PreAuthorize("hasAnyAuthority({'ROOT','ADMINISTRADOR'})")
     @PostMapping("/eliminar/{numeroManzana}/{codigoSucursal}")
     public ResponseEntity<String> eliminar(ManzanaPK manzanaPK) {
         try {
+            if (!Integer.valueOf(manzanaPK.getCodigoSucursal())
+                    .equals(getUserSession().getSucursal().getCodigoSucursal())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La manzana no pertenece a su sucursal");
+            }
             manzanaService.eliminar(new Manzana(manzanaPK));
             return ResponseEntity.ok().body("Manzana Eliminado Correctamente!!");
 
         } catch (Exception e) {
 
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Error al Elimar Registro: " + ClaseError.excepcion("Error al eliminar manzana, ", e));
+                    .body("Error al eliminar manzana"+ e.getMessage());
         }
     }
 
     private UsuarioSistema getUserSession() {
         return (UsuarioSistema) httpSession.getAttribute("usuarioSistema");
+    }
+
+    private boolean esSucursalDeSesion(Sucursal sucursal) {
+        return sucursal != null
+                && sucursal.getCodigoSucursal().equals(getUserSession().getSucursal().getCodigoSucursal());
     }
 }

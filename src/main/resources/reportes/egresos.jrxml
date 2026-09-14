@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="egresos" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="794" leftMargin="24" rightMargin="24" topMargin="24" bottomMargin="24" whenNoDataType="NoPages">
+<style name="base" isDefault="true" fontName="DejaVu Sans" fontSize="9"/>
+<parameter name="periodo" class="java.lang.String"/>
+<parameter name="sucursal" class="java.lang.String"/>
+<field name="fecha" class="java.util.Date"/>
+<field name="tipo" class="java.lang.String"/>
+<field name="proveedor" class="java.lang.String"/>
+<field name="comprobante" class="java.lang.String"/>
+<field name="total" class="java.math.BigDecimal"/>
+<field name="id" class="java.lang.Long"/>
+<variable name="totalGeneral" class="java.math.BigDecimal" calculation="Sum"><variableExpression><![CDATA[$F{total}]]></variableExpression></variable>
+<title><band height="90">
+<staticText><reportElement x="0" y="0" width="794" height="28"/><textElement><font size="20" isBold="true"/></textElement><text><![CDATA[Reporte de egresos]]></text></staticText>
+<textField><reportElement x="0" y="32" width="794" height="18"/><textFieldExpression><![CDATA["Sucursal: " + $P{sucursal}]]></textFieldExpression></textField>
+<textField><reportElement x="0" y="53" width="794" height="18"/><textFieldExpression><![CDATA["Período: " + $P{periodo} + "   |   Gastos vigentes; no incluye anulados."]]></textFieldExpression></textField>
+</band></title>
+<columnHeader><band height="26"><staticText><reportElement x="0" y="0" width="44" height="24" mode="Opaque" backcolor="#E9EEF3"/><textElement><font isBold="true"/></textElement><text><![CDATA[N.º]]></text></staticText><staticText><reportElement x="44" y="0" width="76" height="24" mode="Opaque" backcolor="#E9EEF3"/><textElement><font isBold="true"/></textElement><text><![CDATA[Fecha]]></text></staticText><staticText><reportElement x="120" y="0" width="160" height="24" mode="Opaque" backcolor="#E9EEF3"/><textElement><font isBold="true"/></textElement><text><![CDATA[Tipo de gasto]]></text></staticText><staticText><reportElement x="280" y="0" width="250" height="24" mode="Opaque" backcolor="#E9EEF3"/><textElement><font isBold="true"/></textElement><text><![CDATA[Proveedor]]></text></staticText><staticText><reportElement x="530" y="0" width="144" height="24" mode="Opaque" backcolor="#E9EEF3"/><textElement><font isBold="true"/></textElement><text><![CDATA[Comprobante]]></text></staticText><staticText><reportElement x="674" y="0" width="120" height="24" mode="Opaque" backcolor="#E9EEF3"/><textElement><font isBold="true"/></textElement><text><![CDATA[Total (Gs.)]]></text></staticText></band></columnHeader><detail><band height="30" splitType="Stretch"><textField textAdjust="StretchHeight" isBlankWhenNull="true"><reportElement x="0" y="3" width="38" height="22"/><textElement textAlignment="Left"/><textFieldExpression><![CDATA[$F{id}]]></textFieldExpression></textField><textField textAdjust="StretchHeight" isBlankWhenNull="true" pattern="dd/MM/yyyy"><reportElement x="44" y="3" width="70" height="22"/><textElement textAlignment="Left"/><textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression></textField><textField textAdjust="StretchHeight" isBlankWhenNull="true"><reportElement x="120" y="3" width="154" height="22"/><textElement textAlignment="Left"/><textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression></textField><textField textAdjust="StretchHeight" isBlankWhenNull="true"><reportElement x="280" y="3" width="244" height="22"/><textElement textAlignment="Left"/><textFieldExpression><![CDATA[$F{proveedor}]]></textFieldExpression></textField><textField textAdjust="StretchHeight" isBlankWhenNull="true"><reportElement x="530" y="3" width="138" height="22"/><textElement textAlignment="Left"/><textFieldExpression><![CDATA[$F{comprobante}]]></textFieldExpression></textField><textField textAdjust="StretchHeight" isBlankWhenNull="true" pattern="#,##0.00"><reportElement x="674" y="3" width="114" height="22"/><textElement textAlignment="Right"/><textFieldExpression><![CDATA[$F{total}]]></textFieldExpression></textField></band></detail>
+<pageFooter><band height="24"><textField><reportElement x="674" y="4" width="120" height="18"/><textElement textAlignment="Right"/><textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression></textField></band></pageFooter>
+<summary><band height="40">
+<line><reportElement x="0" y="0" width="794" height="1"/></line>
+<textField><reportElement x="0" y="10" width="360" height="24"/><textFieldExpression><![CDATA["Cantidad de gastos: " + $V{REPORT_COUNT}]]></textFieldExpression></textField>
+<staticText><reportElement x="480" y="10" width="140" height="24"/><textElement><font isBold="true"/></textElement><text><![CDATA[TOTAL EGRESOS]]></text></staticText>
+<textField pattern="#,##0.00"><reportElement x="620" y="10" width="168" height="24"/><textElement textAlignment="Right"><font isBold="true"/></textElement><textFieldExpression><![CDATA[$V{totalGeneral}]]></textFieldExpression></textField>
+</band></summary>
+</jasperReport>

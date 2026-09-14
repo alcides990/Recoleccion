@@ -1,0 +1,62 @@
+.sucursal-form-page {
+    max-width: 980px;
+}
+
+.sucursal-form-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 .8rem;
+}
+
+.sucursal-form-card {
+    padding: 1.35rem;
+    border: 1px solid var(--borde-suave);
+    border-radius: .7rem;
+    background: var(--superficie-color);
+    box-shadow: var(--sombra-suave);
+}
+
+.sucursal-form-card .form-label {
+    margin: 0 0 .35rem;
+    color: #4d555c;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.sucursal-form-card .form-control {
+    min-height: 2.5rem;
+    background: #fff;
+}
+
+.sucursal-form-card .form-control:disabled {
+    cursor: not-allowed;
+    background: #eef0f2;
+}
+
+.sucursal-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.35rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--borde-suave);
+}
+
+.sucursal-form-actions .btn {
+    min-width: 8.5rem;
+}
+
+@media (max-width: 767.98px) {
+    .sucursal-form-card {
+        padding: 1rem;
+    }
+
+    .sucursal-form-toolbar,
+    .sucursal-form-actions {
+        justify-content: stretch;
+    }
+
+    .sucursal-form-toolbar .btn,
+    .sucursal-form-actions .btn {
+        width: 100%;
+    }
+}

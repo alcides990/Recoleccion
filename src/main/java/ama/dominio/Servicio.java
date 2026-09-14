@@ -1,35 +1,47 @@
 package ama.dominio;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "servicios")
 public class Servicio implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "codigo_servicio")
+    private Integer codigoServicio;
+
     @Basic(optional = false)
     @Column(name = "cuenta_corriente")
     @NotBlank(message = "Cuentacorriente no puede estar vacio")
-//    @Pattern(regexp = "[0-9]{2}-\\d{4}-\\d{2}", message = "Formato de cuenta corriente  no es valido")
+    // @Pattern(regexp = "[0-9]{2}-\\d{4}-\\d{2}", message = "Formato de cuenta
+    // corriente no es valido")
     private String cuentaCorriente;
 
-    @Column(name = "nombre_servicio")
-    private String nombreServicio;
+    @Column(name = "direccion")
+    private String direccion;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     @Column(name = "fecha_inicio")
     private LocalDate fechaInicio;
-    
+
+    @Column(name = "ocupado", nullable = false)
+    @Pattern(regexp = "OCUPADO|DESOCUPADO|BALDIO", message = "Ocupación no válida")
+    private String ocupado = "OCUPADO";
+
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "codigo_categoria", referencedColumnName = "codigo_categoria")
@@ -50,23 +62,38 @@ public class Servicio implements Serializable {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Sucursal sucursal;
 
+    @Column(name = "codigo_sucursal", insertable = false, updatable = false)
+    private Integer codigoSucursal;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JoinColumns({
-        @JoinColumn(name = "codigo_manzana", referencedColumnName = "codigo_manzana"),
-        @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
+            @JoinColumn(name = "codigo_manzana", referencedColumnName = "codigo_manzana"),
+            @JoinColumn(name = "codigo_sucursal", referencedColumnName = "codigo_sucursal")
     })
-   
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Manzana manzana;
 
-    @JsonIgnore
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "codigo_zona", referencedColumnName = "codigo_zona")
-    private Zona zona;
+//    @JsonIgnore
+//    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+//    @JoinColumn(name = "codigo_zona", referencedColumnName = "codigo_zona")
+//    private Zona zona;
+    public Servicio(String cuentaCorriente) {
+        this.cuentaCorriente = cuentaCorriente;
+    }
 
+    @Column(name = "observacion", length = 150)
     private String observacion;
 
     @Transient
     EstadoCuenta estadoCuenta;
+
+    @PrePersist
+    @PreUpdate
+    private void completarDatosCuenta() {
+        if (ocupado == null) {
+            ocupado = "OCUPADO";
+        }
+    }
 
 }

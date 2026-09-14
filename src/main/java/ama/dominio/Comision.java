@@ -3,6 +3,7 @@ package ama.dominio;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import lombok.Data;
 @Data
 @Entity
@@ -16,7 +17,8 @@ public class Comision implements Serializable {
     private Integer codigoComision;
     @Column(name = "nombre_comision")
     private String nombreComision;
-    private String comision;
+    @Column(name = "comision", precision = 2, scale = 0)
+    private BigDecimal comision;
 
     public Comision() {
     }

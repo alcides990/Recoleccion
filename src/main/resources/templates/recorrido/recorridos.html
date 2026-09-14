@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIINfQ3ynhICz3JkFQ6q8E1f5c8jcq0qWJk=" crossorigin="">
+    <link rel="stylesheet" href="/css/recorridos/recorridos.css?v=20260904-2">
+    <body sec:authorize="hasAuthority('ROOT')">
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
+
+        <main class="container-fluid recorrido-pagina">
+            <header class="recorrido-encabezado">
+                <div>
+                    <span>Geolocalización operativa</span>
+                    <h3>Recorridos de cobradores</h3>
+                    <p>Registre, inicie, supervise y finalice los recorridos de la sucursal.</p>
+                </div>
+                <i class="fa-solid fa-route"></i>
+            </header>
+
+            <div id="recorridoAlerta" class="alert d-none" role="alert"></div>
+
+            <section class="recorrido-panel recorrido-nuevo">
+                <div class="recorrido-panel-titulo">
+                    <div><strong>Nuevo recorrido</strong><small>Solo puede existir uno pendiente o activo por cobrador.</small></div>
+                </div>
+                <form id="formNuevoRecorrido" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label" for="recorridoCobrador">Cobrador</label>
+                        <select id="recorridoCobrador" class="form-select" required>
+                            <option value="" selected disabled>Seleccione un cobrador</option>
+                            <option th:each="cobrador : ${cobradores}"
+                                    th:value="${cobrador.codigoCobrador}"
+                                    th:text="${cobrador.nombreCompleto}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="recorridoObservacion">Observación</label>
+                        <input id="recorridoObservacion" class="form-control" maxlength="500"
+                               placeholder="Opcional">
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button id="crearRecorrido" type="submit" class="btn btn-primario">
+                            <i class="fa-solid fa-plus"></i> Registrar
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="recorrido-panel">
+                <div class="recorrido-panel-titulo">
+                    <div><strong>Teléfonos vinculados</strong><small>El código aparece en Configuración de la APK. Asigne cada teléfono a su cobrador.</small></div>
+                    <button id="actualizarDispositivos" type="button" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-rotate"></i> Actualizar</button>
+                </div>
+                <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+                    <thead><tr><th>Dispositivo</th><th>Código</th><th>Estado</th><th>Cobrador asignado</th><th>Última conexión</th><th>Acciones</th></tr></thead>
+                    <tbody id="dispositivosCuerpo"></tbody>
+                </table></div>
+            </section>
+
+            <section class="recorrido-panel">
+                <div class="recorrido-panel-titulo">
+                    <div><strong>Recorridos registrados</strong><small>Se muestran primero los activos y pendientes.</small></div>
+                    <button id="actualizarRecorridos" type="button" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-solid fa-rotate"></i> Actualizar
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead><tr><th>N.º</th><th>Cobrador</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Puntos</th><th>Registrado por</th><th class="text-end">Acciones</th></tr></thead>
+                        <tbody id="recorridosCuerpo"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <div class="modal fade" id="detalleRecorridoModal" tabindex="-1"
+             aria-labelledby="detalleRecorridoTitulo" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content recorrido-modal">
+                    <div class="modal-header">
+                        <div><span>Detalle geográfico</span><h5 id="detalleRecorridoTitulo" class="modal-title">Recorrido</h5></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="detalleRecorridoAlerta" class="alert d-none"></div>
+                        <div class="recorrido-mapa-toolbar">
+                            <div class="recorrido-resumen-mapa">
+                                <span><small>Distancia</small><strong id="recorridoDistancia">0 km</strong></span>
+                                <span><small>Duración registrada</small><strong id="recorridoDuracion">—</strong></span>
+                                <span><small>Permanencias</small><strong id="recorridoCantidadPermanencias">0</strong></span>
+                            </div>
+                            <button id="actualizarMapaRecorrido" type="button" class="btn btn-outline-primary btn-sm">
+                                <i class="fa-solid fa-rotate"></i> Actualizar mapa
+                            </button>
+                        </div>
+                        <div class="recorrido-mapa-contenedor">
+                            <div id="recorridoMapa" role="application"
+                                 aria-label="Mapa del recorrido del cobrador"
+                                 th:attr="data-tiles-url=${mapaTilesUrl},data-attribution=${mapaAttribution}"></div>
+                            <div id="recorridoSinPuntos" class="recorrido-mapa-vacio d-none">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                                <span>El recorrido todavía no recibió puntos GPS.</span>
+                            </div>
+                            <div class="recorrido-mapa-leyenda" aria-label="Leyenda del mapa">
+                                <span><i class="leyenda-punto inicio"></i> Inicio</span>
+                                <span><i class="leyenda-punto posicion"></i> Punto GPS</span>
+                                <span><i class="leyenda-punto parada"></i> Permanencia</span>
+                                <span><i class="leyenda-punto fin"></i> Fin</span>
+                            </div>
+                        </div>
+                        <div class="table-responsive mt-3">
+                            <h6 class="mb-2"><i class="fa-solid fa-clock"></i> Lugares y tiempos de permanencia</h6>
+                            <table class="table table-sm table-hover align-middle mb-3">
+                                <thead><tr><th>Lugar</th><th>Llegada</th><th>Salida</th><th>Permanencia</th><th>Muestras</th><th>Mapa</th></tr></thead>
+                                <tbody id="permanenciasRecorridoCuerpo"></tbody>
+                            </table>
+                            <h6 class="mb-2"><i class="fa-solid fa-location-dot"></i> Posiciones recibidas</h6>
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead><tr><th>Fecha</th><th>Latitud</th><th>Longitud</th><th>Precisión</th><th>Velocidad</th><th>Rumbo</th><th>Dispositivo</th><th>Mapa</th></tr></thead>
+                                <tbody id="puntosRecorridoCuerpo"></tbody>
+                            </table>
+                            <div class="d-flex justify-content-between align-items-center gap-2 mt-3">
+                                <button id="puntosPaginaAnterior" type="button" class="btn btn-outline-secondary btn-sm">Anterior</button>
+                                <span id="puntosPaginaEstado" class="text-muted small">Página 0 de 0</span>
+                                <button id="puntosPaginaSiguiente" type="button" class="btn btn-outline-secondary btn-sm">Siguiente</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button></div>
+                </div>
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        <script src="/js/recorridos/recorridos.js?v=20260904-4"></script>
+    </body>
+</html>

@@ -7,47 +7,75 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.TimeZone;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = FlywayAutoConfiguration.class)
 @Slf4j
-public class recolecion implements CommandLineRunner {
+ public class recolecion implements CommandLineRunner {
 
     @Autowired
     private BCryptPasswordEncoder encoder;
 
     @Autowired
     UsuarioSistemaService usuarioSistemaService;
+
     @Autowired
     ComprobanteDao comprobanteDao;
 
     public static void main(String[] args) {
-
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Asuncion"));
         SpringApplication.run(recolecion.class, args);
     }
 
     @Override
     public void run(String... args) throws Exception {
         Pageable pageable = PageRequest.of(0, 5);
-//        var resul = usuarioSistemaDao.findByNombre("irene");
-//       resul.forEach(c->{
-//        System.out.println("manzana esta en nulo : " + resul);
-//        System.out.println("manzana : " + resul);
-//    });
-//        var servicio=new Servicio();
-//        servicio.setCuentaCorriente("24-0001-01");
-//        var comprobante=comprobanteDao.getAllComprobantes(pageable);
-//        resul.getDetalleUsuarioSistema().forEach(dtu
-//                -> {
-//        log.info("Total: " +  dtu.getRol());
-//        log.info("Total: " +  dtu.getUsuarioSistema().getNombre()); 
-//        });
-//        comprobante.forEach(System.out::println);
+        // var resul = usuarioSistemaDao.findByNombre("irene");
+        // resul.forEach(c->{
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        // System.out.println("manzana esta en nulo : " + resul);
+        // System.out.println("manzana : " + resul);
+        // });
+        // var servicio=new Servicio();
+        // servicio.setCuentaCorriente("24-0001-01");
+        // var comprobante=comprobanteDao.getAllComprobantes(pageable);
+        // resul.getDetalleUsuarioSistema().forEach(dtu
+        // -> {
+        // log.info("Total: " + dtu.getRol());
+        // log.info("Total: " + dtu.getUsuarioSistema().getNombre());
+        // });
+        // comprobante.forEach(System.out::println);
 
-//        log.info(encoder.encode("123"));
-       
-    }
+        // log.info(encoder.encode("123"));
+        
 
+ 
+
+}
 }

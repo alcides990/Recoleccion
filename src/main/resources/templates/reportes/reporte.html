@@ -1,200 +1,714 @@
 <!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:th="http://www.thymeleaf.org">
-    <head  th:replace="~{layout/layout :: heat}"> </head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/layout :: heat}"></head>
+    <link rel="stylesheet" th:href="@{/css/reportes/formulario.css}">
     <body>
-        <header  th:replace="~{layout/layout :: header}"> </header>
-        <aside  th:replace="~{layout/layout :: aside}"> </aside>
-        <div class="container">
-            <div class="card-header" ><h3>REPORTES</h3> </div>
-            <div class=" row">
-                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
-                    <button 
-                        class="btn btn-primario btn-sm mb-3 " 
-                        data-bs-toggle="modal" data-bs-target="#modificarModal"
-                        data-bs-placement="top" title="Ver reporte ingresos diario">
-                        <i class="fa-solid fa-money-bill-trend-up"></i> 
-                        Ingreso Diario
-                    </button>
-                </div>
-                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
-                    <button  
-                        class="btn btn-primario btn-sm mb-3 " 
-                        data-bs-toggle="modal" data-bs-target="#ingresos-modal"
-                        data-bs-placement="top" title="Ver reporte de cobranza">
-                        <i class="fa-solid fa-money-bill-trend-up"></i> Cobranza
+        <header th:replace="~{layout/layout :: header}"></header>
+        <aside th:replace="~{layout/layout :: aside}"></aside>
 
-                    </button>
+        <main id="formularioReportes" class="container-fluid">
+            <header class="form-view-header">
+                <div>
+                    <h3>Reportes</h3>
+                    <p>Seleccione el informe que desea generar y complete los filtros correspondientes.</p>
                 </div>
-                <div class="container-btn-reporte col-sm-5 col-md-4 col-lg-2">
-                    <button   id="saldos"  
-                              class="btn btn-primario btn-sm mb-3 " 
-                              data-bs-toggle="modal" data-bs-target="#detalle-zona-modal"
-                              data-bs-placement="top" title="Ver reporte saldo por zona y manzana">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Saldos
-                    </button>
-                </div>
+                <span class="form-view-icon"><i class="fa-solid fa-chart-column"></i></span>
+            </header>
 
+            <section class="row g-3 reportes-opciones" aria-label="Reportes disponibles">
+                <div class="col-md-6 col-xl-4">
+                    <a class="reporte-opcion text-decoration-none" th:href="@{/reporte/ingresos-v2/resumen}"
+                       title="Ver resumen de ingresos">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-money-bill-transfer"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Resumen de ingresos</strong>
+                            <small>Totales por cobrador y medio de pago entre fechas.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a class="reporte-opcion text-decoration-none" th:href="@{/reporte/ingresos-v2/comparativo}"
+                       title="Ver comparativo de cobranza">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-chart-simple"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Comparativo de cobranza</strong>
+                            <small>Compare dos períodos por monto o cantidad.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <button class="reporte-opcion" type="button" data-bs-toggle="modal" data-bs-target="#rg90-ventas-modal"
+                            data-bs-placement="top" title="Exportar ventas RG90">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-file-zipper"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Exportación RG90</strong>
+                            <small>Genera el ZIP mensual de ventas para Marangatu.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <button class="reporte-opcion" type="button" data-bs-toggle="modal" data-bs-target="#ingresos-modal"
+                            data-bs-placement="top" title="Ver reporte de cobranza">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Cobranza</strong>
+                            <small>Ingresos por cobrador o zona, seg&#250;n per&#237;odo.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <button id="reporte-comisiones" class="reporte-opcion" type="button"
+                            data-bs-toggle="modal" data-bs-target="#comisiones-modal"
+                            data-bs-placement="top" title="Ver reporte de comisiones por cobrador">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-percent"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Comisiones por cobrador</strong>
+                            <small>Totales cobrados y comisiones calculadas entre fechas.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <button class="reporte-opcion" type="button" data-bs-toggle="modal" data-bs-target="#facturas-omitidas-modal"
+                            data-bs-placement="top" title="Ver reporte de facturas omitidas">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-file-circle-exclamation"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Facturas omitidas</strong>
+                            <small>Consulte los comprobantes pendientes de emisión.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <button id="saldos" class="reporte-opcion" type="button" data-bs-toggle="modal"
+                            data-bs-target="#detalle-zona-modal" data-bs-placement="top"
+                            title="Ver reporte de saldo por zona y manzana">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Saldos</strong>
+                            <small>Usuarios con deuda por zona, cobrador o manzana.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <button class="reporte-opcion" type="button" data-bs-toggle="modal"
+                            data-bs-target="#usuarios-servicio-modal" data-bs-placement="top"
+                            title="Ver cantidad y monto de servicios por categoría">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-users-rectangle"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Servicios por categoría</strong>
+                            <small>Resumen de cantidades, tarifas y montos.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <button class="reporte-opcion" type="button" data-bs-toggle="modal" data-bs-target="#egresos-modal"
+                            data-bs-placement="top" title="Ver reporte de egresos">
+                        <span class="reporte-opcion-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                        <span class="reporte-opcion-contenido">
+                            <strong>Egresos</strong>
+                            <small>Gastos registrados entre las fechas seleccionadas.</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right reporte-opcion-flecha" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </section>
+
+            <section class="row g-3 reportes-resumen" aria-label="Resumen de registros">
+                <div class="col-md-6 col-xl-4">
+                    <article class="reporte-metrica">
+                        <span class="reporte-metrica-icon" aria-hidden="true"><i class="fa-solid fa-file-invoice"></i></span>
+                        <div>
+                            <span class="reporte-metrica-titulo">Total facturas</span>
+                            <strong th:text="${#numbers.formatInteger(totalFacturas, 1, 'POINT')}">0</strong>
+                            <small>Comprobantes registrados en la sucursal.</small>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <article class="reporte-metrica">
+                        <span class="reporte-metrica-icon" aria-hidden="true"><i class="fa-solid fa-file-circle-xmark"></i></span>
+                        <div>
+                            <span class="reporte-metrica-titulo">Facturas anuladas</span>
+                            <strong th:text="${#numbers.formatInteger(facturasAnuladas, 1, 'POINT')}">0</strong>
+                            <small>Comprobantes anulados de la sucursal.</small>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <article class="reporte-metrica">
+                        <span class="reporte-metrica-icon" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
+                        <div>
+                            <span class="reporte-metrica-titulo">Total cuentas</span>
+                            <strong th:text="${#numbers.formatInteger(totalServicios, 1, 'POINT')}">0</strong>
+                            <small>Servicios registrados en la sucursal.</small>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+
+        <div class="modal fade" id="rg90-ventas-modal" tabindex="-1" aria-labelledby="tituloRg90Ventas"
+             data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content reporte-modal">
+                    <div class="modal-header">
+                        <h3 class="form-title modal-title" id="tituloRg90Ventas">Exportación RG90 ventas</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="mensaje-alerta" id="contenedor-alertas-rg90"></div>
+                    <form id="frm-rg90-ventas" th:action="@{/reporte/rg90/ventas}" method="post">
+                        <div class="modal-body reporte-modal-body">
+                            <p class="reporte-modal-descripcion">Genera un archivo CSV zipeado, sin cabecera, para importar ventas en Marangatu.</p>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="rg90-periodo">Período</label>
+                                    <input class="form-control" id="rg90-periodo" name="periodo" type="month" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="rg90-tipo-comprobante">Tipo comprobante</label>
+                                    <select class="form-select" id="rg90-tipo-comprobante" name="codigoTipoComprobante">
+                                        <option value="0">Todos</option>
+                                        <option th:each="tipoComprobante : ${tiposComprobante}"
+                                                th:value="${tipoComprobante.codigoTipoComprobante}"
+                                                th:text="${tipoComprobante.nombreTipoComprobante}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="rg90-identificador">Identificador</label>
+                                    <input class="form-control text-uppercase" id="rg90-identificador"
+                                           name="identificador" type="text" maxlength="5" value="V0001"
+                                           pattern="[A-Za-z0-9]{1,5}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer reporte-modal-footer">
+                            <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn reporte-btn-primario">
+                                <i class="fa-solid fa-file-arrow-down"></i> Descargar ZIP
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Ventana modal repoerte detalle zona-->
-        <div class="modal fade" id="detalle-zona-modal" tabindex="-1" aria-labelledby="confirmacionModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content bg-color">
+        <div class="modal fade" id="egresos-modal" tabindex="-1" aria-labelledby="tituloEgresos"
+             data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content reporte-modal">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="confirmacionModalLabel">Reporte detalle zona</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <div class="mensaje-alerta" id="contenedor-alertas"></div>
+                        <h3 class="form-title modal-title" id="tituloEgresos">Reporte de egresos</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
-                    <form class="mb-3" id="frm-detalle-zona" th:action="@{/reporte/detalle_zona}" method="post" >
-                        <div class="modal-body ">
-
-                            <div class="form-check form-switch">
-                                <input class="form-check-input"  type="checkbox" role="switch" 
-                                       name="chmanzana" id="chmanzana" value="true"
-                                       data-bs-toggle="form-check-input" data-bs-target="#chmanzana">
-
-                                    <label class="form-check-label" for="chmanzana">
-                                        Por manzana
-                                    </label>
-                            </div>
-                            <label class="form-label font-weight-bold"> Usuarios que adeudan </label>
-                            <div class="row mb-3">
-                                <input class="form-control-sm col-sm-4 m-1 "  type="text" id="desde" name="desde"  placeholder="Desde"/>
-                                <input class="form-control-sm col-sm-4 m-1"  type="text" id="hasta" name="hasta"  placeholder="Hasta"/>
-                                <input class="form-control-sm col-sm-3 m-1"  type="text" id="manzana" name="manzana"   style="display: none;" placeholder="N° manzana"/>
-                            </div>
-                            <div class="form-group row ">
-                                <div class="col-sm-2">
-                                    <label class="col-form-label col-sm-3 font-weight-bold" for="cobrador">Cobrador:</label>
+                    <div class="mensaje-alerta" id="contenedor-alertas-egresos"></div>
+                    <form id="frm-egresos" action="/egresos/reporte" method="post">
+                        <div class="modal-body reporte-modal-body">
+                            <p class="reporte-modal-descripcion">Seleccione el período de gastos que desea incluir.</p>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="egresos-formato">Formato</label>
+                                    <select class="form-select" id="egresos-formato" name="formato" required>
+                                        <option value="RESUMIDO">Resumido por gasto</option>
+                                        <option value="DETALLADO">Detallado por producto/servicio</option>
+                                        <option value="POR_PRODUCTO">Agrupado por producto/servicio</option>
+                                    </select>
                                 </div>
-                                <div class="col-sm-10">
-                                    <select class="form-select " name="codigoCobrador" id="cobrador">
-                                        <option th:each="cobrador : ${cobradores}" 
-                                                th:value="${cobrador.codigoCobrador}" 
+                                <div class="col-12">
+                                    <label class="form-label" for="egresos-categoria">Categoría de producto</label>
+                                    <select class="form-select" id="egresos-categoria" name="categoriaId">
+                                        <option value="">Todas</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="egresos-desde">Desde</label>
+                                    <input class="form-control" id="egresos-desde" name="desde" type="text" placeholder="Desde" autocomplete="off" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="egresos-hasta">Hasta</label>
+                                    <input class="form-control" id="egresos-hasta" name="hasta" type="text" placeholder="Hasta" autocomplete="off" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer reporte-modal-footer">
+                            <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn reporte-btn-primario"><i class="fa-regular fa-file-pdf"></i> Generar PDF</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="usuarios-servicio-modal" tabindex="-1"
+             aria-labelledby="tituloUsuariosServicio" data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content reporte-modal">
+                    <div class="modal-header">
+                        <h3 class="form-title modal-title" id="tituloUsuariosServicio">Servicios por categoría</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="mensaje-alerta" id="contenedor-alertas-usuarios-servicio"></div>
+                    <form id="frm-usuarios-servicio" th:action="@{/reporte/usuarios-servicio}" method="post">
+                        <div class="modal-body reporte-modal-body">
+                            <p class="reporte-modal-descripcion">
+                                Muestra tarifa, cantidad de servicios y monto total por categoría. Seleccione cómo agrupar el resumen.
+                            </p>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="usuarios-servicio-agrupacion">Agrupación</label>
+                                    <select class="form-select" id="usuarios-servicio-agrupacion"
+                                            name="agrupacion" required>
+                                        <option value="GENERAL">General</option>
+                                        <option value="ZONA">Por zona</option>
+                                        <option value="COBRADOR">Por cobrador</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer reporte-modal-footer">
+                            <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn reporte-btn-primario">
+                                <i class="fa-regular fa-eye"></i> Ver reporte
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="facturas-omitidas-modal" tabindex="-1" aria-labelledby="tituloFacturasOmitidas"
+             data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content reporte-modal">
+                    <div class="modal-header">
+                        <h3 class="form-title modal-title" id="tituloFacturasOmitidas">Facturas omitidas</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="mensaje-alerta" id="contenedor-alertas-facturas-omitidas"></div>
+                    <form id="frm-facturas-omitidas" th:action="@{/reporte/facturas_omitidas}" method="post">
+                        <div class="modal-body reporte-modal-body">
+                            <p class="reporte-modal-descripcion">Indique la serie y el rango para localizar números de comprobante que no fueron emitidos.</p>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="omitidas-serie">Serie</label>
+                                    <select class="form-select" id="omitidas-serie" name="codigoSerie" required>
+                                        <option th:each="serie : ${series}" th:value="${serie.codigoSerie}"
+                                                th:text="${serie.serie}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="omitidas-desde">Desde</label>
+                                    <input class="form-control" type="number" min="0" id="omitidas-desde"
+                                           name="desde" placeholder="Primer número" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="omitidas-hasta">Hasta</label>
+                                    <input class="form-control" type="number" min="0" id="omitidas-hasta"
+                                           name="hasta" placeholder="Último número" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer reporte-modal-footer">
+                            <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn reporte-btn-primario">
+                                <i class="fa-regular fa-eye"></i> Ver reporte
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="detalle-zona-modal" tabindex="-1" aria-labelledby="tituloDetalleZona"
+             data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content reporte-modal">
+                    <div class="modal-header">
+                        <h3 class="form-title modal-title" id="tituloDetalleZona">Reporte de saldos</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="mensaje-alerta" id="contenedor-alertas"></div>
+                    <form id="frm-detalle-zona" th:action="@{/reporte/detalle_zona}" method="post">
+                        <div class="modal-body reporte-modal-body">
+                            <p class="reporte-modal-descripcion">Defina los filtros para consultar los usuarios con saldo pendiente.</p>
+
+                            <div class="reporte-switch">
+                                <div>
+                                    <strong>Filtrar por manzana</strong>
+                                    <span>Manzana especificada tiene que coresponder a la zona seleccionada</span>
+                                </div>
+                                <div class="form-check form-switch m-0">
+                                    <input onclick="cargarZonasCobrador()" class="form-check-input" type="checkbox"
+                                           role="switch" name="manzana" id="chmanzana" value="true"
+                                           data-bs-toggle="form-check-input" data-bs-target="#chmanzana">
+                                    <label class="form-check-label visually-hidden" for="chmanzana">Filtrar por manzana</label>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="desde">Usuarios que adeudan desde</label>
+                                    <input class="form-control" type="text" id="desde" name="desde" placeholder="Desde">
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="hasta">Hasta</label>
+                                    <input class="form-control" type="text" id="hasta" name="hasta" placeholder="Hasta">
+                                </div>
+                                <div class="col-sm-6" id="manzana-div" style="display: none;">
+                                    <label class="form-label" for="manzana">N.º de manzana</label>
+                                    <input class="form-control" type="text" id="manzana" name="manzana"
+                                           placeholder="N.º de manzana">
+                                </div>
+                                <div class="col-sm-6" id="cobrador-div">
+                                    <label class="form-label" for="cobrador">Cobrador</label>
+                                    <select onchange="cargarZonasCobrador()" class="form-select" name="cobrador" id="cobrador">
+                                        <option th:each="cobrador : ${cobradores}" th:value="${cobrador.codigoCobrador}"
                                                 th:text="${cobrador.nombreCompleto}"></option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-sm-2">
-                                    <label class="col-form-label mb-1 font-weight-bold" for="zona">Zona</label>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="zona">Zona</label>
+                                    <select class="form-select" name="zona" id="zona"></select>
                                 </div>
-                                <div calss="col-sm-10"> 
-                                    <select class="form-select"  name="codigoZona" id="zona">
-                                        <option th:each="zona : ${zonas}" 
-                                                th:value="${zona.codigoZona}" 
-                                                th:text="${zona.nombreZona}">
+                            </div>
+                        </div>
+                        <div class="modal-footer reporte-modal-footer">
+                            <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn reporte-btn-primario">
+                                <i class="fa-regular fa-eye"></i> Ver reporte
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-                                        </option>
+        <div class="modal fade" id="ingresos-modal" tabindex="-1" aria-labelledby="tituloIngresos"
+             data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content reporte-modal">
+                    <div class="modal-header">
+                        <h3 class="form-title modal-title" id="tituloIngresos">Reporte de cobranza</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="mensaje-alerta" id="contenedor-alertas-ingresos"></div>
+                    <form id="frm-ingresos" th:action="@{/reporte/ingresos}" method="post">
+                        <div class="modal-body reporte-modal-body">
+                            <p class="reporte-modal-descripcion">Indique el período y la agrupación para generar el reporte de cobranza.</p>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="ingresos-desde">Desde</label>
+                                    <input class="form-control" type="text" id="ingresos-desde" name="ingresos-desde"
+                                           placeholder="Desde" autocomplete="off">
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="ingresos-hasta">Hasta</label>
+                                    <input class="form-control" type="text" id="ingresos-hasta" name="ingresos-hasta"
+                                           placeholder="Hasta" autocomplete="off">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="grupo">Tipo de reporte</label>
+                                    <select class="form-select" name="grupo" id="grupo">
+                                        <option value="cob">Resumen por cobrador</option>
+                                        <option value="zona">Resumen por zona</option>
+                                        <option value="seguimiento">Seguimiento por cobrador</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6 seguimiento-cobrador-campo" style="display: none;">
+                                    <label class="form-label" for="ingresos-cobrador">Cobrador</label>
+                                    <select class="form-select" name="codigoCobrador" id="ingresos-cobrador">
+                                        <option value="0">Todos los cobradores</option>
+                                        <option th:each="cobrador : ${cobradores}" th:value="${cobrador.codigoCobrador}"
+                                                th:text="${cobrador.nombreCompleto}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6 seguimiento-cobrador-campo" style="display: none;">
+                                    <label class="form-label" for="ingresos-serie">Serie</label>
+                                    <select class="form-select" name="codigoSerie" id="ingresos-serie">
+                                        <option th:each="serie : ${series}" th:value="${serie.codigoSerie}"
+                                                th:text="${serie.serie}"></option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-
-                        <button type="submit"  class="btn btn-guardar offset-9" > 
-                            <i class="fa-regular fa-eye"></i> Ver
-                        </button>
+                        <div class="modal-footer reporte-modal-footer">
+                            <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn reporte-btn-primario">
+                                <i class="fa-regular fa-eye"></i> Ver reporte
+                            </button>
+                        </div>
                     </form>
-
                 </div>
             </div>
         </div>
-        <!-- Ventana modal repoerte ingreesos -->
-        <div class="modal fade" id="ingresos-modal" tabindex="-1" aria-labelledby="confirmacionModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content bg-color">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmacionModalLabel">Reporte Ingresos</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <div class="mensaje-alerta" id="contenedor-alertas"></div>
-                    </div>
-                    <form class="mb-3" id="frm-detalle-zona" th:action="@{/reporte/ingresos}" method="post" >
-                        <div class="modal-body ">
 
-                            <div class="row">
-                                <div class="col-6 form-floating">
-                                    <input class="form-control"  type="text" id="ingresos-desde" name="ingresos-desde"  placeholder="Desde" autocomplete="off"/>
-                                    <label>Desde</label>
+        <div class="modal fade" id="comisiones-modal" tabindex="-1" aria-labelledby="tituloComisiones"
+             data-bs-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content reporte-modal">
+                    <div class="modal-header">
+                        <h3 class="form-title modal-title" id="tituloComisiones">Comisiones por cobrador</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="mensaje-alerta" id="contenedor-alertas-comisiones"></div>
+                    <form id="frm-comisiones" th:action="@{/reporte/ingresos}" method="post">
+                        <input type="hidden" name="grupo" value="comision">
+                        <div class="modal-body reporte-modal-body">
+                            <p class="reporte-modal-descripcion">Indique el per&#237;odo para calcular las comisiones agrupadas por cobrador.</p>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="comisiones-selector">Comisi&#243;n</label>
+                                    <select class="form-select" id="comisiones-selector" name="codigoComision" required>
+                                        <option value="" selected disabled>Seleccione una comisi&#243;n</option>
+                                        <option th:each="comision : ${comisiones}"
+                                                th:value="${comision.codigoComision}"
+                                                th:text="${comision.nombreComision + ' - ' + comision.comision}"></option>
+                                    </select>
                                 </div>
-                                <div class="col-6 form-floating">
-                                    <input class="form-control"  type="text" id="ingresos-hasta" name="ingresos-hasta"  placeholder="Hasta" autocomplete="off"/>
-                                    <label for="ingresos-desde">Hasta</label>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="comisiones-desde">Desde</label>
+                                    <input class="form-control" type="text" id="comisiones-desde" name="ingresos-desde"
+                                           placeholder="Desde" autocomplete="off" required>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-form-label mb-1 font-weight-bold" for="grupo">Reporte Por:</label>
-                                <select class="form-select"  name="grupo" id="zona">
-                                    <option value="cob"> COBRADOR</option>
-                                    <option value="zona"> ZONA</option>
-                                </select>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="comisiones-hasta">Hasta</label>
+                                    <input class="form-control" type="text" id="comisiones-hasta" name="ingresos-hasta"
+                                           placeholder="Hasta" autocomplete="off" required>
+                                </div>
                             </div>
                         </div>
-
-                        <button type="submit"  class="btn btn-guardar offset-9" > 
-                            <i class="fa-regular fa-eye"></i> Ver
-                        </button>
+                        <div class="modal-footer reporte-modal-footer">
+                            <button type="button" class="btn reporte-btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn reporte-btn-primario">
+                                <i class="fa-regular fa-eye"></i> Ver reporte
+                            </button>
+                        </div>
                     </form>
-
                 </div>
             </div>
         </div>
-        <footer  th:replace="~{layout/layout :: footer}"> </footer>
-        <script src="js/validarFormulario.js"></script>
-         <script src="/js/datepicker-es.js"></script>
-        <script>
-            $(document).ready(function () {
-                //posicionar focus al abrir modal detalle saldo
-                $('#detalle-zona-modal').on('shown.bs.modal', function () {
-                    tabular('#desde');
-                });
-                //posicionar focus al abrir ingresos modal
-                $('#ingresos-modal').on('shown.bs.modal', function () {
-                    $('#ingresos-desde').datepicker();
-                    $('#ingresos-hasta').datepicker();
-                    let fecha = new Date();
-                    let año = fecha.getFullYear().toString().padStart(4, '0');
-                    let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-                    let dia = fecha.getDate().toString().padStart(2, '0');
-                    let fechaFormateada = año + '-' + mes + '-' + dia;
-                    $('#ingresos-desde').val(fechaFormateada);
-                    $('#ingresos-hasta').val(fechaFormateada);
-                });
-                $('#chmanzana').click(function () {
-                    $('#manzana').fadeToggle(100, function () {
-                        tabular('#manzana');
-                        tabulador("#hasta", "#manzana"); //tabular campos
-                    });
-                });
-                tabulador("#desde", "#hasta"); //tabular campos
-                //Recuperar los datos al enviar formulario
-                $("#frm-detalle-zona").submit(function (event) {
-//                    event.preventDefault();
-                    var desde = $("#desde").val();
-                    var hasta = $("#hasta").val();
-                    var codigoCobrador = $("#cobrador").val();
-                    var codigoZona = $("#zona").val();
-                    var manzana = $("#manzana").val();
-                    var url = "/reporte/detalle_zona";
-                    if ($("#chmanzana").prop('checked')) {
-                        var url = "/reporte/detalle_manzana";
-                    }
-                    var datos = {
-                        codigoCobrador: codigoCobrador,
-                        codigoZona: codigoZona,
-                        desde: desde,
-                        hasta: hasta,
-                        codigoManzana : manzana
-                    };
-//                    getReporte(datos, url);
 
-                });
+        <footer th:replace="~{layout/layout :: footer}"></footer>
+        <script src="/js/validarFormulario.js"></script>
+        <script type="module">
+            import { tabulador, tabular, getReporte, mostrarAlerta } from '/js/modulos.js';
+            import { datePickerInit } from '/js/utils.js';
+
+            datePickerInit('#ingresos-desde');
+            datePickerInit('#ingresos-hasta');
+            datePickerInit('#comisiones-desde');
+            datePickerInit('#comisiones-hasta');
+            datePickerInit('#egresos-desde');
+            datePickerInit('#egresos-hasta');
+            $.getJSON('/egresos/catalogos/CATEGORIA_PRODUCTO').done(categorias => {
+                const selector = $('#egresos-categoria').empty().append($('<option>').val('').text('Todas'));
+                categorias.forEach(categoria => selector.append($('<option>').val(categoria.id).text(categoria.nombre)));
             });
+            setDateIngresos();
+            function setDateIngresos(){
+                 let fecha = new Date();
+                let año = fecha.getFullYear().toString().padStart(4, '0');
+                let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                let dia = fecha.getDate().toString().padStart(2, '0');
+                let fechaFormateada = año + '-' + mes + '-' + dia;
+                $('#ingresos-desde').val(fechaFormateada);
+                $('#ingresos-hasta').val(fechaFormateada);
+                $('#comisiones-desde').val(fechaFormateada);
+                $('#comisiones-hasta').val(fechaFormateada);
+                $('#egresos-desde').val(fechaFormateada);
+                $('#egresos-hasta').val(fechaFormateada);
+                $('#rg90-periodo').val(año + '-' + mes);
+            }
+
+            function actualizarSeguimientoCobrador() {
+                const seguimiento = $('#grupo').val() === 'seguimiento';
+                $('.seguimiento-cobrador-campo').stop(true, true).toggle(seguimiento);
+            }
+            $('#grupo').on('change', actualizarSeguimientoCobrador);
+            $('#ingresos-modal').on('shown.bs.modal', actualizarSeguimientoCobrador);
+            actualizarSeguimientoCobrador();
+
+            function cargarComisionesReporte() {
+                const selector = $('#comisiones-selector');
+                selector.prop('disabled', true).html('<option value="">Cargando comisiones...</option>');
+                $.getJSON('/reporte/comisiones').done((comisiones) => {
+                    selector.empty().append('<option value="" selected disabled>Seleccione una comisi&oacute;n</option>');
+                    comisiones.forEach((comision) => {
+                        const texto = [comision.nombreComision, comision.comision].filter(Boolean).join(' - ');
+                        selector.append($('<option>', {value: comision.codigoComision, text: texto}));
+                    });
+                    if (!comisiones.length) {
+                        selector.html('<option value="">No existen comisiones registradas</option>');
+                    }
+                }).fail(() => {
+                    selector.html('<option value="">No fue posible cargar las comisiones</option>');
+                }).always(() => selector.prop('disabled', false));
+            }
+            $('#comisiones-modal').on('shown.bs.modal', cargarComisionesReporte);
+
+            $('#frm-facturas-omitidas').on('submit', (event)=> {
+                event.preventDefault();
+                const boton = $(event.currentTarget).find('button[type="submit"]');
+                getReporte({
+                    codigoSerie: $('#omitidas-serie').val(),
+                    desde: $('#omitidas-desde').val(),
+                    hasta: $('#omitidas-hasta').val()
+                }, '/reporte/facturas_omitidas', '#contenedor-alertas-facturas-omitidas', boton);
+            });
+
+            $('#frm-ingresos, #frm-comisiones').on('submit', (event) => {
+                event.preventDefault();
+                const formulario = event.currentTarget;
+                const datos = Object.fromEntries(new FormData(formulario).entries());
+                const contenedor = formulario.id === 'frm-comisiones'
+                        ? '#contenedor-alertas-comisiones' : '#contenedor-alertas-ingresos';
+                getReporte(datos, '/reporte/ingresos', contenedor,
+                        $(formulario).find('button[type="submit"]'));
+            });
+
+            $('#frm-usuarios-servicio').on('submit', (event) => {
+                event.preventDefault();
+                const formulario = event.currentTarget;
+                getReporte(Object.fromEntries(new FormData(formulario).entries()),
+                        '/reporte/usuarios-servicio', '#contenedor-alertas-usuarios-servicio',
+                        $(formulario).find('button[type="submit"]'));
+            });
+
+            $('#frm-egresos').on('submit', (event) => {
+                event.preventDefault();
+                const formulario = event.currentTarget;
+                const datos = Object.fromEntries(new FormData(formulario).entries());
+                getReporte(datos,
+                        '/egresos/reporte', '#contenedor-alertas-egresos',
+                        $(formulario).find('button[type="submit"]'));
+            });
+
+            $('#frm-rg90-ventas').on('submit', async (event) => {
+                event.preventDefault();
+                const formulario = event.currentTarget;
+                const boton = $(formulario).find('button[type="submit"]');
+                const contenidoOriginal = boton.html();
+                boton.prop('disabled', true)
+                        .html('<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Generando…');
+                $('#contenedor-alertas-rg90').empty();
+                try {
+                    const response = await fetch('/reporte/rg90/ventas', {
+                        headers: {
+                            'X-CSRF-TOKEN': $('#token').val(),
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        method: 'POST',
+                        body: new URLSearchParams(new FormData(formulario))
+                    });
+                    if (!response.ok) {
+                        const data = await response.json().catch(() => ({mensaje: 'No fue posible generar el archivo RG90.'}));
+                        mostrarAlerta({
+                            mensaje: data.mensaje || 'No fue posible generar el archivo RG90.',
+                            url: '/reporte/rg90/ventas',
+                            tipo: 'warning',
+                            contenedor: '#contenedor-alertas-rg90',
+                            time: 9000
+                        });
+                        return;
+                    }
+                    const archivo = await response.blob();
+                    const disposicion = response.headers.get('content-disposition') || '';
+                    const nombre = decodeURIComponent(
+                            disposicion.match(/filename\*=UTF-8''([^;]+)/)?.[1]
+                            || disposicion.match(/filename="?([^";]+)"?/)?.[1]
+                            || 'rg90-ventas.zip');
+                    const url = URL.createObjectURL(archivo);
+                    const enlace = document.createElement('a');
+                    enlace.href = url;
+                    enlace.download = nombre;
+                    document.body.appendChild(enlace);
+                    enlace.click();
+                    enlace.remove();
+                    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+                } catch (error) {
+                    mostrarAlerta({
+                        mensaje: 'Error al descargar RG90: ' + error.message,
+                        url: '/reporte/rg90/ventas',
+                        tipo: 'danger',
+                        contenedor: '#contenedor-alertas-rg90',
+                        time: 7000
+                    });
+                } finally {
+                    boton.prop('disabled', false).html(contenidoOriginal);
+                }
+            });
+
+            $('#detalle-zona-modal').on('shown.bs.modal', ()=> {
+                $('#chmanzana').prop('checked', false);
+                actualizarCamposSaldos();
+                cargarZonasCobrador();
+                tabular('#desde');
+            });
+            $('#chmanzana').on('change', ()=> {
+                actualizarCamposSaldos();
+                if ($('#chmanzana').prop('checked')) {
+                    tabular('#manzana');
+                }
+            });
+
+            function actualizarCamposSaldos() {
+                const porManzana = $('#chmanzana').prop('checked');
+                $('#manzana-div').stop(true, true).toggle(porManzana);
+                $('#cobrador-div').stop(true, true).toggle(!porManzana);
+
+                $('#hasta').off('keydown.ordenSaldos').on('keydown.ordenSaldos', (event)=> {
+                    if (event.keyCode === 13) {
+                        event.preventDefault();
+                        $(porManzana ? '#manzana' : '#cobrador').focus();
+                    }
+                });
+            }
+            tabulador("#desde", "#hasta");
+            $("#frm-detalle-zona").submit( (event)=> {
+                event.preventDefault();
+                let desde = $("#desde").val();
+                let hasta = $("#hasta").val();
+                let codigoCobrador = $("#cobrador").val();
+                let codigoZona = $("#zona").val();
+                let manzana = $("#manzana").val();
+                let url = "/reporte/detalle_zona";
+                if ($("#chmanzana").prop('checked')) {
+                    url = "/reporte/detalle_manzana";
+                }
+                let datos = {
+                    codigoCobrador: codigoCobrador,
+                    codigoZona: codigoZona,
+                    desde: desde,
+                    hasta: hasta,
+                    manzana: manzana
+                };
+                getReporte(datos, url, '#contenedor-alertas',
+                        $(event.currentTarget).find('button[type="submit"]'));
+            });
+        </script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            var zonas = /*[[${zonas}]]*/[];
+            /*]]>*/
+            cargarZonasCobrador();
+            function cargarZonasCobrador() {
+                let codigoCobrador = $("#cobrador").val();
+                let manzaneChecked = $("#chmanzana").prop('checked');
+                $("#zona").empty();
+                zonas.forEach(zona => {
+                    if (zona.cobrador.codigoCobrador == codigoCobrador) {
+                        $("#zona").append('<option value="' + zona.codigoZona + '">' + zona.nombreZona + '</option>');
+                    } else if (manzaneChecked) {
+                        $("#zona").append('<option value="' + zona.codigoZona + '">' + zona.nombreZona + '</option>');
+                    }
+                });
+            }
         </script>
     </body>
 </html>

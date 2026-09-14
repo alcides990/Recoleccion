@@ -1,0 +1,143 @@
+.egresos-bodega {
+    padding: 1rem;
+}
+
+.egresos-bodega #mensajeEgreso:empty {
+    display: none;
+}
+
+.egresos-bodega .egreso-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.2rem 1.35rem;
+    border-radius: .75rem .75rem 0 0;
+    background: var(--btn-color);
+    color: #fff;
+}
+
+.egresos-bodega .egreso-list-header h3,
+.egresos-bodega .egreso-list-header p {
+    margin: 0;
+}
+
+.egresos-bodega .egreso-list-header h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.egresos-bodega .egreso-list-header p {
+    margin-top: .25rem;
+    opacity: .82;
+}
+
+.egresos-bodega .egreso-list-kicker {
+    display: block;
+    margin-bottom: .15rem;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    opacity: .78;
+    text-transform: uppercase;
+}
+
+.egresos-bodega .egreso-list-agregar {
+    flex: 0 0 auto;
+    padding: .62rem 1rem;
+    border: 1px solid rgba(255, 255, 255, .45);
+    background: #fff;
+    color: #394047;
+    font-weight: 700;
+}
+
+.egresos-bodega .egreso-list-agregar i {
+    margin-right: .35rem;
+    color: #394047;
+}
+
+.egresos-bodega .egreso-list-agregar:hover,
+.egresos-bodega .egreso-list-agregar:focus {
+    background: #f7f8fa;
+    color: #1f2933;
+}
+
+.egresos-bodega .egreso-list-card,
+.egresos-bodega .egreso-marco {
+    padding: 1.25rem;
+    border: 1px solid rgba(108, 117, 125, .18);
+    border-top: 0;
+    border-radius: 0 0 .75rem .75rem;
+    background: rgba(255, 255, 255, .94);
+}
+
+.egresos-bodega .egreso-list-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: .85rem 1rem;
+    border: 1px solid rgba(108, 117, 125, .16);
+    border-radius: .5rem;
+    background: #f7f8fa;
+}
+
+.egresos-bodega .egreso-list-summary h4,
+.egresos-bodega .egreso-list-summary p {
+    margin: 0;
+}
+
+.egresos-bodega .egreso-list-summary h4 {
+    color: #26313b;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.egresos-bodega .egreso-list-summary p {
+    margin-top: .25rem;
+    color: #68737d;
+    font-size: .86rem;
+}
+
+.egresos-bodega #filtroEgresos {
+    margin-bottom: 1rem;
+}
+
+.egresos-bodega #formDetalleEgreso .btn {
+    width: 100%;
+    padding-left: .35rem;
+    padding-right: .35rem;
+}
+
+.egresos-bodega #tablaDetalleGasto td:last-child {
+    white-space: nowrap;
+}
+
+.egresos-bodega #tablaDetalleGasto tfoot {
+    border-top: 2px solid #6c757d;
+}
+
+@media (max-width: 767.98px) {
+    .egresos-bodega {
+        padding: .5rem;
+    }
+
+    .egresos-bodega .egreso-list-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .egresos-bodega .egreso-list-agregar {
+        width: 100%;
+    }
+
+    .egresos-bodega .egreso-list-card,
+    .egresos-bodega .egreso-marco {
+        padding: .85rem;
+    }
+
+    .egresos-bodega #tablaDetalleGasto {
+        min-width: 610px;
+    }
+}

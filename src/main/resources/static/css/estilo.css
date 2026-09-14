@@ -13,7 +13,6 @@ html {
 
 body {
     background-color: rgb(144 155 173 / 60%);
-    /*font-size: 14px;*/
 }
 
 :root {
@@ -25,7 +24,7 @@ body {
     background-color: var(--bg-color);
 }
 
-h3 {
+.form-title {
     text-align: center;
     font-weight: bold;
 }
@@ -69,6 +68,9 @@ h3 {
     z-index: 1055;
 
 }
+.ui-autocomplete {
+    z-index: 1060 !important;
+}
 
 
 .menu_aside {
@@ -96,8 +98,6 @@ h3 {
 
 .menu_aside ul,
 li {
-    /*    display: list-item;
-    */
     color: black;
     padding: 2px 2px;
     text-decoration: none;
@@ -110,16 +110,7 @@ li {
 }
 
 
-.menu_aside>* :hover:not(.active) {
-    background-color: #a97d50d3;
-    color: white;
-}
-
-#cobranza li {
-    display: none;
-}
-
-aside div {
+#user-session {
     display: none;
     position: fixed;
     left: 2px;
@@ -146,7 +137,8 @@ aside div {
 }
 
 .container {
-
+    height: 90vh;
+    overflow-y: auto;
     margin: 10px 10px 50px 155px;
     padding: 5px;
     border-radius: 20px;
@@ -181,10 +173,12 @@ aside div {
 
 
 .container-btn-reporte {
+    min-width: 100px;
+    max-width: 160px;
     margin: 10px;
     padding: 10px;
-    border-radius: 10px;
-    border: 2px solid #a97c50;
+    border-radius: 1.5em;
+    border: 2px solid #bca007;
     font-size: 1rem;
     display: inline-flex;
     flex-wrap: wrap;
@@ -198,7 +192,7 @@ aside div {
     margin: 5px;
     padding: 5px;
     border-radius: 10px;
-    border: 0.1px solid #a97c50;
+    border: 0.1px solid #F4C430;
     position: relative;
     font-size: 13px;
 
@@ -219,7 +213,7 @@ aside div {
     margin: 5px;
     padding: 5px;
     border-radius: 10px;
-    border: 0.1px solid #a97c50;
+    border: 0.1px solid #bca007;
     position: relative;
     font-size: 1em;
     flex-wrap: wrap;
@@ -229,23 +223,12 @@ aside div {
 
 }
 
-#tabla-servicio th:nth-child(1),
-#tabla-servicio td:nth-child(1) {
-    position: sticky;
-    left: 1px;
-    z-index: 1;
-}
-
-/*  th:nth-child(2), td:nth-child(2) {
-    position: sticky;
-    left: 90px;
-} */
-
+/*
 .form-control {
     margin: 0.1em;
     padding: 0.1em;
     font-weight: 700;
-}
+}*/
 
 /*.table {
 width: 90%;
@@ -289,24 +272,14 @@ color: white;
 background-color: #716d6d99;
 }*/
 
-.btn-guardar {
-    font-size: 1em;
-    padding: 5px 10px;
-    margin-bottom: 0.2em;
-    background-color: #a97d50d3;
-    color: aliceblue;
-    border: solid 1px #a97c50;
-    border-radius: 5px;
-    border-bottom: 2px solid #926d48;
-}
+
 
 .btn-primario {
     font-size: 1rem;
     padding: 0.4em 0.4em;
-    margin: 0.2em;
     background-color: var(--btn-color);
     color: white;
-    border-radius: 10px;
+    border-radius: 1em;
 }
 
 td .btn-primario {
@@ -318,12 +291,12 @@ td .btn-primario {
 }
 
 .btn-primario:hover {
-    background-color: #926d48;
+    background-color: #bca007;
     color: white;
 }
 
 .btn-guardar:hover {
-    background-color: #926d48;
+    background-color: var(--btn-color);
     color: white;
 }
 
@@ -388,7 +361,7 @@ header {
     width: 100%;
     height: 4px;
     margin-bottom: 5px;
-    background-color: #a97c50;
+    background-color: #F4C430;
 }
 
 textarea.form-control {
@@ -461,11 +434,6 @@ textarea.form-control {
 
     #menu-toggle.active~#menu {
         display: block;
-    }
-
-    .sticky-start {
-        position: sticky;
-        left: 0px;
     }
 
     .comprobante-filter {

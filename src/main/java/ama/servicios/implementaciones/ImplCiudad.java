@@ -3,19 +3,19 @@ package ama.servicios.implementaciones;
 import ama.dao.CiudadDao;
 import ama.dominio.Ciudad;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ama.servicio.CiudadService;
 
 @Service
+@RequiredArgsConstructor
 public class ImplCiudad implements CiudadService {
 
-    @Autowired
-    CiudadDao ciudadDao;
+    private final CiudadDao ciudadDao;
 
     @Override
     public List<Ciudad> listarCiudad() {
-        return (List<Ciudad>) ciudadDao.findAll();
+        return ciudadDao.findAll();
     }
 
     @Override
@@ -35,11 +35,8 @@ public class ImplCiudad implements CiudadService {
 
     @Override
     public Integer getCodigoCiudad() {
-        Integer codigoCiudad = 0;
-        if (ciudadDao.getCodigoCiudad() != null) {
-            codigoCiudad = ciudadDao.getCodigoCiudad();
-        }
-        return codigoCiudad;
+        Integer codigoMaximo = ciudadDao.getCodigoCiudad();
+        return codigoMaximo == null ? 0 : codigoMaximo;
     }
 
 }

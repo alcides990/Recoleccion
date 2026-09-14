@@ -1,44 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="IngresosPorCobrador" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d4fa1245-b4fa-4dae-9cdf-bf63ad824fb7">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<parameter name="desde" class="java.lang.String">
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="266"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="729"/>
+	<parameter name="desde" class="java.lang.String" nestedType="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="hasta" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
+	<parameter name="codigoSucursal" class="java.lang.Integer"/>
 	<queryString>
-		<![CDATA[SELECT cob.codigo_cobrador, CONCAT(cob.nombre, ' ',cob.apellido) AS cobrador,
+		<![CDATA[SELECT cob.codigo_cobrador, concat_ws(' ', cob.nombre, cob.apellido) AS cobrador,
 
-COUNT( CASE comp.codigo_estado 
-WHEN '2' THEN 1 END ) AS 'Fact. Anulada',
+COUNT( CASE WHEN  comp.codigo_estado = 3 THEN 1 END ) AS 'Fact. Anulada',
 
-COUNT( CASE WHEN comp.codigo_tipo_factura = 2 AND comp.codigo_estado = 1
+COUNT( CASE WHEN comp.codigo_tipo_comprobante = 1 AND comp.codigo_estado = 1
   THEN 1 END ) AS 'Fact. Manual',
   
-  COUNT( CASE WHEN comp.codigo_tipo_factura = 1 AND comp.codigo_estado = 1
-  THEN 1 END ) AS 'Fact. Impresa',
+  COUNT( CASE WHEN comp.codigo_tipo_comprobante = 2 AND comp.codigo_estado = 1
+  THEN 1 END ) AS 'Fact. Electronica',
 
-SUM(dtc.importe) AS importe, SUM(dtc.recargo) AS recargo
+SUM(CASE WHEN comp.codigo_estado = 1 THEN comp.total_importe END) AS importe
 
 FROM comprobantes AS comp
-JOIN detallecomprobantes AS dtc
-  ON dtc.codigo_sucursal = comp.codigo_sucursal
-    AND dtc.codigo_punto_expedicion = comp.codigo_punto_expedicion
-    AND dtc.numero_comprobante = comp.numero_comprobante
-    AND dtc.codigo_tipo_factura = comp.codigo_tipo_factura
 JOIN cobradores AS  cob
   ON cob.codigo_cobrador = comp.codigo_cobrador
- WHERE	 comp.`codigo_estado`=1 
-  AND comp.fecha_pago >= $P{desde} 
-  AND comp.fecha_pago <= $P{hasta} 
+ AND cob.codigo_sucursal = comp.codigo_sucursal
+ WHERE	 comp.fecha_pago BETWEEN $P{desde}  AND  $P{hasta} 
+   AND comp.codigo_sucursal = $P{codigoSucursal}
   
-GROUP BY comp.codigo_cobrador]]>
+GROUP BY cob.codigo_sucursal, cob.codigo_cobrador, cob.nombre, cob.apellido
+ORDER BY  cob.codigo_cobrador ASC]]>
 	</queryString>
 	<field name="codigo_cobrador" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="codigo_cobrador"/>
@@ -57,32 +55,28 @@ GROUP BY comp.codigo_cobrador]]>
 		<property name="com.jaspersoft.studio.field.name" value="Fact. Manual"/>
 		<property name="com.jaspersoft.studio.field.label" value="Fact. Manual"/>
 	</field>
-	<field name="Fact. Impresa" class="java.lang.Long">
-		<property name="com.jaspersoft.studio.field.name" value="Fact. Impresa"/>
-		<property name="com.jaspersoft.studio.field.label" value="Fact. Impresa"/>
+	<field name="Fact. Electronica" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="Fact. Electronica"/>
+		<property name="com.jaspersoft.studio.field.label" value="Fact. Electronica"/>
 	</field>
 	<field name="importe" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.name" value="importe"/>
 		<property name="com.jaspersoft.studio.field.label" value="importe"/>
 	</field>
-	<field name="recargo" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.name" value="recargo"/>
-		<property name="com.jaspersoft.studio.field.label" value="recargo"/>
-	</field>
 	<variable name="TOTALMONTO" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{importe}+$F{recargo}]]></variableExpression>
+		<variableExpression><![CDATA[$F{importe}]]></variableExpression>
 	</variable>
 	<variable name="Monto_1" class="java.lang.Double">
-		<variableExpression><![CDATA[$F{importe}+$F{recargo}]]></variableExpression>
+		<variableExpression><![CDATA[$F{importe}]]></variableExpression>
 	</variable>
 	<variable name="Fact. Impresas_1" class="java.lang.Long" calculation="Sum">
-		<variableExpression><![CDATA[$F{Fact. Impresa}]]></variableExpression>
+		<variableExpression><![CDATA[$F{Fact. Electronica}]]></variableExpression>
 	</variable>
 	<variable name="Fact. Manual_1" class="java.lang.Long" calculation="Sum">
 		<variableExpression><![CDATA[$F{Fact. Manual}]]></variableExpression>
 	</variable>
 	<variable name="Fact. Normal_1" class="java.lang.Long" calculation="Sum">
-		<variableExpression><![CDATA[$F{Fact. Manual}+$F{Fact. Impresa}]]></variableExpression>
+		<variableExpression><![CDATA[$F{Fact. Manual}+$F{Fact. Electronica}]]></variableExpression>
 	</variable>
 	<variable name="Fact. Anuladas_1" class="java.lang.Long" calculation="Sum">
 		<variableExpression><![CDATA[$F{Fact. Anulada}]]></variableExpression>
@@ -93,28 +87,28 @@ GROUP BY comp.codigo_cobrador]]>
 	<title>
 		<band height="74" splitType="Stretch">
 			<staticText>
-				<reportElement x="18" y="37" width="192" height="20" uuid="60debafc-697c-4eee-9f75-c2e3a45a3b0b"/>
+				<reportElement x="1" y="37" width="196" height="20" uuid="60debafc-697c-4eee-9f75-c2e3a45a3b0b"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Informe de Ingreso por Cobrador desde:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="210" y="37" width="54" height="20" uuid="9b44bb70-143f-4585-ba1a-706b74c35f88"/>
-				<textElement>
+				<reportElement x="197" y="37" width="67" height="20" uuid="9b44bb70-143f-4585-ba1a-706b74c35f88"/>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{desde}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="264" y="37" width="40" height="20" uuid="35e28e53-2775-4611-8531-eb41e382aa6e"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Hasta :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="304" y="37" width="56" height="20" uuid="728b1b6d-2b62-497f-840a-42328fc64952"/>
+				<reportElement x="304" y="37" width="76" height="20" uuid="728b1b6d-2b62-497f-840a-42328fc64952"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -139,7 +133,7 @@ GROUP BY comp.codigo_cobrador]]>
 				<textElement>
 					<font fontName="SansSerif" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{PAGE_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="477" y="37" width="17" height="20" uuid="ae5fcdc7-0488-4d82-b08c-737b16b4c904"/>
@@ -181,7 +175,7 @@ GROUP BY comp.codigo_cobrador]]>
 				<text><![CDATA[idCob]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="42" y="12" width="111" height="20" uuid="a99aba11-6772-42e1-9e5f-1f5af679fa7c"/>
+				<reportElement x="42" y="12" width="124" height="20" uuid="a99aba11-6772-42e1-9e5f-1f5af679fa7c"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -239,8 +233,8 @@ GROUP BY comp.codigo_cobrador]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{codigo_cobrador}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="42" y="0" width="111" height="20" uuid="6c238867-62a2-4322-96d6-d4d1d5ef147a"/>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="42" y="0" width="124" height="20" uuid="6c238867-62a2-4322-96d6-d4d1d5ef147a"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -258,7 +252,7 @@ GROUP BY comp.codigo_cobrador]]>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{Fact. Manual}+$F{Fact. Impresa}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{Fact. Manual}+$F{Fact. Electronica}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="328" y="0" width="72" height="20" uuid="6a4d422d-8d41-4c1b-a5d9-eaba1b40db1a"/>
@@ -272,7 +266,7 @@ GROUP BY comp.codigo_cobrador]]>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{Fact. Impresa}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{Fact. Electronica}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="483" y="0" width="71" height="20" uuid="79574a73-f97a-4197-8eba-7309b8d01453"/>
@@ -297,7 +291,7 @@ GROUP BY comp.codigo_cobrador]]>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{Fact. Impresas_1}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{Fact. Electronica}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="328" y="12" width="72" height="20" uuid="78f1a4d1-0226-45f3-9624-bdc1c21a872b"/>

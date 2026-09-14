@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ama.servicio.ZonaService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class ImplZona implements ZonaService {
@@ -18,6 +20,24 @@ public class ImplZona implements ZonaService {
     @Override
     public List<Zona> listar() {
         return (List<Zona>) zonaDao.listar();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Zona> listarPorSucursal(Pageable pageable, Integer codigoSucursal) {
+        return zonaDao.listarPorSucursal(pageable, codigoSucursal);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Zona> buscarPorSucursal(Pageable pageable, Integer codigoSucursal, String filtro) {
+        return zonaDao.buscarPorSucursal(pageable, codigoSucursal, filtro);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public long contarPorSucursal(Integer codigoSucursal) {
+        return zonaDao.contarPorSucursal(codigoSucursal);
     }
 
     @Transactional

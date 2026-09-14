@@ -1,0 +1,181 @@
+#servicioModal .servicio-v2-modal {
+    overflow: hidden;
+    border: 0;
+    border-radius: .85rem;
+    background: #fff;
+    box-shadow: 0 1.25rem 3rem rgba(26, 35, 44, .22);
+}
+
+.servicio-list-agregar {
+    flex: 0 0 auto;
+    padding: .62rem 1rem;
+    border: 1px solid rgba(255, 255, 255, .45);
+    background: #fff;
+    color: #394047;
+    font-weight: 700;
+}
+
+body .form-view-header .servicio-list-agregar i {
+    margin-right: .35rem;
+    color: #394047;
+}
+
+.servicio-list-agregar:hover,
+.servicio-list-agregar:focus {
+    background: #f7f8fa;
+    color: #1f2933;
+}
+
+#historialServicioModal .servicio-historial-modal { overflow: hidden; border: 0; border-radius: .85rem; box-shadow: 0 1.2rem 3rem rgba(26,35,44,.24); }
+#historialServicioModal .servicio-v2-header { padding: 1.05rem 1.35rem; background: var(--btn-color); color: #fff; }
+#historialServicioModal .servicio-v2-header .btn-close { filter: brightness(0) invert(1); }
+#historialServicioModal .servicio-v2-kicker { display:block; font-size:.68rem; font-weight:700; letter-spacing:.08em; opacity:.8; text-transform:uppercase; }
+#historialServicioModal .modal-body { padding: 1.25rem; background: #f7f8fa; }
+#historialServicioModal .historial-form { padding: 1rem; border: 1px solid rgba(108,117,125,.18); border-radius: .65rem; background:#fff; }
+#historialServicioModal .table-responsive { padding: .5rem; border: 1px solid rgba(108,117,125,.16); border-radius:.65rem; background:#fff; }
+#historialServicioModal table { margin-bottom:0; }
+#historialServicioModal .form-label { color:#555d64; font-size:.73rem; font-weight:700; text-transform:uppercase; }
+
+#ubicacionServicioModal .ubicacion-servicio-modal { overflow:hidden; border:0; border-radius:.85rem; box-shadow:0 1.2rem 3rem rgba(26,35,44,.24); }
+#ubicacionServicioModal .servicio-v2-header { padding:1.05rem 1.35rem; background:var(--btn-color); color:#fff; }
+#ubicacionServicioModal .servicio-v2-header .btn-close { filter:brightness(0) invert(1); }
+#ubicacionServicioModal .servicio-v2-kicker { display:block; font-size:.68rem; font-weight:700; letter-spacing:.08em; opacity:.8; text-transform:uppercase; }
+#ubicacionServicioModal .modal-body { padding:1.25rem; background:#f7f8fa; }
+#ubicacionServicioModal .ubicacion-servicio-form,
+#ubicacionServicioModal .ubicacion-historial { padding:1rem; border:1px solid rgba(108,117,125,.18); border-radius:.65rem; background:#fff; }
+#ubicacionServicioModal .form-label { color:#555d64; font-size:.73rem; font-weight:700; text-transform:uppercase; }
+#ubicacionServicioModal .ubicacion-servicio-ayuda { margin:.85rem 0 0; color:#68737d; font-size:.84rem; }
+#ubicacionServicioModal .ubicacion-historial h6 { color:#394047; font-weight:700; }
+#ubicacionServicioModal .ubicacion-historial h6 i { margin-right:.35rem; color:var(--btn-color); }
+#ubicacionServicioModal .table-responsive { max-height:18rem; border:1px solid rgba(108,117,125,.14); border-radius:.5rem; }
+#ubicacionServicioModal thead { position:sticky; top:0; z-index:1; background:#eef1f3; }
+#ubicacionServicioModal td { font-size:.84rem; }
+
+.estado-cuenta-acciones { padding: 1rem; border: 1px solid rgba(108,117,125,.18); border-radius:.7rem; background:#f7f8fa; }
+.estado-cuenta-acciones h6 { margin:0; color:#394047; font-weight:700; }
+.estado-cuenta-acciones h6 i { margin-right:.35rem; color:var(--btn-color); }
+.estado-cuenta-acciones p { margin:.35rem 0 .85rem; color:#68737d; font-size:.86rem; }
+.estado-cuenta-acciones-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
+.estado-cuenta-acciones-grid .btn { display:grid; grid-template-columns:auto 1fr; align-items:center; gap:.08rem .55rem; padding:.75rem; text-align:left; }
+.estado-cuenta-acciones-grid .btn i { grid-row:1 / 3; font-size:1.2rem; }
+.estado-cuenta-acciones-grid .btn span { font-weight:700; }
+.estado-cuenta-acciones-grid .btn small { opacity:.75; }
+.estado-cuenta-pagina { padding-bottom:1.5rem; }
+.estado-cuenta-page-header { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; padding:1.15rem 1.35rem; border-radius:.75rem; background:var(--btn-color); color:#fff; }
+.estado-cuenta-page-header .form-title { margin:.1rem 0; color:#fff; }
+.estado-cuenta-page-header p { margin:0; opacity:.82; }
+.estado-cuenta-page-header .servicio-v2-kicker { display:block; font-size:.68rem; font-weight:700; letter-spacing:.08em; opacity:.8; text-transform:uppercase; }
+.estado-cuenta-resumen fieldset { padding:1.15rem; border:1px solid rgba(108,117,125,.2); border-radius:.7rem; background:#fff; }
+.estado-cuenta-resumen legend { float:none; width:auto; margin:0 0 .2rem; padding:0 .35rem; color:#394047; font-size:1rem; font-weight:700; }
+.estado-cuenta-resumen .form-leyenda { margin:0 0 1rem; color:#68737d; font-size:.85rem; }
+.estado-cuenta-resumen label { margin:.25rem 0 .3rem; color:#555d64; font-size:.73rem; font-weight:700; text-transform:uppercase; }
+.extracto-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 1rem; border:1px solid rgba(108,117,125,.18); border-radius:.65rem; background:#fff; }
+.extracto-toolbar strong, .extracto-toolbar small { display:block; }
+.extracto-toolbar small { margin-top:.15rem; color:#68737d; }
+
+@media (max-width: 767.98px) {
+    #historialServicioModal .modal-dialog { margin:.55rem; }
+    #historialServicioModal .modal-body { padding:.85rem; }
+    #historialServicioModal .historial-form { padding:.85rem; }
+    #historialServicioModal .dataTables_length, #historialServicioModal .dataTables_filter { text-align:left; }
+    .estado-cuenta-acciones-grid { grid-template-columns:1fr; }
+    .estado-cuenta-page-header, .extracto-toolbar { align-items:stretch; flex-direction:column; }
+    .estado-cuenta-page-header .btn, .extracto-toolbar .btn { width:100%; }
+    #ubicacionServicioModal .modal-dialog { margin:.55rem; }
+    #ubicacionServicioModal .modal-body { padding:.85rem; }
+    #ubicacionServicioModal .ubicacion-servicio-form,
+    #ubicacionServicioModal .ubicacion-historial { padding:.85rem; }
+}
+
+#servicioModal .servicio-v2-header {
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid rgba(108, 117, 125, .18);
+    background: var(--btn-color);
+    color: #fff;
+}
+
+#servicioModal .servicio-v2-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+#servicioModal .servicio-v2-kicker {
+    display: block;
+    margin-bottom: .12rem;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    opacity: .8;
+    text-transform: uppercase;
+}
+
+#servicioModal .servicio-v2-header .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+#servicioModal .servicio-v2-body {
+    padding: 1.4rem;
+    background: #f7f8fa;
+}
+
+#servicioModal .form-label {
+    margin: 0 0 .35rem .1rem;
+    color: #4d555c;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .025em;
+    text-transform: uppercase;
+}
+
+#servicioModal .form-control,
+#servicioModal .form-select {
+    min-height: 2.65rem;
+    border-color: rgba(108, 117, 125, .32);
+    border-radius: .5rem;
+    background-color: #fff;
+    box-shadow: none;
+}
+
+#servicioModal .form-control:focus,
+#servicioModal .form-select:focus {
+    border-color: var(--btn-color);
+    box-shadow: 0 0 0 .18rem rgba(108, 117, 125, .16);
+}
+
+#servicioModal .form-control[readonly] {
+    background: #eceff2;
+    color: #596168;
+}
+
+#servicioModal .servicio-v2-footer {
+    padding: .9rem 1.4rem;
+    border-top: 1px solid rgba(108, 117, 125, .18);
+    background: #fff;
+}
+
+#servicioModal .servicio-v2-footer .btn {
+    min-width: 8.5rem;
+    padding: .58rem 1rem;
+    border-radius: .45rem;
+    font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+    #servicioModal .modal-dialog {
+        margin: .65rem;
+    }
+
+    #servicioModal .servicio-v2-body {
+        max-height: calc(100vh - 11rem);
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    #servicioModal .servicio-v2-footer {
+        flex-direction: column-reverse;
+    }
+
+    #servicioModal .servicio-v2-footer .btn {
+        width: 100%;
+    }
+}

@@ -1,5 +1,10 @@
 $(document).ready(function () {
 
+    $("#buscarUsuario").on("input", function () {
+        $("#codigoUsuario").val("");
+        $("#numeroDocumento").val("");
+    });
+
     $("#buscarUsuario").autocomplete({
         source: function (request, response) {
             let token = $("#token").val();
@@ -57,19 +62,19 @@ $(document).ready(function () {
                     $("tbody").empty();
                     $.each(data.content, function (llave, valor) {
                         var cargaTabla =
-                                " <tr> " +
-                                " <td> " + valor.codigoUsuario +
-                                "</td><td>" + valor.numeroDocumento +
-                                " </td><td>" + valor.nombre + ' ' + valor.apellido +
-                                "</td><td>" + valor.celular +
-                                " </td><td>" + valor.telefono +
-                                "</td><td>" + valor.barrio +
-                                " </td><td>" + valor.direccion +
-                                " </td><td>" + valor.nombreSucursal +
-                                "</td> <td> <a href='/usuario/editar/" + valor.codigoUsuario + " '  class='btn btn-info btn-md' /> <i class='fa-regular fa-pen-to-square'> </i>  \n\
-                     <a href='/usuario/eliminar/" + valor.codigoUsuario + " '  class='btn btn-danger btn-md'>  <i class='fa-solid fa-trash-can'></i> </a> \n\
-                    </td>" +
-                                " </tr>";
+                                ` <tr> 
+                                 <td> ${valor.codigoUsuario}
+                                </td><td>  ${valor.numeroDocumento} 
+                                 </td><td>  ${valor.nombre} ${valor.apellido??''}
+                                </td><td>  ${valor.celular} 
+                                 </td><td>  ${valor.correo??''}
+                                </td><td>  ${valor.barrio} 
+                                 </td><td>  ${valor.direccion} 
+                                 </td><td>  ${valor.nombreSucursal} 
+                                </td> <td> <a href='/usuario/editar/${valor.codigoUsuario}'   class='btn btn-info btn-md' /> <i class='fa-regular fa-pen-to-square'> </i> 
+                     <a id='eliminar' data-url='/usuario/eliminar/' data-id=${valor.codigoUsuario}  class='btn btn-danger btn-md'>  <i class='fa-solid fa-trash-can'></i> </a> 
+                    </td> 
+                                 </tr>`;
 
                         $("#tbody").append(cargaTabla);
                     });
@@ -82,17 +87,6 @@ $(document).ready(function () {
                 }
             });
         }
-    });
-//esta funciona redireciona a la pagina de inicio con el cambiando la cantidad de
-// registro que con el valor seleccionado en el select 
-    $("#cantElemento").change(function () {
-        var cantElemento = $(this).val();
-        var url = new URL(window.location.href);
-        var searchParams = new URLSearchParams(url.search);
-        searchParams.set('page', 0);
-        searchParams.set('cantElemento', cantElemento);
-        url.search = searchParams.toString();
-        window.location.href = url;
     });
 
 

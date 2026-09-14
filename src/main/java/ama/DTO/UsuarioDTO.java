@@ -14,7 +14,7 @@ public class UsuarioDTO  implements Serializable  {
     private String apellido;
     private String nombreCompleto;
     private String celular;
-    private String telefono;
+    private String correo;
     private String barrio;
     private String direccion;
     private String nombreSucursal;

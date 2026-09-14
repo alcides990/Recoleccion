@@ -1,0 +1,5 @@
+ALTER TABLE egreso_catalogos
+    ADD COLUMN correo VARCHAR(180) NOT NULL DEFAULT '';
+
+ALTER TABLE egreso_catalogos
+    ADD COLUMN monto DECIMAL(18,2) NOT NULL DEFAULT 0;

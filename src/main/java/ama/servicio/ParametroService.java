@@ -4,6 +4,7 @@ package ama.servicio;
 import ama.dominio.Parametro;
 import ama.dominio.Sucursal;
 import java.util.List;
+import java.util.Optional;
 
  
 public interface ParametroService {
@@ -16,6 +17,8 @@ public interface ParametroService {
     public void eliminar(Parametro parametro);
 
     public Parametro encontrar(Sucursal sucursal );
+
+    public Optional<Parametro> buscar(Sucursal sucursal);
     
     public Integer generarCodigo();
 }

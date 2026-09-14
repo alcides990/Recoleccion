@@ -50,7 +50,7 @@ public class ControladorCiudadApi {
     public ResponseEntity<Ciudad> eliminar(@PathVariable Integer id) {
         Ciudad ciudad = new Ciudad();
         ciudad.setCodigoCiudad(id);
-        ciudad = servicioCiudad.encontrarCiudad(ciudad);
+         ciudad = servicioCiudad.encontrarCiudad(ciudad);
         if (ciudad != null) {
             servicioCiudad.eliminar(ciudad);
         } else {

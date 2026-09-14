@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: heat}"></head>
+<body>
+<header th:replace="~{layout/layout :: header}"></header>
+<aside th:replace="~{layout/layout :: aside}"></aside>
+<main class="container-fluid egresos-bodega">
+    <div id="mensajeEgreso" role="alert" aria-live="polite"></div>
+
+    <section id="panelGastos" class="d-none">
+        <header class="egreso-list-header">
+            <div>
+                <span class="egreso-list-kicker">Gestión de egresos</span>
+                <h3>Gastos</h3>
+                <p>Administre los gastos registrados en su sucursal.</p>
+            </div>
+            <a href="/egresos/agregar" id="nuevoEgreso" class="btn egreso-list-agregar"><i class="fa-solid fa-plus"></i> Agregar</a>
+        </header>
+        <section class="egreso-list-card">
+            <form id="filtroEgresos" class="row g-2 align-items-end">
+                <div class="col-sm-3"><label class="form-label" for="desdeEgreso">Desde</label><input id="desdeEgreso" class="form-control" type="text" placeholder="Desde" autocomplete="off" required></div>
+                <div class="col-sm-3"><label class="form-label" for="hastaEgreso">Hasta</label><input id="hastaEgreso" class="form-control" type="text" placeholder="Hasta" autocomplete="off" required></div>
+                <div class="col-sm-3"><label class="form-label" for="categoriaFiltroEgreso">Categoría</label><select id="categoriaFiltroEgreso" class="form-select"><option value="">Todas</option></select></div>
+                <div class="col-sm-3 d-flex gap-2"><button class="btn btn-primario">Filtrar</button></div>
+            </form>
+            <div class="table-responsive"><table id="tablaEgresos" class="table table-striped table-hover w-100"><thead class="bg-color"><tr><th>Id</th><th>Tipo Gasto</th><th>Fecha</th><th>Proveedor</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+            <p class="text-end fw-bold mb-0">Total vigente: <span id="totalPeriodo">0</span></p>
+        </section>
+    </section>
+
+    <section id="editorEgreso" class="egreso-marco d-none">
+        <header class="egreso-list-header">
+            <div>
+                <span class="egreso-list-kicker">Gestión de egresos</span>
+                <h3 id="tituloEgreso">Gasto</h3>
+                <p>Registre cabecera y detalle del gasto.</p>
+            </div>
+        </header>
+        <div class="p-3">
+            <form id="formEgreso">
+                <div class="row g-3">
+                    <div class="col-lg-2 col-sm-4"><label class="form-label" for="fechaEgreso">Fecha</label><input id="fechaEgreso" type="text" class="form-control" autocomplete="off" required></div>
+                    <div class="col-lg-3 col-sm-8"><label class="form-label" for="tipoEgreso">Tipo de Gasto</label><select id="tipoEgreso" class="form-select" required></select></div>
+                    <div class="col-lg-5"><label class="form-label" for="proveedorEgreso">Proveedor</label><input id="proveedorEgreso" class="form-control" maxlength="180" required autocomplete="off" placeholder="Buscar proveedor o escribir uno nuevo"></div>
+                    <div class="col-lg-2 d-flex align-items-end justify-content-end"><button id="guardarEgreso" class="btn btn-primary" disabled>Guardar</button></div>
+                    <div class="col-md-4"><label class="form-label" for="comprobanteEgreso">Comprobante</label><input id="comprobanteEgreso" class="form-control" maxlength="100"></div>
+                    <div class="col-md-8"><label class="form-label" for="observacionEgreso">Observación</label><input id="observacionEgreso" class="form-control" maxlength="500"></div>
+                </div>
+            </form>
+            <div class="egreso-marco mt-4 p-2">
+                <form id="formDetalleEgreso" class="row g-2 align-items-end m-1 pb-2">
+                    <div class="col-lg-6"><label class="form-label" for="insumoEgreso">Producto/Servicio</label><input class="form-control" type="search" id="insumoEgreso" maxlength="180" placeholder="Ingrese descripción de producto o servicio" required autocomplete="off"></div>
+                    <div class="col-lg-3 col-sm-5"><label class="form-label" for="montoInsumo">Monto</label><input class="form-control" type="number" min="0.01" step="0.01" id="montoInsumo" placeholder="Monto/precio" required></div>
+                    <div class="col-lg-2 col-sm-4"><label class="form-label" for="cantidadInsumo">Cantidad</label><input class="form-control" type="number" min="0.001" max="999999999.999" step="0.001" id="cantidadInsumo" placeholder="Cantidad" required></div>
+                    <div class="col-lg-1 col-sm-3"><button id="agregarLinea" type="submit" class="btn btn-primary" aria-label="Agregar al detalle" title="Agregar al detalle (Enter)"><i class="fa-solid fa-plus"></i> Agregar</button></div>
+                </form>
+                <small class="text-muted d-block px-2">Enter en Cantidad agrega al detalle. Los proveedores y productos nuevos se crean al guardar el gasto.</small>
+                <div class="table-responsive mt-2"><table id="tablaDetalleGasto" class="table table-hover table-striped align-middle"><thead class="bg-color"><tr><th>ID</th><th>Descripción</th><th>Cantidad</th><th>Monto</th><th class="text-end">Subtotal</th><th>Acciones</th></tr></thead><tbody id="lineasEgreso"></tbody><tfoot><tr><th colspan="4" class="text-end">TOTAL</th><th id="totalEgreso" class="text-end text-nowrap">Gs. 0</th><td></td></tr></tfoot></table></div>
+            </div>
+            <a href="/egresos" id="cancelarEgreso" class="btn btn-outline-secondary mt-3">Volver a la lista</a>
+        </div>
+    </section>
+
+    <section id="panelCatalogo" class="d-none">
+        <header class="egreso-list-header">
+            <div>
+                <span class="egreso-list-kicker">Catálogos de egresos</span>
+                <h3 id="tituloCatalogo"></h3>
+                <p>Administre los datos auxiliares del módulo.</p>
+            </div>
+            <a id="nuevoCatalogo" class="btn egreso-list-agregar"><i class="fa-solid fa-plus"></i> Agregar</a>
+        </header>
+        <section class="egreso-list-card">
+            <div class="egreso-list-summary">
+                <div>
+                    <h4>Registros</h4>
+                    <p>Busque por nombre o descripción.</p>
+                </div>
+            </div>
+            <div class="mb-3"><label for="buscarCatalogo" class="form-label">Buscar</label><input id="buscarCatalogo" type="search" class="form-control" placeholder="Nombre o descripción"><small class="text-muted">Hasta 100 coincidencias por búsqueda.</small></div>
+            <div class="table-responsive"><table class="table table-striped table-hover"><thead class="bg-color"><tr id="cabeceraCatalogo"></tr></thead><tbody id="filasCatalogo"></tbody></table></div>
+        </section>
+    </section>
+
+    <section id="editorCatalogo" class="egreso-marco d-none">
+        <header class="egreso-list-header">
+            <div>
+                <span class="egreso-list-kicker">Catálogos de egresos</span>
+                <h3 id="tituloEditorCatalogo"></h3>
+                <p>Registre o actualice el dato seleccionado.</p>
+            </div>
+        </header>
+        <form id="formCatalogo" class="row g-3 p-3">
+            <div class="col-lg-5"><label class="form-label" for="codigoCatalogo">Código</label><input id="codigoCatalogo" class="form-control" value="Autogenerado" readonly></div>
+            <div class="col-lg-5 campoProveedor"><label class="form-label" for="documentoCatalogo">CI/RUC</label><input id="documentoCatalogo" class="form-control" maxlength="40"></div>
+            <div class="col-lg-5"><label class="form-label" id="etiquetaNombreCatalogo" for="nombreCatalogo">Nombre</label><input id="nombreCatalogo" class="form-control" maxlength="180" required></div>
+            <div class="col-lg-5 campoProveedor"><label class="form-label" for="telefonoCatalogo">Celular</label><input id="telefonoCatalogo" class="form-control" maxlength="60"></div>
+            <div class="col-lg-5 campoProveedor"><label class="form-label" for="correoCatalogo">Correo</label><input id="correoCatalogo" type="email" class="form-control" maxlength="180"></div>
+            <div class="col-lg-3 campoProducto"><label class="form-label" for="montoCatalogo">Monto</label><input id="montoCatalogo" class="form-control" type="number" min="0" step="0.01"></div>
+            <div class="col-lg-4 campoProducto"><label class="form-label" for="categoriaCatalogo">Categoría</label><select id="categoriaCatalogo" class="form-select"><option value="">Sin categoría</option></select></div>
+            <div class="col-lg-10 campoProveedor"><label class="form-label" for="direccionCatalogo">Dirección</label><input id="direccionCatalogo" class="form-control" maxlength="250"></div>
+            <div class="col-12 d-flex justify-content-between"><a id="volverCatalogo" class="btn btn-outline-secondary">Volver a la lista</a><button id="guardarCatalogo" class="btn btn-primary">Guardar</button></div>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{layout/layout :: footer}"></footer>
+<link rel="stylesheet" href="/css/egresos.css?v=20260910-1">
+<script type="module" src="/js/egresos/inicio.js"></script>
+</body>
+</html>

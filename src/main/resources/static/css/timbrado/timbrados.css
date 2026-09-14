@@ -1,0 +1,31 @@
+.timbrado-page { max-width: 1180px; }
+
+#frm-modal .modal-dialog { width: min(94vw, 760px); margin-right: auto; margin-left: auto; }
+#frm-modal .timbrado-modal { overflow: hidden; border: 0; border-radius: .85rem; box-shadow: 0 1.25rem 3.5rem rgba(26,35,44,.25); }
+#frm-modal .timbrado-modal-header { padding: 1.1rem 1.3rem; border: 0; background: var(--btn-color); color: #fff; }
+#frm-modal .timbrado-modal-heading { display: flex; min-width: 0; align-items: center; gap: .8rem; }
+#frm-modal .timbrado-modal-icon { display: grid; width: 2.7rem; height: 2.7rem; flex: 0 0 2.7rem; place-items: center; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; background: rgba(255,255,255,.13); }
+#frm-modal .timbrado-modal-kicker { display: block; margin-bottom: .05rem; font-size: .68rem; font-weight: 700; letter-spacing: .08em; opacity: .8; text-transform: uppercase; }
+#frm-modal .modal-title { margin: 0; font-size: 1.2rem; font-weight: 700; }
+#frm-modal .btn-close { flex: 0 0 auto; filter: brightness(0) invert(1); }
+#frm-modal .timbrado-modal-body { padding: 1.3rem; background: #f7f8fa; }
+#frm-modal .timbrado-modal-description { margin: 0 0 1rem; color: #65717c; font-size: .9rem; }
+#frm-modal .timbrado-modal-section { padding: 1.15rem; border: 1px solid rgba(108,117,125,.16); border-radius: .65rem; background: #fff; }
+#frm-modal .timbrado-modal-section h6 { margin: 0 0 1rem; color: #394047; font-size: .95rem; font-weight: 700; }
+#frm-modal .timbrado-modal-section h6 i { width: 1.4rem; color: var(--btn-color); }
+#frm-modal .form-label { margin: 0 0 .35rem .08rem; color: #555d64; font-size: .73rem; font-weight: 700; letter-spacing: .025em; text-transform: uppercase; }
+#frm-modal .form-control, #frm-modal .form-select { min-height: 2.75rem; border-color: rgba(108,117,125,.32); border-radius: .5rem; box-shadow: none; }
+#frm-modal .form-control:focus, #frm-modal .form-select:focus { border-color: var(--btn-color); box-shadow: 0 0 0 .18rem rgba(108,117,125,.16); }
+#frm-modal .timbrado-modal-footer { display: flex; gap: .7rem; padding: 1rem 1.3rem; border-top: 1px solid rgba(108,117,125,.18); background: #fff; }
+#frm-modal .timbrado-modal-footer .btn { min-width: 9.5rem; padding: .6rem 1rem; border-radius: .5rem; font-weight: 600; }
+
+@media (max-width: 575.98px) {
+    #frm-modal .modal-dialog { width: auto; margin: .55rem; }
+    #frm-modal .timbrado-modal { max-height: calc(100vh - 1.1rem); border-radius: .7rem; }
+    #frm-modal .timbrado-modal-header, #frm-modal .timbrado-modal-body, #frm-modal .timbrado-modal-footer { padding: 1rem; }
+    #frm-modal .timbrado-modal-icon, #frm-modal .timbrado-modal-description { display: none; }
+    #frm-modal .modal-title { font-size: 1.05rem; }
+    #frm-modal .timbrado-modal-section { padding: .9rem; }
+    #frm-modal .timbrado-modal-footer { flex-direction: column-reverse; }
+    #frm-modal .timbrado-modal-footer .btn { width: 100%; min-width: 0; }
+}

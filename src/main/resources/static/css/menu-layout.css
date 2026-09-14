@@ -1,0 +1,85 @@
+/* Un solo ancho y punto de cambio para el menú y el contenido principal. */
+:root {
+    --ancho-menu-lateral: 220px;
+    --separacion-menu: 16px;
+}
+
+@media (min-width: 1021px) {
+    body:has(> .menu_aside) > .menu_aside,
+    body:has(> .menu_aside) > .menu_aside:hover {
+        top: 0;
+        left: 0;
+        width: var(--ancho-menu-lateral);
+    }
+
+    body:has(> .menu_aside) > :is(main, .container, .container-fluid) {
+        margin-left: calc(var(--ancho-menu-lateral) + var(--separacion-menu)) !important;
+        margin-right: var(--separacion-menu) !important;
+        width: calc(100% - var(--ancho-menu-lateral) - 2 * var(--separacion-menu)) !important;
+        max-width: calc(100% - var(--ancho-menu-lateral) - 2 * var(--separacion-menu)) !important;
+        min-width: 0;
+    }
+
+    .menu_aside .user-session,
+    .menu_aside:hover .user-session {
+        width: calc(var(--ancho-menu-lateral) - 18px);
+    }
+
+    .menu_aside #user-session {
+        width: calc(var(--ancho-menu-lateral) - 18px);
+    }
+}
+
+@media (max-width: 1020px) {
+    body:has(> .menu_aside) > header {
+        min-height: 3.25rem;
+        background: var(--btn-color);
+    }
+
+    body:has(> .menu_aside) > .menu_aside,
+    body:has(> .menu_aside) > .menu_aside:hover,
+    body:has(> .menu_aside) > .menu_aside.active {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        max-height: 65vh;
+        max-height: 65dvh;
+        margin: 0;
+        padding: .55rem .75rem;
+        overflow-y: auto;
+    }
+
+    body:has(> .menu_aside) > .menu_aside { display: none; }
+    body:has(> .menu_aside) > .menu_aside.active { display: block; }
+
+    body:has(> .menu_aside) > :is(main, .container, .container-fluid) {
+        margin-left: .5rem !important;
+        margin-right: .5rem !important;
+        width: calc(100% - 1rem) !important;
+        max-width: calc(100% - 1rem) !important;
+        min-width: 0;
+    }
+
+    .menu_aside .user-session,
+    .menu_aside:hover .user-session,
+    .menu_aside.active .user-session,
+    .menu_aside #user-session {
+        position: static;
+        width: 100%;
+        margin-top: .5rem;
+    }
+
+    #menu-toggle { display: block; }
+    #menu-toggle .barra { background-color: #fff; }
+}
+
+@media print {
+    .menu_aside { display: none !important; }
+    body:has(> .menu_aside) > :is(main, .container, .container-fluid) {
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+}

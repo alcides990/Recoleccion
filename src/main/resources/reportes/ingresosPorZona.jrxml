@@ -1,63 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="IngresosPorZona" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d4fa1245-b4fa-4dae-9cdf-bf63ad824fb7">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="recoleccion"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="195"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="800"/>
 	<parameter name="desde" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="hasta" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
+	<parameter name="codigoSucursal" class="java.lang.Integer"/>
 	<queryString>
-		<![CDATA[SELECT cob.codigo_cobrador, CONCAT(cob.nombre, ' ',cob.apellido) AS cobrador,
-zon.zona, zon.codigo_zona,
-COUNT( CASE comp.codigo_estado 
-WHEN '2' THEN 1 END ) AS 'Fact. Anulada',
+		<![CDATA[SELECT zon.zona, zon.codigo_zona,
 
-COUNT( CASE WHEN comp.codigo_tipo_factura = 2 AND comp.codigo_estado = 1
+COUNT( CASE WHEN  comp.codigo_estado = 3 THEN 1 END ) AS 'Fact. Anulada',
+
+COUNT( CASE  WHEN comp.codigo_tipo_comprobante = 1 AND comp.codigo_estado = 1
   THEN 1 END ) AS 'Fact. Manual',
   
-  COUNT( CASE WHEN comp.codigo_tipo_factura = 1 AND comp.codigo_estado = 1
+  COUNT( CASE WHEN comp.codigo_tipo_comprobante = 1 AND comp.codigo_estado = 3
   THEN 1 END ) AS 'Fact. Impresa',
+  
+SUM(CASE WHEN comp.codigo_estado = 1 THEN comp.total_importe END) AS importe
 
-SUM(dtc.importe) AS importe, SUM(dtc.recargo) AS recargo
 FROM comprobantes AS comp
-JOIN detallecomprobantes AS dtc
-  ON dtc.codigo_sucursal = comp.codigo_sucursal
-    AND dtc.codigo_punto_expedicion = comp.codigo_punto_expedicion
-    AND dtc.numero_comprobante = comp.numero_comprobante
-    AND dtc.codigo_tipo_factura = comp.codigo_tipo_factura
 LEFT JOIN servicios AS servi 
-  ON comp.`cuenta_corriente`= servi.`cuenta_corriente`
+  ON comp.cuenta_corriente= servi.cuenta_corriente
+ AND comp.codigo_sucursal = servi.codigo_sucursal
 
 LEFT JOIN manzanas AS man
   ON man.codigo_manzana=servi.codigo_manzana
   AND man.codigo_sucursal=comp.codigo_sucursal
 LEFT JOIN zonas AS zon
-  ON zon.`codigo_zona`=man.`codigo_zona`
-LEFT JOIN cobradores AS cob 
-  ON cob.`codigo_cobrador` = comp.`codigo_cobrador`
-
- WHERE	 comp.`codigo_estado`=1 
-  AND comp.fecha_pago >= $P{desde} 
-  AND comp.fecha_pago <= $P{hasta} 
+  ON zon.codigo_zona=man.codigo_zona
+ AND zon.codigo_sucursal=man.codigo_sucursal
+ WHERE comp.fecha_pago BETWEEN  $P{desde}  AND   $P{hasta} 
+   AND comp.codigo_sucursal = $P{codigoSucursal}
   
-GROUP BY zon.`codigo_zona`,  cob.`codigo_cobrador`
-ORDER BY zon.`codigo_zona`]]>
+GROUP BY zon.codigo_sucursal, zon.codigo_zona, zon.zona]]>
 	</queryString>
-	<field name="codigo_cobrador" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="codigo_cobrador"/>
-		<property name="com.jaspersoft.studio.field.label" value="codigo_cobrador"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="cobradores"/>
-	</field>
-	<field name="cobrador" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="cobrador"/>
-		<property name="com.jaspersoft.studio.field.label" value="cobrador"/>
-	</field>
 	<field name="zona" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="zona"/>
 		<property name="com.jaspersoft.studio.field.label" value="zona"/>
@@ -84,15 +70,12 @@ ORDER BY zon.`codigo_zona`]]>
 		<property name="com.jaspersoft.studio.field.name" value="importe"/>
 		<property name="com.jaspersoft.studio.field.label" value="importe"/>
 	</field>
-	<field name="recargo" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.name" value="recargo"/>
-		<property name="com.jaspersoft.studio.field.label" value="recargo"/>
-	</field>
+	<sortField name="zona"/>
 	<variable name="TOTALMONTO" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{importe}+$F{recargo}]]></variableExpression>
+		<variableExpression><![CDATA[$F{importe}]]></variableExpression>
 	</variable>
 	<variable name="Monto_1" class="java.lang.Double">
-		<variableExpression><![CDATA[$F{importe}+$F{recargo}]]></variableExpression>
+		<variableExpression><![CDATA[$F{importe}]]></variableExpression>
 	</variable>
 	<variable name="Fact. Impresas_1" class="java.lang.Long" calculation="Sum">
 		<variableExpression><![CDATA[$F{Fact. Impresa}]]></variableExpression>
@@ -106,45 +89,20 @@ ORDER BY zon.`codigo_zona`]]>
 	<variable name="Fact. Anuladas_1" class="java.lang.Long" calculation="Sum">
 		<variableExpression><![CDATA[$F{Fact. Anulada}]]></variableExpression>
 	</variable>
-	<group name="GroupZona">
-		<groupExpression><![CDATA[$F{codigo_zona}]]></groupExpression>
-		<groupHeader>
-			<band height="16">
-				<textField>
-					<reportElement x="42" y="1" width="179" height="15" uuid="0f660578-173f-4333-b080-58756fcd1660">
-						<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					</reportElement>
-					<textElement textAlignment="Left" verticalAlignment="Top">
-						<font fontName="SansSerif" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement x="0" y="0" width="42" height="15" uuid="3c1475bd-c0d8-4a24-b396-7ae8029b49e4">
-						<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					</reportElement>
-					<textElement>
-						<font fontName="SansSerif"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{codigo_zona}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-	</group>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="74" splitType="Stretch">
+		<band height="57" splitType="Stretch">
 			<staticText>
-				<reportElement x="18" y="37" width="192" height="20" uuid="60debafc-697c-4eee-9f75-c2e3a45a3b0b"/>
+				<reportElement x="18" y="37" width="162" height="20" uuid="60debafc-697c-4eee-9f75-c2e3a45a3b0b"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Informe de Ingreso por Zona desde:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="210" y="37" width="54" height="20" uuid="9b44bb70-143f-4585-ba1a-706b74c35f88"/>
+				<reportElement x="190" y="37" width="74" height="20" uuid="9b44bb70-143f-4585-ba1a-706b74c35f88"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -158,7 +116,7 @@ ORDER BY zon.`codigo_zona`]]>
 				<text><![CDATA[Hasta :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="304" y="37" width="56" height="20" uuid="728b1b6d-2b62-497f-840a-42328fc64952"/>
+				<reportElement x="304" y="37" width="66" height="20" uuid="728b1b6d-2b62-497f-840a-42328fc64952"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -178,76 +136,50 @@ ORDER BY zon.`codigo_zona`]]>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Report">
-				<reportElement x="511" y="37" width="36" height="20" uuid="41b9bcd3-2ada-44e9-81d4-f1316a053fdd"/>
-				<textElement>
-					<font fontName="SansSerif" size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$V{PAGE_COUNT}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="477" y="37" width="17" height="20" uuid="ae5fcdc7-0488-4d82-b08c-737b16b4c904"/>
-				<textElement>
-					<font fontName="SansSerif" size="10"/>
-				</textElement>
-				<text><![CDATA[de]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="387" y="37" width="43" height="20" uuid="d8b06bfb-71bb-471b-a45b-768628546827"/>
-				<textElement>
-					<font fontName="SansSerif" size="10"/>
-				</textElement>
-				<text><![CDATA[Pag]]></text>
-			</staticText>
 			<textField>
-				<reportElement x="441" y="37" width="19" height="20" uuid="2fac361e-3095-4114-9415-e7a1722b4007"/>
-				<textElement>
-					<font fontName="SansSerif" size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="18" y="0" width="169" height="20" uuid="d304fc9a-8915-41d5-8037-71eca321394b"/>
+				<reportElement x="18" y="0" width="352" height="20" uuid="bfdecb6a-098f-432d-a7e7-6a714ee794dc"/>
 				<textElement>
 					<font fontName="SansSerif" size="14"/>
 				</textElement>
-				<text><![CDATA[CLIBA S.A]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA["CLIBA S.A"]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
 		<band height="38" splitType="Stretch">
 			<staticText>
-				<reportElement x="160" y="12" width="75" height="20" uuid="9310b598-c987-4fd1-b592-187687ea5d47"/>
-				<textElement>
+				<reportElement x="150" y="12" width="85" height="20" uuid="9310b598-c987-4fd1-b592-187687ea5d47"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Fact. Anuladas]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="250" y="12" width="70" height="20" uuid="084988a0-cc8e-40c4-a1f1-2bd274adbfd9"/>
-				<textElement>
+				<reportElement x="240" y="12" width="80" height="20" uuid="084988a0-cc8e-40c4-a1f1-2bd274adbfd9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Fact.Cobradas]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="328" y="12" width="72" height="20" uuid="399fc12d-8072-4472-bf6e-e367123d9652"/>
-				<textElement>
+				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Fact. Manual]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="410" y="12" width="70" height="20" uuid="af235c58-8005-4667-a8d3-9ffc3788c0a4"/>
-				<textElement>
+				<reportElement x="400" y="12" width="79" height="20" uuid="af235c58-8005-4667-a8d3-9ffc3788c0a4">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
-				<text><![CDATA[Fact. Impresas]]></text>
+				<text><![CDATA[Fact. Impresa]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="483" y="12" width="61" height="20" uuid="c9fbb4c7-e7cc-4594-8c45-d38f11620d3f"/>
-				<textElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Monto]]></text>
@@ -259,15 +191,8 @@ ORDER BY zon.`codigo_zona`]]>
 				<reportElement x="0" y="37" width="550" height="1" uuid="424542b5-1772-4aa5-801b-b4cd3dcbfa4f"/>
 			</line>
 			<staticText>
-				<reportElement x="0" y="11" width="42" height="20" uuid="01fbb7de-009e-44ad-a391-647d33b45408"/>
-				<textElement>
-					<font fontName="SansSerif"/>
-				</textElement>
-				<text><![CDATA[idZona]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="42" y="11" width="111" height="20" uuid="a99aba11-6772-42e1-9e5f-1f5af679fa7c"/>
-				<textElement>
+				<reportElement x="2" y="13" width="111" height="20" uuid="a99aba11-6772-42e1-9e5f-1f5af679fa7c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<text><![CDATA[Zona]]></text>
@@ -276,24 +201,15 @@ ORDER BY zon.`codigo_zona`]]>
 	</columnHeader>
 	<detail>
 		<band height="16" splitType="Stretch">
-			<textField>
-				<reportElement x="5" y="0" width="148" height="16" uuid="6c238867-62a2-4322-96d6-d4d1d5ef147a">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font fontName="SansSerif"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{cobrador}]]></textFieldExpression>
-			</textField>
 			<textField pattern=",###">
-				<reportElement x="160" y="0" width="75" height="16" uuid="5aa7ee44-ebbf-4509-96d7-1133a65079a5"/>
+				<reportElement x="150" y="0" width="85" height="16" uuid="5aa7ee44-ebbf-4509-96d7-1133a65079a5"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Anulada}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
-				<reportElement x="252" y="0" width="65" height="16" uuid="320bd052-e5b9-451a-a88a-e0e91bfbfde9"/>
+				<reportElement x="240" y="0" width="80" height="16" uuid="320bd052-e5b9-451a-a88a-e0e91bfbfde9"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -308,23 +224,64 @@ ORDER BY zon.`codigo_zona`]]>
 			</textField>
 			<textField pattern=",###">
 				<reportElement x="410" y="0" width="67" height="16" uuid="b9214348-bbac-407e-b36e-4c4936c2cc20"/>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Fact. Impresa}]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤#,##0.##;¤-#,##0.##">
+			<textField pattern="#,##0.###;#,##0">
 				<reportElement x="480" y="0" width="75" height="16" uuid="79574a73-f97a-4197-8eba-7309b8d01453"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{Monto_1}]]></textFieldExpression>
 			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="2" y="1" width="148" height="15" uuid="0f660578-173f-4333-b080-58756fcd1660">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="SansSerif" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
+	<pageFooter>
+		<band height="23">
+			<staticText>
+				<reportElement x="199" y="3" width="43" height="20" uuid="d8b06bfb-71bb-471b-a45b-768628546827"/>
+				<textElement>
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<text><![CDATA[Pag]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="253" y="3" width="19" height="20" uuid="2fac361e-3095-4114-9415-e7a1722b4007"/>
+				<textElement>
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="323" y="3" width="36" height="20" uuid="41b9bcd3-2ada-44e9-81d4-f1316a053fdd"/>
+				<textElement>
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_COUNT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="289" y="3" width="17" height="20" uuid="ae5fcdc7-0488-4d82-b08c-737b16b4c904"/>
+				<textElement>
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<text><![CDATA[de]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
 	<summary>
 		<band height="39" splitType="Stretch">
-			<textField pattern="¤#,##0.##;¤-#,##0.##">
+			<textField pattern="#,##0.###;#,##0">
 				<reportElement x="477" y="4" width="78" height="20" uuid="d80bc612-dfdd-479c-b4cf-43b198099c2e"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
@@ -346,14 +303,14 @@ ORDER BY zon.`codigo_zona`]]>
 				<textFieldExpression><![CDATA[$V{Fact. Manual_1}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
-				<reportElement x="252" y="4" width="65" height="20" uuid="96262907-f7d6-4996-b621-df0851496dc5"/>
+				<reportElement x="240" y="4" width="80" height="20" uuid="96262907-f7d6-4996-b621-df0851496dc5"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{Fact. Normal_1}]]></textFieldExpression>
 			</textField>
 			<textField pattern=",###">
-				<reportElement x="161" y="4" width="74" height="20" uuid="ffd11790-0aeb-432a-a147-90bce0dbb238"/>
+				<reportElement x="150" y="4" width="84" height="20" uuid="ffd11790-0aeb-432a-a147-90bce0dbb238"/>
 				<textElement textAlignment="Center">
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
@@ -367,7 +324,7 @@ ORDER BY zon.`codigo_zona`]]>
 				<textElement>
 					<font fontName="SansSerif" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Total Cobrado :]]></text>
+				<text><![CDATA[Totales:]]></text>
 			</staticText>
 		</band>
 	</summary>
