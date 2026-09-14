@@ -110,7 +110,6 @@ public class Rg90ExportService {
                     csv("N"),
                     csv("S"),
                     csv("N"),
-                    csv("N"),
                     csv(""),
                     csv("")));
             salida.append("\r\n");
