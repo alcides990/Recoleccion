@@ -31,3 +31,18 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local tools, caches and generated artifacts ###
+/.codex-remote-attachments/
+/.m2/
+/.m2-repository/
+/.codex-m2/
+/output/
+/tmp/
+/classpath.txt
+/nbactions.tmp
+/*.apk
+/*.sql
+/DataSqlImport/*.sql
+/DataSqlImport/*_origen.csv
+/DataSqlImport/*_origen.json
