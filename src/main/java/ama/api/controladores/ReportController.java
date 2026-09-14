@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.YearMonth;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -367,11 +367,12 @@ public class ReportController {
 
     @PostMapping("/rg90/ventas")
     public ResponseEntity<?> exportarRg90Ventas(
-            @RequestParam("periodo") String periodo,
+            @RequestParam("desde") String desde,
+            @RequestParam("hasta") String hasta,
             @RequestParam(name = "codigoTipoComprobante", defaultValue = "0") Integer codigoTipoComprobante) {
         try {
-            YearMonth mes = YearMonth.parse(periodo);
-            Rg90Archivo archivo = rg90ExportService.exportarVentas(getSucursalSession(), mes, codigoTipoComprobante);
+            Rg90Archivo archivo = rg90ExportService.exportarVentas(getSucursalSession(),
+                    LocalDate.parse(desde), LocalDate.parse(hasta), codigoTipoComprobante);
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
                     .contentLength(archivo.contenido().length)
@@ -380,7 +381,7 @@ public class ReportController {
                     .body(archivo.contenido());
         } catch (DateTimeParseException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("mensaje", "Seleccione un período mensual válido."));
+                    .body(Map.of("mensaje", "Seleccione un rango de fechas válido."));
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("mensaje", ex.getMessage()));

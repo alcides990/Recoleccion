@@ -168,8 +168,12 @@
                             <p class="reporte-modal-descripcion">Genera un archivo CSV, sin cabecera, para importar ventas en Marangatu.</p>
                             <div class="row g-3">
                                 <div class="col-sm-6">
-                                    <label class="form-label" for="rg90-periodo">Período</label>
-                                    <input class="form-control" id="rg90-periodo" name="periodo" type="month" required>
+                                    <label class="form-label" for="rg90-desde">Desde</label>
+                                    <input class="form-control" id="rg90-desde" name="desde" type="text" autocomplete="off" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="rg90-hasta">Hasta</label>
+                                    <input class="form-control" id="rg90-hasta" name="hasta" type="text" autocomplete="off" required>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label" for="rg90-tipo-comprobante">Tipo comprobante</label>
@@ -500,6 +504,8 @@
             datePickerInit('#comisiones-hasta');
             datePickerInit('#egresos-desde');
             datePickerInit('#egresos-hasta');
+            datePickerInit('#rg90-desde');
+            datePickerInit('#rg90-hasta');
             $.getJSON('/egresos/catalogos/CATEGORIA_PRODUCTO').done(categorias => {
                 const selector = $('#egresos-categoria').empty().append($('<option>').val('').text('Todas'));
                 categorias.forEach(categoria => selector.append($('<option>').val(categoria.id).text(categoria.nombre)));
@@ -517,7 +523,8 @@
                 $('#comisiones-hasta').val(fechaFormateada);
                 $('#egresos-desde').val(fechaFormateada);
                 $('#egresos-hasta').val(fechaFormateada);
-                $('#rg90-periodo').val(año + '-' + mes);
+                $('#rg90-desde').val(fechaFormateada);
+                $('#rg90-hasta').val(fechaFormateada);
             }
 
             function actualizarSeguimientoCobrador() {

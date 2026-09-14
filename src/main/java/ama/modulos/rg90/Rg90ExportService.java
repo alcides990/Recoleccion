@@ -4,7 +4,6 @@ import ama.dominio.Sucursal;
 import ama.dominio.Comprobante;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -25,16 +24,18 @@ public class Rg90ExportService {
     }
 
     @Transactional
-    public Rg90Archivo exportarVentas(Sucursal sucursal, YearMonth periodo, Integer codigoTipoComprobante) {
+    public Rg90Archivo exportarVentas(Sucursal sucursal, LocalDate desde, LocalDate hasta,
+            Integer codigoTipoComprobante) {
         if (sucursal == null || sucursal.getEmpresa() == null || sucursal.getEmpresa().getRuc() == null) {
             throw new IllegalArgumentException("La sucursal no tiene empresa/RUC configurado.");
+        }
+        if (desde == null || hasta == null || hasta.isBefore(desde)) {
+            throw new IllegalArgumentException("Seleccione un rango de fechas válido.");
         }
         String ruc = rucSinDv(sucursal.getEmpresa().getRuc());
         if (ruc.isBlank()) {
             throw new IllegalArgumentException("El RUC de la empresa no es válido.");
         }
-        LocalDate desde = periodo.atDay(1);
-        LocalDate hasta = periodo.atEndOfMonth();
         Integer tipoComprobante = codigoTipoComprobante == null ? 0 : codigoTipoComprobante;
         List<Rg90VentaFila> filas = comprobantes.ventasRg90(sucursal.getCodigoSucursal(), desde, hasta, tipoComprobante)
                 .stream()
@@ -48,8 +49,9 @@ public class Rg90ExportService {
                     + " comprobantes. RG90 permite máximo " + MAXIMO_FILAS + " filas por archivo.");
         }
 
-        String lote = siguienteLote(ruc, periodo, tipoComprobante);
-        String base = ruc + "_REG_" + String.format("%02d%04d", periodo.getMonthValue(), periodo.getYear())
+        String periodoArchivo = String.format("%02d%04d", desde.getMonthValue(), desde.getYear());
+        String lote = siguienteLote(ruc, periodoArchivo, tipoComprobante);
+        String base = ruc + "_REG_" + periodoArchivo
                 + "_" + lote;
         String contenido = construirCsv(filas);
         return new Rg90Archivo(base + ".csv", contenido.getBytes(StandardCharsets.UTF_8));
@@ -155,8 +157,8 @@ public class Rg90ExportService {
         return String.format("%03d", Integer.parseInt(limpio));
     }
 
-    private String siguienteLote(String ruc, YearMonth periodo, Integer tipoComprobante) {
-        String clave = ruc + "|" + periodo + "|" + (tipoComprobante == null ? 0 : tipoComprobante);
+    private String siguienteLote(String ruc, String periodoArchivo, Integer tipoComprobante) {
+        String clave = ruc + "|" + periodoArchivo + "|" + (tipoComprobante == null ? 0 : tipoComprobante);
         Rg90Secuencia secuencia = secuencias.findByClave(clave)
                 .orElseGet(() -> new Rg90Secuencia(clave, 1));
         int lote = secuencia.getSiguienteLote() == null || secuencia.getSiguienteLote() < 1
